@@ -224,6 +224,15 @@
             @endcan
             @endif
 
+            @can('search_other_access')
+            <li class="{{ $request->segment(2) == 'reports' ? 'active' : '' }}">
+                <a href="{{ route('admin.reports_others.index') }}">
+                    <i class="fa fa-print"></i>
+                    <span class="title">Reports OtherDept</span>
+                </a>
+            </li>
+            @endcan
+
             @if( env('SHOW_RAWDATA', false))
             @can('raw_datum_access')
 

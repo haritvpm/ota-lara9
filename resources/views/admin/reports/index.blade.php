@@ -13,7 +13,7 @@
 
 
 
-@font-face {
+/*@font-face {
     font-family:'Rachana-Regular';
     src:url("{{URL::asset('fonts/Rachana-Regular.woff')}}") format('woff');
     font-weight: normal;
@@ -25,6 +25,7 @@
 .malfont {
   font-family: 'Rachana-Regular';
 }
+*/
 }
 
 </style>
@@ -106,27 +107,23 @@
    <hr class="hidden-print">
    @if( /*$report_type == 'Simple' || $report_type == 'Detailed'*/1 )
    @if( count($rows) > 0)
-	<h4 class="page-title" style="text-align: center">
+	<!-- <h4 class="page-title" style="text-align: center">
 	    SECRETARIAT OF THE KERALA LEGISLATURE
 	    
-	</h4>
-	<p>
-        @if($romankla != null && $sessionnumber_th != null)
-		 <strong>{!! html_entity_decode($romankla) !!}</strong> KLA,
-         <strong>{!! html_entity_decode( $sessionnumber_th) !!}</strong> Session
-        @endif
-        <br> 
-        @if(!auth()->user()->isAdminorAudit())
-		Section/Office: {{\Auth::user()->Title}}
-        @else
-            @php
+	</h4> -->
+	
+    <h4 class="page-title" style="text-align: center">
+        @php
             $createdbyusername = \Request('created_by');
-            $office = isset($added_bies[$createdbyusername]) ? $added_bies[$createdbyusername] 
-                                                                                : 'All';
+            $office = isset($added_bies[$createdbyusername]) ? $added_bies[$createdbyusername] : 'All';
             @endphp
-        Section/Office: {{ $office }}
-        @endif
-	</p>
+       {{ $office }}
+      ,&nbsp;
+         @if($romankla != null && $sessionnumber_th != null)
+         <strong>{!! html_entity_decode($romankla) !!}</strong> KLA,
+         <strong>{!! html_entity_decode( $sessionnumber_th) !!}</strong> Session
+         @endif
+   </h4>
     
 
     <div class="table-responsive">
@@ -149,7 +146,7 @@
                 </tr>
             </thead>
             
-            <tbody style="font-size:12px;">
+            <tbody >
                 @if( count($rows) > 0)
                 	                        
                       	@foreach ($rows as $key => $value)
@@ -420,7 +417,7 @@
 
     @else
     
-    Nothing to show
+   <!--  Nothing to show -->
    @endif 
    <!-- count(rows) -->
  @endif 

@@ -1198,6 +1198,7 @@ class MyFormsOthersController extends Controller
 
         $printdate = date('d/m/Y', time());
 
+
         $loggedinusername = \Auth::user()->username;
 
         $cansubmittoaccounts =  false;
@@ -1235,6 +1236,7 @@ class MyFormsOthersController extends Controller
                 $session = \App\Session::where('name', $form->session )->first();
                 $romankla = $session->getRomanKLA();
                 $sessionnumber = $session->session .  '<sup>' . $session->getOrdinalSuffix($session->session) . '</sup>';
+                
             }
 
             $view = null;
@@ -1341,12 +1343,12 @@ th{
        $s .= $combined . "</html>";
 
         if(!$htmlview){
-           //return ($s);
-           return PDF::loadHTML($s)->setPaper('a4', 'landscape')->stream();
-           /*$pdf = App::make('dompdf.wrapper');
+           return ($s);
+           //return PDF::loadHTML($s)->setPaper('a4', 'landscape')->stream()->header('Content-Type','application/pdf');
+            /*$pdf = App::make('dompdf.wrapper');
             $pdf->loadHTML($s);
-            //return $pdf->stream();
-            return $pdf->download('otherdept.pdf');*/
+            return $pdf->stream()->header('Content-Type','application/pdf');
+            //return $pdf->download('otherdept.pdf');*/
         }
         else {
 

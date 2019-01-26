@@ -172,6 +172,8 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
     
     Route::get('reports/detailed_report', ['uses' => 'Admin\ReportsController@detailed_report', 'as' => 'reports.detailed_report']);
     Route::resource('reports', 'Admin\ReportsController');
+    Route::resource('reports_others', 'Admin\ReportsOthersController');
+
 
 
     // Backup routes

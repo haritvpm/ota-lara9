@@ -3,25 +3,38 @@
 @extends('layouts.auth')
 
 <style>
+
 body {
 
 <?php
-$patterns = array('gplay.png','hypnotize.png','paisley.png','skulls.png','swirl.png','topography.png','geometry2.png');
-$patternimage = $patterns[rand(0, 6)];
+$patterns = array('zt-ants-ifc_01.jpg', 'hypnotize.png','paisley.png','swirl.png','congruent_outline.png');
+$image_index = rand(0, 4);
+//$image_index = 0;
+$patternimage = $patterns[$image_index];
 ?>
 
 background-color: #ffffff;
 background-image: url("images/patterns/{{$patternimage}}");
 
-/*padding-bottom: 70px;*/
+@if($image_index < 1)
+background-repeat: no-repeat;
+background-size: cover;
+background-position: top;
+
+
+@endif
 
 }
+
+
+
+
 </style>
 
 @section('content')
-
+<div class="bg"></div>
     <div class="row">
-        <div class="col-md-8 col-md-offset-2">
+        <div class="col-md-4 col-md-offset-4">
             <div class="panel panel-default">
                 <div class="panel-heading">{{ ucfirst(config('app.name')) }} - @lang('quickadmin.qa_login')
 
@@ -50,9 +63,9 @@ background-image: url("images/patterns/{{$patternimage}}");
                                value="{{ csrf_token() }}">
 
                         <div class="form-group">
-                            <label class="col-md-4 control-label">User ID</label>
+                            <label class="col-md-3 control-label">User ID</label>
 
-                            <div class="col-md-6">
+                            <div class="col-md-8">
                                 <input type="text"
                                        class="form-control"
                                        name="username"
@@ -61,9 +74,9 @@ background-image: url("images/patterns/{{$patternimage}}");
                         </div>
 
                         <div class="form-group">
-                            <label class="col-md-4 control-label">@lang('quickadmin.qa_password')</label>
+                            <label class="col-md-3 control-label">@lang('quickadmin.qa_password')</label>
 
-                            <div class="col-md-6">
+                            <div class="col-md-8">
                                 <input type="password"
                                        class="form-control"
                                        name="password">
@@ -78,7 +91,7 @@ background-image: url("images/patterns/{{$patternimage}}");
 
 
                         <div class="form-group">
-                            <div class="col-md-6 col-md-offset-4">
+                            <div class="col-md-8 col-md-offset-3">
                                 <label>
                                     <input type="checkbox"
                                            name="remember"> @lang('quickadmin.qa_remember_me')
@@ -87,7 +100,7 @@ background-image: url("images/patterns/{{$patternimage}}");
                         </div>
 
                         <div class="form-group">
-                            <div class="col-md-6 col-md-offset-4">
+                            <div class="col-md-3 col-md-offset-3">
                                 <button type="submit"
                                         class="btn btn-primary"
                                         style="margin-right: 15px;">
@@ -111,11 +124,11 @@ background-image: url("images/patterns/{{$patternimage}}");
 date_default_timezone_set('Asia/Kolkata');
 @endphp
 
-<nav style="max-height:.8em" class="navbar navbar-default navbar-fixed-bottom">
+<nav style="max-height:.8em;background-color: transparent;border-width: 0px;" class="navbar navbar-default navbar-fixed-bottom">
   <div class="container-fluid">
     <p class="navbar-text pull-right">
-        <i class="fa fa-phone-square fa-2x"></i> 2422 &nbsp;&nbsp;
-        <i class="fa fa-calendar fa-2x" ></i> {{ date('l, M j  (d-m-y h:i a)')  }}&nbsp;
+        Ph: 471-251-2422 &nbsp;&nbsp;
+        {{ date('l, M j  (d-m-y h:i a)')  }}&nbsp;
     </p>
     
      <p class="navbar-text">

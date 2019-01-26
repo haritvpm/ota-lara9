@@ -161,8 +161,10 @@ class HomeController extends Controller
         $submitted = $forms->filterStatus('Submitted')->count();
         */
 
-        if($forms){
-            $forms = $forms->get();
+        if( env('SHOW_LEGSECTT', true)){
+            if($forms){
+                $forms = $forms->get();
+            }
         }
 
 
@@ -425,20 +427,22 @@ class HomeController extends Controller
         if( auth()->user()->isAdmin() ){
             foreach ($sessions as $session) {
                
-                $forms = \App\Form::with('created_by') 
-                                    ->whereSession( $session->name )
-                                    ->where('owner','admin')
-                                    ->orderby('submitted_on', 'desc')->get();
-               
+                if( env('SHOW_LEGSECTT', true)){
+                    $forms = \App\Form::with('created_by') 
+                                        ->whereSession( $session->name )
+                                        ->where('owner','admin')
+                                        ->orderby('submitted_on', 'desc')->get();
+                   
 
-                $formcount[$session->name] = $forms->count();
-                if($forms->count()){
+                    $formcount[$session->name] = $forms->count();
+                    if($forms->count()){
 
-                    $lastform =  \App\Form::find($forms->pluck('id')->first());
-                    $last_form_no[$session->name] = $forms->max('form_no');
+                        $lastform =  \App\Form::find($forms->pluck('id')->first());
+                        $last_form_no[$session->name] = $forms->max('form_no');
 
-                    $formlastsubmitteddate[$session->name] = $lastform->submitted_on;
-                    $formlastsubmittedby[$session->name] =   $lastform->created_by->Title;
+                        $formlastsubmitteddate[$session->name] = $lastform->submitted_on;
+                        $formlastsubmittedby[$session->name] =   $lastform->created_by->Title;
+                    }
                 }
 
                 //other dept
@@ -524,7 +528,7 @@ class HomeController extends Controller
     $amount_approved_sectt = 0;
     $session_latest = null;
     
-    if( auth()->user()->isAdmin() ){
+    if( auth()->user()->isAdmin() && env('SHOW_LEGSECTT', true)){
         
         $session_latest =  \App\Session::latest()->first()->name;
         /*
