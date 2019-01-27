@@ -303,12 +303,19 @@ class PA2MLAFormsController extends Controller
        // $date = Carbon::createFromFormat(config('app.date_format'), $request['duty_date'])->format('Y-m-d');
         
 
-        
+        //this is total days
         $maxsittings = \App\Calender::with('session')
                                 ->whereHas('session', function($query)  use ($request) { 
                                     $query->where('name', $request['session']);
                                   })                              
                                 ->count();
+        $maxsittingactual = \App\Calender::with('session')
+                                ->whereHas('session', function($query)  use ($request) { 
+                                    $query->where('name', $request['session']);
+                                  })                              
+                                ->where('day_type','Sitting day')
+                                ->count();
+
         
         $collection = collect($request->overtimes);
         $collection->transform(function($overtime) 
@@ -346,23 +353,34 @@ class PA2MLAFormsController extends Controller
 
 
         $overtimes =$collection->transform(function($overtime) 
-                                           use (/*$res,*/$request,$formid, &$myerrors,$maxsittings,$rates) 
+                                           use (/*$res,*/$request,$formid, &$myerrors,$maxsittings,$rates,$maxsittingactual) 
         {
             $pen = $overtime['pen'];
             $tmp = strpos($pen, '-');
-             if(false !== $tmp){
+            if(false !== $tmp){
                 $pen = substr($pen, 0, $tmp);
-             }
+            }
 
 
             $query = \App\Overtime::with('form')
-                          ->where('pen', 'like' , $pen . '%')
+                          ->where('pen', $pen)
                           ->whereHas('form', function($q)  use ($request,$formid) { 
                             $q->where('overtime_slot', 'Sittings')
                                   ->where('session', $request['session'])
                                   ->where('id', '!=', $formid) //skip this item if on update
                                   ->whereCreator(\Auth::user()->username); //allow assistant and PA2mla in same session. arunlal
                         });
+
+            if(($emp = \App\Employee::where('pen', $pen)->first())){
+
+                if( stristr($emp['desig_display'], 'Attendant') || stristr($emp['desig_display'], 'Chairman') )
+                {
+                    if( $overtime['count'] > $maxsittingactual){
+                         array_push($myerrors, $overtime['pen'] . '-' .$overtime['name'] . ' : PA to Chairman/OA can have max ' . $maxsittingactual . ' OTs');
+                   
+                    }
+                }
+            }
 
 
             //we cannot use pluck, pluck seems to return only distinct 'count'
