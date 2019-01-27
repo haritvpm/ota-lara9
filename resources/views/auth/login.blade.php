@@ -128,7 +128,7 @@ date_default_timezone_set('Asia/Kolkata');
   <div class="container-fluid">
     <p class="navbar-text pull-right">
         Ph: 251-2422 &nbsp;&nbsp;
-        {{ date('l, M j  (d-m-y h:i a)')  }}&nbsp;
+        {{ date('l, M j  (d-m-y h:i a)')  }}
     </p>
     
      <p class="navbar-text">
