@@ -134,7 +134,7 @@ date_default_timezone_set('Asia/Kolkata');
      <p class="navbar-text">
       <small><span class="text-muted">
                 <i>
-                  Last Updated: 24-01-19.&nbsp;</i>
+                  Last Updated: 27-01-19.&nbsp;</i>
        </span>Recommended Browser: Firefox 25+. 
        @if(config('app.debug'))
         (debugmode)
