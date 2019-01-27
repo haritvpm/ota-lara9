@@ -130,26 +130,52 @@ class PA2MLAFormsController extends Controller
                         $q->where('designation','like',"%Personal Assistant to MLA%")
                         ->orWhere('category','like',"%Admin Data Entry%");
 
-                            })->orderby('name','asc')->pluck('pen','name');
+                            })->orderby('name','asc')->get();
 
-        $pa2mlas = $temp->map(function ($name, $key) {
+        /*$pa2mlas = $temp->map(function ($name, $key) {
                         return $name . '-' . $key ;
-                     });
+                     });*/
+
+        $combined = $temp->mapWithKeys(function ($item) {
+
+            $val = $item->designation->designation;
+
+            if($item->desig_display != ''){
+                $val = $item->desig_display;            
+              
+            }
+
+            if( 'Relieved' == $item->category ){
+                $val .= ' (RELIEVED)';
+
+            }
+
+            return [ $item->pen . '-' . $item->name =>  $val ];
+
+            
+        });
+
+        $pa2mlas = $combined->keys();
          
        
         $designations = ['Personal Assistant to MLA','Office Attendant'];
+        //note the desig 'Office Attendant' is used in pa2mla.js file
+        
         $data["calenderdaysmap"] = json_encode($calenderdaysmap);
         $data["designations"] = json_encode($designations);
         $data["calenderdays2"] = json_encode($calenderdays2);
         $data["pa2mlas"] = json_encode($pa2mlas->values());
+        $data["pen_names_to_desig"] = json_encode($combined);
 
-        $presets = \App\Preset::where('user_id',\Auth::user()->id)->pluck('name');
+
+        //$presets = \App\Preset::where('user_id',\Auth::user()->id)->pluck('name');
        
         JavaScript::put([
             'latest_session' => $latest_session,
             'old_slotselected' => old('overtime_slot') ? old('overtime_slot') : '',
             'old_calenderdayselected' => old('duty_date') ? old('duty_date') : '',
-            'presets' => $presets,
+            //'presets' => $presets,
+           // 'pen_names_to_desig' => $combined,
             
         ]);
     

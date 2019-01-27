@@ -1,21 +1,4 @@
 
-<div v-cloak>
-	
-	<div class="alert alert-danger" v-if="errors.products_empty" >
-	<ul>
-        <li v-for="error in errors.products_empty">@{{ error }}</li>
-    </ul>
-	</div>
-
-	
-
-	<div class="alert alert-warning" v-if="myerrors.length">
-        <ul>
-            <li v-for="error in myerrors">@{{ error }}</li>
-        </ul>
-    </div>
-	
-</div>
 
 <div class="row" v-cloak >
 	<div class="col-md-4 form-group">           
@@ -56,7 +39,7 @@
 	
 
 </div>
-<hr>
+
 <div class="row" v-cloak>
 	<div class="col-md-12 form-group ">
 		<table class="table">
@@ -82,7 +65,8 @@
 					:show-labels="false"  
 					:close-on-select="true" 
 					:allow-empty="false" 
-					:options-limit="100" 
+					:options-limit="100"
+					@select="changeSelect"  
 					>
 	
 					</multiselect></td>
@@ -104,9 +88,38 @@
 			
 		</table>
 
+
+		<div v-cloak>
+			
+			<div class="alert alert-danger" v-if="errors.products_empty" >
+			<ul>
+		        <li v-for="error in errors.products_empty">@{{ error }}</li>
+		    </ul>
+			</div>
+		
+
+			<div class="alert alert-warning" v-if="myerrors.length">
+		        <ul>
+		            <li v-for="error in myerrors">@{{ error }}</li>
+		        </ul>
+		    </div>
+			
+		</div>
+
 		<div class="col-md-12 form-group">
+						
 			<div class="row">
+				<div class="col-md-4">
 				<button type="button" class="btn btn-success btn-sm" @click.prevent="addRow"><i class="fa fa-plus"></i> Add row</button>
+				</div>
+				<div class="col-md-8">
+				<div  v-if="addedemployeedesigdisplay" >
+			
+		         <i>Last edited:</i> @{{ addedemployeedesigdisplay }}
+		    
+				</div>
+				</div>
+
 			</div>
         </div>
 

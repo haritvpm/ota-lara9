@@ -433,8 +433,9 @@ new Vue({
               /*if(this.form.overtimes[index].pen == '' || 
                  confirm("Remove this row?"))*/
               {
-                this.myerrors = [];
+                
                 this.form.overtimes.splice(index, 1);
+                this.myerrors = [];
               }
             },
     
@@ -484,7 +485,9 @@ new Vue({
                 var self = this
                 //alert('changin');
                 self.$nextTick(() => {
-                  for(var i=0; i < self.form.overtimes.length; i++){
+                  //for(var i=0; i < self.form.overtimes.length; i++)
+                  for(var i= self.form.overtimes.length-1; i >=0  ; i--)
+                  {
                   if(self.form.overtimes[i].pen == selectedOption /*&& 
                      self.form.overtimes[i].designation == ''*/){
 

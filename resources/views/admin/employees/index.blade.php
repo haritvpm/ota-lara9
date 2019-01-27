@@ -15,11 +15,13 @@
 
         @if(\Auth::user()->isAdmin())
         <!--  <a href="#" class="btn btn-warning" style="margin-left:5px;" data-toggle="modal" data-target="#myModal">@lang('quickadmin.qa_csvImport')</a>
-        @include('csvImport.modal', ['model' => 'Employee']) 
+        @include('csvImport.modal', ['model' => 'Employee']) -->
 
 
-        Employees with no category set : {{$empwithnocategory}} -->
          <a href="{{ route('admin.employees.sparksync') }}" class="btn btn-warning">Spark Sync</a>
+         &nbsp;
+        Employees with no category set : {{$empwithnocategory}}<br>
+        Right now, category and desig display in intranet do not affect EXCEL. 
 
         @endif
         
@@ -87,9 +89,9 @@
                         <th>ID</th>
                         
                         <th>@lang('quickadmin.employees.fields.added-by')</th>
-                        <!-- <th>@lang('quickadmin.employees.fields.categories')</th> -->
-                        <!-- <th>@lang('quickadmin.employees.fields.desig-display')</th> -->
-                        <th>Created</th>
+                        <th>@lang('quickadmin.employees.fields.categories')</th>
+                        <th>@lang('quickadmin.employees.fields.desig-display')</th>
+                        <!-- <th>Created</th> -->
 <!--                         <th>Updated</th> -->                        
                          @endif
                         <th>&nbsp;</th>
@@ -156,9 +158,9 @@
                 @if(\Auth::user()->isAdmin())
                 {data: 'id', name: 'id'},
                 {data: 'added_by', name: 'added_by'},
-              //  {data: 'categories.category', name: 'categories.category'},
-              //  {data: 'desig_display', name: 'desig_display'},
-                {data: 'created_at', name: 'created_at'},
+                {data: 'categories.category', name: 'categories.category'},
+                {data: 'desig_display', name: 'desig_display'},
+                //{data: 'created_at', name: 'created_at'},
                // {data: 'updated_at', name: 'created_at'},
                
                 @endif

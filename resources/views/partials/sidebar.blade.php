@@ -314,7 +314,7 @@
             @can('setting_access')
             <li class="{{ $request->segment(2) == 'backups' ? 'active' : '' }}">
                 <a href="{{ route('admin.backups.index') }}">
-                    <i class="fa fa-disk-o"></i>
+                    <i class="fa fa-file-archive-o"></i>
                     <span class="title">Backups</span>
                 </a>
             </li>

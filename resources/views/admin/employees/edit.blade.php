@@ -100,7 +100,7 @@
                 </div>
             </div>
             @if(\Auth::user()->isAdmin())
-            <!--  <div class="row">
+             <div class="row">
                 <div class="col-xs-12 form-group">
                     {!! Form::label('categories_id', trans('quickadmin.employees.fields.categories').'', ['class' => 'control-label']) !!}
                     {!! Form::select('categories_id', $categories, old('categories_id'), ['class' => 'form-control select2']) !!}
@@ -124,7 +124,7 @@
                     @endif
                 </div>
             </div>
-             -->
+            
              @endif
             
             

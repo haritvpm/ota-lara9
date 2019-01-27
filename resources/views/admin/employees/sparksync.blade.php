@@ -44,7 +44,7 @@
         </div>
     </div>
     @else
-     <table  class="table table-condensed table-bordered" style="width:70%">
+     <table  class="table table-condensed table-bordered" style="width:90%">
             
        <tbody>
         @if(count($myerrors))

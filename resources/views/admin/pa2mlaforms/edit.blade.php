@@ -97,6 +97,8 @@
     Vue.use(VueSweetAlert.default)
     var calenderdays2 = {!! $data['calenderdays2'] !!};
     var pa2mlas = {!! $data['pa2mlas'] !!};  
+ 
+    var pen_names_to_desig = {!! $data['pen_names_to_desig'] !!};
 
     window._form = {!! $form->toJson() !!};
     

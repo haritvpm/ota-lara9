@@ -100,8 +100,8 @@ class EmployeesController extends Controller
         $empwithnocategory = -1;
         if(\Auth::user()->isAdmin())
         {
-          // $empwithnocategory = Employee::where('categories_id',null)
-           //->where('category','<>','Relieved')->count();
+           $empwithnocategory = Employee::where('categories_id',null)
+           ->where('category','<>','Relieved')->count();
         }
 
 
@@ -198,7 +198,7 @@ class EmployeesController extends Controller
              ->Where(function ($query) use ($search) {
                 $query->where('pen', 'like', '%' . $search . '%')
                 ->orWhere('name', 'like', '%' . $search . '%');
-            })->orderby('name','asc')->get()->take(50);
+            })->orderby('name','asc')->get()->take(30);
             //})->orderby('name','asc')->pluck('name','pen')->take(100);
                         
 
@@ -600,6 +600,7 @@ class EmployeesController extends Controller
         //ignore mlas and personal staff
         //dont mess with part time as it might change them to full time on modifi
         $ignoreddesigs = array('Personal', 'Speaker', 'Time');
+        $categories = \App\Category::all()->pluck('id','category');
          
 
         foreach ($arrsectt as &$value){
@@ -609,6 +610,13 @@ class EmployeesController extends Controller
             $pen = trim($pdfrow[1]);
             $name = trim($pdfrow[2]);
             $desig = trim($pdfrow[3]);
+            $desig_display = trim($pdfrow[4]);
+            $category = trim($pdfrow[5]);
+
+
+            $cat_id =  $category != '' ? $categories[$category] : -1;
+
+
             $penname = $pen . " - " . $name;
 
             //see if this designation is valid
@@ -624,10 +632,34 @@ class EmployeesController extends Controller
                     ->where('pen',  $pen )->first();
 
             if($emp){
+
+                $olddesigdisplay = $emp->desig_display;
+                $oldcat = $emp->categories_id;
+
+                if ( 0 != strcasecmp($olddesigdisplay,$desig_display) || 
+                     ($oldcat != $cat_id && $cat_id != -1) ){
+                       
+                    $emp->update([
+                      'desig_display' => $desig_display,
+                      'categories_id' => $cat_id,
+
+                      ]);
+
+                    if($oldcat != $cat_id && $cat_id != -1){
+                      array_push($modified, array('Modified Category' , $penname , $oldcat . " -> " . $cat_id . '(' . $category . ')'));
+                    } 
+
+                    if ( 0 != strcasecmp($olddesigdisplay,$desig_display)){
+                      
+                      array_push($modified, array('Modified DesigDisp' , $penname , $olddesigdisplay . " -> " . $desig_display));
+                    }
+
+                }
+
+
+
                               
                 $olddesig = $emp->designation->designation;
-
-                         
                 if ( 0 == strcasecmp($olddesig,$desig)){
                   continue;
                 }

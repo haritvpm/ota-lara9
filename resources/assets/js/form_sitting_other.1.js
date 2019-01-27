@@ -95,6 +95,7 @@ new Vue({
             
             removeElement: function(index) {
               this.form.overtimes.splice(index, 1);
+              this.myerrors = [];
             },
     
             limitText (count) {

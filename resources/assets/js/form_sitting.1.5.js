@@ -121,8 +121,9 @@ var vm = new Vue({
             removeElement: function(index) {
                 if(this.form.overtimes[index].pen == '' || 
                    confirm("Remove this row?")){
-                  this.myerrors = [];
+                  //this.myerrors = [];
                   this.form.overtimes.splice(index, 1);
+                  this.myerrors = [];
                 }
             },
     
@@ -179,7 +180,9 @@ var vm = new Vue({
 
                 self.$nextTick(() => {
                  
-                  for(var i=0; i < self.form.overtimes.length; i++){
+                  //for(var i=0; i < self.form.overtimes.length; i++)
+                  for(var i= self.form.overtimes.length-1; i >=0  ; i--)
+                  {
                     if(self.form.overtimes[i].pen == selectedOption)
                     {
                       var desig = self.pen_names_to_desig[selectedOption];

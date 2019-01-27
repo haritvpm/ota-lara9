@@ -11,6 +11,9 @@ new Vue({
             myerrors: [],
             muloptions: designations,
             pen_names:  pa2mlas,
+            pen_names_to_desig_our : pen_names_to_desig,
+            addedemployeedesigdisplay : '',
+
         }, 
 
         created: function () {
@@ -83,6 +86,8 @@ new Vue({
                     if(!this.rowsvalid()){
                         return
                     }
+
+                    this.myerrors = [];
     
                     var prevrow = self.form.overtimes.length > 0 ? self.form.overtimes[self.form.overtimes.length - 1] : null;
                     
@@ -105,6 +110,8 @@ new Vue({
             
             removeElement: function(index) {
               this.form.overtimes.splice(index, 1);
+              this.myerrors = [];
+
             },
     
             limitText (count) {
@@ -145,11 +152,60 @@ new Vue({
               return `and ${count} other countries`
             },
           
-            changeSelect (index) {
-                this.myerrors = [];
-                //this.checkDuplicates() //causes issue on change 
+               
+            changeSelect (selectedOption, id) {
                 
-              },
+                this.myerrors = [];
+                var self = this
+                //alert('changin');
+                self.$nextTick(() => {
+                  //for(var i=0; i < self.form.overtimes.length; i++)
+                  for(var i= self.form.overtimes.length-1; i >=0  ; i--)
+                  {
+                  if(self.form.overtimes[i].pen == selectedOption /*&& 
+                     self.form.overtimes[i].designation == ''*/){
+
+                    var desig = self.pen_names_to_desig_our[selectedOption];
+                   
+                    if(desig !== undefined){
+
+                        if(desig.indexOf('Attendant') != -1){
+
+                            self.form.overtimes[i].designation = 'Office Attendant';
+                            self.addedemployeedesigdisplay = '';
+                        
+                        } else {
+                           self.form.overtimes[i].designation = 'Personal Assistant to MLA';
+                           var hiphenpos = self.form.overtimes[i].pen.indexOf( '-' );
+                           self.addedemployeedesigdisplay = self.form.overtimes[i].pen.substr( hiphenpos+1 ) + ' : '+ desig;
+                           if(desig.toUpperCase().indexOf('RELIEVED') != -1){
+                             this.myerrors.push('Emp relieved. Check the dates and OT manually: ' + self.form.overtimes[i].pen)
+                           }
+                        }
+
+
+                    }
+                    break;
+                  }
+
+                  }
+                })
+
+                 
+               
+                //no need we will check on form submit
+                //this also seems to display a warning when we
+                //a. select a duplicate, b. change to a non duplicate immediately
+                //that is not needed.
+                //this.checkDuplicates()
+               /* var pen = self.pen_names[index]
+                if(pen !== undefined){
+                  alert (self.pen_names_to_desig[pen])
+
+                }*/
+                //alert(id) unable to get id. so a hack
+                
+             },
             checkDuplicates(){
                 var self = this
                 //see if there are duplicates

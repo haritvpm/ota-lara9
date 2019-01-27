@@ -94,7 +94,7 @@
 
     var calenderdays2 = {!! $data['calenderdays2'] !!};
 
-
+    
    
 
     window._form = {

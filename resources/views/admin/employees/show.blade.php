@@ -28,6 +28,8 @@
                             <th>Category</th>
                             <td field-key='category'>{{ $employee->category }}</td>
                         </tr>
+
+
                         
                                                 
                         @if(\Auth::user()->isAdmin())
@@ -43,6 +45,14 @@
                         <tr>
                             <th>@lang('quickadmin.employees.fields.desig-display')</th>
                             <td field-key='desig_display'>{{ $employee->desig_display }}</td>
+                        </tr>
+                         <tr>
+                            <th>Created</th>
+                            <td field-key='desig_display'>{{ $employee->created_at }}</td>
+                        </tr>
+                        <tr>
+                            <th>Updated</th>
+                            <td field-key='desig_display'>{{ $employee->updated_at }}</td>
                         </tr>
                         @endif
 
