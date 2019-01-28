@@ -304,7 +304,7 @@ class PA2MLAFormsController extends Controller
         
 
         //this is total days
-        $maxsittings = \App\Calender::with('session')
+        $maxdays = \App\Calender::with('session')
                                 ->whereHas('session', function($query)  use ($request) { 
                                     $query->where('name', $request['session']);
                                   })                              
@@ -353,7 +353,7 @@ class PA2MLAFormsController extends Controller
 
 
         $overtimes =$collection->transform(function($overtime) 
-                                           use (/*$res,*/$request,$formid, &$myerrors,$maxsittings,$rates,$maxsittingactual) 
+                                           use (/*$res,*/$request,$formid, &$myerrors,$maxdays,$rates,$maxsittingactual) 
         {
             $pen = $overtime['pen'];
             $tmp = strpos($pen, '-');
@@ -400,10 +400,10 @@ class PA2MLAFormsController extends Controller
                 array_push($myerrors, $overtime['pen'] . '-' .$overtime['name'] . ' : Already submitted');
             }
             else                     
-            if($totalwouldbe > $maxsittings)
+            if($totalwouldbe > $maxdays)
             {
              
-               array_push($myerrors, $overtime['pen'] . '-' .$overtime['name'] . ' : Exceeds the maximum of ' . $maxsittings );
+               array_push($myerrors, $overtime['pen'] . '-' .$overtime['name'] . ' : Exceeds the maximum of ' . $maxdays );
                
             }
             else

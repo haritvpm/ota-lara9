@@ -8,7 +8,12 @@ body {
 
 <?php
 $patterns = array('zt-ants-ifc_01.jpg', 'hypnotize.png','paisley.png','swirl.png','congruent_outline.png');
+
 $image_index = rand(0, 4);
+if(env('VPS',0)){
+  $image_index = rand(1, 4);
+}
+
 //$image_index = 0;
 $patternimage = $patterns[$image_index];
 ?>
