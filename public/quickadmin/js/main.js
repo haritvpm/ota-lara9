@@ -17,6 +17,7 @@ $(document).ready(function () {
         dom: 'lBfrtip<"actions">',
         columnDefs: [],
         "iDisplayLength": 100,
+        "lengthMenu": [[10, 25, 50,100, 500, 1000,-1], [10, 25, 50, 100,500,1000,"All"]],
         "aaSorting": [],
         /*buttons: [
             {

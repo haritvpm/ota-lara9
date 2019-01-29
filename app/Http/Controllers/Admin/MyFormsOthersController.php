@@ -162,6 +162,15 @@ class MyFormsOthersController extends Controller
 
         $session_array = $q->get();
 
+        //if sitting, prevent ongoing sessions
+        if($issitting){
+            $session_array = $session_array->filter(function ($value) {
+                $maxdate = \App\Calender::where('session_id',$value->id)->max('date');
+                
+                return $maxdate <= Carbon::now();
+            });
+        }
+
         $sessions = $session_array->pluck('name');
 
         $latest_session = $sessions->first();
