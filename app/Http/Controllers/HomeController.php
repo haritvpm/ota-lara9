@@ -55,7 +55,7 @@ class HomeController extends Controller
                             ->where('role_id','2')
                             ->get()->except('admin');*/
 
-            $users_with_no_route  = \App\User::whereDoesntHave("routing")->where('role_id','2')
+            $users_with_no_route  = \App\User::whereDoesntHave("routing")->SimpleUsers()
                             ->pluck('username')->except('admin');
 /*
             foreach ($users as $user) {

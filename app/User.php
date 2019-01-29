@@ -73,6 +73,22 @@ class User extends Authenticatable
     {
         return $query->where('role_id', '=', 2);
     }
+    
+    public function scopeNotSimpleAndHiddenUsers($query)
+    {
+         return $query->where('role_id', '<>', 2)//simple user
+                  ->where('role_id', '<>', 7);  //hidden
+    }
+     public function scopeSimpleOrHiddenUsers($query)
+    {
+         return $query->where('role_id', '=', 2)//simple user
+                  ->orwhere('role_id', '=', 7);  //hidden
+    }
+
+     public function scopeHiddenUsers($query)
+    {
+        return $query->where('role_id', '=', 7);
+    }
      public function scopeOtherDeptUsers($query)
     {
         return $query->where('role_id', '=', 3);

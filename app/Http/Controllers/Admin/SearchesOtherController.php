@@ -32,7 +32,7 @@ class SearchesOtherController extends Controller
         }
 
 
-        $added_bies = \App\User::where('role_id', '3')
+        $added_bies = \App\User::OtherDeptUsers()
                                 ->get(['username'])->pluck('username');
 
         /*$added_bies->transform(function ($v) {

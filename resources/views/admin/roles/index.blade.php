@@ -24,6 +24,7 @@
                        
 
                         <th>@lang('quickadmin.roles.fields.title')</th>
+                        <th>Role Id</th>
                                                 <th>&nbsp;</th>
 
                     </tr>
@@ -35,6 +36,7 @@
                             <tr data-entry-id="{{ $role->id }}">
                               
                                 <td field-key='title'>{{ $role->title }}</td>
+                                <td field-key='id'>{{ $role->id }}</td>
                                                                 <td>
                                     @can('role_view')
                                     <a href="{{ route('admin.roles.show',[$role->id]) }}" class="btn btn-xs btn-primary">@lang('quickadmin.qa_view')</a>

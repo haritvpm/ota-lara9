@@ -285,7 +285,7 @@ class MyFormsController extends Controller
         //this inverts sorting order for next click                                       
         $querystr = '&order='.(Input::get('order') == 'asc' || null ? 'desc' : 'asc').$str_session.$str_status.$str_overtime_slot.$str_datefilter.$str_namefilter.$str_desigfilter.$str_idfilter.$str_created_by.$str_worknaturefilter.$str_submittedbyfilter;
 
-        $added_bies = \App\User::where('role_id', '2')
+        $added_bies = \App\User::SimpleUsers()
                                  ->where('username','not like','de.%')
                                  ->orderBy('name','asc')
                                 ->get(['username','name'])->pluck('name','username');

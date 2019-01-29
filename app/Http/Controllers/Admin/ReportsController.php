@@ -28,7 +28,7 @@ class ReportsController extends Controller
         $rows = array();
         $report_type = Input::get('report_type');
         
-        $added_bies = \App\User::where('role_id', '2')
+        $added_bies = \App\User::SimpleUsers()
                                  ->where('username','not like','de.%')
                                  ->orderBy('name','asc')
                                  ->get(['username','name'])->pluck('name','username');

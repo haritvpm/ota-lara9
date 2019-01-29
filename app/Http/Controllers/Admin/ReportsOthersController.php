@@ -28,7 +28,7 @@ class ReportsOthersController extends Controller
         $rows = array();
         $report_type = 'Detailed';//Input::get('report_type');
         
-        $added_bies = \App\User::where('role_id', '3')
+        $added_bies = \App\User::OtherDeptUsers()
                                  ->orderBy('name','asc')
                                  ->get(['username','name'])->pluck('name','username');
 

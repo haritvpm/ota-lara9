@@ -95,8 +95,8 @@ class UsersController extends Controller
       
 
         $query->when($nolegsecttusers == false, function ($q) {
-          return $q->where('role_id', '<>', 2)//simple user
-                  ->where('role_id', '<>', 7);  //hidden
+          return $q->NotSimpleAndHiddenUsers();
+       
         });
 
         $users = $query->orderBy('updated_at', 'desc')->get();

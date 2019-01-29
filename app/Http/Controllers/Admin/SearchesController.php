@@ -35,7 +35,7 @@ class SearchesController extends Controller
         $designations = \App\Designation::orderby('designation','asc')->pluck('designation');
 
 
-        $added_bies = \App\User::wherein('role_id', ['2','4'])
+        $added_bies = \App\User::SimpleUsers()
                                 ->where('username', 'not like', 'de.%')
                                 ->get(['username'])->pluck('username');
 

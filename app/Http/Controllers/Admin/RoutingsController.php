@@ -28,8 +28,7 @@ class RoutingsController extends Controller
         $usersoflegsectt = null;
 
         if(!$nolegsecttusers){
-            $usersoflegsectt  = \App\User::where('role_id', '=', 2)
-            ->orwhere('role_id', '=', 7) //hidden
+            $usersoflegsectt  = \App\User::SimpleOrHiddenUsers()
             ->pluck('id');
         }
 

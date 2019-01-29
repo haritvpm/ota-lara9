@@ -24,7 +24,7 @@ class RolesController extends Controller
         }
 
 
-                $roles = Role::all();
+        $roles = Role::all();
 
         return view('admin.roles.index', compact('roles'));
     }
