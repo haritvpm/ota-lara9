@@ -115,7 +115,7 @@
                                 Me
                             @else
                                 @if(optional($form->created_by)->Title != null)
-                                   <small> {{ optional($form->created_by)->Title }}<br>({{$form->creator}})</small>
+                                   {{ optional($form->created_by)->Title }}<br> <small>({{$form->creator}})</small>
                                 @else
                                     <small>{{$form->creator}}</small>
                                 @endif
@@ -131,7 +131,7 @@
                             @elseif( $form->overtime_slot == 'Additional')
                                 Addl
                             @else
-                                <small>Sitting</small> 
+                                Sit 
                             @endif
 
                             </td>

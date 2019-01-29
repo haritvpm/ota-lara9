@@ -22,9 +22,29 @@ class RoutingsController extends Controller
         if (! Gate::allows('routing_access')) {
             return abort(401);
         }
+        
+        $nolegsecttusers = env('SHOW_LEGSECTT', 'TRUE');
+
+        $usersoflegsectt = null;
+
+        if(!$nolegsecttusers){
+            $usersoflegsectt  = \App\User::where('role_id', '=', 2)
+            ->orwhere('role_id', '=', 7) //hidden
+            ->pluck('id');
+        }
+
+        $query = Routing::query();
+   
+
+        $query->when($nolegsecttusers == false, function ($q) use ($usersoflegsectt){
+          return $q->whereNotIn('user_id', $usersoflegsectt);
+                 
+        });
+
+        $routings = $query->latest()->get();
 
 
-        $routings = Routing::latest()->get();
+
 
         return view('admin.routings.index', compact('routings'));
     }

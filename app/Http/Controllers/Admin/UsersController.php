@@ -86,9 +86,20 @@ class UsersController extends Controller
 
         }
        
+        $nolegsecttusers = env('SHOW_LEGSECTT', 'TRUE');
 
 
-        $users = User::orderBy('updated_at', 'desc')->get();
+
+
+        $query = User::query(); 
+      
+
+        $query->when($nolegsecttusers == false, function ($q) {
+          return $q->where('role_id', '<>', 2)//simple user
+                  ->where('role_id', '<>', 7);  //hidden
+        });
+
+        $users = $query->orderBy('updated_at', 'desc')->get();
 
         return view('admin.users.index', compact('users', 'nodisplnameusers', 'conflictdesignempl'));
     }

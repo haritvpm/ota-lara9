@@ -23,7 +23,28 @@ class PresetsController extends Controller
         $presets = null;
 
         if(\Auth::user()->isAdmin()){
-            $presets = Preset::orderby('updated_at', 'asc')->get(); //this helps to delete older entries which comes first on delete refresh
+
+            $nolegsecttusers = env('SHOW_LEGSECTT', 'TRUE');
+
+            $usersoflegsectt = null;
+
+            if(!$nolegsecttusers){
+                $usersoflegsectt  = \App\User::where('role_id', '=', 2)
+                ->orwhere('role_id', '=', 7) //hidden
+                ->pluck('id');
+            }
+
+            $query = Preset::query();
+   
+
+            $query->when($nolegsecttusers == false, function ($q) use ($usersoflegsectt){
+              return $q->whereNotIn('user_id', $usersoflegsectt);
+                     
+            });
+
+
+
+            $presets = $query->orderby('updated_at', 'asc')->get(); //this helps to delete older entries which comes first on delete refresh
         }
         else{
             $presets = Preset::where('user_id',\Auth::user()->id)->orderby('updated_at', 'desc')->get();
