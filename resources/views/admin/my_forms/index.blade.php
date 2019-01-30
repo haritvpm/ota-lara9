@@ -78,7 +78,7 @@
                     <th>F.No</th>
                     @endif
 
-                    <th><a href="<?=URL::to('admin/my_forms?sort=session'.$querystr)?>">Session</a></th>
+                    <th><a href="<?=URL::to('admin/my_forms?sort=session'.$querystr)?>">Sesn</a></th>
                     <th><a href="<?=URL::to('admin/my_forms?sort=creator'.$querystr)?>">Created by</a></th>
                     <th><a href="<?=URL::to('admin/my_forms?sort=overtime_slot'.$querystr)?>">OT</a></th>
                     <th><a href="<?=URL::to('admin/my_forms?sort=duty_date'.$querystr)?>">Duty Date</a></th>
@@ -86,7 +86,7 @@
 
                     @if(auth()->user()->isAdmin())
                     <th>Submtd</th>
-                    <th>Updated</th>
+                   <!--  <th>Updated</th> -->
                     @endif
 
                     <th>Remarks</th>
@@ -115,7 +115,7 @@
                                 Me
                             @else
                                 @if(optional($form->created_by)->Title != null)
-                                   {{ optional($form->created_by)->Title }}<br> <small>({{$form->creator}})</small>
+                                   {{ optional($form->created_by)->Title }} <small>({{$form->creator}})</small>
                                 @else
                                     <small>{{$form->creator}}</small>
                                 @endif
@@ -201,9 +201,9 @@
                             {{ date('d-m-y', strtotime($form->submitted_on)) }}
                             @endif
                             </small></td>
-                            <td ><small>
+                           <!--  <td ><small>
                            {{$form->updated_at->timezone('Asia/Kolkata')->format('d-m-y H:i')}}
-                            </small></td>
+                            </small></td> -->
                             @endif
 
                             <td>
@@ -324,7 +324,8 @@
         <input  type="hidden" name = "status" value="all" rel="filter">
 
         @if(Auth::user()->isAdmin())
-         <input  class="form-control" placeholder="WorkNature(optional)" type="text" name = "worknaturefilter" value="{{\Request('worknaturefilter')}}" rel="filter">
+         <input  class="form-control" placeholder="WorkNature" type="text" name = "worknaturefilter" value="{{\Request('worknaturefilter')}}" rel="filter">
+        <input  class="form-control" placeholder="Remarks|nonempty" type="text" name = "remarksfilter" value="{{\Request('remarksfilter')}}" rel="filter">
         <input  class="form-control" placeholder="submittedby" type="text" name = "submittedbyfilter" value="{{\Request('submittedbyfilter')}}" rel="filter">
 
         @endif

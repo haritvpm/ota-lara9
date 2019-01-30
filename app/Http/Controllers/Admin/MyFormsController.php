@@ -60,6 +60,7 @@ class MyFormsController extends Controller
         $str_idfilter = null;
         $str_created_by = null;
         $str_worknaturefilter=null;
+        $str_remarksfilter=null;
         $str_submittedbyfilter=null;
 
         $session = Input::get('session');
@@ -71,6 +72,8 @@ class MyFormsController extends Controller
         $idfilter   =  Input::get('idfilter');
         $createdby =  Input::get('created_by');
         $worknaturefilter = Input::get('worknaturefilter');
+        $remarksfilter = Input::get('remarksfilter');
+
         $submittedbyfilter = Input::get('submittedbyfilter');
 
 
@@ -232,6 +235,16 @@ class MyFormsController extends Controller
                $q->where('worknature','like', '%' . $worknaturefilter.'%' );
             });                 
             $str_worknaturefilter = '&worknaturefilter='. $worknaturefilter;
+        }
+         if (Input::filled('remarksfilter')){
+                      
+            if($remarksfilter == 'nonempty'){
+                $forms->where( 'remarks', '<>', '' );
+            } else {
+                $forms->where( 'remarks', 'like', '%'.$remarksfilter.'%' );
+            }
+                       
+            $str_remarksfilter = '&remarksfilter='. $remarksfilter;
         }
 
         if (Input::filled('desigfilter')){

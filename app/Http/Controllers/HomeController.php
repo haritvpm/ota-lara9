@@ -573,10 +573,10 @@ class HomeController extends Controller
               
         setlocale(LC_MONETARY, 'en_in');
 
-        $amount_all = money_format('%.0n', (double)$amount_all);
-        $amount_approved = money_format('%.0n', (double)$amount_approved);
-        $amount_all_sectt = money_format('%.0n', (double)$amount_all_sectt);
-        $amount_approved_sectt = money_format('%.0n', (double)$amount_approved_sectt);
+        $amount_all = money_format('%!.0n', (double)$amount_all);
+        $amount_approved = money_format('%!.0n', (double)$amount_approved);
+        $amount_all_sectt = money_format('%!.0n', (double)$amount_all_sectt);
+        $amount_approved_sectt = money_format('%!.0n', (double)$amount_approved_sectt);
     }
 
     /////////////

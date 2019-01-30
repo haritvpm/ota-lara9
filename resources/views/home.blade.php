@@ -71,7 +71,7 @@
           @endif
 
          </div>
-        <div class="col-md-4">
+       <!--  <div class="col-md-4">
           @if(auth()->user()->isAdmin())
           @if( env('SHOW_LEGSECTT', true))
           <table class='table .table-condensed   table-striped' style="border-top: none;">
@@ -96,7 +96,7 @@
          @endif
          @endif
     
-      </div>
+      </div> -->
       </div>
 
      </div>
@@ -184,21 +184,21 @@
          </a>
     </div>
 
-    <!-- @if(auth()->user()->isAdmin())
+    @if(auth()->user()->isAdmin())
     <div class="col-md-3">
                     
          <div class="info-box">
-        <div class="info-box bg-yellow">
-          <span class="info-box-icon"><i class="fa fa-inr "></i></span>
+        <div class="info-box">
+          <span class="info-box-icon bg-red"><i class="fa fa-inr "></i></span>
           <div class="info-box-content">
             <span class="info-box-text">Total for {{$session_latest}}</span>
-            <span class="info-box-number">~{{$amount_all_sectt }} (Sec), = {{ $amount_all }}  (all)</span>
+            <span class="info-box-number"> Sect <span>&#8776; </span>{{$amount_all_sectt }},  All = {{ $amount_all }}</span>
           </div>
-          <!- - /.info-box-content - ->
+          <!-- /.info-box-content -->
         </div>
        </div>
     </div>
-    @endif -->
+    @endif
 
  </div>
 
@@ -303,21 +303,21 @@
         </div>
          </a>
     </div>
-   <!--  @if(auth()->user()->isAdmin())
+    @if(auth()->user()->isAdmin())
     <div class="col-md-3">
                     
-         <div class="info-box bg-green">
+         <div class="info-box">
         
-          <span class="info-box-icon"><i class="fa fa-inr "></i></span>
+          <span class="info-box-icon bg-green"><i class="fa fa-inr "></i></span>
           <div class="info-box-content">
             <span class="info-box-text">Aproved for {{$session_latest}}</span>
-            <span class="info-box-number">~ {{ $amount_approved_sectt }} (Sectt), = {{ $amount_approved}}  (all)</span>
+            <span class="info-box-number">Sect <span>&#8776;</span> {{ $amount_approved_sectt }}, All = {{ $amount_approved}}</span>
           </div>
-          <!- - /.info-box-content - ->
+          <!-- /.info-box-content -->
         </div>
        
     </div>
-    @endif -->
+    @endif
 
  </div>
  @endif
