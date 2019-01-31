@@ -31,6 +31,7 @@ class HomeController extends Controller
      */
     public function index()
     {
+       $begintime = microtime(true);
 
        /* Mail::send('email', ['user' => 'sdhfksdjf'], function ($m)  {
             $m->from('harirs@gmail.com', 'Your Application');
@@ -581,7 +582,7 @@ class HomeController extends Controller
 
     /////////////
 
-
+    $timetaken = microtime(true) - $begintime;
 
     return view('home', compact('session_array', 'users_not_submitted_yet',
                                    'info', 'info_submitted', 'total','draft', 'to_approve','pending','submitted', //staff
@@ -591,7 +592,7 @@ class HomeController extends Controller
                                     'formcountother', 'formotherlastsubmitteddate', 'formotherlastsubmittedby', 'last_form_no',
                                     'marqueetext','pending_approval',
                                     'welcometext', 'amount_all_sectt', 'amount_approved_sectt', 
-                                    'amount_all', 'amount_approved','session_latest'
+                                    'amount_all', 'amount_approved','session_latest', 'timetaken'
 
                                      ));
     }

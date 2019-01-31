@@ -25,6 +25,8 @@ class MyFormsController extends Controller
             return abort(401);
         }
 
+        $begintime = microtime(true);
+
 
         //user can login and see forms even after data entry is disabled
         //$session_array = \App\Session::whereDataentryAllowed('Yes')->pluck('name');
@@ -311,7 +313,9 @@ class MyFormsController extends Controller
             
         ]);
 
-        return view('admin.my_forms.index',compact('forms','querystr', 'to_approve',  'pending_approval', 'session_array','session','added_bies' ));
+        $timetaken = microtime(true) - $begintime;
+
+        return view('admin.my_forms.index',compact('forms','querystr', 'to_approve',  'pending_approval', 'session_array','session','added_bies', 'timetaken' ));
     }
 
 

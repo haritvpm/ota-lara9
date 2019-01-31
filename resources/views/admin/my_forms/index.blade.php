@@ -29,7 +29,11 @@
     @endif
 
     <hr>
-    <h4 class="page-title">Index of Forms</h4>
+    <h4 class="page-title">Index of Forms 
+    @if(auth()->user()->isAdmin())
+    <small>Loaded in {{$timetaken}}</small>
+    @endif
+    </h4>
 
     @if(!auth()->user()->isAudit()) 
     <p>

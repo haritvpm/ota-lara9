@@ -140,7 +140,7 @@ date_default_timezone_set('Asia/Kolkata');
       <small><span class="text-muted">
                 Last Updated: 29-01-19.&nbsp;
                  @if(env('VPS_NAME'))
-                 @{{env('VPS_NAME')}} &nbsp;
+                 @ {{env('VPS_NAME')}} &nbsp;
                  @endif
        </span>Recommended Browser: Firefox 25+. 
        @if(config('app.debug'))
