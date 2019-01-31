@@ -582,7 +582,7 @@ class HomeController extends Controller
 
     /////////////
 
-    $timetaken = microtime(true) - $begintime;
+    $timetaken = round(microtime(true) - $begintime,4);
 
     return view('home', compact('session_array', 'users_not_submitted_yet',
                                    'info', 'info_submitted', 'total','draft', 'to_approve','pending','submitted', //staff

@@ -313,7 +313,7 @@ class MyFormsController extends Controller
             
         ]);
 
-        $timetaken = microtime(true) - $begintime;
+        $timetaken = round(microtime(true) - $begintime,4);
 
         return view('admin.my_forms.index',compact('forms','querystr', 'to_approve',  'pending_approval', 'session_array','session','added_bies', 'timetaken' ));
     }

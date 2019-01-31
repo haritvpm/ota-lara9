@@ -48,7 +48,7 @@
   <p>
     Welcome !<br> For help, call <i class="fa fa-phone-square"></i> 2422 &nbsp;&nbsp; {!!$welcometext!!}
     @if(auth()->user()->isAdmin())
-    <i>Loaded in {{$timetaken}}
+    Loaded in {{$timetaken}}
     @endif
   </p>
 
