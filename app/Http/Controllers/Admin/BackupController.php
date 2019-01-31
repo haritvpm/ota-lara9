@@ -53,11 +53,11 @@ class BackupController extends Controller
     public function create()
     {
 
-        \Mail::send(['text'=>'email'], ['name'=>"Hari"], function ($m) {
+        /*\Mail::send(['text'=>'email'], ['name'=>"Hari"], function ($m) {
              $m->from('legisectt@gmail.com', 'OT App');
 
              $m->to('harirs@gmail.com', 'Balu')->subject('Your Reminder!');
-         });
+         });*/
 
         try {
             // start the backup process

@@ -27,7 +27,7 @@ class DesignationsOthersController extends Controller
 
         if(\Auth::user()->isAdmin()){
 
-            $designations_others = DesignationsOther::latest();
+            $designations_others = DesignationsOther::orderBy('created_at', 'desc');
         }
 
         $designations_others = $designations_others->get();

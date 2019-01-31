@@ -47,7 +47,7 @@
             <table class="table table-bordered table-striped {{ count($users) > 0 ? 'datatable' : '' }} ">
                 <thead>
                     <tr>
-                      
+                      <th>Id</th>
                         <th>@lang('quickadmin.users.fields.name')</th>
                         <!-- <th>@lang('quickadmin.users.fields.email')</th> -->
                         <th>@lang('quickadmin.users.fields.role')</th>
@@ -63,6 +63,7 @@
                         @foreach ($users as $user)
                             <tr data-entry-id="{{ $user->id }}">
                                
+                                <td field-key='id'>{{ $user->id }}</td>
 
                                 <td field-key='name' class="text-nowrap">{{ $user->getAttributes()['name'] }}</td>
                                 <!-- <td field-key='email'>{{ $user->email }}</td> -->

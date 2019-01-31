@@ -21,7 +21,7 @@
             <table class="table table-bordered table-striped {{ count($designations_others) > 0 ? 'datatable' : '' }}">
                 <thead>
                     <tr>
-                       
+                       <th>Id</th>
                         <th>@lang('quickadmin.designations-other.fields.designation')</th>
                         
                         <th>@lang('quickadmin.designations-other.fields.rate')</th>
@@ -39,7 +39,7 @@
                     @if (count($designations_others) > 0)
                         @foreach ($designations_others as $designations_other)
                             <tr data-entry-id="{{ $designations_other->id }}">
-                               
+                                <td field-key='id'>{{ $designations_other->id }}</td>
                                 <td field-key='designation'>{{ $designations_other->designation }}</td>
                                 <td field-key='rate'>{{ $designations_other->rate }}</td>
 

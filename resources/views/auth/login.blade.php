@@ -138,7 +138,7 @@ date_default_timezone_set('Asia/Kolkata');
     
      <p class="navbar-text">
       <small><span class="text-muted">
-                Last Updated: 29-01-19.&nbsp;
+                Last Updated: 31-01-19.&nbsp;
                  @if(env('VPS_NAME'))
                  @ {{env('VPS_NAME')}} &nbsp;
                  @endif
