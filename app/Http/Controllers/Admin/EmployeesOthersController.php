@@ -28,7 +28,7 @@ class EmployeesOthersController extends Controller
 
 
         $designations_others_todel = null;
-        $session_array = [];
+        $session_array = null;
 
          if(\Auth::user()->isAdmin() || 
             \Auth::user()->username == 'od.pol'){

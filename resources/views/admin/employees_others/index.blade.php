@@ -48,7 +48,7 @@
 
     <!-- Delete old-->
 
-    @if(count($session_array)>0)
+    @if($session_array)
     <form action="employees_others/clearold" method="get" id="filter" class="form-inline" onsubmit="return confirm('Do you want to delete employees ?');">
 
         Delete all employees not used in the last three sessions ({{$session_array}})
