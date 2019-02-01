@@ -10,6 +10,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreEmployeesOthersRequest;
 use App\Http\Requests\Admin\UpdateEmployeesOthersRequest;
 use Yajra\DataTables\DataTables;
+use Illuminate\Support\Facades\Input;
 
 class EmployeesOthersController extends Controller
 {
@@ -25,6 +26,21 @@ class EmployeesOthersController extends Controller
             return abort(401);
         }
 
+
+        $designations_others_todel = null;
+        $session_array = [];
+
+         if(\Auth::user()->isAdmin() || 
+            \Auth::user()->username == 'od.pol'){
+
+           $session_array = \App\Session::orderby('id','desc')->take(3)->pluck('name')->implode(',');
+          
+         
+           $designations_others_todel = \App\DesignationsOther::with('user')-> where('user_id', \Auth::user()->id )->orderBy('designation', 'asc')->pluck('designation')->prepend('All');
+        }
+
+
+        
 
         
         if (request()->ajax()) {
@@ -67,7 +83,7 @@ class EmployeesOthersController extends Controller
             return $table->make(true);
         }
 
-        return view('admin.employees_others.index');
+        return view('admin.employees_others.index', compact('designations_others_todel','session_array'));
     }
 
     /*
@@ -337,13 +353,41 @@ class EmployeesOthersController extends Controller
             return abort(401);
         }
         
+        $sessiontonotdelete = explode( ',',Input::get('sessions_toignore'));
+
+        $empl_used = \App\OvertimeOther::with('form')
+                ->wherehas( 'form', function($q) use ($sessiontonotdelete){
+                          $q->wherenotin('session',$sessiontonotdelete);
+                })
+                ->distinct()->pluck('designation'); 
+
+        //also prevent empl created in 6 months 
+
+         $dateayearago = Carbon::today()->subMonths(1)->toDateString();
+
+
+        $emp = EmployeesOther::wherenotin('pen', $empl_used)
+                ->whereDate('created_at', '<', $dateayearago)
+                ->whereDate('updated_at', '<', $dateayearago);
+
+        
+        //\App\DesignationsOther::wherein('id',$emp->pluck('designation_id')->unique())->pluck('designation')->dd();
+        //$emp->pluck('designation_id')->unique()->dd();
+        $count = $emp->count();
+
+        $emp->delete();
+
+
+/*
         $dateayearago = Carbon::today()->subYear()->toDateString();
         
         $emp = EmployeesOther::whereDate('created_at', '<', $dateayearago)->whereDate('updated_at', '<', $dateayearago);
 
         $count = $emp->count();
 
-        $emp->delete();
+        $emp->delete();*/
+
+
 
         \Session::flash('message-success', 'Deleted ' . $count . ' employees' ); 
 

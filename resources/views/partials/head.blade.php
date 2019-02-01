@@ -34,7 +34,13 @@
 <link href="{{ url('adminlte/css/custom.css') }}" rel="stylesheet">
 
 <!-- also change in layouts.app.blade -->
+@if(!env('VPS',0))
 <link href="{{ url('adminlte/css/skins/skin-blue.min.css') }}" rel="stylesheet">
+@else
+<link href="{{ url('adminlte/css/skins/skin-yellow.min.css') }}" rel="stylesheet">
+@endif
+
+
 <!-- this is needed for jquery datepicker. we use dp in admin form edit -->
 <!-- <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.3/themes/smoothness/jquery-ui.css"> -->
 <link href="{{ URL::asset('css/jquery-ui.min.css') }}" rel="stylesheet">

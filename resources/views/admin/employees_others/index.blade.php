@@ -48,12 +48,31 @@
 
     <!-- Delete old-->
 
-    <form action="employees_others/clearold" method="get" id="filter" class="form-inline" onsubmit="return confirm('Do you want to delete employees created a year ago?');">
+    @if(count($session_array)>0)
+    <form action="employees_others/clearold" method="get" id="filter" class="form-inline" onsubmit="return confirm('Do you want to delete employees ?');">
+
+        Delete all employees not used in the last three sessions ({{$session_array}})
+        <!--  <br><div class="form-group">                                
+        Designation<select class="form-control" name="designation_todel">
+                        
+                @foreach($designations_others_todel as $val => $desig)
+                @if($val == \Request('designation_todel'))
+                <option value="{{$val}}" selected>{{$desig}}</option>
+                @else
+                     <option value="{{$val}}">{{$desig}}</option>
+                @endif
+                @endforeach
+                              
+        </select>
+        </div> -->
+
+        <input type="hidden" name="sessions_toignore" value={{$session_array}}>
                              
-        <button type="submit" class="btn btn-xs btn-danger">Delete all employees created a year ago</button>
+        <button type="submit" class="btn btn btn-danger">Delete</button>
          
         
     </form>
+    @endif
 
 
 @stop

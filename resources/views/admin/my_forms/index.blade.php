@@ -82,7 +82,7 @@
                     <th>F.No</th>
                     @endif
 
-                    <th><a href="<?=URL::to('admin/my_forms?sort=session'.$querystr)?>">Sesn</a></th>
+                    <th><a href="<?=URL::to('admin/my_forms?sort=session'.$querystr)?>">Session</a></th>
                     <th><a href="<?=URL::to('admin/my_forms?sort=creator'.$querystr)?>">Created by</a></th>
                     <th><a href="<?=URL::to('admin/my_forms?sort=overtime_slot'.$querystr)?>">OT</a></th>
                     <th><a href="<?=URL::to('admin/my_forms?sort=duty_date'.$querystr)?>">Duty Date</a></th>
@@ -93,7 +93,7 @@
                    <!--  <th>Updated</th> -->
                     @endif
 
-                    <th>Remarks</th>
+                  <!--   <th>Remarks</th> -->
                                         
 
                     <th>&nbsp;</th>
@@ -135,7 +135,7 @@
                             @elseif( $form->overtime_slot == 'Additional')
                                 Addl
                             @else
-                                Sit 
+                                Sitting 
                             @endif
 
                             </td>
@@ -173,7 +173,7 @@
                                
                             @if($form->owner == Auth::user()->username)
                                 @if($form->owner == 'admin')
-                                 <small> <span class="text-default"><i class="fa fa-thumbs-up" style="color:green"></i> @admin</span> </small>
+                                 <span class="text-default"><i class="fa fa-thumbs-up" style="color:green"></i> @admin</span>
                                 @else
                                     @if($form->owner != $form->creator)
                                     <span class="text-default"><i class="fa fa-eye" style="color:red"></i> To approve</span> 
@@ -188,7 +188,7 @@
                                     @if($form->owner == $form->creator)
                                      <span class="text-default"><i class="fa fa-edit"></i> Draft</span>
                                     @else
-<i class="fa fa-mail-forward" style="color:blue"></i> <small>at <span class="text-default">{{ optional($form->owned_by)->Title  ?? $form->owner }} {{ optional($form->owned_by)->displayname}}</span></small>
+<i class="fa fa-mail-forward" style="color:blue"></i> at <span class="text-default">{{ optional($form->owned_by)->Title  ?? $form->owner }} {{ optional($form->owned_by)->displayname}}</span>
                                     @endif                  
                                 @endif                                
                             @endif
@@ -210,14 +210,14 @@
                             </small></td> -->
                             @endif
 
-                            <td>
+                           <!--  <td>
                                 <small>
                                 @php
                                echo str_limit( $form->remarks , 17)
                                @endphp
                                </small>
                               
-                            </td>                            
+                            </td>             -->                
 
                             <td class="text-nowrap">
                                 <a href="{{ route('admin.my_forms.show',[$form->id]) }}" class="btn btn-xs btn-primary">@lang('quickadmin.qa_view') </a>  <small>{{$form->overtimes()->count()}} </small>
