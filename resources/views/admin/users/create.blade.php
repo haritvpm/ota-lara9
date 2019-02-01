@@ -47,7 +47,11 @@
             <div class="row">
                 <div class="col-xs-12 form-group">
                     {!! Form::label('password', trans('quickadmin.users.fields.password').'*', ['class' => 'control-label']) !!}
-                    {!! Form::password('password', ['class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
+                    {!! Form::password('password', ['class' => 'form-control', 'placeholder' => '', 'required' => '',  'id' => 'mypassword', 'pattern'=>'.{6,}', 'title'=>'At least 6 or more characters']) !!} 
+                   <!-- An element to toggle between password visibility -->
+                    <input type="checkbox" onclick="ShowPassword()">Show Password
+                    <a href="javascript:void(0);" onclick="CreateDefaultPassword();"> Create Default Password </a>
+                     <a href="javascript:void(0);" onclick="GeneratePassword();">Generate Password </a>
                     <p class="help-block"></p>
                     @if($errors->has('password'))
                         <p class="help-block">
@@ -55,6 +59,7 @@
                         </p>
                     @endif
                 </div>
+                
             </div>
             <div class="row">
                 <div class="col-xs-12 form-group">
@@ -101,3 +106,32 @@
     {!! Form::close() !!}
 @stop
 
+<script type="text/javascript">
+function ShowPassword() {
+  var x = document.getElementById("mypassword");
+  if (x.type === "password") {
+    x.type = "text";
+  } else {
+    x.type = "password";
+  }
+}
+function CreateDefaultPassword() {
+  var x = document.getElementById("mypassword");
+  x.value = "pass123"
+    
+}
+function GeneratePassword() {
+    var x = document.getElementById("mypassword");
+    var length = 6,
+        //charset = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789@",
+        charset = "abcdefghjkmnpqrstuvwxyz23456789",
+        retVal = "";
+    for (var i = 0, n = charset.length; i < length; ++i) {
+        retVal += charset.charAt(Math.floor(Math.random() * n));
+    }
+    x.value = retVal;
+  
+ 
+
+}
+</script>

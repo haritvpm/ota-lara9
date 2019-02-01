@@ -32,6 +32,8 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
     
     Route::get('users/clearold','Admin\UsersController@clearold');
 
+    Route::get('users/password_reset/{id}', ['uses' => 'Admin\UsersController@password_reset', 'as' => 'users.password_reset']);
+
     Route::get('users/create_dataentry/{id}', ['uses' => 'Admin\UsersController@create_dataentry', 'as' => 'users.create_dataentry']);
     
     Route::get('users/editsimple/{id}', ['uses' => 'Admin\UsersController@editsimple', 'as' => 'users.editsimple']);

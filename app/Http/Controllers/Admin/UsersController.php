@@ -9,6 +9,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreUsersRequest;
 use App\Http\Requests\Admin\UpdateUsersRequest;
 use Yajra\DataTables\DataTables;
+use Illuminate\Support\Facades\Hash;
+
 
 class UsersController extends Controller
 {
@@ -271,6 +273,60 @@ class UsersController extends Controller
 
 
         return redirect()->route('admin.users.index');
+    }
+
+    function random_str($length, $keyspace = '23456789abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ')
+    {
+        $pieces = [];
+        $max = mb_strlen($keyspace, '8bit') - 1;
+        for ($i = 0; $i < $length; ++$i) {
+            $pieces []= $keyspace[random_int(0, $max)];
+        }
+        return implode('', $pieces);
+    }
+     public function password_reset($id)
+    {
+        if (! Gate::allows('user_create')) {
+            return abort(401);
+        }
+        
+        $user = User::findOrFail($id);
+        $password = 'pass123';
+        $sendemail = false;
+
+        if(env('VPS',FALSE)) //email available?
+        {
+          if('admin@admin.com' != $user->email)
+          {
+             $password = $this->random_str(6);
+             $sendemail = true;
+          }
+        }
+        //password set when the User model is saved for the first time. Then later on you can update/change the password as needed. 
+        //there is a mutator method to set the password
+
+        $user->update( [
+           'password' => /*Hash::make*/($password),
+        ]);
+
+        if($sendemail){
+          $body = 'Your password has been reset:<br><br>User Id: <b>' . $user->username . '</b><br>Password: <b>' . $password . '</b><br><br><br>Regards<br>Admin';
+
+
+          \Mail::send(['text'=>'email'], ['name'=>$user->name], function ($m) use ($body, $user){
+               $m->from('harilegisec@gmail.com', 'Overtime Allowance App');
+               $m->subject('[Overtime Allowance App] Password Reset');
+
+               $m->to($user->email, $user->name)->setBody($body, 'text/html');
+           });
+        }
+             
+       
+        \Session::flash('message-success', $user->username .'`s password set to ' .  $password .  ($sendemail ? (' and emailed to ' . $user->email) : ''));
+       
+
+        return redirect()->route('admin.users.index');
+
     }
 
 

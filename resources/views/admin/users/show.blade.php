@@ -69,6 +69,16 @@
                                     @can('routing_edit')
                                     <a href="{{ route('admin.routings.edit',[$routing->id]) }}" class="btn btn-xs btn-info">@lang('quickadmin.qa_edit')</a>
                                     @endcan
+
+                                    @can('user_edit')
+                                     <a href="{{ route('admin.users.password_reset',[$user->id]) }}" class="btn btn-default btn-xs" onclick="return confirm('Are you sure to reset password of {{$user->username}}?')">Reset PW</a>
+                                     
+                                    @if( $user->isSectionOfficer() || $user->isDSorAbove() )
+                                    <a href="{{ route('admin.users.create_dataentry',[$user->id]) }}" class="btn btn-default btn-xs">Create DE</a>
+                                    @endif
+
+                                    @endcan
+
                                     @can('routing_delete')
 {!! Form::open(array(
                                         'style' => 'display: inline-block;',
