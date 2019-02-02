@@ -304,5 +304,14 @@ class FormOther extends Model
         return md5($str); 
 
     }
+
+     public function getMD5ClippedAttribute()
+    {
+        $md5 = $this->getMD5Attribute();
+
+
+        return substr($md5,0,3) . '-' . substr($md5, strlen($md5)-3); 
+
+    }
     
 }

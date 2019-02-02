@@ -48,9 +48,16 @@ th{
 
 <style>
 .page-break {
-    page-break-after: always;
+    page-break-after: left;
 }
+
+.nopage-break {
+    page-break-before: avoid;
+}
+
 </style>
+
+<div class="page-breakleft"></div>
 
 <h5 class="page-title" style="text-align: center">
     SECRETARIAT OF THE KERALA LEGISLATURE
@@ -66,7 +73,7 @@ th{
     <div class="panel-heading">
         
     <p align="right" style="font-size:10px;"> No.{{ $form->id }}, Updated: 
-        {{ date('d-m-Y', strtotime($form->updated_at)) }}, Printed: {{$printdate}} {{$form->MD5}}</p>
+        {{ date('d-m-Y', strtotime($form->updated_at)) }}, Printed: {{$printdate}} {{$form->MD5Clipped}}</p>
 
     
     <div class="panel-body ">
@@ -202,13 +209,16 @@ th{
 
 
     
-    
+    <div class=\"npage-break\">
     <div align="right" style="font-size:9px;"><br><br><br><br>Signature, Name and Designation<br>
         of the Officer forwarding the statement</div>
 
     <div style="font-size:9px;">Countersigned by</div>
+     </div>
+
 
 </div>
+
 
 </div>
 </body>

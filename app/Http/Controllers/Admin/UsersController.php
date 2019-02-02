@@ -312,17 +312,22 @@ class UsersController extends Controller
         if($sendemail){
           $body = 'Your password has been reset:<br><br>User Id: <b>' . $user->username . '</b><br>Password: <b>' . $password . '</b><br><br><br>Regards<br>Admin';
 
+          try{
 
-          \Mail::send(['text'=>'email'], ['name'=>$user->name], function ($m) use ($body, $user){
-               $m->from('harilegisec@gmail.com', 'Overtime Allowance App');
-               $m->subject('[Overtime Allowance App] Password Reset');
+            \Mail::send(['text'=>'email'], ['name'=>$user->name], function ($m) use ($body, $user){
+                 $m->from('harilegisec@gmail.com', 'OT');
+                 $m->subject('[Overtime Allowance App] Password Reset');
 
-               $m->to($user->email, $user->name)->setBody($body, 'text/html');
-           });
+                 $m->to($user->email, $user->name)->setBody($body, 'text/html');
+             });
+            }
+          catch(\Exception $e){
+              
+          }
         }
              
        
-        \Session::flash('message-success', $user->username .'`s password set to ' .  $password .  ($sendemail ? (' and emailed to ' . $user->email) : ''));
+        \Session::flash('message-success', $user->username .'\'s password set to ' .  $password .  ($sendemail ? (' and emailed to ' . $user->email) : ''));
        
 
         return redirect()->route('admin.users.index');

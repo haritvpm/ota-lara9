@@ -16,6 +16,7 @@ class ReportsOthersController extends Controller
         if (! Gate::allows('my_form_others_access')) {
             return abort(401);
         }
+        $begintime = microtime(true);
 
         //user can login and see forms even after data entry is disabled
         //$session_array = \App\Session::whereDataentryAllowed('Yes')->pluck('name');
@@ -256,8 +257,9 @@ class ReportsOthersController extends Controller
         }
        */
 
-      
-        return view('admin.reports_others.index', compact('sessions', 'rows', 'session', 'romankla', 'sessionnumber_th', 'malkla', 'sessionnumber', 'report_type', 'overtimes','added_bies', 'totalamountfromcontroller' ));
+        $timetaken = round(microtime(true) - $begintime,4);
+
+        return view('admin.reports_others.index', compact('sessions', 'rows', 'session', 'romankla', 'sessionnumber_th', 'malkla', 'sessionnumber', 'report_type', 'overtimes','added_bies', 'totalamountfromcontroller' , 'timetaken'));
     }
 /*
     public function detailed_report()

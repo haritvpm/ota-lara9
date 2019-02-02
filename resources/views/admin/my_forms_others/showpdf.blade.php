@@ -17,7 +17,7 @@
     <div class="panel-heading">
         
      <p align="right" style="font-size:10px;"> No.{{ $form->id }}, Updated: 
-        {{ date('d-m-Y', strtotime($form->updated_at)) }}, Printed: {{$printdate}} {{$form->MD5}}</p>
+        {{ date('d-m-Y', strtotime($form->updated_at)) }}, Printed: {{$printdate}} {{$form->MD5Clipped}}</p>
 
     
     <div class="panel-body ">
@@ -153,10 +153,12 @@
 
     
     
+    <div class=\"npage-break\">
     <div align="right" style="font-size:9px;"><br><br><br><br>Signature, Name and Designation<br>
         of the Officer forwarding the statement</div>
 
     <div style="font-size:9px;">Countersigned by</div>
+    </div>
 
 </div>
 

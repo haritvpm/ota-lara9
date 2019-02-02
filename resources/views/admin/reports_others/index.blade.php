@@ -106,7 +106,7 @@
    @if( /*$report_type == 'Simple' || $report_type == 'Detailed'*/1 )
    @php
    $totalamount = 0;
-   setlocale(LC_MONETARY, 'en_IN');
+   setlocale(LC_MONETARY, 'en_IN UTF-8');
    @endphp
    @if( count($rows) > 0)
 	<!-- <h4 class="page-title" style="text-align: center">
@@ -128,7 +128,9 @@
 
           @if(auth()->user()->isAdmin())
           <br>
+
           <div class="hidden-print">
+            Loaded in {{$timetaken}}<br>
           Total amount : {{ money_format( "%!.0n",$totalamountfromcontroller) }}
           </div>
           @endif

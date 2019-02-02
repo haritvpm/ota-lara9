@@ -76,7 +76,7 @@
                                     @endcan
                                     @can('user_edit')
                                     <a href="{{ route('admin.users.editsimple',[$user->id]) }}" class="btn btn-xs btn-success">SimpleEdit</a>
-                                    <a href="{{ route('admin.users.password_reset',[$user->id]) }}" class="btn btn-default btn-xs" onclick="return confirm('Are you sure to reset password of {{$user->username}}?')">Reset PW</a>
+                                    <a href="{{ route('admin.users.password_reset',[$user->id]) }}" class="btn btn-warning btn-xs" onclick="return confirm('Are you sure to reset password of {{$user->username}}?')">Reset PW</a>
                                     
 
                                     <a href="{{ route('admin.users.edit',[$user->id]) }}" class="btn btn-xs btn-info">@lang('quickadmin.qa_edit')</a>

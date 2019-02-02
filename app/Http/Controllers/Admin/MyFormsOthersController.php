@@ -1282,7 +1282,8 @@ class MyFormsOthersController extends Controller
                 //if($htmlview)
                 {
                  if($totalforms != $index){
-                    $view .=  "<div class=\"page-break\"></div>"; 
+                    $view .=  "<div class=\"page-break\"></div>";
+
                 }}
             } 
 
@@ -1340,8 +1341,14 @@ th{
 
 <style>
 .page-break {
-    page-break-after: always;
+    page-break-after: left;
 }
+
+.nopage-break {
+    page-break-before: avoid;
+}
+
+
 .monospacefont{
     font-family: monospace;
  }

@@ -56,8 +56,10 @@
                     <th><a href="<?=URL::to('admin/my_forms_others?sort=creator'.$querystr)?>">Created by</a></th>
                     <th><a href="<?=URL::to('admin/my_forms_others?sort=overtime_slot'.$querystr)?>">OT</a></th>
                     <th><a href="<?=URL::to('admin/my_forms_others?sort=duty_date'.$querystr)?>">Duty Date</a></th>
-                    <th><a href="<?=URL::to('admin/my_forms_others?sort=owner'.$querystr)?>">Status</a></th>     
-                    <!-- <th>Remarks</th> -->
+                    <th><a href="<?=URL::to('admin/my_forms_others?sort=owner'.$querystr)?>">Status</a></th> 
+                    @if(auth()->user()->isAdmin())     
+                    <th>Md5</th>
+                    @endif
                     <!-- <th>Last Updated</th> -->
                     <th>&nbsp;</th>
 
@@ -129,7 +131,9 @@
 
                              </td>
                             
-                            <!-- <td >{{ str_limit($form->remarks, 30)  }}</td> -->
+                             @if(auth()->user()->isAdmin()) 
+                            <td >{{ $form->MD5Clipped  }}</td>
+                            @endif
 
                             <!-- <td>{{$form->updated_at}}</td> -->
 
