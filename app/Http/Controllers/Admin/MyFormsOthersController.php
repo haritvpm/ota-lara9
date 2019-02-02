@@ -1216,7 +1216,20 @@ class MyFormsOthersController extends Controller
         foreach ($forms as $form) 
         {
             $index += 1;
-            $id = $form->id;       
+            $id = $form->id;    
+
+            $rowsinprint = $form->overtimes()->count() + 5; 
+            //5 for "signature" text
+
+            //18 - rows in first page in pdf
+            //23 rows in other pages
+            $pagesreq = (int)ceil(($rowsinprint-18)/23) + 1 ; 
+
+            if($htmlview){ //
+                $pagesreq = (int)ceil(($rowsinprint-15)/20) + 1 ;
+            } 
+
+
 
             $overtimes = \App\OvertimeOther::with("employeesother")->where('form_id', $id)->get();
 
@@ -1284,6 +1297,13 @@ class MyFormsOthersController extends Controller
                  if($totalforms != $index){
                     $view .=  "<div class=\"page-break\"></div>";
 
+                    //double side printing, make sure next form is at odd page
+                    //dd($pagesreq%2==1);
+                   
+                    if($pagesreq%2==1){
+                        $view .=  "<div class=\"page-break\">&nbsp;</div>";
+                    }
+
                 }}
             } 
 
@@ -1341,7 +1361,10 @@ th{
 
 <style>
 .page-break {
-    page-break-after: left;
+    page-break-after: always;
+}
+.page-break-must {
+    page-break-before: always;
 }
 
 .nopage-break {

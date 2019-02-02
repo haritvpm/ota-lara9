@@ -44,7 +44,7 @@ th{
      <div class = "pull-right">
         <small> Updated : 
         {{ date('d-m-Y', strtotime($form->updated_at)) }},
-        No.{{ $form->id }}, {{$form->MD5}}
+        No.{{ $form->id }}, {{$form->MD5Clipped}}
         </small>
     </div>
 
