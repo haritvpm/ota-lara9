@@ -106,7 +106,7 @@
    @if( /*$report_type == 'Simple' || $report_type == 'Detailed'*/1 )
    @php
    $totalamount = 0;
-   setlocale(LC_MONETARY, 'en_IN.utf8');
+   setlocale(LC_MONETARY, 'en_IN');
    @endphp
    @if( count($rows) > 0)
 	<!-- <h4 class="page-title" style="text-align: center">

@@ -572,7 +572,7 @@ class HomeController extends Controller
         ->select(\DB::raw('sum(overtimes.count*overtimes.rate) AS total_amount'))
         ->first()->total_amount;
               
-        setlocale(LC_MONETARY, 'en_IN.utf8');
+        setlocale(LC_MONETARY, 'en_IN');
 
         $amount_all = money_format('%!.0n', (double)$amount_all);
         $amount_approved = money_format('%!.0n', (double)$amount_approved);
