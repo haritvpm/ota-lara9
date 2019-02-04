@@ -129,7 +129,7 @@ th{
                     <th>Nature of Work</th>
                     
                     @endif
-                    <th>IFSC/ Account</th>
+                    <th>IFSC , Account</th>
                     <th>Mob</th>
 
                 </tr>
@@ -165,7 +165,7 @@ th{
                     @endif
 
                   
-                    <td class="small" field-key='account_no'>{{ optional($overtime->employeesother)->ifsc }} / {{ optional($overtime->employeesother)->account_no }}</td>
+                    <td class="small" field-key='account_no'>{{ optional($overtime->employeesother)->account_type != 'TSB' ? optional($overtime->employeesother)->ifsc : 'TSB' }} , {{ optional($overtime->employeesother)->account_no }}</td>
                     <td class="small" field-key='mobile_no'> {{ optional($overtime->employeesother)->mobile }}</td>
 
                 </tr>

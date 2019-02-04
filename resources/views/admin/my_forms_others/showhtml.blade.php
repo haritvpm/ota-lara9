@@ -141,8 +141,8 @@ th{
                     <th style="text-align:center;"> <small>Nature of Work</small></th>
                     
                     @endif
-                    <th style="text-align:center;" >IFSC</th>
-                    <th style="text-align:left;">Account</th>
+                    <th style="text-align:center;" >IFSC , Account No</th>
+                    <!-- <th style="text-align:left;">Account</th> -->
                     <th style="text-align:left;">Mob</th>
 
 
@@ -179,9 +179,8 @@ th{
                 @endif
                   
                   
-                    <td class="monospacefont" field-key='ifsc' style="text-align:center;"> {{ optional($overtime->employeesother)->ifsc }}
-                    </td>
-                     <td class="monospacefont" field-key='account_no' style="text-align:left;">{{ optional($overtime->employeesother)->account_no }}
+                    <td class="monospacefont" field-key='ifsc' style="text-align:center;"> {{ optional($overtime->employeesother)->account_type != 'TSB' ? optional($overtime->employeesother)->ifsc : 'TSB'}}
+                    , {{ optional($overtime->employeesother)->account_no }}
                      </td>
                     <td field-key='mobile_no' style="text-align:left;"> <small>{{ optional($overtime->employeesother)->mobile }} </small>  </td>
 
