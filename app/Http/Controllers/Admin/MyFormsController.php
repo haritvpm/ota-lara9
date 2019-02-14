@@ -1333,11 +1333,12 @@ class MyFormsController extends Controller
 
                    $coma_items = count(explode(',', $colleave));
 
-                   $numextracted = preg_replace('/[^0-9]/', '', $colleave);
+                   //$numextracted = preg_replace('/[^0-9]/', '', $colleave);
+                   $hasnums = preg_match('/\d/', $colleave) > 0;
 
                    if( $coma_items == 1 && $leaves == 1){ //one leave and user might have entered '1'
                         if( $colleave == '1' || //comparing to string '1', not number 1. number cast converts '1/12' to 1
-                        $numextracted == ''){
+                        !$hasnums ){
                             $allleavesentered = false;       
                         }
                    }
@@ -1347,7 +1348,7 @@ class MyFormsController extends Controller
                    }
 
                    //but if user has entered a range, it is ok
-                   if($numextracted != ''){ //should have digits
+                   if($hasnums){ //should have digits
                     if(FALSE !== stripos($colleave, "to") ||
                        FALSE !== stripos($colleave, "-") ||
                        FALSE !== stripos($colleave, "and") ||
