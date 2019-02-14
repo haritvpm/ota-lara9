@@ -23,7 +23,7 @@ class RoutingsController extends Controller
             return abort(401);
         }
         
-        $nolegsecttusers = env('SHOW_LEGSECTT', 'TRUE');
+        $nolegsecttusers = \Config::get('custom.show_legsectt');
 
         $usersoflegsectt = null;
 

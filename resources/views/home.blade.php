@@ -62,7 +62,7 @@
         <div class="row">
          <div class="col-md-6">
 
-          @if( env('SHOW_LEGSECTT', true))
+          @if( \Config::get('custom.show_legsectt'))
           @if(auth()->user()->isAdmin() || !auth()->user()->isOD())
           Total Forms : {{ $total }} <br>
           @endif
@@ -76,7 +76,7 @@
          </div>
        <!--  <div class="col-md-4">
           @if(auth()->user()->isAdmin())
-          @if( env('SHOW_LEGSECTT', true))
+          @if( \Config::get('custom.show_legsectt'))
           <table class='table .table-condensed   table-striped' style="border-top: none;">
           <tr>
             <td >Amount for {{$session_latest}}</td>
@@ -109,7 +109,7 @@
 
 
 
-@if( env('SHOW_LEGSECTT', true))
+@if( \Config::get('custom.show_legsectt'))
 @if(auth()->user()->isAdmin() || !auth()->user()->isOD())
  <div class="row">
     <!-- <div class="col-md-2">
@@ -328,7 +328,7 @@
 @endif <!-- not audit -->
 
 
-@if( env('SHOW_LEGSECTT', true))
+@if( \Config::get('custom.show_legsectt'))
 @if(!auth()->user()->isAdmin() && !auth()->user()->isOD() && !auth()->user()->isServices() )
    <p>
   View <a href="<?=URL::to('admin/goview/go.pdf')?>"  target="_blank" > GO(Rt) 123/2016/Leg dtd 20/1/2016</a>  regarding overtime allowance
@@ -355,7 +355,7 @@
 
  @if(auth()->user()->isAdmin())
 
-  @if( env('SHOW_LEGSECTT', true))
+  @if( \Config::get('custom.show_legsectt'))
   <div class="box box-primary">
   <div class="box-header with-border">
   <div class="box-title">Form owner pending status</div>
@@ -493,7 +493,7 @@
     @endif
 
     <hr>
-    @endif <!-- if( env('SHOW_LEGSECTT')) -->
+    @endif <!-- if( \Config::get('custom.show_legsectt')) -->
 
     <div class="box box-success">
     <div class="box-header with-border">

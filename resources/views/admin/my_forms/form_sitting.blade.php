@@ -74,7 +74,7 @@
 					<th style="width: 11%">Period-From</th>
 					<th style="width: 11%">Period-To</th>
 					<th>Sitting days attended</th>
-					<th>Leaves</th>
+					<th>Leave/Late Details</th>
 					<th></th>
 				</tr>
 			</thead>

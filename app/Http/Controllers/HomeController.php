@@ -162,7 +162,7 @@ class HomeController extends Controller
         $submitted = $forms->filterStatus('Submitted')->count();
         */
 
-        if( env('SHOW_LEGSECTT', true)){
+        if( \Config::get('custom.show_legsectt')){
             if($forms){
                 $forms = $forms->get();
             }
@@ -428,7 +428,7 @@ class HomeController extends Controller
         if( auth()->user()->isAdmin() ){
             foreach ($sessions as $session) {
                
-                if( env('SHOW_LEGSECTT', true)){
+                if( \Config::get('custom.show_legsectt')){
                     $forms = \App\Form::with('created_by') 
                                         ->whereSession( $session->name )
                                         ->where('owner','admin')
@@ -529,7 +529,7 @@ class HomeController extends Controller
     $amount_approved_sectt = 0;
     $session_latest = null;
     
-    if( auth()->user()->isAdmin() && env('SHOW_LEGSECTT', true)){
+    if( auth()->user()->isAdmin() && \Config::get('custom.show_legsectt')){
         
         $session_latest =  \App\Session::latest()->first()->name;
         /*

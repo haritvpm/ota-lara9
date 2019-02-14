@@ -58,7 +58,7 @@
     <div class="row">
             <div class="col-md-12 form-group">
                
-                <span>Note:<br> For each person, enter <b>leaves on sitting days</b> if any, correctly (NOT total leave count). e.g:  <i> 30/12, 31/12. </i>
+                <span>Note:<br> For each person, enter <b>leaves/late comings on sitting days</b> if any, correctly (NOT total leave count). e.g:  <i> 30/12, 31/12. </i>
                     <br> If leaves are continuous, enter the range
                     e.g:  <i> 15/12 to 19/12, 31/12. </i>
                     <br> If person transferred to/from this section, set his <b>Period-From</b> /<b>Period-To</b> accordingly.

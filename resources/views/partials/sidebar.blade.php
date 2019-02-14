@@ -12,7 +12,7 @@
                 </a>
             </li>
 
-            @if( env('SHOW_LEGSECTT', true))
+            @if( \Config::get('custom.show_legsectt'))
             @can('my_form_access')
             <li class="{{ $request->segment(2) == 'my_forms' ? 'active' : '' }}">
                 <a href="{{ route('admin.my_forms.index') }}">
@@ -41,7 +41,7 @@
             </li>
             @endcan
 
-             @if( env('SHOW_LEGSECTT', true))
+             @if(  \Config::get('custom.show_legsectt'))
             @can('search_access')
             <li class="{{ $request->segment(2) == 'searches' ? 'active' : '' }}">
                 <a href="{{ route('admin.searches.index') }}">
@@ -61,7 +61,7 @@
             </li>
             @endcan
 
-            @if( env('SHOW_LEGSECTT', true))
+            @if(  \Config::get('custom.show_legsectt'))
             @can('employee_access')
             <li class="{{ $request->segment(2) == 'employees' ? 'active' : '' }}">
                 <a href="{{ route('admin.employees.index') }}">
@@ -145,7 +145,7 @@
                     </li>
                 @endcan
                 
-                @if( env('SHOW_LEGSECTT', true))
+                @if(  \Config::get('custom.show_legsectt'))
                 @can('designation_access')
                 <li class="{{ $request->segment(2) == 'designations' ? 'active active-sub' : '' }}">
                         <a href="{{ route('admin.designations.index') }}">
@@ -213,7 +213,7 @@
            
                        
            
-            @if( env('SHOW_LEGSECTT', true))
+            @if(  \Config::get('custom.show_legsectt'))
             @can('report_access')
             <li class="{{ $request->segment(2) == 'reports' ? 'active' : '' }}">
                 <a href="{{ route('admin.reports.index') }}">
@@ -233,7 +233,7 @@
             </li>
             @endcan
 
-            @if( env('SHOW_RAWDATA', false))
+            @if( \Config::get('custom.show_rawdata') )
             @can('raw_datum_access')
 
             <li class="treeview">
@@ -246,7 +246,7 @@
                 </a>
                 <ul class="treeview-menu">
                 
-                @if( env('SHOW_LEGSECTT', true))
+                @if(  \Config::get('custom.show_legsectt'))
                 @can('form_access')
                 <li class="{{ $request->segment(2) == 'forms' ? 'active active-sub' : '' }}">
                     <a href="{{ route('admin.forms.index') }}">

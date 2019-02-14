@@ -286,7 +286,7 @@ th{
                     <th class="text-center">Period from</th>
                     <th class="text-center">Period to</th>
                     <th class="text-center">Sittings days attended</th>
-                    <th>Leave details if any</th>
+                    <th>Leave/Late if any</th>
                     @else
                     <th>@lang('quickadmin.overtimes.fields.from')</th>
                     <th>@lang('quickadmin.overtimes.fields.to')</th>

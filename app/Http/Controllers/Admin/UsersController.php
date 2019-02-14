@@ -88,7 +88,7 @@ class UsersController extends Controller
 
         }
        
-        $nolegsecttusers = env('SHOW_LEGSECTT', 'TRUE');
+        $nolegsecttusers = \Config::get('custom.show_legsectt');
 
 
 
@@ -294,7 +294,7 @@ class UsersController extends Controller
         $password = 'pass123';
         $sendemail = false;
 
-        if(env('VPS',FALSE)) //email available?
+        if(\Config::get('custom.vps')) //email available?
         {
           if('admin@admin.com' != $user->email)
           {

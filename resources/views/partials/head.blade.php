@@ -34,7 +34,7 @@
 <link href="{{ url('adminlte/css/custom.css') }}" rel="stylesheet">
 
 <!-- also change in layouts.app.blade -->
-@if(!env('VPS',0))
+@if(!\Config::get('custom.vps'))
 <link href="{{ url('adminlte/css/skins/skin-blue.min.css') }}" rel="stylesheet">
 @else
 <link href="{{ url('adminlte/css/skins/skin-yellow.min.css') }}" rel="stylesheet">

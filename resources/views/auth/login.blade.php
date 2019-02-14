@@ -10,7 +10,7 @@ body {
 $patterns = array('zt-ants-ifc_01.jpg', 'hypnotize.png','paisley.png','swirl.png','congruent_outline.png');
 
 $image_index = rand(0, 4);
-if(env('VPS',0)){
+if(\Config::get('custom.vps')){
   $image_index = rand(1, 4);
 }
 
@@ -139,8 +139,8 @@ date_default_timezone_set('Asia/Kolkata');
      <p class="navbar-text">
       <small><span class="text-muted">
                 Last Updated: 14-02-19.&nbsp;
-                 @if(env('VPS_NAME'))
-                 @ {{env('VPS_NAME')}} &nbsp;
+                 @if(\Config::get('custom.vps_name'))
+                 @ {{\Config::get('custom.vps_name')}} &nbsp;
                  @endif
        </span>Recommended Browser: Firefox 25+. 
        @if(config('app.debug'))

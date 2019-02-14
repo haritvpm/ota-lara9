@@ -1333,10 +1333,11 @@ class MyFormsController extends Controller
 
                    $coma_items = count(explode(',', $colleave));
 
+                   $numextracted = preg_replace('/[^0-9]/', '', $colleave);
+
                    if( $coma_items == 1 && $leaves == 1){ //one leave and user might have entered '1'
                         if( $colleave == '1' || //comparing to string '1', not number 1. number cast converts '1/12' to 1
-                        strcasecmp($colleave, 'ONE') == 0 || 
-                        strncasecmp($colleave, 'NIL',3) == 0 ){
+                        $numextracted == ''){
                             $allleavesentered = false;       
                         }
                    }
@@ -1346,19 +1347,22 @@ class MyFormsController extends Controller
                    }
 
                    //but if user has entered a range, it is ok
-                   if( FALSE !== stripos($colleave, "to") ||
+                   if($numextracted != ''){ //should have digits
+                    if(FALSE !== stripos($colleave, "to") ||
                        FALSE !== stripos($colleave, "-") ||
                        FALSE !== stripos($colleave, "and") ||
                        FALSE !== stripos($colleave, "&") ||
                        FALSE !== stripos($colleave, "from") ){
-                    $allleavesentered = true;
+                    
+                        $allleavesentered = true;
+                    }
                    } 
 
                 }
 
                 if(!$allleavesentered){
 
-                  array_push($myerrors, $overtime['pen'] . '-' .$overtime['name'] . ' : Enter the '. $leaves . ' leave dates (not total no of leaves)');
+                  array_push($myerrors, $overtime['pen'] . '-' .$overtime['name'] . ' : Enter the '. $leaves . ' leave/late coming dates (Not total no of leaves)');
                   return null;
                 
                 }

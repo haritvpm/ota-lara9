@@ -24,7 +24,7 @@ class PresetsController extends Controller
 
         if(\Auth::user()->isAdmin()){
 
-            $nolegsecttusers = env('SHOW_LEGSECTT', 'TRUE');
+            $nolegsecttusers = \Config::get('custom.show_legsectt');
 
             $usersoflegsectt = null;
 
