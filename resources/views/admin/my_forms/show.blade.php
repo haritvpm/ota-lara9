@@ -276,7 +276,10 @@ th{
          <table class="table table-bordered table-striped table-condensed">
             <thead>
                 <tr>
-                    <th>No.</th>
+                    @if(Auth::user()->isAdmin())
+                    <th class="hidden-print">Id</th>
+                    @endif
+                    <th>Sl.</th>
                     <th>PEN-Name</th>
                     <th>@lang('quickadmin.overtimes.fields.designation')</th>
                     @if($form->overtime_slot == 'Sittings')
@@ -300,6 +303,9 @@ th{
 
 
                 <tr data-entry-id="{{ $overtime->id }}">
+                    @if(Auth::user()->isAdmin())
+                    <td class="hidden-print"><small>{{ $overtime->id }}</small></td>
+                    @endif
 
                     <td style="width:1px;"><small>{{  $loop->iteration }}</small></td>
                     <td field-key='pen' class="text-nowrap">

@@ -1322,19 +1322,34 @@ class MyFormsController extends Controller
                 $allleavesentered = true;
                 $colleave = trim($overtime['worknature']);
 
-                if( $colleave == ''){
+                if(false !== stripos($colleave,'SUPPL') ){ 
+                    //if supply, disregard leaves
+                    $allleavesentered = true;
+                }
+                else if( $colleave == ''){
                     $allleavesentered = false;
-                } else {
+                } 
+                else {
 
-                   $comas = count(explode(',', $colleave));
+                   $coma_items = count(explode(',', $colleave));
 
-                   if($comas < $leaves){
+                   if( $coma_items == 1 && $leaves == 1){ //one leave and user might have entered '1'
+                        if( $colleave == '1' || //comparing to string '1', not number 1. number cast converts '1/12' to 1
+                        strcasecmp($colleave, 'ONE') == 0 || 
+                        strncasecmp($colleave, 'NIL',3) == 0 ){
+                            $allleavesentered = false;       
+                        }
+                   }
+
+                   if($coma_items < $leaves){
                      $allleavesentered = false;
                    }
 
                    //but if user has entered a range, it is ok
                    if( FALSE !== stripos($colleave, "to") ||
                        FALSE !== stripos($colleave, "-") ||
+                       FALSE !== stripos($colleave, "and") ||
+                       FALSE !== stripos($colleave, "&") ||
                        FALSE !== stripos($colleave, "from") ){
                     $allleavesentered = true;
                    } 
