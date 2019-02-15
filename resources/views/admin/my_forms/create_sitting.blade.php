@@ -56,7 +56,8 @@
     @else
     
         Sorry, no sessions available for data entry
-    
+        <a href="{{route('admin.my_forms.index')}}" class="btn btn-primary">OK</a>
+
     @endif  
 
 @stop

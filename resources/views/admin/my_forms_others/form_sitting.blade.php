@@ -20,7 +20,7 @@
 <div class="row" v-cloak >
 	<div class="col-md-4 form-group">           
 			<label for="session">Session</label>
-			<select {{$readonly}} class ="form-control" name="session" v-model= "form.session" required v-on:change="sessionchanged">
+			<select {{$readonly}} 	tabindex="0"  class ="form-control" name="session" v-model= "form.session" required v-on:change="sessionchanged">
 				
 				@foreach ($sessions as $session)
 					@if ($loop->index == 1)
@@ -35,7 +35,7 @@
 	<div class="col-md-4 form-group">  
 		<label for="duty_date">Date From</label>
 					
-		<date-picker {{$readonly}} v-model="form.date_from" @dp-change="onChange"
+		<date-picker readonly v-model="form.date_from" @dp-change="onChange"
 				:config="configdate"
 				placeholder="Select date"
 				:required="true"                
@@ -45,7 +45,7 @@
 	<div class="col-md-4 form-group">  	
 		<label for="duty_date">Date To</label>
 				
-		<date-picker {{$readonly}} v-model="form.date_to" @dp-change="onChange"
+		<date-picker readonly v-model="form.date_to" @dp-change="onChange"
 				:config="configdate"
 				placeholder="Select date"
 				:required="true"                
@@ -81,6 +81,7 @@
 					<multiselect :name="'name[' + index + ']'" v-model= "row.pen" :ref="'field-'+index" id="ajax" placeholder= "Type to search" 
 					:options="pen_names" 
 					:searchable="true" 
+
 					:show-labels="false"  
 					:close-on-select="true" 
 					:allow-empty="false" 

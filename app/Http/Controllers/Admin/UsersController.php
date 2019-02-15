@@ -292,6 +292,13 @@ class UsersController extends Controller
         
         $user = User::findOrFail($id);
         $password = 'pass123';
+        if(false !== strpos($user->username, 'us.')){
+          $password = 'pass456'; //us.
+        } else if(false === strpos($user->username, 'sn.')){
+          $password = 'pass789'; //ds., js, as,....
+        }
+
+
         $sendemail = false;
 
         if(\Config::get('custom.vps')) //email available?

@@ -112,6 +112,11 @@ var vm = new Vue({
           }*/
 
         this.sessionchanged();
+
+        if (this.form.session != '' && this.form.overtimes.length == 0) {//sessions available for dataentry,
+            //and this is a new form, not editing existing
+            // this.addRow();
+        }
     },
     mounted: function mounted() {},
 
@@ -385,7 +390,7 @@ var vm = new Vue({
             self.$swal({
                 type: 'error',
                 title: 'Error',
-                text: 'Please read the error(s) shown in red at the top',
+                text: 'Please read the error(s) shown in red',
                 timer: 2500
 
             });
@@ -437,7 +442,7 @@ var vm = new Vue({
             self.$swal({
                 type: 'error',
                 title: 'Error',
-                text: 'Please read the error(s) shown in red at the top',
+                text: 'Please read the error(s) shown in red',
                 timer: 2500
 
             });

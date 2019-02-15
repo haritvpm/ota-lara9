@@ -87,6 +87,7 @@
 					:close-on-select="true" 
 					:allow-empty="false" 
 					:options-limit="100" 
+					:tabindex="3" 
 					@select="changeSelect" 
 											
 					@search-change="asyncFind">
@@ -94,7 +95,7 @@
 					</multiselect></td>
 
 					<td><multiselect :name="'desig[' + index + ']'" v-model="row.designation" :allow-empty="false"
-							
+							 :tabindex="4" 
 							:show-labels="false" :options= "muloptions"> 
 						<span slot="noResult"></span>		
 					</multiselect>

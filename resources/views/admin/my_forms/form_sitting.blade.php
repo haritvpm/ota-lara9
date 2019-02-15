@@ -1,28 +1,10 @@
 
 
-<div v-cloak>
-	
-	<div class="alert alert-danger" v-if="errors.products_empty" >
-	<ul>
-        <li v-for="error in errors.products_empty">@{{ error }}</li>
-    </ul>
-	</div>
-
-	
-
-	<div class="alert alert-warning" v-if="myerrors.length">
-        <ul>
-            <li v-for="error in myerrors">@{{ error }}</li>
-        </ul>
-    </div>
-	
-</div>
-
 <div class="row" v-cloak >
 	
 	<div class="col-md-4 form-group">           
 			<label for="session">Session </label> 
-			<select {{$readonly}} class ="form-control" name="session" v-model= "form.session" required v-on:change="sessionchanged">
+			<select {{$readonly}} tabindex="0" class ="form-control" name="session" v-model= "form.session" required v-on:change="sessionchanged">
 				
 				@foreach ($sessions as $session)
 				    @php
@@ -74,7 +56,7 @@
 					<th style="width: 11%">Period-From</th>
 					<th style="width: 11%">Period-To</th>
 					<th>Sitting days attended</th>
-					<th>Leave/Late Details</th>
+					<th>Leave/Late</th>
 					<th></th>
 				</tr>
 			</thead>
@@ -86,7 +68,8 @@
 					<multiselect :name="'name[' + index + ']'"  :ref="'field-'+index"  v-model= "row.pen" 
 					placeholder= "Type to search" 
 					:options="pen_names" 
-					
+					:tabindex="1" 
+
 					:show-labels="false"  
 					:close-on-select="true" 
 					:allow-empty="false" 
@@ -98,8 +81,8 @@
 					<span slot="noResult"></span>
 					</multiselect></td>
 
-					<td class="col-md-3">  <multiselect :name="'desig[' + index + ']'" v-model="row.designation" :allow-empty="false"
-							
+					<td class="col-md-3">  <multiselect :name="'desig[' + index + ']'" v-model="row.designation" :allow-empty="false" 
+					 	:tabindex="2" 
 							:show-labels="false" :options= "muloptions"> 
 						<span slot="noResult"></span>
 					</multiselect> </td>
@@ -133,8 +116,33 @@
 			
 		</table>
 
-		<div class="col-md-12 form-group">
-			<div class="row">
+		<div class="row">
+			<div class="col-md-12 form-group">
+				
+				<div v-cloak>
+					
+					<div class="alert alert-danger" v-if="errors.products_empty" >
+					<ul>
+				        <li v-for="error in errors.products_empty">@{{ error }}</li>
+				    </ul>
+					</div>
+
+					
+
+					<div class="alert alert-warning" v-if="myerrors.length">
+				        <ul>
+				            <li v-for="error in myerrors">@{{ error }}</li>
+				        </ul>
+				    </div>
+					
+				</div>
+
+			</div>
+        </div>
+
+
+		<div class="row">
+			<div class="col-md-12 form-group">
 				<button type="button" class="btn btn-success btn-sm" @click.prevent="addRow"><i class="fa fa-plus"></i> Add row</button>
 			</div>
         </div>

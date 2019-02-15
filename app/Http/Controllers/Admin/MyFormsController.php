@@ -1363,7 +1363,7 @@ class MyFormsController extends Controller
 
                 if(!$allleavesentered){
 
-                  array_push($myerrors, $overtime['pen'] . '-' .$overtime['name'] . ' : Enter the '. $leaves . ' leave/late coming dates (Not total no of leaves)');
+                  array_push($myerrors, $overtime['pen'] . '-' .$overtime['name'] . ' : Enter the '. $leaves . ' leave/late coming date(s) (See Note below).');
                   return null;
                 
                 }
