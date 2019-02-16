@@ -7,18 +7,20 @@
 body {
 
 <?php
-$patterns = array('zt-ants-ifc_01.jpg', 'hypnotize.png','paisley.png','swirl.png','congruent_outline.png');
+$patterns = array('zt-ants-ifc_01.jpg', 'irongrip.png','hypnotize.png','eight_horns.png','congruent_outline.png', 'dark_wood.png');
 
-$image_index = rand(0, 4);
+//https://www.toptal.com/designers/subtlepatterns/page/12/
+
+$image_index = rand(0, 5);
 if(\Config::get('custom.vps')){
-  $image_index = rand(1, 4);
+  $image_index = rand(1, 5);
 }
 
 //$image_index = 0;
 $patternimage = $patterns[$image_index];
 ?>
 
-background-color: #ffffff;
+background-color: #000000;
 background-image: url("images/patterns/{{$patternimage}}");
 
 @if($image_index < 1)

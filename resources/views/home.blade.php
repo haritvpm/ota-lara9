@@ -358,7 +358,7 @@
   @if( \Config::get('custom.show_legsectt'))
   <div class="box box-primary">
   <div class="box-header with-border">
-  <div class="box-title">Form owner pending status</div>
+  <div class="box-title">Pending Forms</div>
   <div class="box-body">
 
      <div class="tabpanel">
@@ -463,7 +463,7 @@
 
   <div class="box box-info">
   <div class="box-header with-border">
-  <div class="box-title">PA2MLA pending</div>
+  <div class="box-title">PA to MLA, PA and OA to Chairman Pending Forms</div>
   <div class="box-body">
 
      <div class="tabpanel">
@@ -525,7 +525,7 @@
  
     <div class="box box-success">
     <div class="box-header with-border">
-    <div class="box-title">Submitted forms per session (incl PA2MLA)</div>
+    <div class="box-title">Submitted Forms in Session (incl PA2MLA)</div>
      <div class="box-body">
       @foreach($session_array as $session)
       
@@ -544,7 +544,7 @@
     @if(count($users_not_submitted_yet))
     <div class="box box-warning">
     <div class="box-header with-border">
-    <div class="box-title">Users who have not created any forms yet</div>
+    <div class="box-title">Users Not Created Any Forms Yet</div>
       <div class="box-body">
       @foreach($users_not_submitted_yet as $k => $v)
           {{ $k }} <span class="text-danger"> {{$v}} </span>
@@ -560,7 +560,7 @@
 
     <div class="box box-info">
     <div class="box-header with-border">
-    <div class="box-title">Submitted forms per session (Other Dept)</div>
+    <div class="box-title">Submitted Forms in Session (Other Dept)</div>
      <div class="box-body">
       @foreach($session_array as $session)
       
