@@ -14,7 +14,9 @@
 
     
     <p>
-    <strong>JS, AS with designation discrepancy in empl and user table:</strong> <br> 
+    <strong>JS, AS with designation discrepancy in empl and user table:</strong> <br>
+    To enable this, user's Name should be in the format (JS,AS,SS)|PEN
+    <br> 
     
     @php
     echo implode( $conflictdesignempl, ', ');

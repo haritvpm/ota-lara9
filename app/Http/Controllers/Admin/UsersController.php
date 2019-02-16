@@ -34,6 +34,7 @@ class UsersController extends Controller
                 {
                   $query->where('username','like', 'us.%')
                         ->orwhere('username','like', 'ds.%')
+                        ->orwhere('username','like', 'sn.%')
                         ->orwhere('name','like', 'js%')
                         ->orwhere('name','like', 'as%');
 
@@ -45,7 +46,8 @@ class UsersController extends Controller
                 ->where(function($q)
                 {
                   $q->where('name','like', 'js%')
-                    ->orwhere('name','like', 'as%');
+                    ->orwhere('name','like', 'as%')
+                    ->orwhere('name','like', 'ss%');
 
                 })->distinct()->get()->pluck( 'name', 'username');
 
@@ -80,6 +82,10 @@ class UsersController extends Controller
                 }
                 if( $desig == 'additional secretary' && 
                     strncasecmp($username2name[$username], 'AS', 2) != 0 ){
+                    array_push($conflictdesignempl,$username );
+                }
+                if( $desig == 'special secretary' && 
+                    strncasecmp($username2name[$username], 'SS', 2) != 0 ){
                     array_push($conflictdesignempl,$username );
                 }
 

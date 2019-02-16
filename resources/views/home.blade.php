@@ -459,6 +459,69 @@
   </div>
  -->
 
+
+
+  <div class="box box-info">
+  <div class="box-header with-border">
+  <div class="box-title">PA2MLA pending</div>
+  <div class="box-body">
+
+     <div class="tabpanel">
+       <!-- Nav tabs -->
+        <ul class="nav nav-tabs" role="tablist">
+        @foreach($info_pa2mla as $session => $sessinfo)
+          @php
+          $idwithnodot = str_replace(".","",$session);
+          @endphp
+           <li role="presentation" @if($loop->last) class="active" @endif>
+              <a href="#tab2-{{$idwithnodot}}" aria-controls="#tab2-{{$idwithnodot}}" role="tab" data-toggle="tab">{{ $session }}</a>
+           </li>
+
+        @endforeach
+        </ul>
+        <!-- Tab panes -->
+        <div class="tab-content">
+            <br>
+            @foreach($info_pa2mla as $session => $sessinfo)
+             @php
+             $idwithnodot = str_replace(".","",$session);
+             $totalpending = 0;
+             @endphp
+             <div  role="tabpanel"   @if($loop->last) class="tab-pane active" @else class="tab-pane" @endif id="tab2-{{$idwithnodot}}">
+                               
+             
+             <ol class="row">
+            
+             @foreach($sessinfo as $k => $pa)
+             
+                
+               <li class="col-sm-3 small">
+
+                    {{ $pa }} 
+            
+              </li>
+              
+              
+             
+             @endforeach
+            
+             </ol> 
+              
+            
+
+            </div>
+            @endforeach
+       </div>
+     </div>
+ </div> 
+ </div>
+ </div>
+
+
+
+
+
+
  
     <div class="box box-success">
     <div class="box-header with-border">
@@ -495,7 +558,7 @@
     <hr>
     @endif <!-- if( \Config::get('custom.show_legsectt')) -->
 
-    <div class="box box-success">
+    <div class="box box-info">
     <div class="box-header with-border">
     <div class="box-title">Submitted forms per session (Other Dept)</div>
      <div class="box-body">

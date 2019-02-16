@@ -1322,7 +1322,8 @@ class MyFormsController extends Controller
                 $allleavesentered = true;
                 $colleave = trim($overtime['worknature']);
 
-                if(false !== stripos($colleave,'SUPPL') ){ 
+                if(false !== stripos($colleave,'SUPPL') || 
+                   \Auth::user()->username == 'sn.watchnward' ){ 
                     //if supply, disregard leaves
                     $allleavesentered = true;
                 }
@@ -1350,7 +1351,7 @@ class MyFormsController extends Controller
                    //but if user has entered a range, it is ok
                    if($hasnums){ //should have digits
                     if(FALSE !== stripos($colleave, "to") ||
-                       FALSE !== stripos($colleave, "-") ||
+                       //FALSE !== stripos($colleave, "-") || // this can occur in dates itself.
                        FALSE !== stripos($colleave, "and") ||
                        FALSE !== stripos($colleave, "&") ||
                        FALSE !== stripos($colleave, "from") ){

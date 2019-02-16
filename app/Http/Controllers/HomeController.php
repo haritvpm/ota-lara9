@@ -95,6 +95,7 @@ class HomeController extends Controller
         $forms = null;
         $formsother = null;
         $forms_ex = null;
+        $forms_pa2mla = null;
 
         $session_array = array();
         $sessions = null;
@@ -112,7 +113,7 @@ class HomeController extends Controller
 
             $formsother = FormOther::with(['created_by','owned_by'])
                      ->whereIn('session',$session_array);
-
+           
 
            // $sessionforexemption = \App\Session::whereExemptionEntry('Yes')->latest()->first();
            // $forms_ex = Exemptionform::with(['created_by','owned_by'])
@@ -166,6 +167,8 @@ class HomeController extends Controller
             if($forms){
                 $forms = $forms->get();
             }
+
+           
         }
 
 
@@ -391,6 +394,57 @@ class HomeController extends Controller
         }
 */
 
+        //pa2mla
+
+        $info_pa2mla = array();
+
+        if( \Config::get('custom.show_legsectt') && auth()->user()->isAdmin()){
+            
+
+            $sessions  = \App\Session::whereshowInDatatable('Yes')
+                                            ->Orwhere('dataentry_allowed','Yes')
+                                            ->get();
+
+            $session_array = $sessions->pluck('name')->toarray();
+
+            foreach ($session_array as $key => $sessionval) {
+
+                if(!array_key_exists($sessionval, $info_pa2mla)){
+                    $info_pa2mla[$sessionval] = [];
+                }
+
+    
+                $pa2mla_pens = \DB::table('overtimes')
+                    ->join('forms', 'forms.id', '=', 'overtimes.form_id')
+                    ->where('forms.session', $sessionval)
+                    ->where('forms.creator', 'admin')
+                                      
+                    ->select('pen')->pluck('pen');
+                    
+                if(!empty($pa2mla_pens)){
+                     $pa2pending = \App\Employee::wherehas( 'designation', function($q) { 
+                        $q->where('designation','like',"%Personal Assistant to MLA%")
+                        ->orWhere('category','like',"%Admin Data Entry%");
+
+                            })
+                     ->wherenotin('pen',$pa2mla_pens)
+                     ->where('category','<>','Relieved')
+                     ->orderby('name','asc')->pluck('name');
+
+
+                     $info_pa2mla[$sessionval] = $pa2pending->toarray();
+                }   
+
+                
+            }
+
+
+            
+
+
+        }
+
+
         ///////////////////////////////////////
 
 
@@ -466,6 +520,8 @@ class HomeController extends Controller
 
             }
         }
+
+
 
        
        $marqueetext = \App\Setting::where('name','scrolltext')->pluck('value')->first();
@@ -593,8 +649,8 @@ class HomeController extends Controller
                                     'formcountother', 'formotherlastsubmitteddate', 'formotherlastsubmittedby', 'last_form_no',
                                     'marqueetext','pending_approval',
                                     'welcometext', 'amount_all_sectt', 'amount_approved_sectt', 
-                                    'amount_all', 'amount_approved','session_latest', 'timetaken'
-
+                                    'amount_all', 'amount_approved','session_latest', 'timetaken',
+                                    'info_pa2mla'
                                      ));
     }
 
