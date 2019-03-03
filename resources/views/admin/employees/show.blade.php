@@ -22,7 +22,7 @@
                         </tr>
                         <tr>
                             <th>@lang('quickadmin.employees.fields.designation')</th>
-                            <td field-key='designation'>{{ $employee->designation->designation or '' }}</td>
+                            <td field-key='designation'>{{ $employee->designation->designation ?? '' }}</td>
                         </tr>
                         <tr>
                             <th>Category</th>
@@ -35,12 +35,12 @@
                         @if(\Auth::user()->isAdmin())
                         <tr>
                             <th>@lang('quickadmin.employees.fields.categories')</th>
-                            <td field-key='categories'>{{ $employee->categories->category or '' }}</td>
+                            <td field-key='categories'>{{ $employee->categories->category ?? '' }}</td>
                         </tr>
                         
                         <tr>
                             <th>Added by</th>
-                            <td field-key='added_by'>{{ $employee->added_by->username or 'Admin' }}</td>
+                            <td field-key='added_by'>{{ $employee->added_by->username ?? 'Admin' }}</td>
                         </tr>
                         <tr>
                             <th>@lang('quickadmin.employees.fields.desig-display')</th>
