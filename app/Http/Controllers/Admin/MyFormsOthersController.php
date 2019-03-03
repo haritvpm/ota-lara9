@@ -267,9 +267,9 @@ class MyFormsOthersController extends Controller
      */
     public function create()
     {
-       /*  if (! Gate::allows('form_create')) {
+        if (! Gate::allows('my_form_others_create')) {
             return abort(401);
-        } */
+        } 
             
 
         return $this->preparevariablesandGotoView( false, null);
@@ -408,10 +408,10 @@ class MyFormsOthersController extends Controller
     //public function store(StoreFormsRequest $request)
     public function store(Request $request)
     {
-       /*  if (! Gate::allows('form_create')) {
+        if (! Gate::allows('my_form_others_create')) {
            // return abort(401);
            return response('Unauthorized.', 401);
-        } */
+        } 
         
         
         $myerrors = [];
@@ -471,9 +471,9 @@ class MyFormsOthersController extends Controller
      */
     public function edit($id)
     {
-        /* if (! Gate::allows('form_edit')) {
+        if (! Gate::allows('my_form_others_edit')) {
             return abort(401);
-        }    */     
+        }      
         
         $form = FormOther::findOrFail($id);
 
@@ -492,9 +492,9 @@ class MyFormsOthersController extends Controller
      */
     public function update(Request $request, $id)
     {
-        /* if (! Gate::allows('form_edit')) {
+         if (! Gate::allows('my_form_others_edit')) {
             return abort(401);
-        } */
+        }
 
         $form = FormOther::findOrFail($id);
 
@@ -597,9 +597,10 @@ class MyFormsOthersController extends Controller
      */
     public function show($id)
     {
-       /*  if (! Gate::allows('form_view')) {
+        if (! Gate::allows('my_form_others_access')) {
             return abort(401);
-        } */
+        }
+
         $overtimes = \App\OvertimeOther::with("employeesother")->where('form_id', $id)->get();
 
 
@@ -717,9 +718,9 @@ class MyFormsOthersController extends Controller
      */
     public function destroy($id)
     {
-       /*  if (! Gate::allows('form_delete')) {
+        if (! Gate::allows('my_form_others_edit')) {
             return abort(401);
-        } */
+        } 
         $form = FormOther::findOrFail($id);
         
         OvertimeOther::where('form_id', $form->id)->delete();
@@ -732,9 +733,9 @@ class MyFormsOthersController extends Controller
 
     public function create_sitting()
     {
-       /*  if (! Gate::allows('form_create')) {
+        if (! Gate::allows('my_form_others_create')) {
             return abort(401);
-        } */
+        } 
           
         return $this->preparevariablesandGotoView(true, null);
        
@@ -835,10 +836,10 @@ class MyFormsOthersController extends Controller
    
     public function store_sitting(Request $request)
     {
-       /*  if (! Gate::allows('form_create')) {
+        if (! Gate::allows('my_form_others_create')) {
            // return abort(401);
            return response('Unauthorized.', 401);
-        } */
+        } 
                 
         $myerrors = [];
 

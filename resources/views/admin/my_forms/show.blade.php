@@ -506,6 +506,7 @@ th{
 
 <script type="text/javascript">
  var editurl = "{{ route('admin.my_forms.edit',[$form->id]) }}";
+ var deleteurl = "{{ route('admin.my_forms.destroy',[$form->id]) }}";
 
   window.addEventListener("keydown", function (event) {
   if (event.defaultPrevented) {
@@ -515,9 +516,16 @@ th{
   var handled = false;
   if (event.key !== undefined) {
     // Handle the event with KeyboardEvent.key and set handled true.
-    if(event.key == 'F9'){
-        //vm.sendbackClick();
+    if(event.key == 'F9' ){
+       
         document.location.href= editurl
+        handled = true;
+    } else if(event.key == 'F12'){
+       
+        if(confirm('Are you sure you want to delete this entire form?')){
+            document.location.href= deleteurl
+        }
+
         handled = true;
     } else if(event.key == 'F8'){
        // vm.sendbackClick();

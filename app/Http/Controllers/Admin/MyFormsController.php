@@ -522,18 +522,18 @@ class MyFormsController extends Controller
      */
     public function create()
     {
-       /*  if (! Gate::allows('form_create')) {
+        if (! Gate::allows('my_form_create')) {
             return abort(401);
-        } */
+        } 
     
         return $this->preparevariablesandGotoView( false, null);
        
     }
     public function create_copy($id)
     {
-        /* if (! Gate::allows('form_edit')) {
+        if (! Gate::allows('my_form_edit')) {
             return abort(401);
-        }    */     
+        }  
         
         //$form = Form::findOrFail($id);
       
@@ -743,10 +743,10 @@ class MyFormsController extends Controller
     //public function store(StoreFormsRequest $request)
     public function store(Request $request)
     {
-       /*  if (! Gate::allows('form_create')) {
+        if (! Gate::allows('my_form_create')) {
            // return abort(401);
            return response('Unauthorized.', 401);
-        } */
+        }
         
         
         $myerrors = [];
@@ -807,9 +807,9 @@ class MyFormsController extends Controller
      */
     public function edit($id)
     {
-        /* if (! Gate::allows('form_edit')) {
+         if (! Gate::allows('my_form_edit')) {
             return abort(401);
-        }    */     
+        }       
         
         $form = Form::findOrFail($id);
 
@@ -828,9 +828,9 @@ class MyFormsController extends Controller
      */
     public function update(Request $request, $id)
     {
-        /* if (! Gate::allows('form_edit')) {
+        if (! Gate::allows('my_form_edit')) {
             return abort(401);
-        } */
+        }
 
         $form = Form::findOrFail($id);
 
@@ -930,9 +930,12 @@ class MyFormsController extends Controller
      */
     public function show($id)
     {
-       /*  if (! Gate::allows('form_view')) {
+        if (! Gate::allows('my_form_access')) {
             return abort(401);
-        } */
+        } 
+
+
+
         //$overtimes = \App\Overtime::where('form_id', $id)->get();
 
         $form = Form::with(['created_by','owned_by', 'overtimes'])->findOrFail($id);
@@ -1146,10 +1149,19 @@ class MyFormsController extends Controller
      */
     public function destroy($id)
     {
-       /*  if (! Gate::allows('form_delete')) {
+        if (! Gate::allows('my_form_delete')) {
             return abort(401);
-        } */
+        } 
+
         $form = Form::findOrFail($id);
+
+        if( ($form->owner != \Auth::user()->username) && !\Auth::user()->isAdmin())
+        {
+            return abort(401);
+        }
+
+
+        
         
         Overtime::where('form_id', $form->id)->delete();
 
@@ -1161,9 +1173,9 @@ class MyFormsController extends Controller
 
     public function create_sitting()
     {
-       /*  if (! Gate::allows('form_create')) {
+        if (! Gate::allows('my_form_create')) {
             return abort(401);
-        } */
+        } 
           
         return $this->preparevariablesandGotoView(true, null);
        
@@ -1430,10 +1442,10 @@ class MyFormsController extends Controller
    
     public function store_sitting(Request $request)
     {
-       /*  if (! Gate::allows('form_create')) {
+         if (! Gate::allows('my_form_create')) {
            // return abort(401);
            return response('Unauthorized.', 401);
-        } */
+        } 
                 
         $myerrors = [];
 
@@ -1745,9 +1757,9 @@ class MyFormsController extends Controller
 
     public function update_sitting(Request $request, $id)
     {
-        /* if (! Gate::allows('form_edit')) {
+        if (! Gate::allows('my_form_edit')) {
             return abort(401);
-        } */
+        } 
 
         $form = Form::findOrFail($id);
 

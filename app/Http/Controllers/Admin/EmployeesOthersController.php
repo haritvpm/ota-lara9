@@ -63,7 +63,8 @@ class EmployeesOthersController extends Controller
             $table->setRowAttr([
                 'data-entry-id' => '{{$id}}',
             ]);
-            $table->addColumn('massDelete', '&nbsp;');
+            //$table->addColumn('massDelete', '&nbsp;');
+            $table->addColumn('massDelete', '');
             $table->addColumn('actions', '&nbsp;')->rawColumns(['actions']);;
             $table->editColumn('actions', function ($row) use ($template) {
                 $gateKey  = 'employees_other_';

@@ -177,16 +177,16 @@ class AuthServiceProvider extends ServiceProvider
             return in_array($user->role_id, [1]);
         });
         Gate::define('form_create', function ($user) {
-            return in_array($user->role_id, [1]);
+            return in_array($user->role_id, [1,2]);
         });
         Gate::define('form_edit', function ($user) {
-            return in_array($user->role_id, [1]);
+            return in_array($user->role_id, [1,2]);
         });
         Gate::define('form_view', function ($user) {
-            return in_array($user->role_id, [1]);
+            return in_array($user->role_id, [1,2]);
         });
         Gate::define('form_delete', function ($user) {
-            return in_array($user->role_id, [1]);
+            return in_array($user->role_id, [1,2]);
         });
 
         // Auth gates for: Overtimes
@@ -211,6 +211,19 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('my_form_access', function ($user) {
             return in_array($user->role_id, [1,2,5]);
         });
+        Gate::define('my_form_create', function ($user) {
+            return in_array($user->role_id, [2]);
+        });
+        Gate::define('my_form_edit', function ($user) {
+            return in_array($user->role_id, [1,2]);
+        });
+        Gate::define('my_form_delete', function ($user) {
+            return in_array($user->role_id, [1,2]);
+        });
+
+
+        
+
         // Auth gates for: My forms
         Gate::define('pa2mlaform_access', function ($user) {
             return in_array($user->role_id, [1]);
@@ -256,6 +269,13 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('my_form_others_access', function ($user) {
             return in_array($user->role_id, [1,3]);
         });
+        Gate::define('my_form_others_create', function ($user) {
+            return in_array($user->role_id, [3]);
+        });
+        Gate::define('my_form_others_edit', function ($user) {
+            return in_array($user->role_id, [1,3]);
+        });
+
 
         // preset_access
         Gate::define('preset_access', function ($user) {
