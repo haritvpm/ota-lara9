@@ -11,6 +11,12 @@ return [
         //'name' => env('APP_URL'),
         ///'name' => 'backups',
         'name' => 'OTA-Claims',
+        //'name' => 'OTA',
+
+        /*'backpack_flags' => [
+            '--only-db' => true, 
+            '--disable-notifications'=> true,
+        ],*/
 
         'source' => [
 
@@ -31,7 +37,7 @@ return [
                 'exclude' => [
                     base_path('vendor'),
                     base_path('node_modules'),
-                    storage_path(),
+                   // storage_path(),
                 ],
 
                 /*
@@ -49,7 +55,12 @@ return [
             ],
         ],
 
+        'database_dump_compressor' => null,
+
+
         'destination' => [
+
+            'filename_prefix' => '',
 
             /*
              * The disk names on which the backups will be stored.
@@ -58,6 +69,11 @@ return [
                 'local',
             ],
         ],
+
+         /*
+         * The directory where the temporary files will be stored.
+         */
+       // 'temporary_directory' => storage_path('app/backup-temp'),
     ],
 
     'cleanup' => [
@@ -129,11 +145,13 @@ return [
 
     'notifications' => [
 
+       'handler' =>  Spatie\Backup\Notifications\Notifier::class,
         /*
          * This class will be used to send all notifications.
          */
        
-        'handler' =>  Spatie\Backup\Notifications\Notifier::class,
+         
+
 
         /*
          * Here you can specify the ways you want to be notified when certain

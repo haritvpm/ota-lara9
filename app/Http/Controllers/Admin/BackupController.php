@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Admin;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Artisan;
+
 use Log;
 use Storage;
 use Carbon\Carbon;
@@ -16,13 +17,20 @@ class BackupController extends Controller
 {
     public function index()
     {
+        if (!count(config('laravel-backup.backup.destination.disks'))) {
+            dd('backpack::backup.no_disks_configured');
+        }
+
         $disk = Storage::disk(config('laravel-backup.backup.destination.disks')[0]);
+
 
         //$files = $disk->allFiles();
 
-        //dd(config('laravel-backup.backup.name'));
+        //dd(storage_path('app/backup-temp'));
         $files = $disk->files(config('laravel-backup.backup.name'));
         $backups = [];
+
+        // dd($files);
 
         // make an array of backup files, with their filesize and creation date
         foreach ($files as $f) {
@@ -59,11 +67,15 @@ class BackupController extends Controller
              $m->to('harirs@gmail.com', 'Balu')->subject('Your Reminder!');
          });*/
 
-        try {
+        try 
+        {
             // start the backup process
             //well notifications was not working, so disable it
-            Artisan::call('backup:run',['--only-db' => true,
-             '--disable-notifications'  => true]);
+             $exitCode = Artisan::call('backup:run',['--only-db' => true, '--disable-notifications'  => true]);
+
+             
+          //  Artisan::call('backup:run');
+
             $output = Artisan::output();
 
             // log the results
@@ -71,8 +83,10 @@ class BackupController extends Controller
             // return the results as a response to the ajax call
             //Alert::success('New backup created');
             return redirect()->back();
-        } catch (Exception $e) {
-            Flash::error($e->getMessage());
+        } 
+        catch (Exception $e) 
+        {
+            //Flash::error($e->getMessage());
             return redirect()->back();
         }
 
