@@ -22,7 +22,7 @@
                         </tr>
                         <tr>
                             <th>@lang('quickadmin.calenders.fields.session')</th>
-                            <td field-key='session'>{{ $calender->session->name or '' }}</td>
+                            <td field-key='session'>{{ $calender->session->name ?? '' }}</td>
                         </tr>
                     </table>
                 </div>

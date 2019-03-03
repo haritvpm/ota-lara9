@@ -53,7 +53,7 @@
                                 
                                 <td field-key='name'>{{ $employees_other->srismt }}. {{ $employees_other->name }}</td>
                                 <td field-key='pen'>{{ $employees_other->pen }}</td>
-                                <td field-key='designation'>{{ $employees_other->designation->designation or '' }}</td>
+                                <td field-key='designation'>{{ $employees_other->designation->designation ?? '' }}</td>
                                 <!-- <td field-key='department_idno'>{{ $employees_other->department_idno }}</td> -->
                                 @if(\Auth::user()->isAdmin())
                                 <td field-key='added_by'>{{ $employees_other->added_by }}</td>

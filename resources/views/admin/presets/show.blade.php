@@ -15,7 +15,7 @@
                 @if(Auth::user()->isAdmin())   
                
                     User : 
-                    {{ $preset->user->Title or '' }} <br>
+                    {{ $preset->user->Title ?? '' }} <br>
                
                 @endif
                Preset Name : 

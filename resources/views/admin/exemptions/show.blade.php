@@ -26,7 +26,7 @@
                         </tr>
                         <tr>
                             <th>@lang('quickadmin.exemptions.fields.exemptionform')</th>
-                            <td field-key='exemptionform'>{{ $exemption->exemptionform->session or '' }}</td>
+                            <td field-key='exemptionform'>{{ $exemption->exemptionform->session ?? '' }}</td>
                         </tr>
                     </table>
                 </div>

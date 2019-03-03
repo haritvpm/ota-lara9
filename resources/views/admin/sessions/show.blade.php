@@ -70,7 +70,7 @@
                 <tr data-entry-id="{{ $calender->id }}">
                     <td field-key='date'>{{ $calender->date }}</td>
                                 <td field-key='day_type'>{{ $calender->day_type }}</td>
-                                <td field-key='session'>{{ $calender->session->name or '' }}</td>
+                                <td field-key='session'>{{ $calender->session->name ?? '' }}</td>
                                                                 <td>
                                     @can('calender_view')
                                     <a href="{{ route('admin.calenders.show',[$calender->id]) }}" class="btn btn-xs btn-primary">@lang('quickadmin.qa_view')</a>

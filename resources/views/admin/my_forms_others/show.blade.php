@@ -75,7 +75,7 @@ th{
                         <td field-key='date_from'>From {{$form->date_from}} to {{$form->date_to}}</td>
                         @else
                            <th>@lang('quickadmin.forms.fields.duty-date')</th>
-                           <td field-key='duty_date'>{{ $form->duty_date }} ({{$descriptionofday  or $daytype}})</td>
+                           <td field-key='duty_date'>{{ $form->duty_date }} ({{$descriptionofday  ?? $daytype}})</td>
                         @endif
 
                     </tr>

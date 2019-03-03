@@ -49,7 +49,7 @@
                 <tr data-entry-id="{{ $employee->id }}">
                     <td field-key='name'>{{ $employee->name }}</td>
                                 <td field-key='pen'>{{ $employee->pen }}</td>
-                                <td field-key='designation'>{{ $employee->designation->designation or '' }}</td>
+                                <td field-key='designation'>{{ $employee->designation->designation ?? '' }}</td>
                                                                 <td>
                                     @can('employee_view')
                                     <a href="{{ route('admin.employees.show',[$employee->id]) }}" class="btn btn-xs btn-primary">@lang('quickadmin.qa_view')</a>

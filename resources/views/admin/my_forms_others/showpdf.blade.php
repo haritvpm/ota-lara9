@@ -43,7 +43,7 @@
                         Period:  From {{$form->date_from}} to {{$form->date_to}}
                         @else
                            
-                        @lang('quickadmin.forms.fields.duty-date'):  {{ $form->duty_date }} ({{ $descriptionofday  or $daytype}})
+                        @lang('quickadmin.forms.fields.duty-date'):  {{ $form->duty_date }} ({{ $descriptionofday  ?? $daytype}})
                         
                         @endif
                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                  

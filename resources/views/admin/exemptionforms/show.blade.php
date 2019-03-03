@@ -75,7 +75,7 @@
                     <td field-key='pen'>{{ $exemption->pen }}</td>
                                 <td field-key='designation'>{{ $exemption->designation }}</td>
                                 <td field-key='worknature'>{{ $exemption->worknature }}</td>
-                                <td field-key='exemptionform'>{{ $exemption->exemptionform->session or '' }}</td>
+                                <td field-key='exemptionform'>{{ $exemption->exemptionform->session ?? '' }}</td>
                                                                 <td>
                                     @can('view')
                                     <a href="{{ route('exemptions.show',[$exemption->id]) }}" class="btn btn-xs btn-primary">@lang('quickadmin.qa_view')</a>

@@ -31,7 +31,7 @@
                         </tr>
                         <tr>
                             <th>@lang('quickadmin.overtimes.fields.form')</th>
-                            <td field-key='form'>{{ $overtime->form->session or '' }}</td>
+                            <td field-key='form'>{{ $overtime->form->session ?? '' }}</td>
                         </tr>
                         <tr>
                             <th>@lang('quickadmin.forms.fields.creator')</th>

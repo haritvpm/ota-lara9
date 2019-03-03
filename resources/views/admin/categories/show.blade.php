@@ -51,11 +51,11 @@
                 <tr data-entry-id="{{ $employee->id }}">
                     <td field-key='name'>{{ $employee->name }}</td>
                                 <td field-key='pen'>{{ $employee->pen }}</td>
-                                <td field-key='designation'>{{ $employee->designation->designation or '' }}</td>
+                                <td field-key='designation'>{{ $employee->designation->designation ?? '' }}</td>
                                 <td field-key='category'>{{ $employee->category }}</td>
-                                <td field-key='added_by'>{{ $employee->added_by->username or '' }}</td>
+                                <td field-key='added_by'>{{ $employee->added_by->username ?? '' }}</td>
                                 <td field-key='srismt'>{{ $employee->srismt }}</td>
-                                <td field-key='categories'>{{ $employee->categories->category or '' }}</td>
+                                <td field-key='categories'>{{ $employee->categories->category ?? '' }}</td>
                                 <td field-key='desig_display'>{{ $employee->desig_display }}</td>
                                                                 <td>
                                     @can('employee_view')

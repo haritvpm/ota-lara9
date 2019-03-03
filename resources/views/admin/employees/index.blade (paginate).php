@@ -49,13 +49,13 @@
                                
                                 <td field-key='name'>{{ $employee->srismt }}. {{ $employee->name }}</td>
                                 <td field-key='pen'>{{ $employee->pen }}</td>
-                                <td field-key='designation'>{{ $employee->designation->designation or '' }}</td>
+                                <td field-key='designation'>{{ $employee->designation->designation ?? '' }}</td>
 
                                 <td field-key='category'>{{ $employee->category }}</td>
 
                                 @if(\Auth::user()->isAdmin())
                                 <td field-key='id'>{{ $employee->id }}</td>
-                                <td field-key='categories'>{{ $employee->categories->category or '' }}</td>
+                                <td field-key='categories'>{{ $employee->categories->category ?? '' }}</td>
                                 <td field-key='added_by'>{{ $employee->added_by }}</td>
                                 <td field-key='desig_display'>{{ $employee->desig_display }}</td>
 

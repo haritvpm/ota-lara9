@@ -36,7 +36,7 @@
                             <tr data-entry-id="{{ $routing->id }}">
                               
 
-                                <td field-key='user'>{{ $routing->user->username or '' }}</td>
+                                <td field-key='user'>{{ $routing->user->username ?? '' }}</td>
                                 <td field-key='route'>{{ $routing->route }}</td>
                                 <td field-key='last_forwarded_to'>{{ $routing->last_forwarded_to }}</td>
                                                                 <td>

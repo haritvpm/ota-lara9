@@ -22,7 +22,7 @@
                         </tr>
                         <tr>
                             <th>@lang('quickadmin.users.fields.role')</th>
-                            <td field-key='role'>{{ $user->role->title or '' }}</td>
+                            <td field-key='role'>{{ $user->role->title ?? '' }}</td>
                         </tr>
                         <tr>
                             <th>@lang('quickadmin.users.fields.username')</th>
@@ -59,7 +59,7 @@
         @if (count($routings) > 0)
             @foreach ($routings as $routing)
                 <tr data-entry-id="{{ $routing->id }}">
-                    <td field-key='user'>{{ $routing->user->username or '' }}</td>
+                    <td field-key='user'>{{ $routing->user->username ?? '' }}</td>
 <td field-key='name'>{{ isset($routing->user) ? $routing->user->Title : '' }}</td>
                                 <td field-key='route'>{{ $routing->route }}</td>
                                                                 <td>

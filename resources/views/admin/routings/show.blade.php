@@ -14,7 +14,7 @@
                     <table class="table table-bordered table-striped">
                         <tr>
                             <th>@lang('quickadmin.routing.fields.user')</th>
-                            <td field-key='user'>{{ $routing->user->username or '' }}</td>
+                            <td field-key='user'>{{ $routing->user->username ?? '' }}</td>
                         </tr>
                         <tr>
                             <th>@lang('quickadmin.routing.fields.route')</th>

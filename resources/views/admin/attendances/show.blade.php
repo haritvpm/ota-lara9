@@ -14,11 +14,11 @@
                     <table class="table table-bordered table-striped">
                         <tr>
                             <th>@lang('quickadmin.attendance.fields.session')</th>
-                            <td field-key='session'>{{ $attendance->session->name or '' }}</td>
+                            <td field-key='session'>{{ $attendance->session->name ?? '' }}</td>
                         </tr>
                         <tr>
                             <th>@lang('quickadmin.attendance.fields.employee')</th>
-                            <td field-key='employee'>{{ $attendance->employee->name or '' }}</td>
+                            <td field-key='employee'>{{ $attendance->employee->name ?? '' }}</td>
                         </tr>
                         <tr>
                             <th>@lang('quickadmin.attendance.fields.dates-absent')</th>

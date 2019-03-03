@@ -26,7 +26,7 @@
                         </tr>
                         <tr>
                             <th>@lang('quickadmin.employees-other.fields.designation')</th>
-                            <td field-key='designation'>{{ $employees_other->designation->designation or '' }}</td>
+                            <td field-key='designation'>{{ $employees_other->designation->designation ?? '' }}</td>
                         </tr>
                         <!-- <tr>
                             <th>@lang('quickadmin.employees-other.fields.department-idno')</th>
@@ -36,7 +36,7 @@
                         @if(\Auth::user()->isAdmin())
                         <tr>
                             <th>@lang('quickadmin.employees-other.fields.added-by')</th>
-                            <td field-key='added_by'>{{ $employees_other->added_by->username or '' }}</td>
+                            <td field-key='added_by'>{{ $employees_other->added_by->username ?? '' }}</td>
                         </tr>
                         @endif
 

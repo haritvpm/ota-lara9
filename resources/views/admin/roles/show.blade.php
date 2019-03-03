@@ -46,7 +46,7 @@
                 <tr data-entry-id="{{ $user->id }}">
                     <td field-key='name'>{{ $user->Title }}</td>
                                 <td field-key='email'>{{ $user->email }}</td>
-                                <td field-key='role'>{{ $user->role->title or '' }}</td>
+                                <td field-key='role'>{{ $user->role->title ?? '' }}</td>
                                 <td field-key='username'>{{ $user->username }}</td>
                                                                 <td>
                                     @can('user_view')

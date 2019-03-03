@@ -67,7 +67,7 @@ th{
                         </td>
                         @else
                            <th>@lang('quickadmin.forms.fields.duty-date')</th>
-                           <td field-key='duty_date'>{{ $form->duty_date }} ({{ $descriptionofday  or $daytype}})
+                           <td field-key='duty_date'>{{ $form->duty_date }} ({{ $descriptionofday  ?? $daytype}})
                              <span style="display:inline-block; width: 20;"></span>
                          <strong>@lang('quickadmin.forms.fields.overtime-slot')</strong> 
                         {{ $form->overtime_slot }}
@@ -190,7 +190,7 @@ th{
                     <td class="text-center" field-key='count'>{{ $overtime->count }}</td>
                     <td field-key='worknature'> <small> {{ $overtime->worknature }} </small> </td>
                     @else
-                    <td field-key='worknature'> <small> {{ $overtime->worknature or 'assly rel work'}}</small></td>
+                    <td field-key='worknature'> <small> {{ $overtime->worknature ?? 'assly rel work'}}</small></td>
                     @endif
                     
 
