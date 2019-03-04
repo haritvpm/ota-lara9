@@ -35,6 +35,8 @@
 
 <!-- also change in layouts.app.blade -->
 
+
+
 if(!\Config::get('custom.vps'))
 <!-- @if(1) -->
 <link href="{{ URL::asset('css/ionicons.min.css') }}" rel="stylesheet">
@@ -44,17 +46,6 @@ if(!\Config::get('custom.vps'))
 <!-- this is needed for jquery datepicker. we use dp in admin form edit -->
 <!-- <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.3/themes/smoothness/jquery-ui.css"> -->
 <link href="{{ URL::asset('css/jquery-ui.min.css') }}" rel="stylesheet">
-
-<!-- <link rel="stylesheet" href="//cdn.datatables.net/1.10.9/css/jquery.dataTables.min.css"/> -->
-<link href="{{ URL::asset('css/jquery.dataTables.min.css') }}" rel="stylesheet">
-
-<!-- <link rel="stylesheet" href="https://cdn.datatables.net/select/1.2.0/css/select.dataTables.min.css"/> -->
-<link href="{{ URL::asset('css/select.dataTables.min.css') }}" rel="stylesheet">
-
-
-<!-- <link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.0.0/dist/vue-multiselect.min.css"> -->
-<!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet" /> -->
-<link href="{{ URL::asset('css/vue-multiselect.min.css') }}" rel="stylesheet">
 
 
 <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.5.0/css/bootstrap-datepicker.standalone.min.css"/> -->
@@ -75,14 +66,6 @@ if(!\Config::get('custom.vps'))
 <!-- this is needed for jquery datepicker. we use dp in admin form edit -->
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.3/themes/smoothness/jquery-ui.css">
 
-<link rel="stylesheet" href="//cdn.datatables.net/1.10.9/css/jquery.dataTables.min.css"/>
-
-<link rel="stylesheet" href="https://cdn.datatables.net/select/1.2.0/css/select.dataTables.min.css"/>
-
-
-<link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.0.0/dist/vue-multiselect.min.css">
-<!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet" /> -->
-
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.5.0/css/bootstrap-datepicker.standalone.min.css"/>
 
@@ -97,11 +80,20 @@ if(!\Config::get('custom.vps'))
 @endif
 
 
-
-
+<!-- <link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.0.0/dist/vue-multiselect.min.css"> -->
+<!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet" /> -->
+<link href="{{ URL::asset('css/vue-multiselect.min.css') }}" rel="stylesheet">
+<!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet" /> -->
 
 <!-- <link rel="stylesheet" href="//cdn.datatables.net/buttons/1.2.4/css/buttons.dataTables.min.css"/> -->
 <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-ui-timepicker-addon/1.4.5/jquery-ui-timepicker-addon.min.css"/> -->
+
+
+
+<!-- <link rel="stylesheet" href="//cdn.datatables.net/1.10.9/css/jquery.dataTables.min.css"/> -->
+<link href="{{ URL::asset('css/jquery.dataTables.min.css') }}" rel="stylesheet">
+<!-- <link rel="stylesheet" href="https://cdn.datatables.net/select/1.2.0/css/select.dataTables.min.css"/> -->
+<link href="{{ URL::asset('css/select.dataTables.min.css') }}" rel="stylesheet">
 
 
 
