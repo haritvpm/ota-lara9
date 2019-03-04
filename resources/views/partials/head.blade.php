@@ -10,8 +10,6 @@
 <meta http-equiv="Content-type"
       content="text/html; charset=utf-8">
 
-<meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval' http://cdnjs.cloudflare.com ">
-
 
 <!-- Tell the browser to be responsive to screen width -->
 <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
@@ -35,10 +33,8 @@
 
 <!-- also change in layouts.app.blade -->
 
+if(\Config::get('custom.vps'))
 
-
-if(!\Config::get('custom.vps'))
-<!-- @if(1) -->
 <link href="{{ URL::asset('css/ionicons.min.css') }}" rel="stylesheet">
 
 <link href="{{ url('adminlte/css/skins/skin-blue.min.css') }}" rel="stylesheet">
