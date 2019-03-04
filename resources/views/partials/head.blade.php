@@ -33,7 +33,7 @@
 
 <!-- also change in layouts.app.blade -->
 
-if(\Config::get('custom.vps'))
+@if(!\Config::get('custom.vps'))
 
 <link href="{{ URL::asset('css/ionicons.min.css') }}" rel="stylesheet">
 
