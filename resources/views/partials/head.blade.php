@@ -19,16 +19,6 @@
 
 <link rel="stylesheet"
       href="{{ url('quickadmin/css') }}/font-awesome.min.css"/>
-@if(\Config::get('custom.vps'))
-<!-- Ionicons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
-
-@else
-
-<link href="{{ URL::asset('css/ionicons.min.css') }}" rel="stylesheet">
-
-@endif
-
 
 <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
 <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -44,7 +34,11 @@
 <link href="{{ url('adminlte/css/custom.css') }}" rel="stylesheet">
 
 <!-- also change in layouts.app.blade -->
-@if(!\Config::get('custom.vps'))
+
+<!-- if(!\Config::get('custom.vps')) -->
+@if(1)
+<link href="{{ URL::asset('css/ionicons.min.css') }}" rel="stylesheet">
+
 <link href="{{ url('adminlte/css/skins/skin-blue.min.css') }}" rel="stylesheet">
 
 <!-- this is needed for jquery datepicker. we use dp in admin form edit -->
@@ -73,6 +67,10 @@
 
 
 @else
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
+
+
 <link href="{{ url('adminlte/css/skins/skin-yellow.min.css') }}" rel="stylesheet">
 <!-- this is needed for jquery datepicker. we use dp in admin form edit -->
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.3/themes/smoothness/jquery-ui.css">
@@ -94,6 +92,8 @@
 
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/3.1.4/css/bootstrap-datetimepicker.min.css">
+
+
 @endif
 
 
