@@ -35,8 +35,8 @@
 
 <!-- also change in layouts.app.blade -->
 
-<!-- if(!\Config::get('custom.vps')) -->
-@if(1)
+if(!\Config::get('custom.vps'))
+<!-- @if(1) -->
 <link href="{{ URL::asset('css/ionicons.min.css') }}" rel="stylesheet">
 
 <link href="{{ url('adminlte/css/skins/skin-blue.min.css') }}" rel="stylesheet">
