@@ -73,20 +73,20 @@ class BackupController extends Controller
             //well notifications was not working, so disable it
              $exitCode = Artisan::call('backup:run',['--only-db' => true, '--disable-notifications'  => true]);
 
-             
+
           //  Artisan::call('backup:run');
 
             $output = Artisan::output();
 
             // log the results
-            Log::info("Backpack\BackupManager -- new backup started from admin interface \r\n" . $output);
+           // Log::info("Backpack\BackupManager -- new backup started from admin interface \r\n" . $output);
             // return the results as a response to the ajax call
             //Alert::success('New backup created');
             return redirect()->back();
         } 
         catch (Exception $e) 
         {
-            //Flash::error($e->getMessage());
+            Flash::error($e->getMessage());
             return redirect()->back();
         }
 
