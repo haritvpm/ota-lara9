@@ -55,12 +55,12 @@ return [
             ],
         ],
 
-        'database_dump_compressor' => null,
+       
 
 
         'destination' => [
 
-            'filename_prefix' => '',
+        
 
             /*
              * The disk names on which the backups will be stored.
@@ -73,7 +73,7 @@ return [
          /*
          * The directory where the temporary files will be stored.
          */
-       // 'temporary_directory' => storage_path('app/backup-temp'),
+       'temporary_directory' => storage_path('app/backup-temp'),
     ],
 
     'cleanup' => [

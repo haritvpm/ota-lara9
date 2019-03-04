@@ -619,6 +619,8 @@ class EmployeesController extends Controller
 
             $penname = $pen . " - " . $name;
 
+            array_push($pensinpdf,$pen);
+
             //see if this designation is valid
             if(!$designations->has($desig)){
               array_push($myerrors, array('Desig not found' , '' ,$desig ));
@@ -626,8 +628,7 @@ class EmployeesController extends Controller
               continue;
             }
 
-            array_push($pensinpdf,$pen);
-
+            
             $emp =  Employee::with('designation')
                     ->where('pen',  $pen )->first();
 
@@ -715,6 +716,8 @@ class EmployeesController extends Controller
                array_push($added, array('New Emp Added' , $penname , $desig));
             }
         }
+
+        //For the pens NOT in spark pdf, set to relieved.
 
         if(count($pensinpdf)){
 

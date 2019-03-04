@@ -140,7 +140,7 @@ date_default_timezone_set('Asia/Kolkata');
     
      <p class="navbar-text">
       <small><span class="text-muted">
-                Last Updated: 18-02-19.&nbsp;
+                Last Updated: 04-03-19.&nbsp;
                  @if(\Config::get('custom.vps_name'))
                  @ {{\Config::get('custom.vps_name')}} &nbsp;
                  @endif
