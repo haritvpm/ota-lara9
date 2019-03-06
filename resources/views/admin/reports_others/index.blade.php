@@ -30,7 +30,7 @@
 </style>
 
 
-    <h3 class="page-title hidden-print">Reports</h3>
+    <h3 class="page-title hidden-print">Reports (Other Dept)</h3>
     
     <div class="panel panel-default hidden-print" id="app">
         <div class="panel-heading">

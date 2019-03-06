@@ -225,7 +225,7 @@
             @endif
 
             @can('search_other_access')
-            <li class="{{ $request->segment(2) == 'reports' ? 'active' : '' }}">
+            <li class="{{ $request->segment(2) == 'reports_others' ? 'active' : '' }}">
                 <a href="{{ route('admin.reports_others.index') }}">
                     <i class="fa fa-print"></i>
                     <span class="title">Reports OtherDept</span>
