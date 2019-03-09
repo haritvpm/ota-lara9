@@ -131,9 +131,10 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
 
     Route::post('presets_mass_destroy', ['uses' => 'Admin\PresetsController@massDestroy', 'as' => 'presets.mass_destroy']);
 
- 
+     Route::get('designations_others/download_desig','Admin\DesignationsOthersController@download_desig');
     Route::resource('designations_others', 'Admin\DesignationsOthersController');
     Route::post('designations_others_mass_destroy', ['uses' => 'Admin\DesignationsOthersController@massDestroy', 'as' => 'designations_others.mass_destroy']);
+
 
     Route::get('employees_others/clearold', 'Admin\EmployeesOthersController@clearold');
     

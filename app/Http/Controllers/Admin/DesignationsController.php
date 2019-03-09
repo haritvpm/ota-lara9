@@ -158,7 +158,7 @@ class DesignationsController extends Controller
 
         $desig = \App\Designation::orderby('rate','desc')->orderby('id','asc')->get();
 
-        $filename =  'sectt_designation_rates-'.  date('Y-m-d') . '.csv';
+        $filename =  'sectt_designation_table-'.  date('Y-m-d') . '.csv';
         
         $csvExporter = new \Laracsv\Export();
 

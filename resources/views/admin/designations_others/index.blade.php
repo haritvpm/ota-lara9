@@ -6,6 +6,12 @@
     @can('designations_other_create')
     <p>
         <a href="{{ route('admin.designations_others.create') }}" class="btn btn-success">@lang('quickadmin.qa_add_new')</a>
+
+         @if(\Auth::user()->isAdmin())
+         <a href="#" class="btn btn-warning" style="margin-left:5px;" data-toggle="modal" data-target="#myModal">@lang('quickadmin.qa_csvImport')</a>
+        @include('csvImport.modal', ['model' => 'DesignationsOther'])
+        @endif
+        
         
     </p>
     @endcan
@@ -77,6 +83,21 @@
             </table>
         </div>
     </div>
+
+
+ @if(\Auth::user()->isAdmin())
+ <br>
+
+        <form action="{{url('admin/designations_others/download_desig')}}" method="get" class="form-inline">
+            Download Designations (OD)
+            <!-- <input class="form-control" type="submit" value="Filter" rel="filter"> -->
+            <button type="submit" class="btn btn-primary" rel="filter"><span class="glyphicon glyphicon-save"></span> </button>
+
+        </form>
+
+   
+@endif
+
 @stop
 
 @section('javascript') 

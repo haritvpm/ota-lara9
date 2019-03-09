@@ -162,4 +162,19 @@ class DesignationsOthersController extends Controller
         }
     }
 
+    public function download_desig()
+    {        
+
+        $desig = \App\DesignationsOther::orderby('rate','desc')->orderby('id','asc')->get();
+
+        $filename =  'otherdept_designation_table-'.  date('Y-m-d') . '.csv';
+        
+        $csvExporter = new \Laracsv\Export();
+
+        $csvExporter->build($desig, [ 'id','designation', 'max_persons' , 'user_id' , 'rate' ]);
+
+        $csvExporter->download($filename);
+
+    }
+
 }
