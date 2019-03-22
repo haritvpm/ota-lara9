@@ -417,7 +417,6 @@ cannot trust form id, as a user might have started a form, but waited long to su
     public function download_desig()
     {
         
-
         $desig = \App\Designation::orderby('rate','desc')->orderby('designation','asc')->get();
 
         $filename =  'sectt_designation_rates-'.  date('Y-m-d') . '.csv';
@@ -428,7 +427,6 @@ cannot trust form id, as a user might have started a form, but waited long to su
         $csvExporter->build($desig, [ 'designation','rate' ]);
 
         $csvExporter->download($filename);
-
 
     }
 

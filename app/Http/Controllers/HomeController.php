@@ -584,6 +584,8 @@ class HomeController extends Controller
     $amount_all_sectt = 0;
     $amount_approved_sectt = 0;
     $session_latest = null;
+
+    $relievedempwhosubmitted=null;
     
     if( auth()->user()->isAdmin() && \Config::get('custom.show_legsectt')){
         
@@ -635,6 +637,20 @@ class HomeController extends Controller
         $amount_approved = money_format('%!.0n', (double)$amount_approved);
         $amount_all_sectt = money_format('%!.0n', (double)$amount_all_sectt);
         $amount_approved_sectt = money_format('%!.0n', (double)$amount_approved_sectt);
+
+
+
+        $relievedemp = \App\Employee::wherecategory('Relieved')
+            ->pluck('pen');
+                
+        $relievedempwhosubmitted = \App\Overtime::wherehas( 'form', function($q)  use ($session_latest) {
+                                $q->where( 'overtime_slot' , '=', 'Sittings')
+                                  ->whereSession($session_latest);
+                            })
+                            ->wherein('pen', $relievedemp)->get(['pen','name','designation']);
+
+
+       
     }
 
     /////////////
@@ -650,14 +666,14 @@ class HomeController extends Controller
                                     'marqueetext','pending_approval',
                                     'welcometext', 'amount_all_sectt', 'amount_approved_sectt', 
                                     'amount_all', 'amount_approved','session_latest', 'timetaken',
-                                    'info_pa2mla'
+                                    'info_pa2mla', 'relievedempwhosubmitted'
                                      ));
     }
 
     public function goview($file)
     {
-        $filename = 'app/public/' . $file;
-        $path = storage_path($filename);
+        $filename = 'go/' . $file;
+        $path = public_path($filename);
 
         return Response::make(file_get_contents($path), 200, [
             'Content-Type' => 'application/pdf',

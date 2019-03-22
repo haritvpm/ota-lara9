@@ -46,7 +46,7 @@
   </div>
 
   <p>
-    Welcome !<br> For help, call <i class="fa fa-phone-square"></i> 2422 &nbsp;&nbsp; {!!$welcometext!!}
+    Welcome !<br> For help, call Accounts D - <i class="fa fa-phone-square"></i> 2422 &nbsp;&nbsp; {!!$welcometext!!}
     @if(auth()->user()->isAdmin())
     Loaded in {{$timetaken}}
     @endif
@@ -330,8 +330,12 @@
 
 @if( \Config::get('custom.show_legsectt'))
 @if(!auth()->user()->isAdmin() && !auth()->user()->isOD() && !auth()->user()->isServices() )
-   <p>
-  View <a href="<?=URL::to('admin/goview/go.pdf')?>"  target="_blank" > GO(Rt) 123/2016/Leg dtd 20/1/2016</a>  regarding overtime allowance
+  <p>
+  View orders regarding overtime allowance<br>
+  <a href="<?=URL::to('admin/goview/go.pdf')?>"  target="_blank" > GO(MS) <b>123/2016/Leg</b> dtd 20-01-2016</a><br>
+  <a href="<?=URL::to('admin/goview/go1917.pdf')?>"  target="_blank" > GO(MS) <b>1917/2018/Leg</b> dtd 11-12-2018</a><br>
+  <a href="<?=URL::to('admin/goview/go326.pdf')?>"  target="_blank" > GO(MS) <b>326/2019/Leg</b> dtd 07-03-2019</a><br>
+    
   </p>
    
 
@@ -519,9 +523,6 @@
 
 
 
-
-
-
  
     <div class="box box-success">
     <div class="box-header with-border">
@@ -554,6 +555,34 @@
     </div>
     </div> 
     @endif
+
+
+    @if(count($relievedempwhosubmitted))
+    <div class="box box-warning">
+    <div class="box-header with-border">
+    <div class="box-title">Emp relieved, but present in latest session forms</div>
+      <div class="box-body">
+        <ol class="row">
+        @foreach($relievedempwhosubmitted as $k => $v)
+          
+           <li class="col-sm-3 small">
+
+             <span class="text-danger"> {{$v->name}} </span>{{$v->pen}} {{$v->designation}}
+            
+              </li>
+
+           
+        @endforeach
+       </ol>
+      </div>
+    </div>
+    </div> 
+    @endif
+
+
+
+
+
 
     <hr>
     @endif <!-- if( \Config::get('custom.show_legsectt')) -->

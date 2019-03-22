@@ -159,7 +159,7 @@ th{
     <div class="panel-body table-responsive">
         <div class="row">
             <div class="col-md-12">
-                <table class="table table-responsive table-condensed">
+                <table class="table table-condensed">
                     <tr>
                         <td>
                        <strong>{!! html_entity_decode($romankla) !!}</strong> KLA,
@@ -427,11 +427,11 @@ th{
 
         @if( $form->owner != $form->creator)
          
-         &nbsp;<button class="btn btn-default hidden-print" @click="sendbackClick" data-toggle="tooltip" title="Send this form back to the section which created it"><i class="fa fa-mail-reply"></i>&nbsp;Send Back</button>
+         &nbsp;<button class="btn btn-default hidden-print" @click="sendbackClick" data-toggle="tooltip" title="Send this form back to the section which created it"><i class="fa fa-mail-reply"></i>&nbsp;Send Back to Asst</button>
 
-        @if(Auth::user()->isAdmin()) 
+      
           &nbsp;<button class="btn btn-default hidden-print" @click="sendonelevelbackClick" data-toggle="tooltip" title="Send this form back to the last person who approved it"><i class="fa fa-mail-reply"></i>&nbsp;Send Back 1-Level</button>
-        @endif
+       
 
         
 
