@@ -522,6 +522,27 @@
  </div>
 
 
+    @if(count($relievedempwhosubmitted))
+    <div class="box box-warning">
+    <div class="box-header with-border">
+    <div class="box-title">Emp relieved, but present in  {{$session_latest}} session forms</div>
+      <div class="box-body">
+        <ol class="row">
+        @foreach($relievedempwhosubmitted as $k => $v)
+          
+           <li class="col-sm-3 small">
+
+             <span class="text-danger"> {{$v->name}} </span>{{$v->pen}} {{$v->designation}}
+            
+              </li>
+
+           
+        @endforeach
+       </ol>
+      </div>
+    </div>
+    </div> 
+    @endif
 
  
     <div class="box box-success">
@@ -557,27 +578,6 @@
     @endif
 
 
-    @if(count($relievedempwhosubmitted))
-    <div class="box box-warning">
-    <div class="box-header with-border">
-    <div class="box-title">Emp relieved, but present in latest session forms</div>
-      <div class="box-body">
-        <ol class="row">
-        @foreach($relievedempwhosubmitted as $k => $v)
-          
-           <li class="col-sm-3 small">
-
-             <span class="text-danger"> {{$v->name}} </span>{{$v->pen}} {{$v->designation}}
-            
-              </li>
-
-           
-        @endforeach
-       </ol>
-      </div>
-    </div>
-    </div> 
-    @endif
 
 
 

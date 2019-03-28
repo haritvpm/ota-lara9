@@ -740,8 +740,19 @@ class EmployeesController extends Controller
             });
 
           }
-        }
 
+          //also make sure that the emp who are in pdf are not set relieved.
+
+          $empnotrelieved = Employee::wherein('pen',  $pensinpdf )
+               ->where('category', '=', 'Relieved')
+               ->get();
+
+          $empnotrelieved->map(function ($item, $key) use (&$myerrors)  {
+                array_push($myerrors, array('Change to Not Relieved' , $item['pen'] . '-' . $item['name'] , $item->designation->designation));
+ 
+            });
+
+        }
 
 
         //\Session::flash('message-success', 'ok');

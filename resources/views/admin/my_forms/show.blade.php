@@ -150,7 +150,7 @@ th{
 
     <div class = "pull-right">
         <small> Created,Updated : 
-        {{ date('d-m-Y', strtotime($form->created_at)) }}, {{ date('d-m-Y h:i a', strtotime($form->updated_at->timezone('Asia/Kolkata'))) }}, No.{{ $form->id }}
+        {{ date('d-m-Y', strtotime($form->created_at)) }}, {{ date('d-m-Y h:i a', strtotime($form->updated_at->timezone('Asia/Kolkata'))) }}, No.{{ $form->id }} {{ $form->form_no > 0 ? ',' . $form->form_no : '' }}
         </small>
     </div>
 
