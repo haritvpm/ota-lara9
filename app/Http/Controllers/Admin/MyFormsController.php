@@ -547,7 +547,6 @@ class MyFormsController extends Controller
         $date = Carbon::createFromFormat(config('app.date_format'), $request['duty_date'])->format('Y-m-d');
            
 
-
         $collection = collect($request->overtimes);
         $collection->transform(function($overtime) 
         {
@@ -1316,7 +1315,19 @@ class MyFormsController extends Controller
             
             $sittingsinrange =  abs($pos2-$pos1)+1;
             if($pos1 === false ||  $pos2 === false){
-                $sittingsinrange =  $start_one->diffInDays($end_one)+1;
+              //  $sittingsinrange =  $start_one->diffInDays($end_one)+1;
+
+                //user has entered a date that is not a sitting day, manually
+
+                $sittingsinrange = \App\Calender::with('session')
+                                ->whereHas('session', function($query)  use ($request) { 
+                                    $query->where('name', $request['session']);
+                                  })                         
+                                  ->where('date', '>=', $start_one)
+                                  ->where('date', '<=', $end_one)
+                                ->where('day_type','Sitting day')->count();
+
+
             }
             
             if( $overtime['count'] >  $sittingsinrange ){
@@ -1335,7 +1346,10 @@ class MyFormsController extends Controller
                 $colleave = trim($overtime['worknature']);
 
                 if(false !== stripos($colleave,'SUPPL') || 
-                   \Auth::user()->username == 'sn.watchnward' ){ 
+                   \Auth::user()->username == 'sn.watchnward' || 
+                    false !== stripos(\Auth::user()->username,'oo.sec') || 
+                    false !== stripos(\Auth::user()->username,'oo.dyspkr') || 
+                    false !== stripos(\Auth::user()->username,'oo.spkr') ){ 
                     //if supply, disregard leaves
                     $allleavesentered = true;
                 }

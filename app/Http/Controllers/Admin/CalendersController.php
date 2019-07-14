@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Admin;
 
+
 use App\Calender;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use App\Http\Controllers\Controller;
@@ -177,12 +179,31 @@ class CalendersController extends Controller
         $calender = Calender::findOrFail($id);
         $session = $calender->session;
 
-        $forms_count = \App\Form::where('session',$session->name)->count();
+        $date = Carbon::createFromFormat(config('app.date_format'), $calender->date)->format('Y-m-d');
+
+        //dd ($date  . '-----' . $calender->date);
+
+        $forms_count = \App\Form::where('session',$session->name)
+                        ->where('overtime_slot', '<>' ,'Sittings')
+                        ->where('duty_date', $date)
+                        ->count();
+
+        //if sitting forms are there, it means session has already finished
+        $sitting_form_count =  \App\Form::where('session',$session->name)
+                                ->where('overtime_slot', 'Sittings')->count();
+
         //$forms_other_count = \App\FormOther::where('session',$session->name)->count();
 
-        if( $forms_count > 0 /*|| $forms_other_count > 0 */){
+        if( $forms_count > 0 ){
 
-            \Session::flash('message-danger', 'Unable to delete as ' . $forms_count . ' forms still belong to this calender date session' ); 
+            \Session::flash('message-danger', 'Unable to delete as ' . $forms_count . ' forms belong to this date' ); 
+
+            return redirect()->route('admin.calenders.index');
+        }
+
+         if( /*|| $forms_other_count > 0  ||*/ $sitting_form_count > 0){
+
+            \Session::flash('message-danger', 'Unable to delete as ' . $sitting_form_count . ' sittings forms belong to this session' ); 
 
             return redirect()->route('admin.calenders.index');
         }

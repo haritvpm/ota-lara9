@@ -7,16 +7,16 @@
 body {
 
 <?php
-$patterns = array('zt-ants-ifc_01.jpg', 'irongrip.png','hypnotize.png','eight_horns.png','congruent_outline.png', 'dark_wood.png');
+$patterns = array('zt-ants-ifc_01.jpg', 'hypnotize.png','eight_horns.png','congruent_outline.png');
 
 //https://www.toptal.com/designers/subtlepatterns/page/12/
 
-$image_index = rand(0, 5);
+$image_index = rand(0, sizeof($patterns)-1);
 if(\Config::get('custom.vps')){
-  $image_index = rand(1, 5);
+//  $image_index = rand(1, 5);
 }
 
-//$image_index = 0;
+//$image_index = 1;
 $patternimage = $patterns[$image_index];
 ?>
 
@@ -27,7 +27,6 @@ background-image: url("images/patterns/{{$patternimage}}");
 background-repeat: no-repeat;
 background-size: cover;
 background-position: top;
-
 
 @endif
 
@@ -140,7 +139,7 @@ date_default_timezone_set('Asia/Kolkata');
     
      <p class="navbar-text">
       <small><span class="text-muted">
-                Last Updated: 04-03-19.&nbsp;
+                Last Updated: 08-04-19.&nbsp;
                  @if(\Config::get('custom.vps_name'))
                  @ {{\Config::get('custom.vps_name')}} &nbsp;
                  @endif

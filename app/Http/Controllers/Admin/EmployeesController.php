@@ -723,6 +723,7 @@ class EmployeesController extends Controller
 
           $emprelievedpens =  Employee::wherenotin('pen',  $pensinpdf )
                ->where('category', '<>', 'Relieved')
+               ->where ('pen', 'not like', '%E%') //ignore employment exchange like IT CHM
                ->pluck('pen');
           
           if($emprelievedpens->count()){

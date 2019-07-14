@@ -522,9 +522,10 @@ th{
         handled = true;
     } else if(event.key == 'F12'){
        
-        if(confirm('Are you sure you want to delete this entire form?')){
-            document.location.href= deleteurl
-        }
+       //not working
+       // if(confirm('Are you sure you want to delete this entire form?')){
+         //   document.location.href= deleteurl
+        //}
 
         handled = true;
     } else if(event.key == 'F8'){
