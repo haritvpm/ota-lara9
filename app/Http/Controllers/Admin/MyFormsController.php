@@ -1368,23 +1368,30 @@ class MyFormsController extends Controller
                         !$hasnums ){
                             $allleavesentered = false;       
                         }
+
+                        $hasdatestring = preg_match('/\d{1,2}[-\/\\.]+\d{1,2}/', $colleave) > 0;
+
+                        if(!$hasdatestring){
+                         $allleavesentered = false;          
+                        }
                    }
 
                    if($coma_items < $leaves){
                      $allleavesentered = false;
                    }
 
+                   /*
                    //but if user has entered a range, it is ok
-                   if($hasnums){ //should have digits
+                   if($hasnums && $leaves > 9){ //should have digits. 
                     if(FALSE !== stripos($colleave, "to") ||
                        //FALSE !== stripos($colleave, "-") || // this can occur in dates itself.
                        FALSE !== stripos($colleave, "and") ||
-                       FALSE !== stripos($colleave, "&") ||
+                      // FALSE !== stripos($colleave, "&") ||
                        FALSE !== stripos($colleave, "from") ){
                     
                         $allleavesentered = true;
                     }
-                   } 
+                   }*/ 
 
                 }
 

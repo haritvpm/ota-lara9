@@ -136,6 +136,10 @@ th{
             </thead>
 
             <tbody>
+                <?php
+                $total_ots =  0;
+                ?>
+
                 @if (count($overtimes) > 0)
                 @foreach ($overtimes as $overtime)
                 <?php
@@ -143,7 +147,7 @@ th{
                 $name =   substr( $overtime->pen,strpos( $overtime->pen,'-' )+1 );
                 $desig =  substr( $name,strpos( $name,',' )+1);
                 $name =   substr( $name,0, strpos( $name,',' ) );
-
+                $total_ots +=  $overtime->count ;
                 ?>
                 <tr data-entry-id="{{ $overtime->id }}">
 
@@ -170,6 +174,13 @@ th{
 
                 </tr>
                 @endforeach
+
+                
+                <tr>
+                    <td class="small" class="text-left" colspan="12">  Total :  {{ $total_ots }}</td>
+                </tr>
+
+
                 @else
                 <tr>
                     <td colspan="12">@lang('quickadmin.qa_no_entries_in_table')</td>
