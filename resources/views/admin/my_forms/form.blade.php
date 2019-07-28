@@ -142,6 +142,8 @@
 
 				 <span v-show ="form.overtimes.length>1" class="pull-right">Copy from First Row:&nbsp;</span>
 
+				 <span v-show ="form.overtimes.length>1" class="pull-right">Copy Time to Next Row: F4 | &nbsp;</span>
+
 			</div>
         </div>
 

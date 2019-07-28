@@ -99,7 +99,7 @@ function validateHhMm(textval) {
   return momentObj.format("HH:mm");
 }
 
-new Vue({
+var vm = new Vue({
 
   el: '#app',
 
@@ -396,7 +396,10 @@ new Vue({
       // }
 
 
-      if (this.form.overtimes.length > 0) {
+      if (this.form.overtimes.length > 0 && this.form.overtimes[0].from == '') {
+
+        //do this only if first row of a slot is empty
+
 
         //this.$swal('Warning', 'You have added a few rows already. Please make sure the time-from and time-to of the rows are correct', 'warning')
         //clear all times
@@ -950,9 +953,48 @@ new Vue({
         }
       }
     }
-  }), _methods)
+  }), _defineProperty(_methods, "copytimedownonerow", function copytimedownonerow() {
 
-});
+    for (var i = 0; i < this.form.overtimes.length - 1; i++) {
+
+      if (this.form.overtimes[i].from != '' && this.form.overtimes[i].to != '' && this.form.overtimes[i + 1].from == '' && this.form.overtimes[i + 1].to == '') {
+
+        this.form.overtimes[i + 1].from = this.form.overtimes[i].from;
+        this.form.overtimes[i + 1].to = this.form.overtimes[i].to;
+        break;
+      }
+    }
+  }), _methods) //methods
+
+}); //vue
+
+
+window.addEventListener("keydown", function (event) {
+  if (event.defaultPrevented) {
+    return; // Should do nothing if the default action has been cancelled
+  }
+
+  var handled = false;
+  if (event.key !== undefined) {
+    // Handle the event with KeyboardEvent.key and set handled true.
+    if (event.key == 'F4') {
+
+      vm.copytimedownonerow();
+
+      handled = true;
+    }
+  } else if (event.keyIdentifier !== undefined) {
+    // Handle the event with KeyboardEvent.keyIdentifier and set handled true.
+  } else if (event.keyCode !== undefined) {
+    // Handle the event with KeyboardEvent.keyCode and set handled true.
+
+  }
+
+  if (handled) {
+    // Suppress "double action" if event handled
+    event.preventDefault();
+  }
+}, true);
 
 /***/ })
 
