@@ -614,7 +614,7 @@ class EmployeesController extends Controller
             $category = trim($pdfrow[5]);
 
 
-            $cat_id =  $category != '' ? $categories[$category] : -1;
+          //  $cat_id =  $category != '' ? $categories[$category] : -1;
 
 
             $penname = $pen . " - " . $name;
@@ -623,7 +623,7 @@ class EmployeesController extends Controller
 
             //see if this designation is valid
             if(!$designations->has($desig)){
-              array_push($myerrors, array('Desig not found' , '' ,$desig ));
+              array_push($myerrors, array('Desig not found' , '' ,$desig, $pen, $name ));
            
               continue;
             }
@@ -634,6 +634,7 @@ class EmployeesController extends Controller
 
             if($emp){
 
+/*
                 $olddesigdisplay = $emp->desig_display;
                 $oldcat = $emp->categories_id;
 
@@ -656,8 +657,7 @@ class EmployeesController extends Controller
                     }
 
                 }
-
-
+*/
 
                               
                 $olddesig = $emp->designation->designation;
@@ -699,7 +699,7 @@ class EmployeesController extends Controller
                 }
 
                 if($ignored ){
-                     array_push($ignoreditems, array('Ignored New Emp' , $penname, $olddesig . " -> " . $desig));
+                     array_push($ignoreditems, array('Ignored New Emp' , $penname, $desig));
                   continue;
                 }
 
@@ -711,9 +711,9 @@ class EmployeesController extends Controller
                   'added_by' => 'admin',
                 ]);
              
-              $employee->save();
+            //  $employee->save(); no issues, but add manually
 
-               array_push($added, array('New Emp Added' , $penname , $desig));
+            //   array_push($added, array('New Emp Added' , $penname , $desig));
             }
         }
 

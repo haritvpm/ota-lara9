@@ -126,6 +126,7 @@ class ReportsOthersController extends Controller
         define("F_THIRD", 0x4);
         define("F_ADDITIONAL", 0x10);
         $totalamountfromcontroller = 0;
+        $totalots = 0;
 
 
         foreach ($overtimes as $key => $value) {
@@ -197,7 +198,8 @@ class ReportsOthersController extends Controller
 
                 $rows[$k]['ns'] += 1;
 
-                $totalamountfromcontroller += $rate ;   
+                $totalamountfromcontroller += $rate ;  
+                $totalots += 1; 
 
                 $arr = $rows[$k];
                 if(is_array($arr) && array_key_exists($m, $arr)){
@@ -228,6 +230,7 @@ class ReportsOthersController extends Controller
                 }
 
                 $totalamountfromcontroller += $rate*$value->count ;
+                $totalots += $value->count; 
 
             }
 
@@ -259,7 +262,7 @@ class ReportsOthersController extends Controller
 
         $timetaken = round(microtime(true) - $begintime,4);
 
-        return view('admin.reports_others.index', compact('sessions', 'rows', 'session', 'romankla', 'sessionnumber_th', 'malkla', 'sessionnumber', 'report_type', 'overtimes','added_bies', 'totalamountfromcontroller' , 'timetaken'));
+        return view('admin.reports_others.index', compact('sessions', 'rows', 'session', 'romankla', 'sessionnumber_th', 'malkla', 'sessionnumber', 'report_type', 'overtimes','added_bies', 'totalamountfromcontroller' , 'timetaken', 'totalots'));
     }
 /*
     public function detailed_report()

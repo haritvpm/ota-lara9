@@ -130,8 +130,9 @@
           <br>
 
           <div class="hidden-print">
-            Loaded in {{$timetaken}}<br>
-          Total amount : {{ money_format( "%!.0n",$totalamountfromcontroller) }}
+            <br>
+          Total OTs : {{$totalots}},  Total amount : {{ money_format( "%!.0n",$totalamountfromcontroller) }}
+          
           </div>
           @endif
    </h5>
