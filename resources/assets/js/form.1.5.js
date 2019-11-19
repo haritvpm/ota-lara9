@@ -1079,8 +1079,13 @@ var vm = new Vue({
     return; // Should do nothing if the default action has been cancelled
   }
 
+
+
+
+
   var handled = false;
   if (event.key !== undefined) {
+   
     // Handle the event with KeyboardEvent.key and set handled true.
   if(event.key == 'F4'){
            
@@ -1088,8 +1093,16 @@ var vm = new Vue({
        
         handled = true;
     }
+    else 
+    if(event.key == '`'){ //tilde
+           
+        vm.addRow(); 
+       
+        handled = true;
+    }
 
   } else if (event.keyIdentifier !== undefined) {
+    //alert(event.keyIdentifier);
     // Handle the event with KeyboardEvent.keyIdentifier and set handled true.
   } else if (event.keyCode !== undefined) {
     // Handle the event with KeyboardEvent.keyCode and set handled true.
