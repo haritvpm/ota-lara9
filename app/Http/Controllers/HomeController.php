@@ -6,7 +6,7 @@ namespace App\Http\Controllers;
 use App\Form;
 use App\FormOther;
 use App\Http\Requests;
-use Illuminate\Http\Request;
+
 use Response;
 use JavaScript;
 use App\Exemptionform;
@@ -633,10 +633,10 @@ class HomeController extends Controller
         
         setlocale(LC_MONETARY, 'en_IN');
 
-        $amount_all = money_format('%!.0n', (double)$amount_all);
-        $amount_approved = money_format('%!.0n', (double)$amount_approved);
-        $amount_all_sectt = money_format('%!.0n', (double)$amount_all_sectt);
-        $amount_approved_sectt = money_format('%!.0n', (double)$amount_approved_sectt);
+        $amount_all = number_format((float )$amount_all);
+        $amount_approved = number_format( (float )$amount_approved);
+        $amount_all_sectt = number_format( (float )$amount_all_sectt);
+        $amount_approved_sectt = number_format((float )$amount_approved_sectt);
 
 
 

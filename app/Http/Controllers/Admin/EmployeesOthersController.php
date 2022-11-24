@@ -4,13 +4,13 @@ namespace App\Http\Controllers\Admin;
 
 use Carbon\Carbon;
 use App\EmployeesOther;
-use Illuminate\Http\Request;
+
 use Illuminate\Support\Facades\Gate;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreEmployeesOthersRequest;
 use App\Http\Requests\Admin\UpdateEmployeesOthersRequest;
 use Yajra\DataTables\DataTables;
-use Illuminate\Support\Facades\Input;
+use Illuminate\Http\Request;
 
 class EmployeesOthersController extends Controller
 {
@@ -354,7 +354,7 @@ class EmployeesOthersController extends Controller
             return abort(401);
         }
         
-        $sessiontonotdelete = explode( ',',Input::get('sessions_toignore'));
+        $sessiontonotdelete = explode( ',',$request->query('sessions_toignore'));
 
         $empl_used = \App\OvertimeOther::with('form')
                 ->wherehas( 'form', function($q) use ($sessiontonotdelete){

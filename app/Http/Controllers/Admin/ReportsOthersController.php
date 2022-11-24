@@ -1,17 +1,17 @@
 <?php
 namespace App\Http\Controllers\Admin;
 
-use Illuminate\Http\Request;
+
 use Illuminate\Support\Facades\Gate;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Input;
+use Illuminate\Http\Request;
 use App\FormOther;
 use App\OvertimeOther;
 use Carbon\Carbon;
 
 class ReportsOthersController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         if (! Gate::allows('my_form_others_access')) {
             return abort(401);
@@ -27,22 +27,22 @@ class ReportsOthersController extends Controller
         					->orderby('id','desc')->pluck('name');
         
         $rows = array();
-        $report_type = 'Detailed';//Input::get('report_type');
+        $report_type = 'Detailed';//$request->query('report_type');
         
         $added_bies = \App\User::OtherDeptUsers()
                                  ->orderBy('name','asc')
                                  ->get(['username','name'])->pluck('name','username');
 
 
-        if(!Input::filled('session'))
+        if(!$request->filled('session'))
         {            
         	return view('admin.reports_others.index',compact('sessions', 'rows','report_type', 'added_bies'));
         }
       
-        $createdby =  Input::get('created_by');
+        $createdby =  $request->query('created_by');
 
 
-        $session =  Input::get('session');
+        $session =  $request->query('session');
 
         $sessionitem = \App\Session::where('name', $session )->first();
         $romankla = $sessionitem->getRomanKLA();
@@ -76,7 +76,7 @@ class ReportsOthersController extends Controller
                 
         
 
-        /*if (Input::filled('created_by')){ 
+        /*if ($request->filled('created_by')){ 
                            
             if($createdby != 'all'){
                
@@ -98,12 +98,12 @@ class ReportsOthersController extends Controller
 
             $desig_sort_order =trim($desig_sort_order,",");
 
-            $data = $data
-            //->orderby('designation','asc')
+//            $data = $data
+            ////->orderby('designation','asc')
             
-           // ->orderbyraw("field (designation, " . $desig_sort_order . ")" )
-            ->orderbyraw("SUBSTRING_INDEX(pen,'-',-1)",'asc');
-            //->orderbyraw("designation",'asc')
+           //// ->orderbyraw("field (designation, " . $desig_sort_order . ")" )
+        //    ->orderbyraw("SUBSTRING_INDEX(pen,'-',-1)",'asc');
+            ////->orderbyraw("designation",'asc')
             ;
         }
 
@@ -265,7 +265,7 @@ class ReportsOthersController extends Controller
         return view('admin.reports_others.index', compact('sessions', 'rows', 'session', 'romankla', 'sessionnumber_th', 'malkla', 'sessionnumber', 'report_type', 'overtimes','added_bies', 'totalamountfromcontroller' , 'timetaken', 'totalots'));
     }
 /*
-    public function detailed_report()
+    public function detailed_report(Request $request)
     {
         if (! Gate::allows('report_access')) {
             return abort(401);
@@ -281,18 +281,18 @@ class ReportsOthersController extends Controller
         
         $rows = array();
                      
-        if(!Input::filled('session'))
+        if(!$request->filled('session'))
         {            
             return view('admin.reports.index',compact('sessions', 'rows'));
         }
 
         $str_submitted_before = null;
         $str_submitted_after = null;
-        $submitted_before =  Input::get('submitted_before');
-        $submitted_after =  Input::get('submitted_after');
+        $submitted_before =  $request->query('submitted_before');
+        $submitted_after =  $request->query('submitted_after');
 
 
-        $session =  Input::get('session');
+        $session =  $request->query('session');
 
         $sessionitem = \App\Session::where('name', $session )->first();
         $romankla = $sessionitem->getRomanKLA();
@@ -331,7 +331,7 @@ class ReportsOthersController extends Controller
                                 });
         }
 
-        if (Input::filled('submitted_before')){
+        if ($request->filled('submitted_before')){
                   
             $date = Carbon::createFromFormat(config('app.date_format'), $submitted_before )->format('Y-m-d');
 
@@ -343,7 +343,7 @@ class ReportsOthersController extends Controller
             $submitted_before = '&submitted_before='.$submitted_before;
         }
 
-        if (Input::filled('submitted_after')){
+        if ($request->filled('submitted_after')){
                   
             $date = Carbon::createFromFormat(config('app.date_format'), $submitted_after )->format('Y-m-d');
 

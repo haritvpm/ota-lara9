@@ -6,10 +6,10 @@ use App\Form;
 use App\Overtime;
 use App\Calender;
 use Illuminate\Http\Request;
+
 use Illuminate\Support\Facades\Gate;
 use App\Http\Controllers\Controller;
 //use Yajra\DataTables\DataTables;
-use Illuminate\Support\Facades\Input;
 //use Laracasts\Utilities\JavaScript\JavaScriptFacade;
 use JavaScript;
 use Carbon\Carbon;
@@ -19,13 +19,14 @@ use PDF;
 
 class MyFormsController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         if (! Gate::allows('my_form_access')) {
             return abort(401);
         }
-
-        $begintime = microtime(true);
+        
+   
+       $begintime = microtime(true);
 
 
         //user can login and see forms even after data entry is disabled
@@ -65,21 +66,21 @@ class MyFormsController extends Controller
         $str_remarksfilter=null;
         $str_submittedbyfilter=null;
 
-        $session = Input::get('session');
-        $overtime_slot = Input::get('overtime_slot');
-        $status =  Input::get('status');
-        $datefilter =  Input::get('datefilter');
-        $namefilter =  Input::get('namefilter');
-        $desigfilter =  Input::get('desigfilter');
-        $idfilter   =  Input::get('idfilter');
-        $createdby =  Input::get('created_by');
-        $worknaturefilter = Input::get('worknaturefilter');
-        $remarksfilter = Input::get('remarksfilter');
+        $session = $request->query('session');
+        $overtime_slot = $request->query('overtime_slot');
+        $status =  $request->query('status');
+        $datefilter =  $request->query('datefilter');
+        $namefilter =  $request->query('namefilter');
+        $desigfilter =  $request->query('desigfilter');
+        $idfilter   =  $request->query('idfilter');
+        $createdby =  $request->query('created_by');
+        $worknaturefilter = $request->query('worknaturefilter');
+        $remarksfilter = $request->query('remarksfilter');
 
-        $submittedbyfilter = Input::get('submittedbyfilter');
+        $submittedbyfilter = $request->query('submittedbyfilter');
 
 
-        if (Input::filled('created_by')){ 
+        if ($request->filled('created_by')){ 
                            
             if($createdby != 'all'){
                 //$forms->where( 'creator', $createdby);
@@ -94,7 +95,7 @@ class MyFormsController extends Controller
 
         //undersec should be able to view any new forms from prev sessions if there are no session filter
         
-        if (Input::filled('session')){
+        if ($request->filled('session')){
              
             $forms->where('session',$session);
             $str_session = '&session='.$session;
@@ -106,7 +107,7 @@ class MyFormsController extends Controller
 
         //tab takes care of status. 
         
-        if (!Input::filled('status')){
+        if (!$request->filled('status')){
             if(!auth()->user()->isAdminorAudit()){
                 $status = 'todo';
             }
@@ -139,7 +140,7 @@ class MyFormsController extends Controller
                          
 
 
-        if (Input::filled('idfilter'))
+        if ($request->filled('idfilter'))
         {
             $forms->where(function($query) use ($idfilter)
                     {
@@ -152,7 +153,7 @@ class MyFormsController extends Controller
         }
 
 
-        if (Input::filled('overtime_slot')){
+        if ($request->filled('overtime_slot')){
             if($overtime_slot == 'Non-Sittings'){
                 $forms->where( 'overtime_slot' , '!=', 'Sittings' );    
             }
@@ -169,7 +170,7 @@ class MyFormsController extends Controller
         }
 
         
-        if (Input::filled('datefilter')){
+        if ($request->filled('datefilter')){
             
             $dates = null;
             if( strcasecmp($datefilter, 'S') == 0  || 
@@ -209,7 +210,7 @@ class MyFormsController extends Controller
             $str_datefilter = '&datefilter='.$datefilter;
         }
 
-        if (Input::filled('submittedbyfilter')){
+        if ($request->filled('submittedbyfilter')){
                       
             $forms->where( 'submitted_by', 'like', '%' . $submittedbyfilter.'%' );
                              
@@ -217,11 +218,11 @@ class MyFormsController extends Controller
         }
  
 
-        if (Input::filled('namefilter') || Input::filled('desigfilter')){
+        if ($request->filled('namefilter') || $request->filled('desigfilter')){
             $forms->with('overtimes');
         }
 
-        if (Input::filled('namefilter')){
+        if ($request->filled('namefilter')){
                     
             $forms->wherehas( 'overtimes', function($q) use ($namefilter){
                $q->where('pen','like', '%' . $namefilter.'%' )
@@ -231,14 +232,14 @@ class MyFormsController extends Controller
             $str_namefilter = '&namefilter='. $namefilter;
         }
 
-        if (Input::filled('worknaturefilter')){
+        if ($request->filled('worknaturefilter')){
                       
             $forms->wherehas( 'overtimes', function($q) use ($worknaturefilter){
                $q->where('worknature','like', '%' . $worknaturefilter.'%' );
             });                 
             $str_worknaturefilter = '&worknaturefilter='. $worknaturefilter;
         }
-         if (Input::filled('remarksfilter')){
+         if ($request->filled('remarksfilter')){
                       
             if($remarksfilter == 'nonempty'){
                 $forms->where( 'remarks', '<>', '' );
@@ -249,7 +250,7 @@ class MyFormsController extends Controller
             $str_remarksfilter = '&remarksfilter='. $remarksfilter;
         }
 
-        if (Input::filled('desigfilter')){
+        if ($request->filled('desigfilter')){
                         
              $forms->wherehas( 'overtimes', function($q) use ($desigfilter){
 
@@ -278,11 +279,11 @@ class MyFormsController extends Controller
          }
      
 
-        $sort =  Input::filled('sort') ? Input::get('sort') : 'updated_at'; // if user type in the url a column that doesnt exist app will default to id
-        $order = Input::get('order') === 'asc' ? 'asc' : 'desc'; // default desc
+        $sort =  $request->filled('sort') ? $request->query('sort') : 'updated_at'; // if user type in the url a column that doesnt exist app will default to id
+        $order = $request->query('order') === 'asc' ? 'asc' : 'desc'; // default desc
                 
         $forms = $forms->orderBy($sort, $order)->distinct()->paginate(10)
-                                               ->appends(Input::except('page'));
+                                               ->appends($request->except('page'));
         $to_approve = 0; 
         //sections and admins have nothing to approve
         if ( auth()->user()->isDataEntryLevel() || auth()->user()->isAdminorAudit()) {
@@ -298,7 +299,7 @@ class MyFormsController extends Controller
         
 
         //this inverts sorting order for next click                                       
-        $querystr = '&order='.(Input::get('order') == 'asc' || null ? 'desc' : 'asc').$str_session.$str_status.$str_overtime_slot.$str_datefilter.$str_namefilter.$str_desigfilter.$str_idfilter.$str_created_by.$str_worknaturefilter.$str_submittedbyfilter;
+        $querystr = '&order='.($request->query('order') == 'asc' || null ? 'desc' : 'asc').$str_session.$str_status.$str_overtime_slot.$str_datefilter.$str_namefilter.$str_desigfilter.$str_idfilter.$str_created_by.$str_worknaturefilter.$str_submittedbyfilter;
 
         $added_bies = \App\User::SimpleUsers()
                                  ->where('username','not like','de.%')
@@ -544,6 +545,7 @@ class MyFormsController extends Controller
 
     public function createovertimes( Request $request, &$myerrors, $formid=null)
     {
+        
         $date = Carbon::createFromFormat(config('app.date_format'), $request['duty_date'])->format('Y-m-d');
            
 
@@ -742,10 +744,13 @@ class MyFormsController extends Controller
     //public function store(StoreFormsRequest $request)
     public function store(Request $request)
     {
+        
         if (! Gate::allows('my_form_create')) {
            // return abort(401);
            return response('Unauthorized.', 401);
         }
+
+        
         
         
         $myerrors = [];
@@ -788,7 +793,7 @@ class MyFormsController extends Controller
 
        
 
-       \Session::flash('message-success', 'Success: created form no:' . $formid ); 
+        $request->session()->flash('message-success', 'Success: created form no:' . $formid ); 
 
         return response()->json([
            'created' => true,
@@ -909,7 +914,7 @@ class MyFormsController extends Controller
 
         });
 
-        \Session::flash('message-success', 'Success: updated form-no: ' . $formid ); 
+        $request->session()->flash('message-success', 'Success: updated form-no: ' . $formid ); 
 
 
         return response()->json([
@@ -1507,7 +1512,7 @@ class MyFormsController extends Controller
 
         });
 
-        \Session::flash('message-success', 'Success: created form-no: ' . $formid ); 
+        $request->session()->flash('message-success', 'Success: created form-no: ' . $formid ); 
            
    
 
@@ -1859,7 +1864,7 @@ class MyFormsController extends Controller
             return $form->id;
         });
         
-        \Session::flash('message-success', 'Success: updated form-no: ' . $formid ); 
+        $request->session()->flash('message-success', 'Success: updated form-no: ' . $formid ); 
 
         return response()->json([
             'created' => true,
@@ -1870,7 +1875,7 @@ class MyFormsController extends Controller
         //return redirect()->route('admin.my_forms.index');
     }
 
-    public function getpdf()
+    public function getpdf(Request $request)
     {
 
         $str_session = null;                 
@@ -1882,14 +1887,14 @@ class MyFormsController extends Controller
         $str_idfilter = null;
         $str_created_by = null;
         
-        $session = Input::get('session');
-        $overtime_slot = Input::get('overtime_slot');
-        $status =  Input::get('status');
-        $datefilter =  Input::get('datefilter');
-        $namefilter =  Input::get('namefilter');
-        $desigfilter =  Input::get('desigfilter');
-        $idfilter   =  Input::get('idfilter');
-        $createdby =  Input::get('created_by');
+        $session = $request->query('session');
+        $overtime_slot = $request->query('overtime_slot');
+        $status =  $request->query('status');
+        $datefilter =  $request->query('datefilter');
+        $namefilter =  $request->query('namefilter');
+        $desigfilter =  $request->query('desigfilter');
+        $idfilter   =  $request->query('idfilter');
+        $createdby =  $request->query('created_by');
 
         $forms = \App\Form::with(['created_by','owned_by','overtimes'])
                        ->filterStatus('Submitted')
@@ -1898,7 +1903,7 @@ class MyFormsController extends Controller
                       
 
 
-        if (Input::filled('created_by')){ 
+        if ($request->filled('created_by')){ 
                            
             if($createdby != 'all'){
                 //$forms = $forms->where( 'creator', $createdby);
@@ -1910,7 +1915,7 @@ class MyFormsController extends Controller
         }
          
        
-        if (Input::filled('session')){
+        if ($request->filled('session')){
              $forms = $forms->where('session',$session);
         }
 
@@ -1918,7 +1923,7 @@ class MyFormsController extends Controller
 
                       
 
-        if (Input::filled('idfilter'))
+        if ($request->filled('idfilter'))
         {
             $forms = $forms->where('id',$idfilter);
                    
@@ -1927,7 +1932,7 @@ class MyFormsController extends Controller
         }
 
 
-        if (Input::filled('overtime_slot')){
+        if ($request->filled('overtime_slot')){
             if($overtime_slot == 'Non-Sittings'){
                 $forms = $forms->where( 'overtime_slot' , '!=', 'Sittings' );    
             }
@@ -1938,14 +1943,14 @@ class MyFormsController extends Controller
             $str_overtime_slot = '&overtime_slot='.$overtime_slot;
         }
 
-        if (Input::filled('datefilter')){
+        if ($request->filled('datefilter')){
             
             $forms = $forms->filterDate( $datefilter );
 
             $str_datefilter = '&datefilter='.$datefilter;
         }
 
-        if (Input::filled('namefilter')){
+        if ($request->filled('namefilter')){
                     
             $forms = $forms->wherehas( 'overtimes', function($q) use ($namefilter){
                $q->where('pen','like', '%' . $namefilter.'%' );
@@ -1954,7 +1959,7 @@ class MyFormsController extends Controller
             $str_namefilter = '&namefilter='. $namefilter;
         }
     
-        if (Input::filled('desigfilter')){
+        if ($request->filled('desigfilter')){
                         
              $forms = $forms->wherehas( 'overtimes', function($q) use ($desigfilter){
                 
@@ -1981,7 +1986,7 @@ class MyFormsController extends Controller
         $forms = $forms->orderBy('id', 'asc')->get();
 
        
-        $htmlview = Input::get('viewall') != 'viewallpdf';
+        $htmlview = $request->query('viewall') != 'viewallpdf';
      
         $combined = null;
         $index = 0;

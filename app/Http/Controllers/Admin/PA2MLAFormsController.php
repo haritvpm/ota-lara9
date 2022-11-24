@@ -4,11 +4,11 @@ namespace App\Http\Controllers\Admin;
 use App\Form;
 use App\Overtime;
 use App\Calender;
-use Illuminate\Http\Request;
+
 use Illuminate\Support\Facades\Gate;
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\DataTables;
-use Illuminate\Support\Facades\Input;
+use Illuminate\Http\Request;
 //use Laracasts\Utilities\JavaScript\JavaScriptFacade;
 use JavaScript;
 use Carbon\Carbon;
@@ -16,7 +16,7 @@ use Auth;
 
 class PA2MLAFormsController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         if (! Gate::allows('pa2mlaform_access')) {
             return abort(401);
@@ -39,14 +39,14 @@ class PA2MLAFormsController extends Controller
         $str_idfilter = null;
               
       
-        $session = Input::get('session');
-        $datefilter =  Input::get('datefilter');
-        $namefilter =  Input::get('namefilter');
+        $session = $request->query('session');
+        $datefilter =  $request->query('datefilter');
+        $namefilter =  $request->query('namefilter');
        
-        $idfilter   =  Input::get('idfilter');
+        $idfilter   =  $request->query('idfilter');
         
 
-        if (Input::filled('session')){
+        if ($request->filled('session')){
             $forms->where('session',$session);
             $str_session = '&session='.$session;
         }
@@ -57,7 +57,7 @@ class PA2MLAFormsController extends Controller
 
 
 
-        if (Input::filled('idfilter'))
+        if ($request->filled('idfilter'))
         {
            $forms = $forms->where('id',$idfilter);
                    
@@ -66,14 +66,14 @@ class PA2MLAFormsController extends Controller
         }
 
 
-        if (Input::filled('datefilter')){
+        if ($request->filled('datefilter')){
             
             $forms = $forms->filterDate( $datefilter );
 
             $str_datefilter = '&datefilter='.$datefilter;
         }
 
-        if (Input::filled('namefilter')){
+        if ($request->filled('namefilter')){
            
          
             $forms = $forms->wherehas( 'overtimes', function($q) use ($namefilter){
@@ -84,14 +84,14 @@ class PA2MLAFormsController extends Controller
         }
          
 
-        $sort =  Input::filled('sort') ? Input::get('sort') : 'id'; // if user type in the url a column that doesnt exist app will default to id
-        $order = Input::get('order') === 'asc' ? 'asc' : 'desc'; // default desc
+        $sort =  $request->filled('sort') ? $request->query('sort') : 'id'; // if user type in the url a column that doesnt exist app will default to id
+        $order = $request->query('order') === 'asc' ? 'asc' : 'desc'; // default desc
                 
         $forms = $forms->orderBy($sort, $order)->paginate(15)
-                                               ->appends(Input::except('page'));
+                                               ->appends($request->except('page'));
          
         //this inverts sorting order for next click                                       
-        $querystr = '&order='.(Input::get('order') == 'asc' || null ? 'desc' : 'asc').$str_datefilter.$str_namefilter.$str_idfilter;
+        $querystr = '&order='.($request->query('order') == 'asc' || null ? 'desc' : 'asc').$str_datefilter.$str_namefilter.$str_idfilter;
              
         return view('admin.pa2mlaforms.index',compact('forms','querystr', 'session_array','session' ));
     }

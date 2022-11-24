@@ -131,7 +131,7 @@
 
           <div class="hidden-print">
             <br>
-          Total OTs : {{$totalots}},  Total amount : {{ money_format( "%!.0n",$totalamountfromcontroller) }}
+          Total OTs : {{$totalots}},  Total amount : {{ number_format( $totalamountfromcontroller) }}
           
           </div>
           @endif
@@ -197,7 +197,7 @@
                               $totalamount += $amountforthis;
                             @endphp
 
-                            <td class="text-right">{{ money_format( "%!.0n",$amountforthis) }}</td>
+                            <td class="text-right">{{ number_format( $amountforthis) }}</td>
                                                   
                         </tr>
                     @endforeach
@@ -207,7 +207,7 @@
                         </td>
                         <td class="text-center">Total</td>
                         <td class="text-right">
-                           <b> {{ money_format( "%.0n",$totalamount)}} </b>
+                           <b> {{ number_format( $totalamount)}} </b>
                         </td>
 
                     </tr>

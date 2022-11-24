@@ -1,24 +1,26 @@
 <?php
+use Illuminate\Support\Facades\Route;
+
 Route::get('/', function () { return redirect('/admin/home'); });
 
 // Authentication Routes...
-$this->get('login', 'Auth\LoginController@showLoginForm')->name('auth.login');
-$this->post('login', 'Auth\LoginController@login')->name('auth.login');
-$this->post('logout', 'Auth\LoginController@logout')->name('auth.logout');
+Route::get('login', 'Auth\LoginController@showLoginForm')->name('auth.login');
+Route::post('login', 'Auth\LoginController@login')/*->name('auth.login')*/;
+Route::post('logout', 'Auth\LoginController@logout')->name('auth.logout');
 
 // Change Password Routes...
-$this->get('change_password', 'Auth\ChangePasswordController@showChangePasswordForm')->name('auth.change_password');
-$this->patch('change_password', 'Auth\ChangePasswordController@changePassword')->name('auth.change_password');
+Route::get('change_password', 'Auth\ChangePasswordController@showChangePasswordForm')->name('auth.change_password');
+Route::patch('change_password', 'Auth\ChangePasswordController@changePassword')/*->name('auth.change_password')*/;
 
 // Password Reset Routes...
-$this->get('password/reset', 'Auth\ForgotPasswordController@showLinkRequestForm')->name('auth.password.reset');
-$this->post('password/email', 'Auth\ForgotPasswordController@sendResetLinkEmail')->name('auth.password.reset');
-$this->get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm')->name('password.reset');
-$this->post('password/reset', 'Auth\ResetPasswordController@reset')->name('auth.password.reset');
+Route::get('password/reset', 'Auth\ForgotPasswordController@showLinkRequestForm')->name('auth.password.reset');
+Route::post('password/email', 'Auth\ForgotPasswordController@sendResetLinkEmail')/*->name('auth.password.reset')*/;
+Route::get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm')->name('password.reset');
+Route::post('password/reset', 'Auth\ResetPasswordController@reset')/*->name('auth.password.reset')*/;
 
 
-$this->get('change_displayname', 'Auth\ProfileController@showChangeDisplaynameForm')->name('auth.change_displayname');
-$this->patch('change_displayname', 'Auth\ProfileController@changeDisplayname')->name('auth.change_displayname');
+Route::get('change_displayname', 'Auth\ProfileController@showChangeDisplaynameForm')->name('auth.change_displayname');
+Route::patch('change_displayname', 'Auth\ProfileController@changeDisplayname')/*->name('auth.change_displayname')*/;
 
 
 Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], function () {
@@ -54,7 +56,7 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
     Route::get('employees/create_temppen',['uses' => 'Admin\EmployeesController@create_temppen', 'as' => 'employees.create_temppen']);
 
     Route::get('employees/sparksync',['uses' => 'Admin\EmployeesController@sparksync', 'as' => 'employees.sparksync']);
-    Route::post('employees/sparksync',['uses' => 'Admin\EmployeesController@sparksync', 'as' => 'employees.sparksync']);
+    Route::post('employees/sparksync',['uses' => 'Admin\EmployeesController@sparksync', 'as' => 'employees.sparksyncpost']);
 
     Route::resource('employees', 'Admin\EmployeesController');
    
@@ -142,7 +144,7 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
     Route::post('employees_others_mass_destroy', ['uses' => 'Admin\EmployeesOthersController@massDestroy', 'as' => 'employees_others.mass_destroy']);
 
     Route::get('employees_others/ajaxfind/{q}',array('as'=>'employees_others.ajax','uses'=>'Admin\EmployeesOthersController@ajaxfind'));
-    Route::get('employees_others/ajaxload/{q}',array('as'=>'employees_others.ajax','uses'=>'Admin\EmployeesOthersController@ajaxload'));
+    Route::get('employees_others/ajaxload/{q}',array('as'=>'employees_others.ajaxload','uses'=>'Admin\EmployeesOthersController@ajaxload'));
 
     ///////////////////////OD///////////////////////
 

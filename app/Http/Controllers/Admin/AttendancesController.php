@@ -7,13 +7,13 @@ use App\Employee;
 use App\Calender;
 
 use App\Attendance;
-use Illuminate\Http\Request;
+
 use Illuminate\Support\Facades\Gate;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreAttendancesRequest;
 use App\Http\Requests\Admin\UpdateAttendancesRequest;
 use Yajra\DataTables\DataTables;
-use Illuminate\Support\Facades\Input;
+use Illuminate\Http\Request;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 
@@ -25,7 +25,7 @@ class AttendancesController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         if (! Gate::allows('attendance_access')) {
             return abort(401);
@@ -96,9 +96,9 @@ class AttendancesController extends Controller
         $data_dates = array();
         $data_names = array();
         $data_desigs = array();
-        $sessionname = Input::get('session');
-        $namefilter =  Input::get('namefilter');
-        $datefilter =  Input::get('datefilter');
+        $sessionname = $request->query('session');
+        $namefilter =  $request->query('namefilter');
+        $datefilter =  $request->query('datefilter');
 
        
            
@@ -108,7 +108,7 @@ class AttendancesController extends Controller
                 })
              ->where('category','<>','Staff - Admin Data Entry');
 
-        if (Input::filled('session') && Input::filled('namefilter')){
+        if ($request->filled('session') && $request->filled('namefilter')){
                   
             if (!ctype_digit($namefilter)) {
 
@@ -128,7 +128,7 @@ class AttendancesController extends Controller
         }
             
         
-        if (Input::filled('session')){
+        if ($request->filled('session')){
 
             $temp = $temp->orderby('name','asc')->get()/*->take(50)*/;
             
@@ -140,7 +140,7 @@ class AttendancesController extends Controller
                                 ->where('session_id', $session->id)
                                 ->wherein('employee_id', $ids);
 
-            if(Input::filled('datefilter')){
+            if($request->filled('datefilter')){
                 $date = Carbon::createFromFormat('d-m-Y', $datefilter);
 
                 $absents->wheredate('date_absent',$date->toDateString());
@@ -199,12 +199,12 @@ class AttendancesController extends Controller
     public function download()
     {        
 
-       if( Input::filled('session'))
+       if( $request->filled('session'))
        {
         
         $absents = null;
         
-        $sessionname = Input::get('session');
+        $sessionname = $request->query('session');
       
            
         $temp =  Employee::with('designation')

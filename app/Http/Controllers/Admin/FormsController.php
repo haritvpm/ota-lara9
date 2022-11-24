@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Form;
-use Illuminate\Http\Request;
+
 use Illuminate\Support\Facades\Gate;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Input;
+use Illuminate\Http\Request;
 use App\Http\Requests\Admin\StoreFormsRequest;
 use App\Http\Requests\Admin\UpdateFormsRequest;
 use Yajra\DataTables\DataTables;
@@ -84,7 +84,7 @@ class FormsController extends Controller
     public function clearoldforms()
     {
         $str_session = null; 
-        $session = Input::get('session_todelete');
+        $session = $request->query('session_todelete');
 
         if(!\Auth::user()->isAdmin()){
             return abort(401);
@@ -96,7 +96,7 @@ class FormsController extends Controller
                       ->whereDate('updated_at', '<', $date_ago->toDateString())
                       ->orderby('id','desc')->get();
 
-        $dump = Input::get('delbtn') != 'del';
+        $dump = $request->query('delbtn') != 'del';
         
         if($dump){
             if($forms->count()){

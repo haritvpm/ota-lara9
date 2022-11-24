@@ -1,10 +1,10 @@
 <?php
 namespace App\Http\Controllers\Admin;
 
-use Illuminate\Http\Request;
+
 use Illuminate\Support\Facades\Gate;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Input;
+use Illuminate\Http\Request;
 use App\FormOther;
 use App\OvertimeOther;
 use Carbon\Carbon;
@@ -12,7 +12,7 @@ use App\Setting;
 
 class SearchesOtherController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
       /*  if (! Gate::allows('search_access')) {
             return abort(401);
@@ -44,7 +44,7 @@ class SearchesOtherController extends Controller
 
         // FILTERS
                
-        if(!Input::filled('session'))
+        if(!$request->filled('session'))
         {            
         	return view('admin.searches_other.index',compact('sessions','added_bies'));
         }
@@ -57,20 +57,20 @@ class SearchesOtherController extends Controller
         $str_desigfilter = null;
         $str_created_by = null;
 
-        $session = Input::get('session');
-        $overtime_slot = Input::get('overtime_slot');
-        $status =  Input::get('status');
-        $datefilter=  Input::get('datefilter');
-        $namefilter=  Input::get('namefilter');
-        $desigfilter=  Input::get('desigfilter');
-        $createdby =  Input::get('created_by');
+        $session = $request->query('session');
+        $overtime_slot = $request->query('overtime_slot');
+        $status =  $request->query('status');
+        $datefilter=  $request->query('datefilter');
+        $namefilter=  $request->query('namefilter');
+        $desigfilter=  $request->query('desigfilter');
+        $createdby =  $request->query('created_by');
         
         $overtimes = OvertimeOther::with('form')
         			 ->wherehas( 'form', function($q) use ($session){
 			               $q->where('session',$session);
 			         }); 
 
-        if (Input::filled('created_by')){ 
+        if ($request->filled('created_by')){ 
             if(\Auth::user()->isAdmin()){
                 
                 if($createdby != 'all'){
@@ -93,7 +93,7 @@ class SearchesOtherController extends Controller
         }
 
 
-        if (Input::filled('overtime_slot')){
+        if ($request->filled('overtime_slot')){
 
            if($overtime_slot == 'Non-Sittings'){
                $overtimes = $overtimes->wherehas( 'form', function($q) {
@@ -109,7 +109,7 @@ class SearchesOtherController extends Controller
             $str_overtime_slot = '&overtime_slot='.$overtime_slot;
         }
 
-        if (Input::filled('datefilter')){
+        if ($request->filled('datefilter')){
                   
             $overtimes = $overtimes->wherehas( 'form', function($q) use ($datefilter){
 			               		$q->filterDate($datefilter);
@@ -118,7 +118,7 @@ class SearchesOtherController extends Controller
             $str_datefilter = '&datefilter='.$datefilter;
         }
 
-        if (Input::filled('status')){
+        if ($request->filled('status')){
                   
             $overtimes = $overtimes->wherehas( 'form', function($q) use ($status){
 			               		$q->filterstatus($status);
@@ -129,14 +129,14 @@ class SearchesOtherController extends Controller
 
         			 
 
-        if (Input::filled('namefilter')){
+        if ($request->filled('namefilter')){
                     
             $overtimes = $overtimes->where('pen','like', '%' . $namefilter.'%' );
                             
             $str_namefilter = '&namefilter='. $namefilter;
         }
     
-        if (Input::filled('desigfilter')){
+        if ($request->filled('desigfilter')){
                       
              $overtimes = $overtimes->where('designation', 'like', '%' . $desigfilter.'%' );
                            
@@ -164,13 +164,13 @@ class SearchesOtherController extends Controller
         $user_count = count($uniques);
       
 
-        $overtimes =  $overtimes->paginate(10)->appends(Input::except('page'));
+        $overtimes =  $overtimes->paginate(10)->appends($request->except('page'));
 
         return view('admin.searches_other.index',compact('sessions','added_bies','overtimes','user_count', 
                                                    'total_overtimes', 'total_amount'));
     }
 
-    public function download()
+    public function download(Request $request)
     {
         
 
@@ -182,13 +182,13 @@ class SearchesOtherController extends Controller
         $str_formno_before = null;
         $str_formno_after = null;
 
-        $session = Input::get('session');
-        $overtime_slot = Input::get('overtime_slot');
-        $createdby =  Input::get('created_by');
-        $submitted_before =  Input::get('submitted_before');
-        $submitted_after =  Input::get('submitted_after');
-        $formno_before =  Input::get('formno_before');
-        $formno_after =  Input::get('formno_after');
+        $session = $request->query('session');
+        $overtime_slot = $request->query('overtime_slot');
+        $createdby =  $request->query('created_by');
+        $submitted_before =  $request->query('submitted_before');
+        $submitted_after =  $request->query('submitted_after');
+        $formno_before =  $request->query('formno_before');
+        $formno_after =  $request->query('formno_after');
 
 /*
 cannot trust form no, as a user might have started a form, but waited long to submit it. so submit date is the key.
@@ -201,7 +201,7 @@ cannot trust form no, as a user might have started a form, but waited long to su
                              ->where('owner', 'admin'); //submitted to us
                      }); 
 
-        if (Input::filled('created_by')){ 
+        if ($request->filled('created_by')){ 
                           
             if($createdby != 'all'){
                 $overtimes = $overtimes->wherehas( 'form', function($q) use ($createdby){
@@ -211,7 +211,7 @@ cannot trust form no, as a user might have started a form, but waited long to su
                    
         }
 
-        if (Input::filled('overtime_slot')){
+        if ($request->filled('overtime_slot')){
            if($overtime_slot == 'Non-Sittings'){
                $overtimes = $overtimes->wherehas( 'form', function($q) {
                                 $q->where( 'overtime_slot' , '!=', 'Sittings');
@@ -224,7 +224,7 @@ cannot trust form no, as a user might have started a form, but waited long to su
             }
         }
 
-        if (Input::filled('submitted_before')){
+        if ($request->filled('submitted_before')){
                   
             $date = Carbon::createFromFormat(config('app.date_format'), $submitted_before )->format('Y-m-d');
 
@@ -235,7 +235,7 @@ cannot trust form no, as a user might have started a form, but waited long to su
             $submitted_before = '&submitted_before='.$submitted_before;
         }
 
-        if (Input::filled('submitted_after')){
+        if ($request->filled('submitted_after')){
                   
             $date = Carbon::createFromFormat(config('app.date_format'), $submitted_after )->format('Y-m-d');
 
@@ -247,7 +247,7 @@ cannot trust form no, as a user might have started a form, but waited long to su
         }
 
 
-        if (Input::filled('formno_before')){
+        if ($request->filled('formno_before')){
                   
           
             $overtimes = $overtimes->wherehas( 'form', function($q) use ($date){
@@ -256,7 +256,7 @@ cannot trust form no, as a user might have started a form, but waited long to su
 
             $formno_before = '&formno_before='.$formno_before;
         }
-        if (Input::filled('formno_after')){
+        if ($request->filled('formno_after')){
                   
           
             $overtimes = $overtimes->wherehas( 'form', function($q) use ($date){

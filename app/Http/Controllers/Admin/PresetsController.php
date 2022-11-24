@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Preset;
-use Illuminate\Http\Request;
+
 use Yajra\DataTables\DataTables;
 use Illuminate\Support\Facades\Gate;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Input;
+use Illuminate\Http\Request;
 
 
 class PresetsController extends Controller
@@ -131,7 +131,7 @@ class PresetsController extends Controller
                  ]);
             } /*else {
 
-              return redirect()->back()->withErrors(['error: ' . $presetname . '- already exists' ])->withInput(Input::all());;
+              return redirect()->back()->withErrors(['error: ' . $presetname . '- already exists' ])->withInput(Request::all());;
             }*/
         }
 
@@ -207,7 +207,7 @@ class PresetsController extends Controller
                'error' => $presetname . '- already exists'
                  ]);*/
           
-            return redirect()->back()->withErrors(['error: ' . $presetname . '- already exists' ])->withInput(Input::all());;
+            return redirect()->back()->withErrors(['error: ' . $presetname . '- already exists' ])->withInput($request->all());;
 
        }
 

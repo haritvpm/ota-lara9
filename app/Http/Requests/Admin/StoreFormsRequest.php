@@ -1,8 +1,8 @@
 <?php
 namespace App\Http\Requests\Admin;
-use Illuminate\Http\Request;
+
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Input;
+use Illuminate\Http\Request;
 use JavaScript;
 class StoreFormsRequest extends FormRequest
 {

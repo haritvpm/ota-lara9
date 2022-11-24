@@ -210,15 +210,7 @@
                             </small></td> -->
                             @endif
 
-                           <!--  <td>
-                                <small>
-                                @php
-                               echo str_limit( $form->remarks , 17)
-                               @endphp
-                               </small>
-                              
-                            </td>             -->                
-
+                          
                             <td class="text-nowrap">
                                 <a href="{{ route('admin.my_forms.show',[$form->id]) }}" class="btn btn-xs btn-primary">@lang('quickadmin.qa_view') </a>  <small>{{$form->overtimes()->count()}} </small>
                                 

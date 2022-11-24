@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Routing;
-use Illuminate\Http\Request;
+
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreRoutingsRequest;
 use App\Http\Requests\Admin\UpdateRoutingsRequest;

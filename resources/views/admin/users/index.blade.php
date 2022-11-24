@@ -19,7 +19,7 @@
     <br> 
     
     @php
-    echo implode( $conflictdesignempl, ', ');
+    echo implode( ', ',  $conflictdesignempl);
     @endphp
    
     </p>

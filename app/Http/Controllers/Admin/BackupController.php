@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 //use Alert;
-use Illuminate\Http\Request;
+
 use App\Http\Controllers\Controller;
 use Artisan;
 
@@ -114,8 +114,8 @@ class BackupController extends Controller
             return \Response::stream(function () use ($stream) {
                 fpassthru($stream);
             }, 200, [
-                "Content-Type" => $fs->getMimetype($file),
-                "Content-Length" => $fs->getSize($file),
+                "Content-Type" => Storage::mimeType($file),// $fs->getMimetype($file),
+                "Content-Length" => Storage::size($file),
                 "Content-disposition" => "attachment; filename=\"" . basename($file) . "\"",
             ]);
         } else {

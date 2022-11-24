@@ -149,7 +149,7 @@
                             <td>
                                 <small>
                                 @php
-                               echo str_limit( $form->remarks , 20)
+                               echo \Illuminate\Support\Str::limit( $form->remarks , 20)
                                @endphp
                                </small>
                               

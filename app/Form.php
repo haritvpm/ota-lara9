@@ -103,6 +103,9 @@ class Form extends Model
 
     public function scopefilterStatus($query, $status)
     {
+        if($status === null)
+            return;
+
         if ($status == 'todo') {
             return $query->whereRaw('creator = owner') //draft
                          ->orWhere(function ($query) { //to approve
@@ -111,7 +114,7 @@ class Form extends Model
                           });
                          
         }
-        else if (strpos($status, 'Sent') === 0) {
+        else if (strpos((string)$status, 'Sent') === 0) {
             return $query->whereRaw('creator != owner')
                          ->where('owner', '!=', Auth::user()->username); //it is sent by me. no longer with me
 
@@ -124,7 +127,7 @@ class Form extends Model
             return $query->whereRaw('creator != owner')->where('owner',Auth::user()->username);
                 
         }
-        else if (strpos($status, 'Pending') === 0) {
+        else if ((string)strpos($status, 'Pending') === 0) {
             return $query->whereRaw('creator != owner')
                 ->where('owner', '!=', 'admin')
                 ->where('owner', '!=', Auth::user()->username); //it is sent by me. no longer with me

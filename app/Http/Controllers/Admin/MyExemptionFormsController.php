@@ -4,11 +4,11 @@ namespace App\Http\Controllers\Admin;
 use App\Exemptionform;
 use App\Exemption;
 use App\Calender;
-use Illuminate\Http\Request;
+
 use Illuminate\Support\Facades\Gate;
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\DataTables;
-use Illuminate\Support\Facades\Input;
+use Illuminate\Http\Request;
 //use Laracasts\Utilities\JavaScript\JavaScriptFacade;
 use JavaScript;
 use Carbon\Carbon;
@@ -19,7 +19,7 @@ class MyExemptionFormsController extends Controller
     const SUBMISSION_DAYS_BEFORESESSION = 0;      // 
 
 
-    public function index()
+    public function index(Request $request)
     {
         if (! Gate::allows('myexemptionform_access')) {
             return abort(401);
@@ -40,14 +40,14 @@ class MyExemptionFormsController extends Controller
         $str_idfilter = null;
         $str_status = null;      
       
-        $session = Input::get('session');
-        $status =  Input::get('status');
-        $namefilter =  Input::get('namefilter');
+        $session = $request->query('session');
+        $status =  $request->query('status');
+        $namefilter =  $request->query('namefilter');
        
-        $idfilter   =  Input::get('idfilter');
+        $idfilter   =  $request->query('idfilter');
         
 
-        if (Input::filled('session')){
+        if ($request->filled('session')){
              
         }
         else{
@@ -58,7 +58,7 @@ class MyExemptionFormsController extends Controller
 
          //tab takes care of status. 
         
-        if (!Input::filled('status')){
+        if (!$request->filled('status')){
             if(!auth()->user()->isAdminorAudit()){
                 $status = 'todo';
             }
@@ -92,7 +92,7 @@ class MyExemptionFormsController extends Controller
 
 
 
-        if (Input::filled('idfilter'))
+        if ($request->filled('idfilter'))
         {
            $forms = $forms->where('id',$idfilter);
                    
@@ -101,7 +101,7 @@ class MyExemptionFormsController extends Controller
         }
 
 
-        if (Input::filled('namefilter')){
+        if ($request->filled('namefilter')){
            
          
             $forms = $forms->wherehas( 'exemptions', function($q) use ($namefilter){
@@ -125,14 +125,14 @@ class MyExemptionFormsController extends Controller
         }
         
 
-        $sort =  Input::filled('sort') ? Input::get('sort') : 'id'; // if user type in the url a column that doesnt exist app will default to id
-        $order = Input::get('order') === 'asc' ? 'asc' : 'desc'; // default desc
+        $sort =  $request->filled('sort') ? $request->query('sort') : 'id'; // if user type in the url a column that doesnt exist app will default to id
+        $order = $request->query('order') === 'asc' ? 'asc' : 'desc'; // default desc
                 
         $forms = $forms->orderBy($sort, $order)->paginate(15)
-                                               ->appends(Input::except('page'));
+                                               ->appends($request->except('page'));
          
         //this inverts sorting order for next click                                       
-        $querystr = '&order='.(Input::get('order') == 'asc' || null ? 'desc' : 'asc').$str_namefilter.$str_idfilter;
+        $querystr = '&order='.($request->query('order') == 'asc' || null ? 'desc' : 'asc').$str_namefilter.$str_idfilter;
              
         return view('admin.myexemptionforms.index',compact('forms','querystr', 'session_array','session', 'to_approve',  'pending_approval' ));
     }
@@ -748,7 +748,7 @@ class MyExemptionFormsController extends Controller
 
         
 
-        $session = Input::get('session');
+        $session = $request->query('session');
             
         //save calender
         $data = \App\Exemption::with('form')

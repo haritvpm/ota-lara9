@@ -5,10 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Employee;
 use Carbon\Carbon;
 
-use Illuminate\Http\Request;
+
 use Illuminate\Support\Facades\Gate;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Input;
+use Illuminate\Http\Request;
 use App\Http\Requests\Admin\StoreEmployeesRequest;
 use App\Http\Requests\Admin\UpdateEmployeesRequest;
 use Yajra\DataTables\DataTables;
@@ -123,9 +123,9 @@ class EmployeesController extends Controller
         $str_addedby = null;
         $str_type = null;
        
-        $namefilter =  Input::get('namefilter');
-        $added_by =  Input::get('added_by');
-        $type =  Input::get('type');
+        $namefilter =  $request->query('namefilter');
+        $added_by =  $request->query('added_by');
+        $type =  $request->query('type');
 
 
 
@@ -143,7 +143,7 @@ class EmployeesController extends Controller
         }
 
 
-        if (Input::filled('added_by')){ 
+        if ($request->filled('added_by')){ 
                            
             if($added_by != 'all'){
                 $query = $query->where( 'added_by', $added_by);
@@ -154,7 +154,7 @@ class EmployeesController extends Controller
             
         }
         
-        if (Input::filled('type')){
+        if ($request->filled('type')){
            
             if($type != 'all'){
                 $query = $query->where('category',$type);
@@ -163,7 +163,7 @@ class EmployeesController extends Controller
             }
         }
 
-        if (Input::filled('namefilter')){
+        if ($request->filled('namefilter')){
            
          
             $query = $query->where(function ($q) use($namefilter) {
@@ -179,7 +179,7 @@ class EmployeesController extends Controller
 
         
         $employees = $query->orderby('id','desc')->paginate(100)
-                                               ->appends(Input::except('page'));
+                                               ->appends($request->except('page'));
 
         return view('admin.employees.index', compact('employees'));
     }
@@ -551,7 +551,7 @@ class EmployeesController extends Controller
                 return $pen;
                 });
 
-       // $dump = Input::get('delbtn') != 'del';
+       // $dump = $request->query('delbtn') != 'del';
         
         //if($dump)
         {
@@ -574,15 +574,15 @@ class EmployeesController extends Controller
        }
 
        $inputview = 0;
-       $sectt = Input::get('sectt');
-      // $hostel = Input::get('hostel');
+       $sectt = $request->query('sectt');
+      // $hostel = $request->query('hostel');
        $myerrors = array();
        $added = array();
        $modified = array();
        $notinpdf = array();
        $ignoreditems = array();
 
-       if (!Input::filled('sectt') /*|| !Input::filled('hostel')*/){ 
+       if (!$request->filled('sectt') /*|| !$request->filled('hostel')*/){ 
 
           return view('admin.employees.sparksync', compact('inputview', 'myerrors', 'added', 'modified', 'notinpdf', 'ignoreditems'));
 

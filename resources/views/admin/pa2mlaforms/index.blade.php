@@ -66,7 +66,7 @@
                                                        
                            
                             
-                            <td >{{ str_limit($form->remarks, 30)  }}</td>
+                            <td >{{ \Illuminate\Support\Str::limit($form->remarks, 30)  }}</td>
                             <td >{{ date('d-m-Y', strtotime($form->updated_at)) }}</td>
 
                             <td>

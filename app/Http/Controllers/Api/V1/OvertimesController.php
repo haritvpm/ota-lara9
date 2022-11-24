@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Overtime;
-use Illuminate\Http\Request;
+
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreOvertimesRequest;
 use App\Http\Requests\Admin\UpdateOvertimesRequest;

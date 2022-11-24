@@ -4,11 +4,11 @@ namespace App\Http\Controllers\Admin;
 use App\FormOther;
 use App\OvertimeOther;
 use App\Calender;
-use Illuminate\Http\Request;
+
 use Illuminate\Support\Facades\Gate;
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\DataTables;
-use Illuminate\Support\Facades\Input;
+use Illuminate\Http\Request;
 //use Laracasts\Utilities\JavaScript\JavaScriptFacade;
 use JavaScript;
 use Carbon\Carbon;
@@ -51,16 +51,16 @@ class MyFormsOthersController extends Controller
         $str_desigfilter = null;
         $str_idfilter = null;
         
-        $session = Input::get('session');
-        $overtime_slot = Input::get('overtime_slot');
-        $status =  Input::get('status');
-        $datefilter =  Input::get('datefilter');
-        $namefilter =  Input::get('namefilter');
-        $desigfilter =  Input::get('desigfilter');
-        $idfilter   =  Input::get('idfilter');
+        $session = $request->query('session');
+        $overtime_slot = $request->query('overtime_slot');
+        $status =  $request->query('status');
+        $datefilter =  $request->query('datefilter');
+        $namefilter =  $request->query('namefilter');
+        $desigfilter =  $request->query('desigfilter');
+        $idfilter   =  $request->query('idfilter');
         
 
-        if (Input::filled('session')){
+        if ($request->filled('session')){
              
              // $session = $session_array[0];
         
@@ -70,7 +70,7 @@ class MyFormsOthersController extends Controller
         }
 
 
-        if (Input::filled('status'))
+        if ($request->filled('status'))
         {
            
             
@@ -84,7 +84,7 @@ class MyFormsOthersController extends Controller
         $str_status = '&status='.$status;
 
 
-        if (Input::filled('idfilter'))
+        if ($request->filled('idfilter'))
         {
            $forms = $forms->where('id',$idfilter);
                    
@@ -93,7 +93,7 @@ class MyFormsOthersController extends Controller
         }
 
 
-        if (Input::filled('overtime_slot')){
+        if ($request->filled('overtime_slot')){
             if($overtime_slot == 'Non-Sittings'){
                 $forms = $forms->where( 'overtime_slot' , '!=', 'Sittings' );    
             }
@@ -104,14 +104,14 @@ class MyFormsOthersController extends Controller
             $str_overtime_slot = '&overtime_slot='.$overtime_slot;
         }
 
-        if (Input::filled('datefilter')){
+        if ($request->filled('datefilter')){
             
             $forms = $forms->filterDate( $datefilter );
 
             $str_datefilter = '&datefilter='.$datefilter;
         }
 
-        if (Input::filled('namefilter')){
+        if ($request->filled('namefilter')){
            
          
             $forms = $forms->wherehas( 'overtimes', function($q) use ($namefilter){
@@ -121,7 +121,7 @@ class MyFormsOthersController extends Controller
             $str_namefilter = '&namefilter='. $namefilter;
         }
     
-        if (Input::filled('desigfilter')){
+        if ($request->filled('desigfilter')){
                         
              $forms = $forms->wherehas( 'overtimes', function($q) use ($desigfilter){
                 $q->where('designation','like', '%' . $desigfilter.'%' );
@@ -131,14 +131,14 @@ class MyFormsOthersController extends Controller
         }
      
 
-        $sort =  Input::filled('sort') ? Input::get('sort') : 'id'; // if user type in the url a column that doesnt exist app will default to id
-        $order = Input::get('order') === 'asc' ? 'asc' : 'desc'; // default desc
+        $sort =  $request->filled('sort') ? $request->query('sort') : 'id'; // if user type in the url a column that doesnt exist app will default to id
+        $order = $request->query('order') === 'asc' ? 'asc' : 'desc'; // default desc
                 
         $forms = $forms->orderBy($sort, $order)->paginate(15)
-                                               ->appends(Input::except('page'));
+                                               ->appends($request->except('page'));
          
         //this inverts sorting order for next click                                       
-        $querystr = '&order='.(Input::get('order') == 'asc' || null ? 'desc' : 'asc').$str_status.$str_overtime_slot.$str_datefilter.$str_namefilter.$str_desigfilter.$str_idfilter;
+        $querystr = '&order='.($request->query('order') == 'asc' || null ? 'desc' : 'asc').$str_status.$str_overtime_slot.$str_datefilter.$str_namefilter.$str_desigfilter.$str_idfilter;
             
         $to_approve = 0; 
         //sections and admins have nothing to approve
@@ -1086,7 +1086,7 @@ class MyFormsOthersController extends Controller
 
 
 
-    public function getpdf()
+    public function getpdf(Request $request)
     {
         if (! Gate::allows('my_form_others_access')) {
             return abort(401);
@@ -1110,16 +1110,16 @@ class MyFormsOthersController extends Controller
         $str_desigfilter = null;
         $str_idfilter = null;
         
-        $session = Input::get('session');
-        $overtime_slot = Input::get('overtime_slot');
-        $status =  Input::get('status');
-        $datefilter =  Input::get('datefilter');
-        $namefilter =  Input::get('namefilter');
-        $desigfilter =  Input::get('desigfilter');
-        $idfilter   =  Input::get('idfilter');
+        $session = $request->query('session');
+        $overtime_slot = $request->query('overtime_slot');
+        $status =  $request->query('status');
+        $datefilter =  $request->query('datefilter');
+        $namefilter =  $request->query('namefilter');
+        $desigfilter =  $request->query('desigfilter');
+        $idfilter   =  $request->query('idfilter');
         
 
-        if (Input::filled('session')){
+        if ($request->filled('session')){
              
         }
         else{
@@ -1130,7 +1130,7 @@ class MyFormsOthersController extends Controller
 
 
 
-        if (Input::filled('status'))
+        if ($request->filled('status'))
         {
            $forms = $forms->filterStatus($status);
                    
@@ -1138,7 +1138,7 @@ class MyFormsOthersController extends Controller
             
         }
 /*
-        if (Input::filled('idfilter'))
+        if ($request->filled('idfilter'))
         {
            $forms = $forms->where('id',$idfilter);
                    
@@ -1147,7 +1147,7 @@ class MyFormsOthersController extends Controller
         }
 
 
-        if (Input::filled('overtime_slot')){
+        if ($request->filled('overtime_slot')){
             if($overtime_slot == 'Non-Sittings'){
                 $forms = $forms->where( 'overtime_slot' , '!=', 'Sittings' );    
             }
@@ -1158,14 +1158,14 @@ class MyFormsOthersController extends Controller
             $str_overtime_slot = '&overtime_slot='.$overtime_slot;
         }
 
-        if (Input::filled('datefilter')){
+        if ($request->filled('datefilter')){
             
             $forms = $forms->filterDate( $datefilter );
 
             $str_datefilter = '&datefilter='.$datefilter;
         }
 
-        if (Input::filled('namefilter')){
+        if ($request->filled('namefilter')){
            
          
             $forms = $forms->wherehas( 'overtimes', function($q) use ($namefilter){
@@ -1175,7 +1175,7 @@ class MyFormsOthersController extends Controller
             $str_namefilter = '&namefilter='. $namefilter;
         }
     
-        if (Input::filled('desigfilter')){
+        if ($request->filled('desigfilter')){
                         
              $forms = $forms->wherehas( 'overtimes', function($q) use ($desigfilter){
                 $q->where('designation','like', '%' . $desigfilter.'%' );
@@ -1185,8 +1185,8 @@ class MyFormsOthersController extends Controller
         }*/
      
      
-        $sort =  Input::filled('sort') ? Input::get('sort') : 'id'; // if user type in the url a column that doesnt exist app will default to id
-        $order = Input::get('order') === 'asc' ? 'asc' : 'desc'; // default desc
+        $sort =  $request->filled('sort') ? $request->query('sort') : 'id'; // if user type in the url a column that doesnt exist app will default to id
+        $order = $request->query('order') === 'asc' ? 'asc' : 'desc'; // default desc
                 
         $forms = $forms->orderBy($sort, $order)->get();;
          
@@ -1194,7 +1194,7 @@ class MyFormsOthersController extends Controller
         $combined = null;
         $index = 0;
         
-        $htmlview = Input::get('viewall') != 'viewallpdf';
+        $htmlview = $request->query('viewall') != 'viewallpdf';
 
         $totalforms = count($forms);
 
@@ -1403,7 +1403,7 @@ th{
             return abort(401);
         }
 
-        $session = Input::get('session2del');
+        $session = $request->query('session2del');
 
         $forms = FormOther::where('session',$session)->get();
 
