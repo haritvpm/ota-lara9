@@ -7,17 +7,20 @@ use App\Employee;
 use App\Calender;
 
 use App\Attendance;
-use App\Http\Controllers\Traits\CsvImportTrait;
+// use App\Http\Controllers\Traits\CsvImportTrait;
 use Illuminate\Support\Facades\Gate;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreAttendancesRequest;
 use App\Http\Requests\Admin\UpdateAttendancesRequest;
 use Yajra\DataTables\DataTables;
 use Illuminate\Http\Request;
+use \SpreadsheetReader;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 
 class AttendancesController extends Controller
 {
-    use CsvImportTrait;
+    // use CsvImportTrait;
     
     /**
      * Display a listing of Attendance.
@@ -94,7 +97,7 @@ class AttendancesController extends Controller
             $csvExporter = new \Laracsv\Export();
 
 
-            $csvExporter->build($absents, [ 'dates_present', 'employee_id', 'employee.pen' ]);
+            $csvExporter->build($absents, [ 'present_dates', 'employee_id', 'employee.pen' ]);
 
             $csvExporter->download($filename);
 
@@ -297,6 +300,99 @@ class AttendancesController extends Controller
         ];
         
     }
+   
+    
+    public function parseCsvImportCustom(Request $request)
+    {
+        try {
+            $file = $request->file('csv_file');
+            $request->validate([
+                'csv_file' => 'mimes:csv,txt',
+            ]);
+
+            $path      = $file->path();
+            $filename = $file->getClientOriginalName();
+            $sessionname = strtok($filename, ' ');
+           // $hasHeader = $request->input('header', false) ? true : false;
+
+            $reader  = new SpreadsheetReader($path);
+            $headers = $reader->current();
+
+        
+            $session = \App\Session::whereDataentryAllowed('Yes')->whereName($sessionname)->first();
+
+            if(!$session){
+                File::delete($path);
+                return redirect()->route('admin.attendances.index')->withErrors(['Session not-found or dataentry-not-allowed (extracted from first part of filename): ' . $sessionname ]);
+            }
+           // dd($session);
+
+            $fields = array('present_dates' => 5,
+                            'pen' => 2, 
+                            'name' => 1,
+                            'total' => 6);
+            $insert = [];
+
+            // $out = new \Symfony\Component\Console\Output\ConsoleOutput();
+            foreach ($reader as $key => $row) {
+                //  $out->writeln( '------' . $key );
+                if (/*$hasHeader &&*/ $key == 0) {
+                    continue;
+                }
+
+                $tmp = [];
+                foreach ($fields as $header => $k) {
+                    if (isset($row[$k])) {
+                        $tmp[$header] = $row[$k];
+                    }
+                }
+
+                if (count($tmp) > 0) {
+                    $insert[] = $tmp;
+                }
+            }
+
+            File::delete($path);
+
+            //find if employee exists
+            $pens =[];
+            foreach ($insert as $insert_item) {
+                $insert_item['pen'] = str_replace(' ', '', $insert_item['pen']);
+                $pens[] = $insert_item['pen'];
+            }
+
+            $employees_indb = Employee::select('pen')->whereIn('pen', $pens)->get()->pluck('pen');
+
+            $result = array_diff($pens, $employees_indb->toarray());
+
+           
+
+            if( count( $result ) ){
+                
+                return redirect()->route('admin.attendances.index')->withErrors(['PEN not found: ' . implode( ',', array_values($result) )]);
+            }
+
+            $for_insert = array_chunk($insert, 100);
+
+            foreach ($for_insert as $insert_item) {
+                $session->attendances()->createMany($insert_item);
+                
+               
+            }
+
+            $rows  = count($insert);
+           
+            File::delete($path);
+
+            session()->flash('message', 'imported :rows', [$rows]);
+            
+            return redirect()->route('admin.attendances.index');
+        } catch (\Exception $ex) {
+            throw $ex;
+        }
+        
+    }
+
    
 
 }

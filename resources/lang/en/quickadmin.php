@@ -204,8 +204,8 @@ return [
         'fields'         => [
             'id'                    => 'ID',
             'id_helper'             => ' ',
-            'dates_present'         => 'Dates Present',
-            'dates_present_helper'  => ' ',
+            'present_dates'         => 'Dates Present',
+            'present_dates_helper'  => ' ',
             'pen'                   => 'Pen',
             'pen_helper'            => ' ',
             'created_at'            => 'Created at',

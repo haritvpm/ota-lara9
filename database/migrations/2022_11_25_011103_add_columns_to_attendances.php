@@ -15,9 +15,10 @@ return new class extends Migration
     {
         Schema::table('attendances', function (Blueprint $table) {
             if (!Schema::hasColumn('attendances', 'pen')) {
+                $table->string('name');
                 $table->string('pen');
                 $table->integer('total');
-                $table->string('dates_present')->nullable();
+                $table->string('present_dates')->nullable();
                
                 
             }
@@ -39,7 +40,7 @@ return new class extends Migration
         Schema::table('attendances', function (Blueprint $table) {
            /*  $table->dropColumn('pen');
             $table->dropColumn('total');
-            $table->dropColumn('dates_present'); */
+            $table->dropColumn('present_dates'); */
 
         });
     }

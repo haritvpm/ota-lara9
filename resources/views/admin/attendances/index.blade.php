@@ -9,7 +9,7 @@
             <button class="btn btn-warning" data-toggle="modal" data-target="#csvImportModal">
                 {{ trans('global.app_csvImport') }}
             </button>
-            @include('csvImport.modalfortrait', ['model' => 'Attendance', 'route' => 'admin.attendances.parseCsvImport'])
+            @include('csvImport.modalfortrait', ['model' => 'Attendance', 'route' => 'admin.attendances.parseCsvImportCustom'])
         </div>
     </div>
 @endcan
@@ -30,13 +30,16 @@
                             {{ trans('quickadmin.attendance.fields.id') }}
                         </th>
                         <th>
-                            {{ trans('quickadmin.attendance.fields.dates_present') }}
+                            name
                         </th>
                         <th>
                             {{ trans('quickadmin.attendance.fields.pen') }}
                         </th>
                         <th>
                             {{ trans('quickadmin.attendance.fields.session') }}
+                        </th>
+                        <th>
+                            {{ trans('quickadmin.attendance.fields.present_dates') }}
                         </th>
                         <th>
                             {{ trans('quickadmin.attendance.fields.total') }}
@@ -56,13 +59,16 @@
                                 {{ $attendance->id ?? '' }}
                             </td>
                             <td>
-                                {{ $attendance->dates_present ?? '' }}
+                                {{ $attendance->name ?? '' }}
                             </td>
                             <td>
                                 {{ $attendance->pen ?? '' }}
                             </td>
                             <td>
                                 {{ $attendance->session->name ?? '' }}
+                            </td>
+                            <td>
+                                {{ $attendance->present_dates ?? '' }}
                             </td>
                             <td>
                                 {{ $attendance->total ?? '' }}

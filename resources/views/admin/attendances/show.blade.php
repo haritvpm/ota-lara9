@@ -25,10 +25,10 @@
                     </tr>
                     <tr>
                         <th>
-                            {{ trans('quickadmin.attendance.fields.dates_present') }}
+                            {{ trans('quickadmin.attendance.fields.present_dates') }}
                         </th>
                         <td>
-                            {{ $attendance->dates_present }}
+                            {{ $attendance->present_dates }}
                         </td>
                     </tr>
                     <tr>

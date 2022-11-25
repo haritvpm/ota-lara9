@@ -11,14 +11,14 @@
             @method('PUT')
             @csrf
             <div class="form-group">
-                <label for="dates_present">{{ trans('quickadmin.attendance.fields.dates_present') }}</label>
-                <input class="form-control {{ $errors->has('dates_present') ? 'is-invalid' : '' }}" type="text" name="dates_present" id="dates_present" value="{{ old('dates_present', $attendance->dates_present) }}">
-                @if($errors->has('dates_present'))
+                <label for="present_dates">{{ trans('quickadmin.attendance.fields.present_dates') }}</label>
+                <input class="form-control {{ $errors->has('present_dates') ? 'is-invalid' : '' }}" type="text" name="present_dates" id="present_dates" value="{{ old('present_dates', $attendance->present_dates) }}">
+                @if($errors->has('present_dates'))
                     <div class="invalid-feedback">
-                        {{ $errors->first('dates_present') }}
+                        {{ $errors->first('present_dates') }}
                     </div>
                 @endif
-                <span class="help-block">{{ trans('quickadmin.attendance.fields.dates_present_helper') }}</span>
+                <span class="help-block">{{ trans('quickadmin.attendance.fields.present_dates_helper') }}</span>
             </div>
             <div class="form-group">
                 <label class="required" for="pen">{{ trans('quickadmin.attendance.fields.pen') }}</label>
