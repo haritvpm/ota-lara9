@@ -136,13 +136,13 @@
         </div>
 
     	
-       <!--  <div class="row">
+        <div class="row">
         	<div class="col-md-12 form-group">
         		<label for="comment">Remarks:</label>
         		<textarea class="form-control" rows="1" v-model="form.remarks" maxlength="190"></textarea>
         	</div>
         </div>	    
- -->
+ 
 	</div>
 	
 </div>

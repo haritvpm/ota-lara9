@@ -191,12 +191,12 @@ th{
 
         <br>
 
-        <!-- <div class="row">
+         <div class="row">
             <div class="col-md-12 form-group">
                 
                 <p ><strong>Remarks</strong> : {{ $form->remarks }} </p>
             </div>
-        </div>     -->  
+        </div> 
 
     </div>
 
@@ -238,7 +238,7 @@ th{
         @endif
        
 
-        @if( $form->owner != $form->creator && !Auth::user()->isAdmin() )
+        @if( $form->owner != $form->creator  )
          &nbsp;<button class="btn btn-warning pull-right hidden-print" @click="sendbackClick"><i class="fa fa-mail-reply"></i>&nbsp;Send Back</button>
         @endif
        

@@ -970,9 +970,12 @@ class MyFormsOthersController extends Controller
         $form = FormOther::findOrFail($id);
     
 
-        if( $form->owner != \Auth::user()->username)
+        if(!\Auth::user()->isAdmin())
         {
-            return abort(401);
+            if( $form->owner != \Auth::user()->username)
+            {
+                return abort(401);
+            }
         }
       
 
@@ -980,7 +983,9 @@ class MyFormsOthersController extends Controller
          $form->update( [
             'owner' => $form->creator,
             'submitted_by' => null,
+            'submitted_names' => null,
             'submitted_on' => null,
+            'form_no' => null,
             'remarks' => $request['remarks'],
 
         ]);
