@@ -216,6 +216,8 @@ return [
             'deleted_at_helper'     => ' ',
             'session'               => 'Session',
             'session_helper'        => ' ',
+			'name'               	=> 'Name',
+            'name_helper'        => ' ',
             'total'        => 'Total Sittings',
             'total_helper' => ' ',
         ],

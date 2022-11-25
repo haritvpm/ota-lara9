@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::table('attendances', function (Blueprint $table) {
             if (!Schema::hasColumn('attendances', 'pen')) {
-                $table->string('name');
+                $table->string('name')->nullable();
                 $table->string('pen');
                 $table->integer('total');
                 $table->string('present_dates')->nullable();

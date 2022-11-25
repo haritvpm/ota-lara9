@@ -201,8 +201,8 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
    
     
 
-   // Route::post('csv_parse', 'Admin\CsvImportController@parse')->name('csv_parse');
-   // Route::post('csv_process', 'Admin\CsvImportController@process')->name('csv_process');
+    Route::post('csv_parse', 'Admin\CsvImportController@parse')->name('csv_parse');
+    Route::post('csv_process', 'Admin\CsvImportController@process')->name('csv_process');
     Route::post('attendances/parse-csv-import', 'Admin\AttendancesController@parseCsvImportCustom')->name('attendances.parseCsvImportCustom');
     
 });

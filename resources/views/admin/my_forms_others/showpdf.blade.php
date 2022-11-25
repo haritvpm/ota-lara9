@@ -86,7 +86,7 @@
                     <th style="text-align:center;"> <small>Nature of Work</small></th>
                     
                     @endif
-                    <th style="text-align:center;">&nbsp;IFSC, Account No</th>
+                    <!-- <th style="text-align:center;">&nbsp;IFSC, Account No</th> -->
              <!--        <th >&nbsp;&nbsp;Account</th> -->
                     <th >&nbsp;Mob</th>
 
@@ -124,7 +124,7 @@
                 @endif
                   
                   
-                    <td class="monospacefont"   style="text-align:center;"> {{ optional($overtime->employeesother)->account_type != 'TSB' ? optional($overtime->employeesother)->ifsc : 'TSB' }} , {{ optional($overtime->employeesother)->account_no }} </td>
+                    <!-- <td class="monospacefont"   style="text-align:center;"> {{ optional($overtime->employeesother)->account_type != 'TSB' ? optional($overtime->employeesother)->ifsc : 'TSB' }} , {{ optional($overtime->employeesother)->account_no }} </td> -->
                     <td > <small>{{ optional($overtime->employeesother)->mobile }} </small>  </td>
 
 

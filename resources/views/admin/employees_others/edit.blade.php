@@ -68,7 +68,7 @@
                         </p>
                     @endif
                 </div>
-
+<!-- 
                 <div class="col-xs-2 form-group">
                     {!! Form::label('department_idno', trans('quickadmin.employees-other.fields.department-idno').'', ['class' => 'control-label']) !!}
                     {!! Form::text('department_idno', old('department_idno'), ['class' => 'form-control', 'placeholder' => '']) !!}
@@ -78,10 +78,10 @@
                             {{ $errors->first('department_idno') }}
                         </p>
                     @endif
-                </div>
+                </div> -->
             </div>
            
-            <div class="row">
+            <!-- <div class="row">
                 <div class="col-xs-4 form-group">
                     {!! Form::label('account_type', trans('quickadmin.employees-other.fields.account-type').'*', ['class' => 'control-label']) !!}
                     {!! Form::select('account_type', $enum_account_type, old('account_type'), ['class' => 'form-control select2', 'required' => '']) !!}
@@ -114,7 +114,7 @@
                         </p>
                     @endif
                 </div>
-            </div>
+            </div> -->
 
             
             

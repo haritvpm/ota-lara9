@@ -68,7 +68,7 @@
                 </div>
             </div> -->
            
-            <div class="row">
+          <!--   <div class="row">
                 <div class="col-xs-6 form-group">
                     {!! Form::label('account_type', trans('quickadmin.employees-other.fields.account-type').'*', ['class' => 'control-label']) !!}
                     {!! Form::select('account_type', $enum_account_type, old('account_type'), ['class' => 'form-control', 'required' => '']) !!}
@@ -90,9 +90,9 @@
                         </p>
                     @endif
                 </div>
-            </div>
+            </div> -->
             <div class="row">
-                <div class="col-xs-6 form-group">
+                <!-- <div class="col-xs-6 form-group">
                     {!! Form::label('account_no', trans('quickadmin.employees-other.fields.account-no').'*', ['class' => 'control-label']) !!}
                     {!! Form::text('account_no', old('account_no'), ['class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
                     <p class="help-block"></p>
@@ -101,7 +101,7 @@
                             {{ $errors->first('account_no') }}
                         </p>
                     @endif
-                </div>
+                </div> -->
                 <div class="col-xs-6 form-group">
                     {!! Form::label('mobile', trans('quickadmin.employees-other.fields.mobile').'*', ['class' => 'control-label']) !!}
                     {!! Form::text('mobile', old('mobile'), ['class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}

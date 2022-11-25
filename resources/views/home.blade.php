@@ -589,66 +589,7 @@
 
   @endif
 
-  <!-- @if(auth()->user()->isAdmin()||auth()->user()->isServices())
-
-  <div class="box box-primary">
-  <div class="box-header with-border">
-  <div class="box-title">Exemption Form pending status</div>
-  <div class="box-body">
-
-     <div class="tabpanel">
-       <!- - Nav tabs - ->
-        <ul class="nav nav-tabs" role="tablist">
-        @foreach($info_ex as $session => $sessinfo)
-          @php
-          $idwithnodot = str_replace(".","",$session);
-          @endphp
-           <li role="presentation" @if($loop->first) class="active" @endif>
-              <a href="#tab-{{$idwithnodot}}" aria-controls="#tab-{{$idwithnodot}}" role="tab" data-toggle="tab">{{ $session }}</a>
-           </li>
-
-        @endforeach
-        </ul>
-        <!- - Tab panes - ->
-        <div class="tab-content">
-            <br>
-            @foreach($info_ex as $session => $sessinfo)
-             @php
-             $idwithnodot = str_replace(".","",$session);
-             $totalpending = 0;
-             @endphp
-             <div  role="tabpanel"   @if($loop->first) class="tab-pane active" @else class="tab-pane" @endif id="tab-{{$idwithnodot}}">
-                               
-             
-             <ol class="row">
-            
-             @foreach($sessinfo as $k => $v)
-               @if($v['created'] == 0 )   @continue;   @endif
-              <li class="col-sm-6">
-                
-                {{ $k }}  : <strong><span class="text-warning">{{$v['created']}}</span></strong>
-                @if(!$loop->last), @endif
-                </li>
-                @php
-                $totalpending += $v['created'];
-                @endphp
-             @endforeach
-            
-             </ol> 
-              
-             <p>Total: {{$totalpending}}  </p>
-
-            </div>
-            @endforeach
-       </div>
-     </div>
- </div> 
- </div>
- </div>
-
- @endif
- -->
-
+  
 @stop
 
 

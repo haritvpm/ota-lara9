@@ -30,10 +30,14 @@
                             {{ trans('quickadmin.attendance.fields.id') }}
                         </th>
                         <th>
-                            name
+                            Name as per O/S
                         </th>
                         <th>
-                            {{ trans('quickadmin.attendance.fields.pen') }}
+                            {{ trans('quickadmin.attendance.fields.pen') }}  as per O/S
+                        </th>
+
+                        <th>
+                            Employee
                         </th>
                         <th>
                             {{ trans('quickadmin.attendance.fields.session') }}
@@ -65,8 +69,13 @@
                                 {{ $attendance->pen ?? '' }}
                             </td>
                             <td>
+                                {{ $attendance->employee->name ?? '' }}
+                            </td>
+
+                            <td>
                                 {{ $attendance->session->name ?? '' }}
                             </td>
+
                             <td>
                                 {{ $attendance->present_dates ?? '' }}
                             </td>
@@ -101,6 +110,30 @@
                 </tbody>
             </table>
         </div>
+
+
+        <form action="" method="get" id="filter" class="form-inline">
+		<div class="form-group">
+            Session <select class="form-control" name="session">
+
+                @foreach($sessions as $sess)
+                @if($sess == \Request('session'))
+                <option selected>{{$sess}}</option>
+                @else
+                <option>{{$sess}}</option>
+                @endif
+                @endforeach
+
+            </select>
+        </div>
+      
+       
+        <button type="submit" name="action" value="view" class="btn btn-success" rel="filter"><span class="glyphicon glyphicon-search"></span> View</button>
+        <button type="submit" name="action" value="deleteall" class="btn btn-danger">Delete All</button>
+      
+        </form>
+
+
     </div>
 </div>
 

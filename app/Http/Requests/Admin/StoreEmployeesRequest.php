@@ -28,7 +28,7 @@ class StoreEmployeesRequest extends FormRequest
                 'required',
                 'regex:/^((?![A-Za-z0-9]).)*$/'
                 ),*/
-            'pen' => 'min:3|required|unique:employees,pen,'.$this->route('employee'),
+            'pen' => 'min:6|required|unique:employees,pen,'.$this->route('employee'),
             'designation_id' => 'required',
         ];
     }

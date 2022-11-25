@@ -25,11 +25,11 @@ class UpdateEmployeesOthersRequest extends FormRequest
         return [
             
             'name' => 'min:3|required',
-            'pen' => 'min:3|required',
+            'pen' => 'min:6|required',
             'designation_id' => 'required',
-            'account_type' => 'required',
+            // 'account_type' => 'required',
          //   'ifsc' => 'min:11|max:11',
-            'account_no' => 'min:7|required',
+            // 'account_no' => 'min:7|required',
             'mobile' => 'min:10|required',
         ];
     }
@@ -47,26 +47,26 @@ class UpdateEmployeesOthersRequest extends FormRequest
             //see if a user with same pen exists
 
             //this means we cannot edit ourselves
-            /*
-            $emp = \App\EmployeesOther::where('added_by', \Auth::user()->username )
-                        ->where('pen', $this->input('pen'))
+            // /*
+            // $emp = \App\EmployeesOther::where('added_by', \Auth::user()->username )
+            //             ->where('pen', $this->input('pen'))
                         
-                        ->count();
+            //             ->count();
 
 
-            if ($emp > 0) {
-                $validator->errors()->add('pen', 'A person with the same PEN already exists');
-            }
+            // if ($emp > 0) {
+            //     $validator->errors()->add('pen', 'A person with the same PEN already exists');
+            // }
             
 
-            $emp = \App\EmployeesOther::where('added_by', \Auth::user()->username )
-                        ->where('account_no', $this->input('account_no'))->count();
+            // $emp = \App\EmployeesOther::where('added_by', \Auth::user()->username )
+            //             ->where('account_no', $this->input('account_no'))->count();
 
-            if ($emp > 0) {
-                $validator->errors()->add('account_no', 'A person with the same account_no already exists');
-            }*/
+            // if ($emp > 0) {
+            //     $validator->errors()->add('account_no', 'A person with the same account_no already exists');
+            // }*/
 
-           if(  $this->input('account_type') == "Bank Account" ){
+          /*  if(  $this->input('account_type') == "Bank Account" ){
                 if( 11 != strlen($this->input('ifsc'))){
                     $validator->errors()->add('ifsc', 'IFSC must be 11 character long');
                 }
@@ -78,7 +78,7 @@ class UpdateEmployeesOthersRequest extends FormRequest
                 if( 0 != strlen($this->input('ifsc'))){
                     $validator->errors()->add('ifsc', 'No IFSC needed for TSB accounts');
                 }
-            }
+            } */
 
         });
     }

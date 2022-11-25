@@ -34,9 +34,9 @@
                         <!-- <th>ID</th> -->
                         <th>@lang('quickadmin.employees-other.fields.added-by')</th>
                        @endif
-                        <th>@lang('quickadmin.employees-other.fields.account-type')</th>
-                        <th>IFSC</th>
-                        <th>@lang('quickadmin.employees-other.fields.account-no')</th>
+                        <!-- <th>@lang('quickadmin.employees-other.fields.account-type')</th> -->
+                        <!-- <th>IFSC</th> -->
+                        <!-- <th>@lang('quickadmin.employees-other.fields.account-no')</th> -->
                          <th>@lang('quickadmin.employees-other.fields.mobile')</th>
                                                 <th>&nbsp;</th>
 
@@ -97,9 +97,9 @@
                 // {data: 'id', name: 'id'},       
                 {data: 'added_by', name: 'added_by'},
                 @endif
-                {data: 'account_type', name: 'account_type'},
-                {data: 'ifsc', name: 'ifsc'},
-                {data: 'account_no', name: 'account_no'},
+                // {data: 'account_type', name: 'account_type'},
+               
+                // {data: 'account_no', name: 'account_no'},
                 {data: 'mobile', name: 'mobile'},
                 {data: 'actions', name: 'actions', searchable: false, sortable: false}
             ];

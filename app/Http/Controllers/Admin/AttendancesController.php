@@ -33,8 +33,8 @@ class AttendancesController extends Controller
             return abort(401);
         }
       
-
-        $q = \App\Session::whereDataentryAllowed('Yes')->latest();
+       
+        $q = \App\Session::whereShowInDatatable('Yes')->latest();
 
         $session_array = $q->get();
                  
@@ -45,22 +45,38 @@ class AttendancesController extends Controller
         $sessionname = $request->query('session', $sessions[0]);
        
               
-        $attendances = Attendance::all();
-                    
+         
+        $session = \App\Session::latest()->get()->first();
         
         if ($request->filled('session')){
-
-            $temp = $temp->orderby('name','asc')->get()/*->take(50)*/;
-            
-            $ids = $temp->pluck('id');
+       
 
             $session = \App\Session::where('name',$sessionname)->get()->first();
-                 
-                   
-           
         }
-          
        
+        switch ($request->input('action')) {
+            default:
+                // model
+                break;
+    
+            case 'deleteall':
+                $session->attendances()->delete();
+                
+                break;
+             
+        }
+        
+        $attendances = $session->attendances()->get();
+
+//////////////////////////
+        $pens_not_found = Attendance::where('session_id',$session->id )->whereNull('employee_id')->get()->pluck('pen')->toarray();
+
+        if(count($pens_not_found)  ){
+            \Session::flash('message-danger', 'Employee not found for PEN: '. implode(',', $pens_not_found));
+        } 
+
+
+       // dd($attendances);
         return view('admin.attendances.index', compact('sessions','attendances'));
         
 
@@ -119,7 +135,7 @@ class AttendancesController extends Controller
             return abort(401);
         }
         
-        $sessions = \App\Session::get()->pluck('name', 'id')->prepend(trans('quickadmin.qa_please_select'), '');
+        $sessions = \App\Session::latest()->get()->pluck('name', 'id')->prepend(trans('quickadmin.qa_please_select'), '');
         $employees = \App\Employee::get()->pluck('name', 'id')->prepend(trans('quickadmin.qa_please_select'), '');
 
         return view('admin.attendances.create', compact('sessions', 'employees'));
@@ -136,6 +152,13 @@ class AttendancesController extends Controller
         if (! Gate::allows('attendance_create')) {
             return abort(401);
         }
+        
+       // $att = $request->all();
+
+        //if($att->name == '') $att->name = 
+
+
+
         $attendance = Attendance::create($request->all());
 
 
@@ -156,7 +179,7 @@ class AttendancesController extends Controller
             return abort(401);
         }
         
-        $sessions = \App\Session::get()->pluck('name', 'id')->prepend(trans('quickadmin.qa_please_select'), '');
+        $sessions = \App\Session::latest()->get()->pluck('name', 'id')->prepend(trans('quickadmin.qa_please_select'), '');
         $employees = \App\Employee::get()->pluck('name', 'id')->prepend(trans('quickadmin.qa_please_select'), '');
 
         $attendance = Attendance::findOrFail($id);
@@ -229,6 +252,7 @@ class AttendancesController extends Controller
         if (! Gate::allows('attendance_delete')) {
             return abort(401);
         }
+/*
         if ($request->input('ids')) {
             $entries = Attendance::whereIn('id', $request->input('ids'))->get();
 
@@ -236,6 +260,10 @@ class AttendancesController extends Controller
                 $entry->delete();
             }
         }
+        */
+
+        
+
     }
     public function ajaxfindexactpenforattendace($param)
     {
@@ -325,6 +353,13 @@ class AttendancesController extends Controller
                 File::delete($path);
                 return redirect()->route('admin.attendances.index')->withErrors(['Session not-found or dataentry-not-allowed (extracted from first part of filename): ' . $sessionname ]);
             }
+
+            if( $session->attendances()->count()){
+                File::delete($path);
+                return redirect()->route('admin.attendances.index')->withErrors(['Session attendance already entered!' ]);
+     
+            }
+
            // dd($session);
 
             $fields = array('present_dates' => 5,
@@ -343,50 +378,76 @@ class AttendancesController extends Controller
                 $tmp = [];
                 foreach ($fields as $header => $k) {
                     if (isset($row[$k])) {
-                        $tmp[$header] = $row[$k];
+                        
+                        if( $header == 'pen' )
+                            $tmp[$header] = str_replace(' ', '',  $row[$k]);
+                        else
+                            $tmp[$header] = $row[$k];
                     }
                 }
 
-                if (count($tmp) > 0) {
-                    $insert[] = $tmp;
+                
+
+                if (count($tmp) == count($fields) ) {
+                    if( $tmp['total'] > 0 ){
+                        $insert[] = $tmp;
+                    }
+                } else {
+                    dd($row);
                 }
             }
 
             File::delete($path);
 
             //find if employee exists
+            
             $pens =[];
             foreach ($insert as $insert_item) {
-                $insert_item['pen'] = str_replace(' ', '', $insert_item['pen']);
                 $pens[] = $insert_item['pen'];
             }
-
+            $pens = array_unique($pens); //if there are multiple empty pens,remove
+/*
             $employees_indb = Employee::select('pen')->whereIn('pen', $pens)->get()->pluck('pen');
-
             $result = array_diff($pens, $employees_indb->toarray());
+             if( count( $result ) ){
+                
+               return redirect()->route('admin.attendances.index')->withErrors(['PEN not found: ' . implode( ',', array_values($result) )]);
+            }*/
 
+            $employees_indb = Employee::whereIn('pen', $pens)->get()->pluck('id','pen');
+            //dd($employees_indb);
+            $pens_not_found = [];
+
+            foreach ($insert as &$insert_item) {
+                
+                //$emp = Employee::select('id')->where('pen', $insert_item['pen'])->first();
+                if(array_key_exists($insert_item['pen'], $employees_indb->toarray())){
+                    $emp_id = $employees_indb[$insert_item['pen']];
+                 
+                    $insert_item['employee_id'] = $emp_id;
+                } else {
+                    $pens_not_found[] = $insert_item['pen'];
+                }  
+                
+            }
+
+            if(count($pens_not_found)){
+                //return redirect()->route('admin.attendances.index')->withErrors(['Employee not found. PEN: ' . implode(',', $pens_not_found) ]);
+            }
            
-
-            if( count( $result ) ){
-                
-                return redirect()->route('admin.attendances.index')->withErrors(['PEN not found: ' . implode( ',', array_values($result) )]);
-            }
-
-            $for_insert = array_chunk($insert, 100);
-
-            foreach ($for_insert as $insert_item) {
-                $session->attendances()->createMany($insert_item);
-                
-               
-            }
-
+                      
+            $session->attendances()->createMany($insert);
+         
             $rows  = count($insert);
            
             File::delete($path);
 
-            session()->flash('message', 'imported :rows', [$rows]);
+            \Session::flash('message-success', 'imported items: ' . $rows );
+            if(count($pens_not_found)  ){
+                \Session::flash('message-danger', 'Employee not found for PEN: '. implode(',', $pens_not_found));
+            }
             
-            return redirect()->route('admin.attendances.index');
+            return redirect()->route('admin.attendances.index',['session'=> $session->name]);
         } catch (\Exception $ex) {
             throw $ex;
         }

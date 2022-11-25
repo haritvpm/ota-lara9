@@ -34,9 +34,9 @@
                         <th>@lang('quickadmin.employees-other.fields.added-by')</th>
                         @endif
                        
-                        <th>@lang('quickadmin.employees-other.fields.account-type')</th>
-                        <th>IFSC</th>
-                        <th>@lang('quickadmin.employees-other.fields.account-no')</th>
+                        <!-- <th>@lang('quickadmin.employees-other.fields.account-type')</th> -->
+                    
+                        <!-- <th>@lang('quickadmin.employees-other.fields.account-no')</th> -->
                          <th>@lang('quickadmin.employees-other.fields.mobile')</th>
                                                 <th>&nbsp;</th>
 
@@ -58,9 +58,9 @@
                                 @if(\Auth::user()->isAdmin())
                                 <td field-key='added_by'>{{ $employees_other->added_by }}</td>
                                 @endif
-                                <td field-key='account_type'>{{ $employees_other->account_type }}</td>
-                                <td field-key='ifsc'>{{ $employees_other->ifsc }}</td>
-                                <td field-key='account_no'>{{ $employees_other->account_no }}</td>
+                                <!-- <td field-key='account_type'>{{ $employees_other->account_type }}</td> -->
+                                <!-- <td field-key='ifsc'>{{ $employees_other->ifsc }}</td> -->
+                                <!-- <td field-key='account_no'>{{ $employees_other->account_no }}</td> -->
                                 <td field-key='mobile'>{{ $employees_other->mobile }}</td>
                                                                 <td>
                                     @can('employees_other_view')

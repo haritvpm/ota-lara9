@@ -40,18 +40,6 @@
                         </tr>
                         @endif
 
-                        <tr>
-                            <th>@lang('quickadmin.employees-other.fields.account-type')</th>
-                            <td field-key='account_type'>{{ $employees_other->account_type }}</td>
-                        </tr>
-                        <tr>
-                            <th>@lang('quickadmin.employees-other.fields.ifsc')</th>
-                            <td field-key='ifsc'>{{ $employees_other->ifsc }}</td>
-                        </tr>
-                        <tr>
-                            <th>@lang('quickadmin.employees-other.fields.account-no')</th>
-                            <td field-key='account_no'>{{ $employees_other->account_no }}</td>
-                        </tr>
                          <tr>
                             <th>@lang('quickadmin.employees-other.fields.mobile')</th>
                             <td field-key='mobile'>{{ $employees_other->mobile }}</td>
