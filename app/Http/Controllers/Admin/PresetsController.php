@@ -231,7 +231,7 @@ class PresetsController extends Controller
 
 
        //return redirect()->route('admin.presets.index');
-       return redirect()->route('admin.presets.show', ['id' => $id]);
+       return redirect()->route('admin.presets.show', ['preset' => $id]);
     }
 
 

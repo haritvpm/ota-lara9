@@ -536,10 +536,7 @@ class EmployeesController extends Controller
 
         $date_ago = Carbon::today()->subYears(1);
         $merged = \App\Overtime::distinct()->get(['pen'])->pluck('pen');
-        if(\Schema::hasTable('exemptions')){
-          $pens2 = \App\Exemption::distinct()->get(['pen'])->pluck('pen');
-          $merged = $merged->merge($pens2)->unique();
-        }
+        
 
         $merged->transform(function ($pen) {
                 $tmp = strpos($pen, '-');

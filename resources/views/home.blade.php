@@ -207,25 +207,7 @@
 
 
 
- <!-- Exemption status -->
-  @can('myexemptionform_access')
-    @if($to_approve_ex > 0 || $draft_ex > 0)
-
-    <a href="<?=URL::to('admin/myexemptionforms')?>">
-    <div class="alert alert-danger" role="alert">
-      
-      @if($to_approve_ex > 0)
-      <strong>{{$to_approve_ex}} exemption form(s)</strong> to approve.&nbsp;
-      @endif
-
-      @if( $draft_ex > 0)
-      <strong>{{$draft_ex}} exemption form(s)</strong> still in draft stage.
-      @endif
-
-    </div>
-    </a>
-    @endif
-  @endcan
+ 
 
  @endif
  @endif

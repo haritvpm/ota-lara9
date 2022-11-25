@@ -1,56 +1,67 @@
 @extends('layouts.app')
-
 @section('content')
-    <h3 class="page-title">@lang('quickadmin.attendance.title')</h3>
-    {!! Form::open(['method' => 'POST', 'route' => ['admin.attendances.store']]) !!}
 
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            @lang('quickadmin.qa_create')
-        </div>
-        
-        <div class="panel-body">
-            <div class="row">
-                <div class="col-xs-12 form-group">
-                    {!! Form::label('session_id', trans('quickadmin.attendance.fields.session').'*', ['class' => 'control-label']) !!}
-                    {!! Form::select('session_id', $sessions, old('session_id'), ['class' => 'form-control select2', 'required' => '']) !!}
-                    <p class="help-block"></p>
-                    @if($errors->has('session_id'))
-                        <p class="help-block">
-                            {{ $errors->first('session_id') }}
-                        </p>
-                    @endif
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-xs-12 form-group">
-                    {!! Form::label('employee_id', trans('quickadmin.attendance.fields.employee').'*', ['class' => 'control-label']) !!}
-                    {!! Form::select('employee_id', $employees, old('employee_id'), ['class' => 'form-control select2', 'required' => '']) !!}
-                    <p class="help-block"></p>
-                    @if($errors->has('employee_id'))
-                        <p class="help-block">
-                            {{ $errors->first('employee_id') }}
-                        </p>
-                    @endif
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-xs-12 form-group">
-                    {!! Form::label('dates_absent', trans('quickadmin.attendance.fields.dates-absent').'', ['class' => 'control-label']) !!}
-                    {!! Form::textarea('dates_absent', old('dates_absent'), ['class' => 'form-control ', 'placeholder' => '']) !!}
-                    <p class="help-block"></p>
-                    @if($errors->has('dates_absent'))
-                        <p class="help-block">
-                            {{ $errors->first('dates_absent') }}
-                        </p>
-                    @endif
-                </div>
-            </div>
-            
-        </div>
+<div class="card">
+    <div class="card-header">
+        {{ trans('global.create') }} {{ trans('quickadmin.attendance.title_singular') }}
     </div>
 
-    {!! Form::submit(trans('quickadmin.qa_save'), ['class' => 'btn btn-danger']) !!}
-    {!! Form::close() !!}
-@stop
+    <div class="card-body">
+        <form method="POST" action="{{ route("admin.attendances.store") }}" enctype="multipart/form-data">
+            @csrf
+            <div class="form-group">
+                <label for="dates_present">{{ trans('quickadmin.attendance.fields.dates_present') }}</label>
+                <input class="form-control {{ $errors->has('dates_present') ? 'is-invalid' : '' }}" type="text" name="dates_present" id="dates_present" value="{{ old('dates_present', '') }}">
+                @if($errors->has('dates_present'))
+                    <div class="invalid-feedback">
+                        {{ $errors->first('dates_present') }}
+                    </div>
+                @endif
+                <span class="help-block">{{ trans('quickadmin.attendance.fields.dates_present_helper') }}</span>
+            </div>
+            <div class="form-group">
+                <label class="required" for="pen">{{ trans('quickadmin.attendance.fields.pen') }}</label>
+                <input class="form-control {{ $errors->has('pen') ? 'is-invalid' : '' }}" type="text" name="pen" id="pen" value="{{ old('pen', '') }}" required>
+                @if($errors->has('pen'))
+                    <div class="invalid-feedback">
+                        {{ $errors->first('pen') }}
+                    </div>
+                @endif
+                <span class="help-block">{{ trans('quickadmin.attendance.fields.pen_helper') }}</span>
+            </div>
+            <div class="form-group">
+                <label for="session_id">{{ trans('quickadmin.attendance.fields.session') }}</label>
+                <select class="form-control select2 {{ $errors->has('session') ? 'is-invalid' : '' }}" name="session_id" id="session_id">
+                    @foreach($sessions as $id => $entry)
+                        <option value="{{ $id }}" {{ old('session_id') == $id ? 'selected' : '' }}>{{ $entry }}</option>
+                    @endforeach
+                </select>
+                @if($errors->has('session'))
+                    <div class="invalid-feedback">
+                        {{ $errors->first('session') }}
+                    </div>
+                @endif
+                <span class="help-block">{{ trans('quickadmin.attendance.fields.session_helper') }}</span>
+            </div>
+            <div class="form-group">
+                <label class="required" for="total">{{ trans('quickadmin.attendance.fields.total') }}</label>
+                <input class="form-control {{ $errors->has('total') ? 'is-invalid' : '' }}" type="number" name="total" id="total" value="{{ old('total', '0') }}" step="1" required>
+                @if($errors->has('total'))
+                    <div class="invalid-feedback">
+                        {{ $errors->first('total') }}
+                    </div>
+                @endif
+                <span class="help-block">{{ trans('quickadmin.attendance.fields.total_helper') }}</span>
+            </div>
+            <div class="form-group">
+                <button class="btn btn-danger" type="submit">
+                    {{ trans('global.save') }}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 
+
+
+@endsection

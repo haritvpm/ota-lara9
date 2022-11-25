@@ -42,9 +42,9 @@ class SessionsController extends Controller
 
         $enum_dataentry_allowed = Session::$enum_dataentry_allowed;
         $enum_show_in_datatable = Session::$enum_show_in_datatable;
-        $enum_exemption_entry = Session::$enum_exemption_entry;
+        $enum_sittings_entry = Session::$enum_sittings_entry;
 
-        return view('admin.sessions.create', compact('enum_dataentry_allowed', 'enum_show_in_datatable', 'enum_exemption_entry'));
+        return view('admin.sessions.create', compact('enum_dataentry_allowed', 'enum_show_in_datatable', 'enum_sittings_entry'));
     }
 
     /**
@@ -79,11 +79,11 @@ class SessionsController extends Controller
         }        
         $enum_dataentry_allowed = Session::$enum_dataentry_allowed;
         $enum_show_in_datatable = Session::$enum_show_in_datatable;
-        $enum_exemption_entry = Session::$enum_exemption_entry;
+        $enum_sittings_entry = Session::$enum_sittings_entry;
 
         $session = Session::findOrFail($id);
 
-        return view('admin.sessions.edit', compact('session', 'enum_dataentry_allowed', 'enum_show_in_datatable', 'enum_exemption_entry'));
+        return view('admin.sessions.edit', compact('session', 'enum_dataentry_allowed', 'enum_show_in_datatable', 'enum_sittings_entry'));
     }
 
     /**
@@ -103,11 +103,11 @@ class SessionsController extends Controller
         if( \Auth::user()->isAdmin() ){
 
             $session->update($request->all());
-        } else {
+        } /* else {
             $session->update([
-                'exemption_entry' => $request['exemption_entry'],
+                'sittings_entry' => $request['sittings_entry'],
             ]);
-        }
+        } */
 
 
 

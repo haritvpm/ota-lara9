@@ -792,9 +792,8 @@ class MyFormsController extends Controller
         });
 
        
-
         $request->session()->flash('message-success', 'Success: created form no:' . $formid ); 
-
+        
         return response()->json([
            'created' => true,
            'id' => $formid

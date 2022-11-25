@@ -30,7 +30,7 @@
                         <th>@lang('quickadmin.sessions.fields.dataentry-allowed')</th>
                         <th>@lang('quickadmin.sessions.fields.show-in-datatable')</th>
                         @endif
-                         <th>@lang('quickadmin.sessions.fields.exemption-entry')</th>
+                         <th>@lang('quickadmin.sessions.fields.sittings-entry')</th>
                                                 <th>&nbsp;</th>
 
                     </tr>
@@ -49,7 +49,7 @@
                                 <td field-key='dataentry_allowed'>{{ $session->dataentry_allowed }}</td>
                                 <td field-key='show_in_datatable'>{{ $session->show_in_datatable }}</td>
                                 @endif
-                                <td field-key='exemption_entry'>{{ $session->exemption_entry }}</td>
+                                <td field-key='sittings_entry'>{{ $session->sittings_entry }}</td>
                                 <td>
                                     @can('session_view')
                                     <a href="{{ route('admin.sessions.show',[$session->id]) }}" class="btn btn-xs btn-primary">@lang('quickadmin.qa_view')</a>

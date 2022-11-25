@@ -19,7 +19,7 @@ class Add59f48fa38b78dRelationshipsToAttendanceTable extends Migration
                 }
                 if (!Schema::hasColumn('attendances', 'employee_id')) {
                 $table->integer('employee_id')->unsigned()->nullable();
-                $table->foreign('employee_id', '85158_59f48fa25ef36')->references('id')->on('employees')->onDelete('cascade');
+                $table->foreign('employee_id', '85158_59f48fa25ef36')->references('id')->on('employees');
                 }
                 
         });

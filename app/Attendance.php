@@ -9,12 +9,16 @@ use Illuminate\Database\Eloquent\Model;
  * @package App
  * @property string $session
  * @property string $employee
- * @property date $date_absent
+ * @property string $dates_present
 */
 class Attendance extends Model
 {
-    protected $fillable = ['date_absent', 'session_id', 'employee_id'];
-    
+    protected $fillable = ['dates_present',
+    'pen',
+    'session_id',
+    'total','employee_id','created_at',
+    'updated_at',];
+    public $table = 'attendances';
 
     /**
      * Set to null if empty

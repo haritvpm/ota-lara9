@@ -371,45 +371,7 @@ class AuthServiceProvider extends ServiceProvider
         });
         
 
-        // Auth gates for: Exemptions
-        Gate::define('exemption_access', function ($user) {
-            return in_array($user->role_id, [1,6]);
-        });
-        Gate::define('exemption_edit', function ($user) {
-            return in_array($user->role_id, [1, 6]);
-        });
-        Gate::define('exemption_view', function ($user) {
-            return in_array($user->role_id, [1, 6]);
-        });
-        Gate::define('exemption_delete', function ($user) {
-            return in_array($user->role_id, [1, 6]);
-        });
-        Gate::define('exemption_create', function ($user) {
-            return in_array($user->role_id, [6]);
-        });
-
-        // Auth gates for: Exemptionforms
-        Gate::define('exemptionform_access', function ($user) {
-            return in_array($user->role_id, [1, 6]);
-        });
-        
-        Gate::define('exemptionform_create', function ($user) {
-            return in_array($user->role_id, [1, 6]);
-        });
-        Gate::define('exemptionform_edit', function ($user) {
-            return in_array($user->role_id, [1, 6]);
-        });
-        Gate::define('exemptionform_view', function ($user) {
-            return in_array($user->role_id, [1, 6]);
-        });
-        Gate::define('exemptionform_delete', function ($user) {
-            return in_array($user->role_id, [1, 6]);
-        });
-
-        // Auth gates for: My forms
-        Gate::define('myexemptionform_access', function ($user) {
-            return in_array($user->role_id, [1, 6]);
-        });
+       
 
     }
 }

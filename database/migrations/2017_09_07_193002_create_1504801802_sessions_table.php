@@ -20,6 +20,7 @@ class Create1504801802SessionsTable extends Migration
                 $table->integer('session')->nullable()->unsigned();
                 $table->enum('dataentry_allowed', array('Yes', 'No'));
                 $table->enum('show_in_datatable', array('Yes', 'No'))->nullable();
+                $table->enum('sittings_entry', array('Yes', 'No'))->nullable();
                 $table->timestamps();
                 
             });

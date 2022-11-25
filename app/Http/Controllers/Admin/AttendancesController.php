@@ -7,19 +7,18 @@ use App\Employee;
 use App\Calender;
 
 use App\Attendance;
-
+use App\Http\Controllers\Traits\CsvImportTrait;
 use Illuminate\Support\Facades\Gate;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreAttendancesRequest;
 use App\Http\Requests\Admin\UpdateAttendancesRequest;
 use Yajra\DataTables\DataTables;
 use Illuminate\Http\Request;
-use Monolog\Logger;
-use Monolog\Handler\StreamHandler;
-
 
 class AttendancesController extends Controller
 {
+    use CsvImportTrait;
+    
     /**
      * Display a listing of Attendance.
      *
@@ -30,103 +29,21 @@ class AttendancesController extends Controller
         if (! Gate::allows('attendance_access')) {
             return abort(401);
         }
+      
 
-        /*
-        if (request()->ajax()) {
-            $query = Attendance::query();
-            $query->with("session");
-            $query->with("employee");
-            $template = 'actionsTemplate';
-            
-            $table = Datatables::of($query);
-
-            $table->setRowAttr([
-                'data-entry-id' => '{{$id}}',
-            ]);
-            $table->addColumn('massDelete', '&nbsp;');
-            $table->addColumn('actions', '&nbsp;');
-            $table->editColumn('actions', function ($row) use ($template) {
-                $gateKey  = 'attendance_';
-                $routeKey = 'admin.attendances';
-
-                return view($template, compact('row', 'gateKey', 'routeKey'));
-            });
-            $table->editColumn('session.name', function ($row) {
-                return $row->session ? $row->session->name : '';
-            });
-            $table->editColumn('employee.name', function ($row) {
-                return $row->employee ? $row->employee->name : '';
-            });
-            $table->editColumn('dates_absent', function ($row) {
-                return $row->dates_absent ? $row->dates_absent : '';
-            });
-
-            
-            return $table->make(true);
-        }
-        */
-
-        $q = \App\Session::with('calender')->whereDataentryAllowed('Yes')->latest();
+        $q = \App\Session::whereDataentryAllowed('Yes')->latest();
 
         $session_array = $q->get();
-            
-        $calenderdaysmap = [];
-        $calenderdays2 = array();
-     
-        foreach ($session_array as $session) {
-    
-            $daysall = $session->calender()->orderby('date','asc');
-                       
-            $days = $daysall->where( 'day_type','Sitting day')->get(['date','day_type']);
-            
-            foreach ($days as $day) {
-              
-                $calenderdaysmap[$day['date']] = $session->name;
-
-                $calenderdays2[$session->name][] = $day['date'];    
-            }
-        }
-
-        $data["calenderdaysmap"] = json_encode($calenderdaysmap);
-        $data["calenderdays2"] = json_encode($calenderdays2);
+                 
         $sessions = $session_array->pluck('name');
 
         //view for a PEN
-        $absents = null;
-        $data_dates = array();
-        $data_names = array();
-        $data_desigs = array();
-        $sessionname = $request->query('session');
-        $namefilter =  $request->query('namefilter');
-        $datefilter =  $request->query('datefilter');
-
+              
+        $sessionname = $request->query('session', $sessions[0]);
        
-           
-        $temp =  Employee::with('designation')
-                ->wherehas( 'designation', function($q){
-                    $q->wherenotin('designation', ['Personal Assistant to MLA']);
-                })
-             ->where('category','<>','Staff - Admin Data Entry');
-
-        if ($request->filled('session') && $request->filled('namefilter')){
-                  
-            if (!ctype_digit($namefilter)) {
-
-                 $temp->Where(function ($query) use ($namefilter) {
-                    $query->where('name', 'like',  "%".$namefilter."%" );
+              
+        $attendances = Attendance::all();
                     
-                });
-            } else {
-
-                    $temp->Where(function ($query) use ($namefilter) {
-                    $query->where('pen',  $namefilter )
-                        ->orwhere('id',  $namefilter );
-                    
-                });
-             }
-
-        }
-            
         
         if ($request->filled('session')){
 
@@ -135,63 +52,13 @@ class AttendancesController extends Controller
             $ids = $temp->pluck('id');
 
             $session = \App\Session::where('name',$sessionname)->get()->first();
-
-            $absents = Attendance::with("employee")
-                                ->where('session_id', $session->id)
-                                ->wherein('employee_id', $ids);
-
-            if($request->filled('datefilter')){
-                $date = Carbon::createFromFormat('d-m-Y', $datefilter);
-
-                $absents->wheredate('date_absent',$date->toDateString());
-            }   
-            
-            $absents = $absents->orderby('date_absent','asc')
-                        ->get();
-
-           
-
-            foreach ($absents as $key => $value) {
-                $date = Carbon::createFromFormat('Y-m-d', $value->date_absent)->format('M-d');
-
-                if(array_key_exists($value->employee_id,$data_dates)){
                  
-                 $data_dates[$value->employee_id] .=  $date . ', ';
-                             
-                }
-                else {
-                
-                 $data_dates[$value->employee_id] =  $date . ', ';
-                 $data_names[$value->employee_id] =  $value->employee->pen . '-'. $value->employee->name ;
-                 $data_desigs[$value->employee_id] =  $value->employee->designation->designation;
-                }
-            }
-
-            $desig_sort_order = explode(",",\App\Preset::
-                where('name','default_designation_sortorder')
-                ->first()->pens);
-
-            
-
-            uksort($data_desigs, function ($a,$b) use ($desig_sort_order, $data_desigs,$data_names){
-            
-              $PosA=array_search( "'" . $data_desigs[$a] . "'", $desig_sort_order);
-              $PosB=array_search( "'" . $data_desigs[$b] . "'", $desig_sort_order);
-
-              if ($PosA==$PosB){
-                $namea = substr($data_names[$a], strpos($data_names[$a], '-'));
-                $nameb = substr($data_names[$b], strpos($data_names[$b], '-'));
-
-                return strcasecmp($namea, $nameb);
-              }
-                else{
-                    return ($PosA > $PosB ? 1 : -1);
-                }
-            });
+                   
+           
         }
           
        
-        return view('admin.attendances.index', compact('data', 'sessions','data_dates', 'data_names', 'data_desigs'));
+        return view('admin.attendances.index', compact('sessions','attendances'));
         
 
     }
@@ -221,28 +88,13 @@ class AttendancesController extends Controller
                                 ->where('session_id', $session->id)
                                 ->wherein('employee_id', $ids)
                                 ->get();
-/*
-            $absents_consolidated = collect();
 
-            foreach ($absents as $value) {
-                if(array_key_exists($value['employee_id'], $absents_consolidated)){
-                    $absents_consolidated[$value['employee_id']]['date_absent'] .= $value['date_absent'];
-                    $absents_consolidated[$value['employee_id']]['count'] += 1;
-                } else {
-                    $absents_consolidated[$value['employee_id']] = collect();
-                    $absents_consolidated[$value['employee_id']]['date_absent'] = $value['date_absent'];
-                    $absents_consolidated[$value['employee_id']]['count'] = 1;
-                    $absents_consolidated[$value['employee_id']]['employee_id'] = $value['employee_id'];
-                }
-
-            }*/
-            
             $filename =  $sessionname . '-absentees'.  date('Y-m-d') . '.csv';
             
             $csvExporter = new \Laracsv\Export();
 
 
-            $csvExporter->build($absents, [ 'date_absent', 'employee_id', 'employee.pen' ]);
+            $csvExporter->build($absents, [ 'dates_present', 'employee_id', 'employee.pen' ]);
 
             $csvExporter->download($filename);
 
@@ -419,8 +271,7 @@ class AttendancesController extends Controller
         $ids = $temp->pluck('id');
 
         $absents = Attendance::where('session_id', $sittingday->session->id)
-                            ->whereDate('date_absent',$date->toDateString())
-                            ->wherein('employee_id', $ids)
+                              ->wherein('employee_id', $ids)
                             ->pluck("employee_id");
 
 
@@ -446,71 +297,6 @@ class AttendancesController extends Controller
         ];
         
     }
-    public function ajaxupdateattendance($param)
-    {
-
-      if (! Gate::allows('attendance_edit')) {
-            return abort(401);
-        }
-
-        $markedabsent = false;
-        $arr = explode( "|", $param);
-        $search = substr($arr[0], 0,strpos($arr[0], '-'));
-
-        $date = Carbon::createFromFormat(config('app.date_format'), $arr[1]);
-        $sittingday = Calender::whereDate('date',$date->toDateString())->first();
-
-        $temp =  Employee::where('pen',  $search )->first();
-        if($temp){
-            
-            $att = Attendance::where('employee_id', $temp->id)
-                              ->where('session_id', $sittingday->session->id )
-                              ->whereDate('date_absent',$date->toDateString())->get();
-
-            if($att->count()){
-                $att->first()->delete();
-                $markedabsent = false;
-            } else {
-                Attendance::create([
-                    'date_absent' => $date,
-                    'session_id' => $sittingday->session->id,
-                    'employee_id' => $temp->id,
-
-                ]);
-                $markedabsent = true;
-            }
-
-
-        $log = [//'session' => $sittingday->session->name, 
-                'date_absent' => $date->toDateString(),
-                'emp' => $arr[0],
-                'desig' => $temp->designation->designation,
-                'absent' => $markedabsent ? 'YES' : 'NO',
-
-            ];
-
-        $orderLog = new Logger('attendance');
-        $orderLog->pushHandler(new StreamHandler(storage_path('logs/attendance' . $sittingday->session->name . '.log' )), Logger::INFO);
-        $orderLog->info('', $log);
-               
-        
-        return [
-            'res' => true,
-            'absent' => $markedabsent ,
-            'name' => $arr[0],
-            'desig' => $temp->designation->designation,
-
-            
-
-        ];
-
-        } else {
-
-            return [  'res' => false ];
-
-
-        }
-
-    }
+   
 
 }

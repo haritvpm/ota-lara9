@@ -17,7 +17,7 @@ use PDF;
 
 class MyFormsOthersController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         if (! Gate::allows('my_form_others_access')) {
             return abort(401);

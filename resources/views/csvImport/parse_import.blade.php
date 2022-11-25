@@ -26,6 +26,9 @@
                                 </tr>
                             @endif
                             @if($lines)
+                          
+
+
                                 @foreach ($lines as $line)
                                     <tr>
                                         @foreach ($line as $field)

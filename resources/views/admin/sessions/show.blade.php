@@ -34,8 +34,8 @@
                             <td field-key='show_in_datatable'>{{ $session->show_in_datatable }}</td>
                         </tr>
                          <tr>
-                            <th>@lang('quickadmin.sessions.fields.exemption-entry')</th>
-                            <td field-key='exemption_entry'>{{ $session->exemption_entry }}</td>
+                            <th>@lang('quickadmin.sessions.fields.sittings-entry')</th>
+                            <td field-key='sittings_entry'>{{ $session->sittings_entry }}</td>
                         </tr>
                          <tr>
                             <th>Total Sittings</th>

@@ -187,10 +187,7 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
     Route::get('backup/download/{file_name}', 'Admin\BackupController@download');
     Route::get('backup/delete/{file_name}', 'Admin\BackupController@delete');
 
-    
-    //Route::post('attendances/updateattendance', 'Admin\AttendancesController@updateattendance');
-    Route::get('attendances/ajaxupdateattendance/{q}',array('as'=>'attendances.ajaxupdateattendance','uses'=>'Admin\AttendancesController@ajaxupdateattendance'));
-
+   
     Route::get('attendances/ajaxfindexactpenforattendace/{q}',array('as'=>'attendances.ajaxexactforattendace','uses'=>'Admin\AttendancesController@ajaxfindexactpenforattendace'));
     
     Route::get('attendances/download','Admin\AttendancesController@download');
@@ -201,19 +198,11 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
     Route::resource('categories', 'Admin\CategoriesController');
     Route::post('categories_mass_destroy', ['uses' => 'Admin\CategoriesController@massDestroy', 'as' => 'categories.mass_destroy']);
 
-    Route::resource('exemptions', 'Admin\ExemptionsController');
-    Route::post('exemptions_mass_destroy', ['uses' => 'Admin\ExemptionsController@massDestroy', 'as' => 'exemptions.mass_destroy']);
-    Route::resource('exemptionforms', 'Admin\ExemptionformsController');
-    Route::post('exemptionforms_mass_destroy', ['uses' => 'Admin\ExemptionformsController@massDestroy', 'as' => 'exemptionforms.mass_destroy']);
-
-     Route::put('myexemptionforms/forward/{id}', 'Admin\MyExemptionFormsController@forward');
-    Route::put('myexemptionforms/submittoaccounts/{id}', 'Admin\MyExemptionFormsController@submittoaccounts');
-    
-    Route::get('myexemptionforms/download_emp','Admin\MyExemptionFormsController@download_emp');
-    Route::resource('myexemptionforms', 'Admin\MyExemptionFormsController');
+   
     
 
-    Route::post('csv_parse', 'Admin\CsvImportController@parse')->name('csv_parse');
-    Route::post('csv_process', 'Admin\CsvImportController@process')->name('csv_process');
-
+   // Route::post('csv_parse', 'Admin\CsvImportController@parse')->name('csv_parse');
+   // Route::post('csv_process', 'Admin\CsvImportController@process')->name('csv_process');
+    Route::post('attendances/parse-csv-import', 'Admin\AttendancesController@parseCsvImport')->name('attendances.parseCsvImport');
+    Route::post('attendances/process-csv-import', 'Admin\AttendancesController@processCsvImport')->name('attendances.processCsvImport');
 });

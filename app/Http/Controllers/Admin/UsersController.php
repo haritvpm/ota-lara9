@@ -429,23 +429,6 @@ class UsersController extends Controller
        
 
 
-        if(\Schema::hasTable('exemptions')){
-            $merged2 = \App\Exemptionform::distinct()->get(['owner'])->pluck('owner');
-            $merged = $merged->merge($merged2)->unique();
-            $merged2 = \App\Exemptionform::distinct()->get(['creator'])->pluck('creator');
-            $merged = $merged->merge($merged2)->unique();
-            $merged2 = collect();
-            $merged3 = \App\Exemptionform::distinct()->get(['submitted_by'])->pluck('submitted_by');
-
-            foreach ($merged3 as $key => $value) {
-               $arr = explode(",", $value);
-
-               $merged2 = $merged2->merge($arr)->unique();
-               
-            }
-
-            $merged = $merged->merge($merged2)->unique();
-        }
 
               
        

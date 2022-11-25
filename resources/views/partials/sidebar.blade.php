@@ -82,24 +82,15 @@
             @endcan
 
 
-            <!-- @can('attendance_access')
+            @can('attendance_access')
             <li class="{{ $request->segment(2) == 'attendances' ? 'active' : '' }}">
                 <a href="{{ route('admin.attendances.index') }}">
                     <i class="fa fa-check-square-o"></i>
                     <span class="title">@lang('quickadmin.attendance.title')</span>
                 </a>
             </li>
-            @endcan -->
+            @endcan
 
-
-           <!--  @can('myexemptionform_access')
-            <li class="{{ $request->segment(2) == 'myexemptionforms' ? 'active' : '' }}">
-                <a href="{{ route('admin.myexemptionforms.index') }}">
-                    <i class="fa fa-times-circle"></i>
-                    <span class="title">Exemption</span>
-                </a>
-            </li>
-            @endcan -->
             
         
             
@@ -288,23 +279,7 @@
                     </li>
                 @endcan
 
-              <!--   @can('exemption_access')
-                <li class="{{ $request->segment(2) == 'exemptions' ? 'active' : '' }}">
-                    <a href="{{ route('admin.exemptions.index') }}">
-                        <i class="fa fa-database"></i>
-                        <span class="title">@lang('quickadmin.exemptions.title')</span>
-                    </a>
-                </li>
-                @endcan
-                
-                @can('exemptionform_access')
-                <li class="{{ $request->segment(2) == 'exemptionforms' ? 'active' : '' }}">
-                    <a href="{{ route('admin.exemptionforms.index') }}">
-                        <i class="fa fa-wpforms"></i>
-                        <span class="title">@lang('quickadmin.exemptionforms.title')</span>
-                    </a>
-                </li>
-                @endcan -->
+             
                 </ul>
             </li>
             @endcan

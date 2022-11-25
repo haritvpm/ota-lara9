@@ -12,17 +12,17 @@ use Illuminate\Database\Eloquent\Model;
  * @property integer $session
  * @property enum $dataentry_allowed
  * @property enum $show_in_datatable
-* @property enum $exemption_entry
+* @property enum $sittings_entry
 */
 class Session extends Model
 {
-    protected $fillable = ['name', 'kla', 'session', 'dataentry_allowed', 'show_in_datatable', 'exemption_entry'];
+    protected $fillable = ['name', 'kla', 'session', 'dataentry_allowed', 'show_in_datatable', 'sittings_entry'];
 
 
     public static $enum_dataentry_allowed = ["Yes" => "Yes", "No" => "No"];
 
     public static $enum_show_in_datatable = ["Yes" => "Yes", "No" => "No"];
- public static $enum_exemption_entry = ["Yes" => "Yes", "No" => "No"];
+ public static $enum_sittings_entry = ["Yes" => "Yes", "No" => "No"];
     /**
      * Set attribute to money format
      * @param $input
@@ -44,6 +44,10 @@ class Session extends Model
     public function calender()
     {
         return $this->hasMany('App\Calender');
+    }
+    public function attendances()
+    {
+        return $this->hasMany('App\Attendance');
     }
 
     // A function to return the Roman Numeral, given an integer 

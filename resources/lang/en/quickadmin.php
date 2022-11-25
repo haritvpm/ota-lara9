@@ -60,7 +60,7 @@ return [
 			'session' => 'Session',
 			'dataentry-allowed' => 'Dataentry allowed',
 			'show-in-datatable' => 'Show in datatable',
-			'exemption-entry' => 'Exemption entry',
+			'sittings-entry' => 'Sittings entry',
 		],
 	],
 	
@@ -199,13 +199,27 @@ return [
 		],
 	],
 	'attendance' => [
-		'title' => 'Attendance',
-		'fields' => [
-			'session' => 'Session',
-			'employee' => 'Employee',
-			'dates-absent' => 'Dates Absent',
-		],
-	],
+        'title'          => 'Attendance',
+        'title_singular' => 'Attendance',
+        'fields'         => [
+            'id'                    => 'ID',
+            'id_helper'             => ' ',
+            'dates_present'         => 'Dates Present',
+            'dates_present_helper'  => ' ',
+            'pen'                   => 'Pen',
+            'pen_helper'            => ' ',
+            'created_at'            => 'Created at',
+            'created_at_helper'     => ' ',
+            'updated_at'            => 'Updated at',
+            'updated_at_helper'     => ' ',
+            'deleted_at'            => 'Deleted at',
+            'deleted_at_helper'     => ' ',
+            'session'               => 'Session',
+            'session_helper'        => ' ',
+            'total'        => 'Total Sittings',
+            'total_helper' => ' ',
+        ],
+    ],
 	'categories' => [
 		'title' => 'categories',
 		'fields' => [
@@ -213,30 +227,7 @@ return [
 		],
 	],
 	
-	'exemptions' => [
-		'title' => 'Exemptions',
-		'fields' => [
-			'pen' => 'PEN',
-			'name' => 'Name',
-			'designation' => 'Designation',
-			'worknature' => 'Worknature/Remarks	',
-			'exemptionform' => 'Exemptionform',
-		],
-	],
-	
-	'exemptionforms' => [
-		'title' => 'Exemptionforms',
-		'fields' => [
-			'session' => 'Session',
-			'creator' => 'Creator',
-			'owner' => 'Owner',
-			'form-no' => 'Form no',
-			'submitted-names' => 'Submitted names',
-			'submitted-by' => 'Submitted by',
-			'submitted-on' => 'Submitted on',
-			'remarks' => 'Remarks',
-		],
-	],
+
 	
 
 	'qa_new_daily_form' => 'New Duty Form',

@@ -73,12 +73,12 @@
 
             <div class="row">
                 <div class="col-xs-12 form-group">
-                    {!! Form::label('exemption_entry', trans('quickadmin.sessions.fields.exemption-entry').'', ['class' => 'control-label']) !!}
-                    {!! Form::select('exemption_entry', $enum_exemption_entry, old('exemption_entry'), ['class' => 'form-control select2']) !!}
+                    {!! Form::label('sittings_entry', trans('quickadmin.sessions.fields.sittings-entry').'', ['class' => 'control-label']) !!}
+                    {!! Form::select('sittings_entry', $enum_sittings_entry, old('sittings_entry'), ['class' => 'form-control select2']) !!}
                     <p class="help-block"></p>
-                    @if($errors->has('exemption_entry'))
+                    @if($errors->has('sittings_entry'))
                         <p class="help-block">
-                            {{ $errors->first('exemption_entry') }}
+                            {{ $errors->first('sittings_entry') }}
                         </p>
                     @endif
                 </div>

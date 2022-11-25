@@ -94,7 +94,7 @@ class HomeController extends Controller
 
         $forms = null;
         $formsother = null;
-        $forms_ex = null;
+      
         $forms_pa2mla = null;
 
         $session_array = array();
@@ -115,9 +115,7 @@ class HomeController extends Controller
                      ->whereIn('session',$session_array);
            
 
-           // $sessionforexemption = \App\Session::whereExemptionEntry('Yes')->latest()->first();
-           // $forms_ex = Exemptionform::with(['created_by','owned_by'])
-            //         ->where('session',$sessionforexemption->name);
+          
                                 
                         
         }
@@ -136,15 +134,6 @@ class HomeController extends Controller
                          //->whereSession($session)
                          ->whereIn('session',$session_array)
                          ->CreatedOrOwnedOrApprovedByLoggedInUser();
-
-                /*         
-                if(\Schema::hasTable('exemptions')){
-                    $sessionforexemption = \App\Session::whereExemptionEntry('Yes')->latest()->first();
-                    $forms_ex = Exemptionform::with(['created_by','owned_by'])
-                         ->where('session',$sessionforexemption->name)
-                         ->CreatedOrOwnedOrApprovedByLoggedInUser();
-                 }*/
-
 
             }
             else{
@@ -321,78 +310,7 @@ class HomeController extends Controller
             }
         }
 
-        //exemption forms
-
-
-        if($forms_ex){
-            $forms_ex = $forms_ex->get();
-        }
-
-        $total_ex = 0;
-        $submitted_ex = 0;
-        $draft_ex = 0;
-        $to_approve_ex = 0;
-        $pending_ex = 0;
-
-        $info_ex = array();
-        
-        /*     
-        if($forms_ex){
-            foreach( $forms_ex as $form ){
-                $total_ex += 1;
-                $keysession = $form->session;
-
-                if(!array_key_exists($keysession, $info_ex)){
-                    $info_ex[$keysession] = [];
-                }
-
-                $key = $form->owner == 'admin' ? 'submitted' : 'created';
-                //if form creator is dataentry, consider section
-                $formcreator = $form->owner;
-                if(strpos($formcreator,'de.')===0){
-                    $formcreator = substr($formcreator,3);
-                }
-
-                //user might have been deleted
-                //also we need used id if JS or above
-                $key2 = optional($form->owned_by)->Title ;
-                if($key2 == null || strlen($key2) <=2 ){
-                    $key2 .='(' .$form->owner . ')';
-                }
-                
-                if(!array_key_exists($key2, $info_ex[$keysession])){
-
-                    $info_ex[$keysession][ $key2 ]['submitted'] = 0;
-                    $info_ex[$keysession][ $key2 ]['created'] = 0;
-
-                    $info_ex[$keysession][ $key2 ][$key] = 1;
-                }
-                else
-                    $info_ex[$keysession][ $key2 ][$key] += 1;
-
-       
-
-                if($form->owner == 'admin') {$submitted_ex += 1;}
-                else if($form->owner == $form->creator) {$draft_ex += 1;}
-                else if($form->owner != $form->creator && $form->owner != auth()->user()->username) {$pending_ex += 1;}
-                else if($form->owner != $form->creator && $form->owner == auth()->user()->username) {$to_approve_ex += 1;}
-                else{
-                    dd($form);
-                }
-                
-            }
-        }
-        
-        foreach ($info_ex as $key => $value) {
-                        
-            uasort($info_ex[$key], function($a, $b){
-                if($a['created'] == $b['created']) {
-                    return 0;
-                }
-                return ($a['created'] > $b['created']) ? -1 : 1;
-            } );
-        }
-*/
+         
 
         //pa2mla
 
@@ -660,7 +578,7 @@ class HomeController extends Controller
     return view('home', compact('session_array', 'users_not_submitted_yet',
                                    'info', 'info_submitted', 'total','draft', 'to_approve','pending','submitted', //staff
                                     'info_other','total_other','draft_other', 'to_approve_other','pending_other','submitted_other', //od
-                                     'info_ex', 'total_ex','draft_ex', 'to_approve_ex','pending_ex','submitted_ex', //exemption forms
+                                    
                                     'formcount', 'formlastsubmitteddate', 'formlastsubmittedby', 
                                     'formcountother', 'formotherlastsubmitteddate', 'formotherlastsubmittedby', 'last_form_no',
                                     'marqueetext','pending_approval',

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use SpreadsheetReader;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 
 
 class CsvImportController extends Controller
@@ -23,12 +24,16 @@ class CsvImportController extends Controller
 
         $reader = new SpreadsheetReader($path);
         $headers = $reader->current();
-        $lines = [];
-        $lines[] = $reader->next();
-        $lines[] = $reader->next();
+        $lines   = [];
+
+        $i = 0;
+        while ($reader->next() !== false && $i < 5) {
+            $lines[] = $reader->current();
+            ++$i;
+        }
 
 
-        $filename = str_random(10) . '.csv';
+        $filename =  Str::random(10) . '.csv';
         $file->storeAs('csv_import', $filename);
 
         $modelName = $request->input('model', false);
@@ -68,27 +73,21 @@ class CsvImportController extends Controller
         $reader = new SpreadsheetReader($path);
         $insert = [];
         
-
-        foreach($reader as $key => $row) {
+        foreach ($reader as $key => $row) {
             if ($hasHeader && $key == 0) {
-              continue;
+                continue;
             }
 
-            if(count($row) == count($fields))
-            {
-                $tmp = [];
-                foreach($fields as $header => $k) {
-
-                    // if( count($row) <= $k )
-                    // {
-                    //     dd($row);
-                    // }
-
+            $tmp = [];
+            foreach ($fields as $header => $k) {
+                if (isset($row[$k])) {
                     $tmp[$header] = $row[$k];
                 }
-                $insert[] = $tmp;
             }
 
+            if (count($tmp) > 0) {
+                $insert[] = $tmp;
+            }
         }
 
         $for_insert = array_chunk($insert, 100);
@@ -118,7 +117,7 @@ class CsvImportController extends Controller
         }
 
         $rows = count($insert);
-        $table = str_plural($modelName);
+        $table = Str::plural($modelName);
 
         File::delete($path);
 
