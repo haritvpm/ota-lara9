@@ -6,29 +6,17 @@
 
 body {
 
-<?php
-$patterns = array('zt-ants-ifc_01.jpg', 'hypnotize.png','eight_horns.png','congruent_outline.png');
-
-//https://www.toptal.com/designers/subtlepatterns/page/12/
-
-$image_index = rand(0, sizeof($patterns)-1);
-if(\Config::get('custom.vps')){
-//  $image_index = rand(1, 5);
-}
-
-//$image_index = 1;
-$patternimage = $patterns[$image_index];
-?>
-
 background-color: #000000;
-background-image: url("images/patterns/{{$patternimage}}");
+/*
+background: url("images/bg/pexels-adrien-olichon-2387793.jpg") no-repeat center center fixed; 
+background: url("images/bg/pexels-eva-bronzini-6087685.jpg") no-repeat center center fixed; */
+background: url("images/bg/pexels-jakub-novacek-924824.jpg") no-repeat center center fixed; 
 
-@if($image_index < 1)
-background-repeat: no-repeat;
-background-size: cover;
-background-position: top;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
 
-@endif
 
 }
 
@@ -106,9 +94,9 @@ background-position: top;
                         </div>
 
                         <div class="form-group">
-                            <div class="col-md-3 col-md-offset-3">
+                            <div class="col-md-8 col-md-offset-3">
                                 <button type="submit"
-                                        class="btn btn-primary"
+                                        class="btn btn-danger  btn-lg"
                                         style="margin-right: 15px;">
                                     @lang('quickadmin.qa_login')
                                 </button>
@@ -158,5 +146,4 @@ date_default_timezone_set('Asia/Kolkata');
 
 
 @endsection
-
 
