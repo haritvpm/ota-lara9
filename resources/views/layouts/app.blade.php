@@ -10,7 +10,7 @@
 
 <!-- also change in layouts.app.blade -->
 @if(!\Config::get('custom.vps'))
-<body class="hold-transition skin-blue sidebar-mini {{ (  isset($collapse_sidebar) ? 'sidebar-collapse' : '') }} ">
+<body class="hold-transition skin-purple-light sidebar-mini {{ (  isset($collapse_sidebar) ? 'sidebar-collapse' : '') }} ">
 @else
 <body class="hold-transition skin-yellow sidebar-mini {{ (  isset($collapse_sidebar) ? 'sidebar-collapse' : '') }} ">
 @endif

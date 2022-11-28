@@ -24,7 +24,7 @@ class StoreEmployeesOthersRequest extends FormRequest
     {
         return [
             'name' => 'min:3|required',
-            'pen' => 'min:6|required|unique:employees_others',
+            'pen' => 'min:6|required|alpha_num|unique:employees_others',
             'designation_id' => 'required',
             // 'account_type' => 'required',
          //   'ifsc' => 'min:11|max:11',

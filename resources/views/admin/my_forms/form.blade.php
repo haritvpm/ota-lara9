@@ -80,7 +80,7 @@
 <button  class="btn btn-default" data-toggle="tooltip" title="Insert row" @click.prevent="insertElement(index+1);"> <span v-text="index+1"></span> </small> </button></td>
 					<td>
 										
-					<multiselect :name="'name[' + index + ']'" v-model= "row.pen" id="ajax"  :ref="'field-'+index" placeholder= "Type to search" 
+					<multiselect :name="'name[' + index + ']'" v-model= "row.pen" id="ajax"  :ref="'field-'+index"  placeholder= "Type to search" 
 					:options="pen_names" 
 					:searchable="true" 
 					:show-labels="false"  

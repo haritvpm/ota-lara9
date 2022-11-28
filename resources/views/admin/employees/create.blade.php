@@ -50,7 +50,7 @@
             <div class="row">
                 <div class="col-xs-7 form-group">
                     {!! Form::label('pen', trans('quickadmin.employees.fields.pen').'*', ['class' => 'control-label']) !!}
-                    <i>(enter <span class="text-danger"> carefully</span>; editing not allowed after Save)</i>
+                    <i>(enter  including any alphabet. e.g.-  <span class="text-danger">799438, P12059, T24479, etc. </span>; editing not allowed after Save)</i>
                     {!! Form::text('pen', old('pen'), ['class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
                     <p class="help-block"></p>
                     @if($errors->has('pen'))

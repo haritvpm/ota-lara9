@@ -128,9 +128,9 @@
     <div class="col-md-3">
          <!-- a href="<?=URL::to('admin/my_forms?status=Draft')?>"-->
          <a href="<?=URL::to('admin/my_forms')?>">
-         <div class="info-box">
+         <div class="info-box bg-gray">
           <!-- Apply any bg-* class to to the icon to color it -->
-          <span class="info-box-icon bg-gray"><i class="fa fa-edit"></i></span>
+          <span class="info-box-icon"><i class="fa fa-edit"></i></span>
           <div class="info-box-content">
             <span class="info-box-text">Drafts</span>
             <span class="info-box-number">{{ $draft }}</span>
@@ -144,9 +144,9 @@
     <div class="col-md-3">
           <!-- <a href="<?=URL::to('admin/my_forms?status=To_approve')?>"> -->
           <a href="<?=URL::to('admin/my_forms')?>">
-         <div class="info-box">
+         <div class="info-box  bg-red">
           <!-- Apply any bg-* class to to the icon to color it -->
-          <span class="info-box-icon bg-red"><i class="fa fa-eye"></i></span>
+          <span class="info-box-icon"><i class="fa fa-eye"></i></span>
           <div class="info-box-content">
             <span class="info-box-text">To Approve</span>
             <span class="info-box-number">{{ $to_approve }}</span>
@@ -160,9 +160,9 @@
     @if($pending_approval != -1)
     <div class="col-md-3">
          <a href="<?=URL::to('admin/my_forms?status=Pending')?>">
-         <div class="info-box">
+         <div class="info-box  bg-blue">
           <!-- Apply any bg-* class to to the icon to color it -->
-          <span class="info-box-icon bg-blue"><i class="fa fa-mail-forward"></i></span>
+          <span class="info-box-icon"><i class="fa fa-mail-forward"></i></span>
           <div class="info-box-content">
             <span class="info-box-text">Sent</span>
             <span class="info-box-number">{{ $pending }}</span>
@@ -175,9 +175,9 @@
 
     <div class="col-md-3">
          <a href="<?=URL::to('admin/my_forms?status=Submitted')?>">
-         <div class="info-box">
+         <div class="info-box  bg-green">
           <!-- Apply any bg-* class to to the icon to color it -->
-          <span class="info-box-icon bg-green"><i class="fa fa-thumbs-up"></i></span>
+          <span class="info-box-icon"><i class="fa fa-thumbs-up"></i></span>
           <div class="info-box-content">
             <span class="info-box-text">Submitted</span>
             <span class="info-box-number">{{ $submitted }}</span>
@@ -190,15 +190,14 @@
     @if(auth()->user()->isAdmin())
     <div class="col-md-3">
                     
-         <div class="info-box">
-        <div class="info-box">
-          <span class="info-box-icon bg-red"><i class="fa fa-inr "></i></span>
+         <div class="info-box  bg-red">
+           <span class="info-box-icon"><i class="fa fa-inr "></i></span>
           <div class="info-box-content">
             <span class="info-box-text">Total for {{$session_latest}}</span>
             <span class="info-box-number"> Sect <span>&#8776; </span>{{$amount_all_sectt }},  All = {{ $amount_all }}</span>
           </div>
           <!-- /.info-box-content -->
-        </div>
+     
        </div>
     </div>
     @endif

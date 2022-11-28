@@ -329,8 +329,6 @@ class EmployeesController extends Controller
             return abort(401);
         }
 
-        
-
         $employee = new Employee ($request->all());
 
         //admins does not save added by

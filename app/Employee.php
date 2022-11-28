@@ -41,5 +41,10 @@ class Employee extends Model
     {
         return $this->belongsTo(Category::class, 'categories_id');
     }
+
+    public function getPENNameAttribute()
+{
+    return $this->pen . ' - ' . $this->name;
+}
     
 }

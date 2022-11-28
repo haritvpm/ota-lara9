@@ -31,7 +31,7 @@
 
 <link href="{{ URL::asset('css/ionicons.min.css') }}" rel="stylesheet">
 
-<link href="{{ url('adminlte/css/skins/skin-blue.min.css') }}" rel="stylesheet">
+<link href="{{ url('adminlte/css/skins/skin-purple-light.min.css') }}" rel="stylesheet">
 
 <!-- this is needed for jquery datepicker. we use dp in admin form edit -->
 <!-- <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.3/themes/smoothness/jquery-ui.css"> -->

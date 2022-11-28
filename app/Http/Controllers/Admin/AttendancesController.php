@@ -136,7 +136,7 @@ class AttendancesController extends Controller
         }
         
         $sessions = \App\Session::latest()->get()->pluck('name', 'id')->prepend(trans('quickadmin.qa_please_select'), '');
-        $employees = \App\Employee::get()->pluck('name', 'id')->prepend(trans('quickadmin.qa_please_select'), '');
+        $employees = \App\Employee::orderby('name','asc')->get()->pluck('PENName','id')->prepend(trans('quickadmin.qa_please_select'), '');
 
         return view('admin.attendances.create', compact('sessions', 'employees'));
     }
@@ -180,7 +180,7 @@ class AttendancesController extends Controller
         }
         
         $sessions = \App\Session::latest()->get()->pluck('name', 'id')->prepend(trans('quickadmin.qa_please_select'), '');
-        $employees = \App\Employee::get()->pluck('name', 'id')->prepend(trans('quickadmin.qa_please_select'), '');
+        $employees = \App\Employee::orderby('name','asc')->get()->pluck('PENName','id')->prepend(trans('quickadmin.qa_please_select'), '');
 
         $attendance = Attendance::findOrFail($id);
 
