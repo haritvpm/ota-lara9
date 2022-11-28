@@ -119,7 +119,7 @@
 		<div class="row">
 			<div class="col-md-12 form-group">
 				
-				<div v-cloak>
+				<div >
 					
 					<div class="alert alert-danger" v-if="errors.products_empty" >
 					<ul>

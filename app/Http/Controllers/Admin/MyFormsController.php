@@ -1217,14 +1217,30 @@ class MyFormsController extends Controller
         ////////////////////////////////////
 
         $pens = $collection->pluck('pen');
-        /*
-        $pens->transform(function ($item, $key) {
-            $tmp = strpos($item, '-');
-            if(false !== $tmp){
-                return  substr($item,0, $tmp);
-            }
-            return $item;
-        });*/
+        
+        $checksecretaryattendance = true;
+        $pentoattendace = null;
+        $pentodays = null;
+
+        if($checksecretaryattendance){
+            
+            $employee_ids = \App\Employee::wherein('pen', $pens->toArray())->pluck('id');
+            
+            $pentoattendace = \App\Attendance::with('session')
+                                ->whereHas('session', function($query)  use ($request) { 
+                                    $query->where('name', $request['session']);})
+                                ->wherein('employee_id', $employee_ids->toArray() )->get();
+            $pentodays = $pentoattendace->pluck( 'present_dates', 'pen' );                  
+            $pentoattendace = $pentoattendace->pluck( 'total', 'pen' );
+
+           // dd($pentoattendace);
+
+            //$out = new \Symfony\Component\Console\Output\ConsoleOutput();
+      //$out->writeln($pentoattendace);
+            
+        }
+
+
 
        //when we passed in a pen of 'E11956', it was shown as error, probably because it was interpreted as a number.
       //so enclose every pen in quotes.
@@ -1264,7 +1280,8 @@ class MyFormsController extends Controller
        
         $overtimes =$collection->transform(function($overtime) 
                                            use ($res, $request,$formid, &$myerrors,$maxsittings,
-                                            $rates,$sitting_start, $sitting_end,$dateformatwithoutime,$maxsittingdates) 
+                                            $rates,$sitting_start, $sitting_end,$dateformatwithoutime,$maxsittingdates, 
+                                            $checksecretaryattendance, $pentoattendace, $pentodays) 
         {
              
              $pen = $overtime['pen'];
@@ -1298,13 +1315,26 @@ class MyFormsController extends Controller
 
             $totalwouldbe =  $totalsittingexisting + $overtime['count'];
 
-                                             
+             
+            
+            if($checksecretaryattendance){
+                if($totalwouldbe > $pentoattendace[$overtime['pen']])
+                {      
+                    array_push($myerrors,  $overtime['pen'] . '-' .$overtime['name'] . ' : Exceeds attendace as per O/S. Already saved = ' . $totalsittingexisting . '. + this (' .$overtime['count'] .') = ' . $totalwouldbe. '. (max possible: ' . $pentoattendace[$overtime['pen']] .')' );
+                  //  array_push($myerrors,  $overtime['pen'] . '-' .$overtime['name'] . ' : Exceeds attendace as per secretary-office report. Already saved = ' . $totalsittingexisting . '. + this (' .$overtime['count'] .') = ' . $totalwouldbe. '. (max possible: ' . $pentoattendace[$overtime['pen']] . ' -> '. $pentodays[$overtime['pen']] .')' );
+                                       
+                    return null;   
+                }
+            }
+
             if($totalwouldbe > $maxsittings)
             {      
                array_push($myerrors,  $overtime['pen'] . '-' .$overtime['name'] . ' : Already saved sitting days = ' . $totalsittingexisting . '. + this (' .$overtime['count'] .') = ' . $totalwouldbe. '. (maximum possible: ' . $maxsittings .')' );
             
-                return null;   
+               return null;   
             }
+          
+            
                    
             //check date overlap
             $start_one = Carbon::createFromFormat($dateformatwithoutime, $overtime['from']);

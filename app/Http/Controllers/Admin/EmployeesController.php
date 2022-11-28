@@ -26,6 +26,17 @@ class EmployeesController extends Controller
             return abort(401);
         }
 
+        /*
+        $pens =Collect(['799438', '179992']);
+        $sessionrequest = '15.06';
+        $employee_ids = \App\Employee::wherein('pen', $pens->toArray())->pluck('id');
+        $pentoattendace = \App\Attendance::with('session')
+                            ->whereHas('session', function($query)  use ($sessionrequest) { 
+                                $query->where('name', $sessionrequest);})
+                            ->wherein('employee_id', $employee_ids->toArray() )
+                            ->pluck( 'total', 'pen' );
+       dd($pentoattendace['799438']);*/
+
         $session_latest =  \App\Session::latest()->first()->name;
 
         if (request()->ajax()) {

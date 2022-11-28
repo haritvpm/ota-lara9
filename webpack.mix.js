@@ -1,4 +1,4 @@
-const { mix } = require('laravel-mix');
+const mix = require('laravel-mix');
 
 /*
  |--------------------------------------------------------------------------
@@ -15,16 +15,11 @@ mix.js('resources/assets/js/app.js', 'public/js')
    .js('resources/assets/js/form.1.5.js', 'public/js')
    .js('resources/assets/js/form_sitting.1.5.js', 'public/js')
    .js('resources/assets/js/home.1.js', 'public/js')
-
    .js('resources/assets/js/form_other.1.js', 'public/js')
    .js('resources/assets/js/form_sitting_other.1.js', 'public/js')
    .js('resources/assets/js/form_pa2mla.js', 'public/js')
-
    .js('resources/assets/js/form_show.1.0.js', 'public/js/')
-
    .js('resources/assets/js/form_other_show.js', 'public/js')
    .js('resources/assets/js/employee_index.js', 'public/js')
    .js('resources/assets/js/attendance_index.js', 'public/js')
-
-
    .sass('resources/assets/sass/app.scss', 'public/css');
