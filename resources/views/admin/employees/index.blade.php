@@ -120,15 +120,21 @@
 
 
    <br>
-    
-    <form action="{{url('admin/employees/clearold')}}" method="get" class="form-inline">
-       List unused Employees
-        <button type="submit" class="btn btn-danger" >Dump</button>
+   
+   <form action="{{url('admin/employees/findinvalidpen')}}" method="get" class="form-inline">
+       List employees with invalid PEN for current session
+        <button type="submit" class="btn btn-danger" >List</button>
         <!-- <button type="submit" class="btn btn-danger" name="delbtn" value="del">Delete All Forms</button> -->
                          
     </form>
-     
 
+    <!-- <form action="{{url('admin/employees/clearold')}}" method="get" class="form-inline">
+       List unused Employees
+        <button type="submit" class="btn btn-danger" >Dump</button>
+                                 
+    </form> -->
+     
+    
    
 @endif
 

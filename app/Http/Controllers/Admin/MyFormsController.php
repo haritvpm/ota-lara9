@@ -325,7 +325,14 @@ class MyFormsController extends Controller
     {
         $enum_overtime_slot = Form::$enum_overtime_slot;
 
-        $q = \App\Session::with('calender')->whereDataentryAllowed('Yes')->latest();
+        $q = \App\Session::with('calender')->whereDataentryAllowed('Yes'); 
+        
+      
+        if( \Config::get('custom.check_attendance')){
+           $q = $q->whereSittingsEntry('Yes'); 
+        }
+
+        $q = $q->latest();
 
         $session_array = $q->get();
 
@@ -336,6 +343,7 @@ class MyFormsController extends Controller
                 
                 return $maxdate <= Carbon::now();
             });
+           
         }
 
         $sessions = $session_array->pluck('name');
@@ -1218,7 +1226,11 @@ class MyFormsController extends Controller
 
         $pens = $collection->pluck('pen');
         
-        $checksecretaryattendance = true;
+        $checksecretaryattendance = false;
+        if( \Config::get('custom.check_attendance')){
+            $checksecretaryattendance = true;
+        }
+        
         $pentoattendace = null;
         $pentodays = null;
 

@@ -61,7 +61,11 @@
                     {!! Form::label('pen', trans('quickadmin.employees.fields.pen').'*', ['class' => 'control-label']) !!}
                    
                    @if(strncasecmp($employee->pen,"TMP",3)!=0)
+                    @if(\Auth::user()->isAdmin())
+                    {!! Form::text('pen', old('pen'), ['class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
+                    @else
                     {!! Form::text('pen', old('pen'), ['class' => 'form-control', 'placeholder' => '', 'required' => '', 'readonly']) !!}
+                    @endif
                     @else
                     <!-- allow non admins to edit temp pen -->
                     {!! Form::text('pen', old('pen'), ['class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}

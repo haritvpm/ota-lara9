@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\Admin\StoreEmployeesRequest;
 use App\Http\Requests\Admin\UpdateEmployeesRequest;
 use Yajra\DataTables\DataTables;
+use Illuminate\Support\Collection;
 
 class EmployeesController extends Controller
 {
@@ -26,16 +27,7 @@ class EmployeesController extends Controller
             return abort(401);
         }
 
-        /*
-        $pens =Collect(['799438', '179992']);
-        $sessionrequest = '15.06';
-        $employee_ids = \App\Employee::wherein('pen', $pens->toArray())->pluck('id');
-        $pentoattendace = \App\Attendance::with('session')
-                            ->whereHas('session', function($query)  use ($sessionrequest) { 
-                                $query->where('name', $sessionrequest);})
-                            ->wherein('employee_id', $employee_ids->toArray() )
-                            ->pluck( 'total', 'pen' );
-       dd($pentoattendace['799438']);*/
+      
 
         $session_latest =  \App\Session::latest()->first()->name;
 
@@ -770,6 +762,80 @@ class EmployeesController extends Controller
 
        
         
+    }
+
+
+    public function findinvalidpen()
+    {        
+        if(!\Auth::user()->isAdmin()){
+            return abort(401);
+        }
+
+        
+        $date_ago = Carbon::today()->subYears(1);
+
+          
+        
+        
+        $emp_withinvalidpens = \App\Employee::whereDate('created_at', '>', $date_ago->toDateString())
+                ->whereDate('updated_at', '>', $date_ago->toDateString())
+                ->where(function($query) {
+                     $query->whereRaw('LENGTH(pen) < 6')
+                            ->orwhereRaw('LENGTH(pen) > 7')
+                            ->orWhere('pen','LIKE','% %');
+                })
+                ->orderby('id','desc')->pluck('name','pen');
+
+      
+
+        $session_latest =  \App\Session::latest()->first()->name;
+
+             
+        
+        $collection = new Collection();
+
+        //find OT forms with the above invalid pen
+        foreach($emp_withinvalidpens as $pen => $name)  {
+
+            $ots = \App\Overtime::with('form')->whereHas('form', function($query) use  ($session_latest) {
+                $query->where('session', $session_latest);
+              })->where('pen','LIKE', $pen)
+                ->get()->pluck('form.form_no');
+
+            $collection->push( array('pen' => $pen, 'name' => $name, 'form_nos' => $ots) );
+        }
+
+        //Also find any overtimes with invalid pen already submitted, but before editing the PEN by admin
+        $invalidpens = $emp_withinvalidpens->keys()->all();
+       
+        $ots_withinvalidpen = \App\Overtime::with('form')->whereHas('form', function($query) use  ($session_latest) {
+            $query->where('session', $session_latest);
+          })
+          ->wherenotin('pen',$invalidpens) //exclude already found
+          ->where(function($query) {
+            $query->whereRaw('LENGTH(pen) < 6')
+                   ->orwhereRaw('LENGTH(pen) > 7')
+                   ->orWhere('pen','LIKE','% %');
+            })
+            ->get();
+
+        foreach($ots_withinvalidpen as $ot)  {
+              $collection->push( array('pen' => $ot->pen, 'name' => $ot->name, 'form_nos' => $ot->form->form_no) );
+        }
+
+//        dd($collection);
+
+        $filename =  $session_latest .' invalid pens-'.  date('Y-m-d') . '.csv';
+    
+        $csvExporter = new \Laracsv\Export();
+
+        $csvExporter->build($collection, [ "pen", "name","form_nos" ]);
+
+        $csvExporter->download($filename);
+            
+        
+
+
     }
 
 
