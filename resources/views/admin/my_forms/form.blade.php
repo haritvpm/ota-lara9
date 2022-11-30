@@ -96,7 +96,7 @@
 
 					<td><multiselect :name="'desig[' + index + ']'" v-model="row.designation" :allow-empty="false"
 							 :tabindex="4" 
-							:show-labels="false" :options= "muloptions"> 
+							:show-labels="false" :options= "muloptions" :disabled="true"> 
 						<span slot="noResult"></span>		
 					</multiselect>
 					</td>

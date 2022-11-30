@@ -328,7 +328,7 @@ class MyFormsController extends Controller
         $q = \App\Session::with('calender')->whereDataentryAllowed('Yes'); 
         
       
-        if( \Config::get('custom.check_attendance')){
+        if( $issitting && \Config::get('custom.check_attendance')){
            $q = $q->whereSittingsEntry('Yes'); 
         }
 
@@ -1332,7 +1332,7 @@ class MyFormsController extends Controller
             if($checksecretaryattendance){
                 if($totalwouldbe > $pentoattendace[$overtime['pen']])
                 {      
-                    array_push($myerrors,  $overtime['pen'] . '-' .$overtime['name'] . ' : Exceeds attendace as per O/S. Already saved = ' . $totalsittingexisting . '. + this (' .$overtime['count'] .') = ' . $totalwouldbe. '. (max possible: ' . $pentoattendace[$overtime['pen']] .')' );
+                    array_push($myerrors,  $overtime['pen'] . '-' .$overtime['name'] . ' : Exceeds attendance as per O/S. Already saved = ' . $totalsittingexisting . '. Plus this (' .$overtime['count'] .') = ' . $totalwouldbe. '. (max possible: ' . $pentoattendace[$overtime['pen']] .')' );
                   //  array_push($myerrors,  $overtime['pen'] . '-' .$overtime['name'] . ' : Exceeds attendace as per secretary-office report. Already saved = ' . $totalsittingexisting . '. + this (' .$overtime['count'] .') = ' . $totalwouldbe. '. (max possible: ' . $pentoattendace[$overtime['pen']] . ' -> '. $pentodays[$overtime['pen']] .')' );
                                        
                     return null;   
@@ -1341,7 +1341,7 @@ class MyFormsController extends Controller
 
             if($totalwouldbe > $maxsittings)
             {      
-               array_push($myerrors,  $overtime['pen'] . '-' .$overtime['name'] . ' : Already saved sitting days = ' . $totalsittingexisting . '. + this (' .$overtime['count'] .') = ' . $totalwouldbe. '. (maximum possible: ' . $maxsittings .')' );
+               array_push($myerrors,  $overtime['pen'] . '-' .$overtime['name'] . ' : Already saved = ' . $totalsittingexisting . '. Plus this (' .$overtime['count'] .') = ' . $totalwouldbe. '. (maximum possible: ' . $maxsittings .')' );
             
                return null;   
             }

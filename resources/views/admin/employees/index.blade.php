@@ -30,7 +30,7 @@
 
 
 
- @if(!\Auth::user()->isAudit())
+ @if(\Auth::user()->isAdmin())
  
  <h5>Change Designation of Employee on Promotion/Reversion</h5>
      <div   id="app">
