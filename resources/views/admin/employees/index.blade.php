@@ -62,25 +62,22 @@
     </div>
 @endif
  <br>
-<!-- prevent user changing employee details -->
-    <!-- if(\Auth::user()->isAdmin()) -->
+ <!-- prevent user changing employee details -->
+  @if(\Auth::user()->isAdmin())
 
     <div class="panel panel-default">
         <div class="panel-heading">
-            List of employees with no PEN
+            List of employees
         </div>
 
         <div class="panel-body table-responsive">
             <table class="table table-bordered table-striped ajaxTable"> 
-                <!-- inside above table class @can('employee_delete') dt-select @endcan -->
+             
                 <thead>
                     <tr>
-                      <!--   @can('employee_delete')
-                            <th style="text-align:center;"><input type="checkbox" id="select-all" /></th>
-                        @endcan -->
-                        <!-- <th>@lang('quickadmin.employees.fields.srismt')</th> -->
+                  
                         <th>@lang('quickadmin.employees.fields.name')</th>
-                        <!-- <th>@lang('quickadmin.employees.fields.name-mal')</th> -->
+   
                         <th>@lang('quickadmin.employees.fields.pen')</th>
                         <th style="text-align:center;"><span class="glyphicon glyphicon-search"></span></th>
                         <th>@lang('quickadmin.employees.fields.designation')</th>
@@ -91,8 +88,7 @@
                         <th>@lang('quickadmin.employees.fields.added-by')</th>
                         <th>@lang('quickadmin.employees.fields.categories')</th>
                         <th>@lang('quickadmin.employees.fields.desig-display')</th>
-                        <!-- <th>Created</th> -->
-<!--                         <th>Updated</th> -->                        
+                   
                          @endif
                         <th>&nbsp;</th>
 
@@ -101,7 +97,7 @@
             </table>
         </div>
     </div>
- <!-- endif -->
+  @endif
 
 
 

@@ -971,56 +971,7 @@ class MyFormsController extends Controller
 
         $forwardarray = null;
 
-        /*
-        if($loggedinusername == $form->owner){
-
-            $routes = collect();
-
-            //if we are a section, we will have a route
-            if (\Auth::user()->isDataEntryLevel()) {
-                $route = \Auth::user()->routing->route;
-                            
-                $split = explode(',', $route);
-                foreach ($split as $val) {
-                    $val = trim($val);
-                    if($val != '')  $routes->push( $val);    
-                }
-                
-            }
-            else{
-                
-                //if logged in user is under sec and was forwarded this
-                //or  if creator is under sec  
-
-                //get all routes that has this user's name in it
-
-                $route = \App\Routing::where('route','like','%'.$loggedinusername.'%')->pluck('route');
-                foreach ($route as $r) {
-                    //find the rest of the string where this username starts
-                    $relevantroute = explode($loggedinusername,$r)[1];
-                    $split = explode(',', $relevantroute);
-                    foreach ($split as $val) {
-                        $val = trim($val);
-                        if($val != '')  $routes->push( $val);    
-                    }
-                }
-                
-            }
-            
-            $routes = $routes->unique();
-
-            //now we need to fetch all the user displaynames
-
-            $forwardarray = \App\User::whereIn( 'username',$routes )->get(['username','name','displayname']);
-
-            
-
-            $forwardarray = $forwardarray->mapWithKeys(function ($item) {
-                return [$item['username'] => ($item['displayname'] ? $item['displayname'] . ', ' : '') .$item['name']];
-            });
-
-        }
-        */
+        
 
         if($loggedinusername == $form->owner && $form->owner != 'admin'){
 
@@ -1073,7 +1024,7 @@ class MyFormsController extends Controller
 
     
         $descriptionofday = '';
-        
+        $needsposting = false;
         if($form->overtime_slot != 'Sittings'){
             $date = Carbon::createFromFormat(config('app.date_format'), $form->duty_date)->format('Y-m-d');
 
@@ -1082,6 +1033,8 @@ class MyFormsController extends Controller
             $daytype = $calender->day_type;
 
             $descriptionofday = $calender->description;
+
+            $needsposting = $form->NeedsPostingOrder();
         }
         
         $submmittedby = $form->SubmitedbyNames;
@@ -1148,7 +1101,8 @@ class MyFormsController extends Controller
 
         return view('admin.my_forms.show', compact('form', 
                     'overtimes','daytype','submmittedby',  'createdby', 'canforward' , 'cansubmittoaccounts', 'descriptionofday'
-                    ,'prev','next', 'romankla', 'sessionnumber_th', 'sessionnumber','malkla'));
+                    ,'prev','next', 'romankla', 'sessionnumber_th', 'sessionnumber','malkla',
+                    'needsposting'));
     }
 
 

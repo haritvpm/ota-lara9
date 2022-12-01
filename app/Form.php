@@ -387,4 +387,33 @@ class Form extends Model
         
         return 0== strcasecmp($loggedusername, $this->CreatorSection);
     }
+
+    public function NeedsPostingOrder()
+    {
+        $needsposting = true;
+
+        //we should set parttime even if it is being edited by house keeping
+
+        if(false !== strpos( $this->creator, 'health') || 
+            false !== strpos( $this->creator, 'agri' )){
+            $needsposting = false;        
+        }
+
+        if(false !== strpos($this->creator, 'watchnward')){
+            $needsposting = false;
+        }
+
+        if(false !== strpos($this->creator, 'sn.am') || 
+          false !== strpos($this->creator, 'sn.ma')){
+            $needsposting = false;
+        }
+
+
+        if( false !== strpos(  $this->creator, 'oo.') ){
+            $needsposting = false; //dyspkr and sec too
+        }
+
+        return $needsposting ;
+        
+    }
 }

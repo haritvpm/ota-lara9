@@ -47,7 +47,7 @@
 <div class="row" v-cloak>
 	
 	<div class="col-md-12 form-group ">
-		<table class="table  table-condensed ">
+		<table class="table  table-condensed">
 			<thead v-show="form.overtimes.length" >
 				<tr style="font-size: 12px; font-weight: bold">
 					<th>No</th>
@@ -61,7 +61,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				<tr v-for="(row, index) in form.overtimes">
+				<tr v-for="(row, index) in form.overtimes" :class="{ info: index%2 }">
 					<td style="width:1px;"> <small><span v-text="index+1"></span></small></td>
 
 					<td class="col-md-3"> 

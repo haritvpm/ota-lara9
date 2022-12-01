@@ -373,10 +373,27 @@ th{
           </div>
          
      
-        <br>
        @endif
 
     @endif
+
+    @if($needsposting)
+                
+       <div class="hidden-print checkbox checkbox-danger">
+            <input id="checkbox3" type="checkbox" v-model="needspostingchecked">
+            <label for="checkbox3" >
+              <p class="malfont"  v-html="approvalpostingcheckedtext+' - <strong>{{Auth::user()->DispNameWithName}}</strong>'">
+               
+              </p>
+                                            
+            </label>
+        </div>
+       
+   
+      <br>
+     @endif
+
+    
 
     @if( strpos(Auth::user()->username,'oo.') !== 0)
         @if($form->overtime_slot == 'Sittings')
@@ -469,16 +486,16 @@ th{
         @endphp    
           
         @if($cansubmittoaccounts)
-        &nbsp;<button class="btn btn-success pull-right hidden-print" @click="submitClick('{{$usertitle}}')" data-toggle="tooltip" title="Send to Accounts D" :disabled="!agreechecked"><i class="fa fa-envelope"></i>&nbsp;Submit to Accounts</button>
+        &nbsp;<button class="btn btn-success pull-right hidden-print" @click="submitClick('{{$usertitle}}')" data-toggle="tooltip" title="Send to Accounts D" :disabled="!agreechecked || !needspostingchecked"><i class="fa fa-envelope"></i>&nbsp;Submit to Accounts</button>
         <!-- due to max length of 255 of submitted_names, prevent too many forwarding -->
         @endif
      
 
         @if($canforward)
           @if(!$cansubmittoaccounts)
-          &nbsp;<button class="btn btn-danger pull-right hidden-print" @click="forwardClick('{{$usertitle}}')" data-toggle="tooltip" title="Send this form to a higher official for approval" id="btn_forward" :disabled="!agreechecked"><i class="fa fa-mail-forward"></i>&nbsp;Forward</button>
+          &nbsp;<button class="btn btn-danger pull-right hidden-print" @click="forwardClick('{{$usertitle}}')" data-toggle="tooltip" title="Send this form to a higher official for approval" id="btn_forward" :disabled="!agreechecked || !needspostingchecked"><i class="fa fa-mail-forward"></i>&nbsp;Forward</button>
           @elseif($form->overtime_slot != 'Sittings' && $cansubmittoaccounts)
-          &nbsp;<button class="btn btn-default hidden-print" @click="forwardClick('{{$usertitle}}')" data-toggle="tooltip" title="Send this form to a higher official for approval" id="btn_forward" :disabled="!agreechecked"><i class="fa fa-mail-forward"></i>&nbsp;</button>
+          &nbsp;<button class="btn btn-default hidden-print" @click="forwardClick('{{$usertitle}}')" data-toggle="tooltip" title="Send this form to a higher official for approval" id="btn_forward" :disabled="!agreechecked || !needspostingchecked"><i class="fa fa-mail-forward"></i>&nbsp;</button>
           @endif
         @endif
 

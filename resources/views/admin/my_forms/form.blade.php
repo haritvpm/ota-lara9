@@ -62,7 +62,7 @@
 <div class="row" v-cloak>
 	
 	<div class="col-md-12 form-group ">
-		<table class="table  table-condensed ">
+		<table class="table  table-condensed">
 			<thead v-show="form.overtimes.length" >
 				<tr style="font-size: 12px; font-weight: bold">
 					<th>No</th>
@@ -75,7 +75,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				<tr v-for="(row, index) in form.overtimes">
+				<tr v-for="(row, index) in form.overtimes" :class="{ info: index%2 }">
 					<td style="width:1px;"> <small> 
 <button  class="btn btn-default" data-toggle="tooltip" title="Insert row" @click.prevent="insertElement(index+1);"> <span v-text="index+1"></span> </small> </button></td>
 					<td>
@@ -118,7 +118,7 @@
 					</td>
 					
 					<td class="col-md-2"> <input :name="'worknature[' + index + ']'" class="form-control" type="text" v-model="row.worknature" required></td>
-					<td style="width:1px;"><button class="btn btn-danger"  @click.prevent="removeElement(index);"><i class="fa fa-times"></i></button>
+					<td style="width:1px;"><button class="btn btn-danger"  @click.prevent="removeElement(index);"   data-toggle="tooltip" title="remove row"><i class="fa fa-times"></i></button>
 					
 
 					</td>

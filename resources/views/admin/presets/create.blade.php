@@ -2,13 +2,14 @@
 
 @section('content')
     <h3 class="page-title">@lang('quickadmin.preset.title')</h3>
-<p>
-    <strong>Reserved names</strong> : <br> default_worknature,<br> default_holiday_firstot_starttime, default_holiday_firstot_endtime,<br>
+<!-- <p>
+    <strong>Reserved names</strong> : 
+    <br> default_worknature,<br> default_holiday_firstot_starttime, default_holiday_firstot_endtime,<br>
     default_holiday_secondot_starttime, default_holiday_secondot_endtime<br>
     default_workingday_firstot_starttime, default_workingday_firstot_endtime<br>
     default_workingday_secondot_starttime, default_workingday_secondot_endtime<br>
     default_sittingday_secondot_starttime, default_sittingday_secondot_endtime.
-</p>
+</p> -->
 
     {!! Form::open(['method' => 'POST', 'route' => ['admin.presets.store']]) !!}
 
