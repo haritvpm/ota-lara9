@@ -66,10 +66,13 @@ class AttendancesController extends Controller
              
         }
         
-        $attendances = $session->attendances()->get();
-
+        $attendances = $session->attendances()
+                        ->orderBy('name')
+                        ->get();
+        
 //////////////////////////
-        $pens_not_found = Attendance::where('session_id',$session->id )->whereNull('employee_id')->get()->pluck('pen')->toarray();
+        $pens_not_found = Attendance::where('session_id',$session->id )
+                                    ->whereNull('employee_id')->get()->pluck('pen')->toarray();
 
         $errors = [];
 
@@ -86,7 +89,8 @@ class AttendancesController extends Controller
                         ->get()->pluck('pen')->toarray();;
 
         if(count($duplicates)  ){
-            $errors[] = 'Duplicates : '. implode(', ', $duplicates);
+          
+           \Session::flash('message-info', 'Duplicate found, verify: '. implode(', ', $duplicates));
            
         } 
         return view('admin.attendances.index', compact('sessions','attendances'))->withErrors($errors);

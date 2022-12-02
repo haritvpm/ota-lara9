@@ -1208,12 +1208,6 @@ class MyFormsController extends Controller
                 array_push($myerrors,  'Attendance not found for:' . $pensnotinattendance->implode(',') );
                 return null;
             }*/
-
-           // $pentodays = $attendance->pluck( 'total_present_dates', 'employee.pen' );   //this pen is o/s pen
-           // $pentoattendace = $attendance->pluck( 'total_sum', 'employee.pen' );
-
-           // dd($pentoattendace);
-           
         }
 
 
@@ -1266,19 +1260,7 @@ class MyFormsController extends Controller
                 $pen = substr($pen, 0, $tmp);
              }
 
-             /*
-             $query = \App\Overtime::with('form')
-                              ->where('pen', 'like' , $pen . '%')
-                              ->whereHas('form', function($q)  use ($request,$formid) { 
-                                $q->where('overtime_slot', 'Sittings')
-                                      ->where('session', $request['session'])
-                                      ->where('id', '!=', $formid); //skip this item if on update
-                            });
-
-            //we cannot use pluck, pluck seems to return only distinct 'count'
-            $res = $query->get();
-            */
-
+            
             $res_for_pen = $res->reject(function($element) use ($pen) {
                 return strncasecmp($element['pen'], $pen, strlen($pen)) != 0;
             });

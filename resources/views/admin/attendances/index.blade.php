@@ -63,12 +63,13 @@
                                 {{ $attendance->name ?? '' }} <br>
                                 {{ $attendance->pen ?? '' }}<br>
                                 {{ $attendance->designation ?? '' }} <br>
-                                {{ $attendance->section ?? '' }} 
+                                <!-- {{ $attendance->section ?? '' }}  -->
                             </td>
                            
                             <td>
                                 {{ $attendance->employee->name  ?? 'Please edit and select' }}<br>
-                                {{ $attendance->employee->pen ?? '' }}
+                                {{ $attendance->employee->pen ?? '' }}<br>
+                                {{ $attendance->employee->designation->designation ?? '' }}
                             </td>
 
                             <td>
