@@ -71,13 +71,25 @@ class AttendancesController extends Controller
 //////////////////////////
         $pens_not_found = Attendance::where('session_id',$session->id )->whereNull('employee_id')->get()->pluck('pen')->toarray();
 
+        $errors = [];
+
         if(count($pens_not_found)  ){
-            \Session::flash('message-danger', 'Employee not found for PEN: '. implode(',', $pens_not_found));
+            $errors[] = 'Employee not found for PEN: '. implode(', ', $pens_not_found);
+           
         } 
 
+        $duplicates = \DB::table('attendances')
+                        ->where('session_id',$session->id )
+                        ->select('pen','employee_id', \DB::raw('COUNT(*) as `count`'))
+                        ->groupBy('pen','employee_id')
+                        ->havingRaw('COUNT(*) > 1')
+                        ->get()->pluck('pen')->toarray();;
 
-       // dd($attendances);
-        return view('admin.attendances.index', compact('sessions','attendances'));
+        if(count($duplicates)  ){
+            $errors[] = 'Duplicates : '. implode(', ', $duplicates);
+           
+        } 
+        return view('admin.attendances.index', compact('sessions','attendances'))->withErrors($errors);
         
 
     }
@@ -365,6 +377,8 @@ class AttendancesController extends Controller
             $fields = array('present_dates' => 5,
                             'pen' => 2, 
                             'name' => 1,
+                            'designation'=> 3,
+                            'section'=> 4,
                             'total' => 6);
             $insert = [];
 
@@ -444,7 +458,8 @@ class AttendancesController extends Controller
 
             \Session::flash('message-success', 'imported items: ' . $rows );
             if(count($pens_not_found)  ){
-                \Session::flash('message-danger', 'Employee not found for PEN: '. implode(',', $pens_not_found));
+                //check done by index function. so not needed
+               // \Session::flash('message-danger', 'Employee not found for PEN: '. implode(',', $pens_not_found));
             }
             
             return redirect()->route('admin.attendances.index',['session'=> $session->name]);

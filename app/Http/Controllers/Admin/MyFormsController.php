@@ -1201,11 +1201,13 @@ class MyFormsController extends Controller
                                 ->wherein('employee_id', $employee_ids->toArray() )->get();
 
             $pensinattendance = $attendance->pluck( 'employee.pen' );
-            $pensnotinattendance = $pens->diff($pensinattendance);
-            if($pensnotinattendance->count()){
-               // array_push($myerrors,  'Attendance not found for:' . $pensnotinattendance->implode(',') );
-              //  return null;
-            }
+            /*$pensnotinattendance = $pens->diff($pensinattendance);
+            if($pensnotinattendance->count())
+            {
+                array_push($myerrors,  'Attendance not found for:' . $pensnotinattendance->implode(',') );
+                return null;
+            }*/
+            
             $pentodays = $attendance->pluck( 'present_dates', 'employee.pen' );   //this pen is o/s pen
             $pentoattendace = $attendance->pluck( 'total', 'employee.pen' );
 

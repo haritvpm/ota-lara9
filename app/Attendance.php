@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Model;
 class Attendance extends Model
 {
     protected $fillable = ['present_dates',
-    'pen', 'name',
+    'pen', 'name', 'designation', 'section',
     'session_id',
     'total','employee_id','created_at',
     'updated_at',];

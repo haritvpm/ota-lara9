@@ -20,7 +20,7 @@
 
     <div class="card-body">
         <div class="table-responsive">
-            <table class=" table table-bordered table-striped table-hover datatable datatable-Attendance">
+            <table class=" table table-bordered table-striped datatable datatable-Attendance">
                 <thead>
                     <tr>
                         <th width="10">
@@ -30,14 +30,11 @@
                             {{ trans('quickadmin.attendance.fields.id') }}
                         </th>
                         <th>
-                            Name as per O/S
+                            As per O/S
                         </th>
+                      
                         <th>
-                            {{ trans('quickadmin.attendance.fields.pen') }}  as per O/S
-                        </th>
-
-                        <th>
-                            Employee as per us
+                            As per us
                         </th>
                         <th>
                             {{ trans('quickadmin.attendance.fields.session') }}
@@ -63,13 +60,15 @@
                                 {{ $attendance->id ?? '' }}
                             </td>
                             <td>
-                                {{ $attendance->name ?? '' }}
+                                {{ $attendance->name ?? '' }} <br>
+                                {{ $attendance->pen ?? '' }}<br>
+                                {{ $attendance->designation ?? '' }} <br>
+                                {{ $attendance->section ?? '' }} 
                             </td>
+                           
                             <td>
-                                {{ $attendance->pen ?? '' }}
-                            </td>
-                            <td>
-                                {{ $attendance->employee->name  ?? '' }} {{ $attendance->employee->pen ?? '' }}
+                                {{ $attendance->employee->name  ?? 'Please edit and select' }}<br>
+                                {{ $attendance->employee->pen ?? '' }}
                             </td>
 
                             <td>
@@ -79,8 +78,8 @@
                             <td>
                                 {{ $attendance->present_dates ?? '' }}
                             </td>
-                            <td>
-                                {{ $attendance->total ?? '' }}
+                            <td class="text-center">
+                               <strong> {{ $attendance->total ?? '' }}</strong>
                             </td>
                             <td>
                                 @can('attendance_show')
