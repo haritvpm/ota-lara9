@@ -1198,20 +1198,21 @@ class MyFormsController extends Controller
             $attendance = \App\Attendance::with('session', 'employee')
                                 ->whereHas('session', function($query)  use ($request) { 
                                     $query->where('name', $request['session']);})
-                                ->wherein('employee_id', $employee_ids->toArray() )->get();
+                                ->wherein('employee_id', $employee_ids->toArray() )
+                                ->get();
 
-            $pensinattendance = $attendance->pluck( 'employee.pen' );
+            //$pensinattendance = $attendance->pluck( 'employee.pen' );
             /*$pensnotinattendance = $pens->diff($pensinattendance);
             if($pensnotinattendance->count())
             {
                 array_push($myerrors,  'Attendance not found for:' . $pensnotinattendance->implode(',') );
                 return null;
             }*/
-            
-            $pentodays = $attendance->pluck( 'present_dates', 'employee.pen' );   //this pen is o/s pen
-            $pentoattendace = $attendance->pluck( 'total', 'employee.pen' );
 
-          //  dump($pentoattendace);
+           // $pentodays = $attendance->pluck( 'total_present_dates', 'employee.pen' );   //this pen is o/s pen
+           // $pentoattendace = $attendance->pluck( 'total_sum', 'employee.pen' );
+
+           // dd($pentoattendace);
            
         }
 
@@ -1256,7 +1257,7 @@ class MyFormsController extends Controller
         $overtimes =$collection->transform(function($overtime) 
                                            use ($res, $request,$formid, &$myerrors,$maxsittings,
                                             $rates,$sitting_start, $sitting_end,$dateformatwithoutime,$maxsittingdates, 
-                                            $checksecretaryattendance, $pentoattendace, $pentodays) 
+                                            $checksecretaryattendance, $attendance) 
         {
              
              $pen = $overtime['pen'];
@@ -1294,25 +1295,36 @@ class MyFormsController extends Controller
             
             if($checksecretaryattendance){
 
-                if (!$pentoattendace->has($overtime['pen']))
-                {
+
+                if( ! $attendance->contains('employee.pen', $overtime['pen'] ) ){
                     array_push($myerrors,  $overtime['pen'] . '-' .$overtime['name'] . ' : Attendance not found.' );
-                    return null;   
 
                 }
-                else
-                if($totalwouldbe > $pentoattendace[$overtime['pen']])
-                {      
-                    array_push($myerrors,  $overtime['pen'] . '-' .$overtime['name'] . ' : Exceeds attendance as per O/S. Already saved = ' . $totalsittingexisting . '. Plus this (' .$overtime['count'] .') = ' . $totalwouldbe. '. (max possible: ' . $pentoattendace[$overtime['pen']] .')' );
-                  //  array_push($myerrors,  $overtime['pen'] . '-' .$overtime['name'] . ' : Exceeds attendace as per secretary-office report. Already saved = ' . $totalsittingexisting . '. + this (' .$overtime['count'] .') = ' . $totalwouldbe. '. (max possible: ' . $pentoattendace[$overtime['pen']] . ' -> '. $pentodays[$overtime['pen']] .')' );
-                                       
-                    return null;   
+                else {
+                    //there can be multiple entries for a pen in attendace due to section changes during session
+                    $total_ot_asper_secretary = $attendance->where( 'employee.pen', $overtime['pen']  )->sum('total');
+                    
+                    if($totalwouldbe > $total_ot_asper_secretary)
+                    {      
+                        
+                        if($totalsittingexisting){
+                            array_push($myerrors,  $overtime['pen'] . '-' .$overtime['name'] . ' : Exceeds attendance as per O/S. Already saved ' . $totalsittingexisting . '. + this (' .$overtime['count'] .') = ' . $totalwouldbe. '. (max possible: ' . $total_ot_asper_secretary .')' );
+                        } else {
+                            array_push($myerrors,  $overtime['pen'] . '-' .$overtime['name'] . ' : Exceeds attendance as per O/S - ' .$overtime['count'] . '. (max possible: ' . $total_ot_asper_secretary .')' );
+                        }
+                                    
+                        return null;   
+                    }
                 }
             }
 
             if($totalwouldbe > $maxsittings)
             {      
-               array_push($myerrors,  $overtime['pen'] . '-' .$overtime['name'] . ' : Already saved = ' . $totalsittingexisting . '. Plus this (' .$overtime['count'] .') = ' . $totalwouldbe. '. (maximum possible: ' . $maxsittings .')' );
+               if($totalsittingexisting){
+                array_push($myerrors,  $overtime['pen'] . '-' .$overtime['name'] . ' : Already saved ' . $totalsittingexisting . '. + this (' .$overtime['count'] .') = ' . $totalwouldbe. '. (maximum possible: ' . $maxsittings .')' );
+               } else {
+                array_push($myerrors,  $overtime['pen'] . '-' .$overtime['name'] . ' : This = ' . $overtime['count'] . '. (maximum possible: ' . $maxsittings .')' );
+               }
             
                return null;   
             }
