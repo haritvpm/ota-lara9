@@ -265,4 +265,33 @@ class User extends Authenticatable
          
     }
 
+    public static function needsPostingOrder($user)
+    {
+        $needsposting = true;
+
+        //we should set parttime even if it is being edited by house keeping
+
+        if(false !== strpos( $user, 'health') || 
+            false !== strpos( $user, 'agri' )){
+            $needsposting = false;        
+        }
+
+        if(false !== strpos($user, 'watchnward')){
+            $needsposting = false;
+        }
+
+        if(false !== strpos($user, 'sn.am') || 
+          false !== strpos($user, 'sn.ma')){
+            $needsposting = false;
+        }
+
+
+        if( false !== strpos(  $user, 'oo.') ){
+            $needsposting = false; //dyspkr and sec too
+        }
+
+        return $needsposting ;
+        
+    }
+
 }

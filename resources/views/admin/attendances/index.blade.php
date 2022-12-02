@@ -37,7 +37,7 @@
                         </th>
 
                         <th>
-                            Employee
+                            Employee as per us
                         </th>
                         <th>
                             {{ trans('quickadmin.attendance.fields.session') }}
@@ -69,7 +69,7 @@
                                 {{ $attendance->pen ?? '' }}
                             </td>
                             <td>
-                                {{ $attendance->employee->name ?? '' }}
+                                {{ $attendance->employee->name  ?? '' }} {{ $attendance->employee->pen ?? '' }}
                             </td>
 
                             <td>

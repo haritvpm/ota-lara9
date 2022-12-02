@@ -1034,7 +1034,7 @@ class MyFormsController extends Controller
 
             $descriptionofday = $calender->description;
 
-            $needsposting = $form->NeedsPostingOrder();
+            $needsposting = \App\User::needsPostingOrder($form->creator); 
         }
         
         $submmittedby = $form->SubmitedbyNames;
@@ -1181,8 +1181,11 @@ class MyFormsController extends Controller
         $pens = $collection->pluck('pen');
         
         $checksecretaryattendance = false;
-        if( \Config::get('custom.check_attendance')){
-            $checksecretaryattendance = true;
+        if( \Config::get('custom.check_attendance')) {
+            $form = $formid ? Form::find($formid) : null; //if updating a form, get creator field
+            if( \App\User::needsPostingOrder( $form ? $form->creator : \Auth::user()->username) ){
+                $checksecretaryattendance = true;
+            }
         }
         
         $pentoattendace = null;
@@ -1192,18 +1195,22 @@ class MyFormsController extends Controller
             
             $employee_ids = \App\Employee::wherein('pen', $pens->toArray())->pluck('id');
             
-            $pentoattendace = \App\Attendance::with('session')
+            $attendance = \App\Attendance::with('session', 'employee')
                                 ->whereHas('session', function($query)  use ($request) { 
                                     $query->where('name', $request['session']);})
                                 ->wherein('employee_id', $employee_ids->toArray() )->get();
-            $pentodays = $pentoattendace->pluck( 'present_dates', 'pen' );                  
-            $pentoattendace = $pentoattendace->pluck( 'total', 'pen' );
 
-           // dd($pentoattendace);
+            $pensinattendance = $attendance->pluck( 'employee.pen' );
+            $pensnotinattendance = $pens->diff($pensinattendance);
+            if($pensnotinattendance->count()){
+               // array_push($myerrors,  'Attendance not found for:' . $pensnotinattendance->implode(',') );
+              //  return null;
+            }
+            $pentodays = $attendance->pluck( 'present_dates', 'employee.pen' );   //this pen is o/s pen
+            $pentoattendace = $attendance->pluck( 'total', 'employee.pen' );
 
-            //$out = new \Symfony\Component\Console\Output\ConsoleOutput();
-      //$out->writeln($pentoattendace);
-            
+          //  dump($pentoattendace);
+           
         }
 
 
@@ -1284,6 +1291,14 @@ class MyFormsController extends Controller
              
             
             if($checksecretaryattendance){
+
+                if (!$pentoattendace->has($overtime['pen']))
+                {
+                    array_push($myerrors,  $overtime['pen'] . '-' .$overtime['name'] . ' : Attendance not found.' );
+                    return null;   
+
+                }
+                else
                 if($totalwouldbe > $pentoattendace[$overtime['pen']])
                 {      
                     array_push($myerrors,  $overtime['pen'] . '-' .$overtime['name'] . ' : Exceeds attendance as per O/S. Already saved = ' . $totalsittingexisting . '. Plus this (' .$overtime['count'] .') = ' . $totalwouldbe. '. (max possible: ' . $pentoattendace[$overtime['pen']] .')' );
@@ -1339,7 +1354,7 @@ class MyFormsController extends Controller
 
             //if the user has not entered all the sittings days within the period, make sure he enter leaves.
 
-            if( $overtime['count'] < $sittingsinrange){
+            if( !$checksecretaryattendance && $overtime['count'] < $sittingsinrange  ){
 
                 $leaves = $sittingsinrange-$overtime['count'];
                 $allleavesentered = true;
