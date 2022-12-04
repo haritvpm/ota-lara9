@@ -56,7 +56,13 @@
 					<th style="width: 11%">Period-From</th>
 					<th style="width: 11%">Period-To</th>
 					<th>Sitting days attended</th>
+
+					@if( \Config::get('custom.check_attendance')) 
+					<th>Remarks if any</th>
+					@else
 					<th>Leave/Late</th>
+					@endif
+
 					<th></th>
 				</tr>
 			</thead>

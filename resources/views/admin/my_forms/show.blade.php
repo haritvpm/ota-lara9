@@ -285,8 +285,14 @@ th{
                     @if($form->overtime_slot == 'Sittings')
                     <th class="text-center">Period from</th>
                     <th class="text-center">Period to</th>
-                    <th class="text-center">Sittings days attended</th>
-                    <th>Leave/Late if any</th>
+                    <th class="text-center">Sitting days attended</th>
+                    
+                      @if( \Config::get('custom.check_attendance')) 
+                      <th>Remarks if any</th>
+                      @else
+                      <th>Leave/Late</th>
+                      @endif
+
                     @else
                     <th>@lang('quickadmin.overtimes.fields.from')</th>
                     <th>@lang('quickadmin.overtimes.fields.to')</th>

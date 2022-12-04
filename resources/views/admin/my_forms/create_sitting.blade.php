@@ -43,7 +43,10 @@
  <div class="row">
             <div class="col-md-12 form-group">
                
-                <span>Note:<br> For each person, enter <b>leaves/late comings on sitting days</b> if any, correctly (NOT total leave count). e.g:  <i> 30/12, 31/12. </i>
+                <span>Note:
+                    @unless ( \Config::get('custom.check_attendance')) 
+                    <br> For each person, enter <b>leaves/late comings on sitting days</b> if any, correctly (NOT total leave count). e.g:  <i> 30/12, 31/12. </i>
+                    @endunless
                     
                     <br> If person was transferred to/from this section, set his <b>Period-From</b> /<b>Period-To</b> accordingly.
                        
