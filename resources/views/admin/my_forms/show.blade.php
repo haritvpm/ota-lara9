@@ -125,18 +125,7 @@ th{
     SECRETARIAT OF THE KERALA LEGISLATURE
     
 </h4>
-    @if($prev != null || $next != null)
-    <?php
-    $prevdisabled = $prev == null ? 'disabled' : '';
-    $nextdisabled = $next == null ? 'disabled' : '';
-
-    ?>
-  
-    <a href="{{ route('admin.my_forms.show',[$prev]) }}"class="btn  {{$prevdisabled}} hidden-print"><i class="fa fa-chevron-left"></i> Previous</a>
    
-    <a href="{{ route('admin.my_forms.show',[$next]) }}"class="btn  {{$nextdisabled}} hidden-print">Next <i class="fa fa-chevron-right"></i></a>
-    @endif
-    
   
 
 
@@ -383,7 +372,7 @@ th{
 
     @endif
 
-    @if($needsposting)
+    @if($needsposting && !Auth::user()->isAdmin())
                 
        <div class="hidden-print checkbox checkbox-danger">
             <input id="checkbox3" type="checkbox" v-model="needspostingchecked">

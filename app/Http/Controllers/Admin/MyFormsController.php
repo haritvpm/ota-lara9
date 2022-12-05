@@ -1073,7 +1073,8 @@ class MyFormsController extends Controller
 
         $prev=null;
         $next=null;
-        if(\Auth::user()->isAdminorAudit() && $form->owner=='admin'){
+        /* if(\Auth::user()->isAdminorAudit() && $form->owner=='admin')
+        {
             $prev = Form::where('id', '<', $form->id)
                         ->where('owner','admin')
                         ->where('creator','<>','admin')//no pa2admin
@@ -1094,7 +1095,7 @@ class MyFormsController extends Controller
                            })
                         ->min('id');
 
-        }
+        } */
 
 
       
