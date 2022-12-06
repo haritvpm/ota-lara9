@@ -481,16 +481,16 @@ th{
         @endphp    
           
         @if($cansubmittoaccounts)
-        &nbsp;<button class="btn btn-success pull-right hidden-print" @click="submitClick('{{$usertitle}}')" data-toggle="tooltip" title="Send to Accounts D" :disabled="!agreechecked || !needspostingchecked"><i class="fa fa-envelope"></i>&nbsp;Submit to Accounts</button>
+        &nbsp;<button class="btn btn-success pull-right hidden-print" @click="submitClick('{{$usertitle}}')" data-toggle="tooltip" title="Send to Accounts D" :disabled="!agreechecked || ( needsposting && !needspostingchecked)"><i class="fa fa-envelope"></i>&nbsp;Submit to Accounts</button>
         <!-- due to max length of 255 of submitted_names, prevent too many forwarding -->
         @endif
      
 
         @if($canforward)
           @if(!$cansubmittoaccounts)
-          &nbsp;<button class="btn btn-danger pull-right hidden-print" @click="forwardClick('{{$usertitle}}')" data-toggle="tooltip" title="Send this form to a higher official for approval" id="btn_forward" :disabled="!agreechecked || !needspostingchecked"><i class="fa fa-mail-forward"></i>&nbsp;Forward</button>
+          &nbsp;<button class="btn btn-danger pull-right hidden-print" @click="forwardClick('{{$usertitle}}')" data-toggle="tooltip" title="Send this form to a higher official for approval" id="btn_forward" :disabled="!agreechecked ||  ( needsposting && !needspostingchecked)"><i class="fa fa-mail-forward"></i>&nbsp;Forward</button>
           @elseif($form->overtime_slot != 'Sittings' && $cansubmittoaccounts)
-          &nbsp;<button class="btn btn-default hidden-print" @click="forwardClick('{{$usertitle}}')" data-toggle="tooltip" title="Send this form to a higher official for approval" id="btn_forward" :disabled="!agreechecked || !needspostingchecked"><i class="fa fa-mail-forward"></i>&nbsp;</button>
+          &nbsp;<button class="btn btn-default hidden-print" @click="forwardClick('{{$usertitle}}')" data-toggle="tooltip" title="Send this form to a higher official for approval" id="btn_forward" :disabled="!agreechecked ||  ( needsposting && !needspostingchecked)"><i class="fa fa-mail-forward"></i>&nbsp;</button>
           @endif
         @endif
 

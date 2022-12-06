@@ -1025,7 +1025,7 @@ class MyFormsController extends Controller
     
         $descriptionofday = '';
         $needsposting = false;
-        if($form->overtime_slot != 'Sittings'){
+        if($form->overtime_slot != 'Sittings'   && $form->owner == $loggedinusername && $form->owner != 'admin'){
             $date = Carbon::createFromFormat(config('app.date_format'), $form->duty_date)->format('Y-m-d');
 
  
@@ -1068,6 +1068,7 @@ class MyFormsController extends Controller
             'sessionnumber' => $sessionnumber,
             'klasession_for_JS' => $klasession_for_JS,
             'dataentry_allowed' => $session->dataentry_allowed != 'No',
+'needsposting' => $needsposting,
 
         ]);
 
