@@ -17,17 +17,17 @@ class BackupController extends Controller
 {
     public function index()
     {
-        if (!count(config('laravel-backup.backup.destination.disks'))) {
+        if (!count(config('backup.backup.destination.disks'))) {
             dd('backpack::backup.no_disks_configured');
         }
 
-        $disk = Storage::disk(config('laravel-backup.backup.destination.disks')[0]);
+        $disk = Storage::disk(config('backup.backup.destination.disks')[0]);
 
 
         //$files = $disk->allFiles();
 
         //dd(storage_path('app/backup-temp'));
-        $files = $disk->files(config('laravel-backup.backup.name'));
+        $files = $disk->files(config('backup.backup.name'));
         $backups = [];
 
         // dd($files);
@@ -104,11 +104,11 @@ class BackupController extends Controller
      */
     public function download($file_name)
     {       
-        $file = config('laravel-backup.backup.name') . '/' . $file_name;
+        $file = config('backup.backup.name') . '/' . $file_name;
         
-        $disk = Storage::disk(config('laravel-backup.backup.destination.disks')[0]);
+        $disk = Storage::disk(config('backup.backup.destination.disks')[0]);
         if ($disk->exists($file)) {
-            $fs = Storage::disk(config('laravel-backup.backup.destination.disks')[0])->getDriver();
+            $fs = Storage::disk(config('backup.backup.destination.disks')[0])->getDriver();
             $stream = $fs->readStream($file);
 
             return \Response::stream(function () use ($stream) {
@@ -128,9 +128,9 @@ class BackupController extends Controller
      */
     public function delete($file_name)
     {
-        $disk = Storage::disk(config('laravel-backup.backup.destination.disks')[0]);
-        if ($disk->exists(config('laravel-backup.backup.name') . '/' . $file_name)) {
-            $disk->delete(config('laravel-backup.backup.name') . '/' . $file_name);
+        $disk = Storage::disk(config('backup.backup.destination.disks')[0]);
+        if ($disk->exists(config('backup.backup.name') . '/' . $file_name)) {
+            $disk->delete(config('backup.backup.name') . '/' . $file_name);
             return redirect()->back();
         } else {
             abort(404, "The backup file doesn't exist.");
