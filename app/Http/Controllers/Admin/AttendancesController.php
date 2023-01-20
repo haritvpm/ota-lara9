@@ -166,19 +166,36 @@ class AttendancesController extends Controller
     public function store(StoreAttendancesRequest $request)
     {
         if (! Gate::allows('attendance_create')) {
-            return abort(401);
+         return abort(401);
+        }
+       
+        $employee = Employee::with('designation')->findOrFail($request->employee_id );
+        //
+        
+        //check if already attendance entered
+        //if not, save
+        //$session = \App\Session::findOrFail($request->session_id);
+        // dd($employee->designation()->first()->designation);
+        
+        $has_att = Attendance::where('session_id', $request->session_id)
+                    ->where(function ($query) use ($request, $employee) {
+                    $query->where('employee_id', $request->employee_id)
+                    ->orWhere('pen', $employee->pen);
+                    })
+                    ->get()->count();
+        if($has_att > 0){
+            dd('attendance already exists: ' . $employee->pen);
+            //\Session::flash('message-info', 'Attendance already exists');
+            return redirect()->route('admin.attendances.index');
         }
         
-       // $att = $request->all();
-
-        //if($att->name == '') $att->name = 
-
-
-
-        $attendance = Attendance::create($request->all());
-
-
-
+        $attendance = Attendance::create($request->all() +
+                        [
+                        'pen' =>$employee->pen,
+                        'name' =>$employee->name,
+                        'designation' => $employee->designation()->first()->designation,
+                        ]);
+        
         return redirect()->route('admin.attendances.index');
     }
 

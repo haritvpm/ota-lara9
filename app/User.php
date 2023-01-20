@@ -280,8 +280,8 @@ class User extends Authenticatable
             $needsposting = false;
         }
 
-        if(false !== strpos($user, 'sn.am') || 
-          false !== strpos($user, 'sn.ma')){
+        if(false !== strpos($user, 'sn.am') /*|| 
+          false !== strpos($user, 'sn.ma')*/){
             $needsposting = false;
         }
 

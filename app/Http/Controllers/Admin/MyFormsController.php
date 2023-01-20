@@ -1192,6 +1192,7 @@ class MyFormsController extends Controller
         
         $pentoattendace = null;
         $pentodays = null;
+        $attendance = null;
 
         if($checksecretaryattendance){
             
