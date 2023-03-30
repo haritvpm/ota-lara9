@@ -1,5 +1,7 @@
 @extends('layouts.app')
 @section('content')
+
+      
 @can('attendance_create')
     <div style="margin-bottom: 10px;" class="row">
         <div class="col-lg-12">
@@ -14,9 +16,32 @@
     </div>
 @endcan
 <div class="card">
+
+  
+
     <div class="card-header">
         {{ trans('quickadmin.attendance.title_singular') }} {{ trans('global.list') }}
     </div>
+
+    <form action="" method="get" id="filter" class="form-inline">
+		<div class="form-group">
+            Session <select class="form-control" name="session">
+
+                @foreach($sessions as $sess)
+                @if($sess == \Request('session'))
+                <option selected>{{$sess}}</option>
+                @else
+                <option>{{$sess}}</option>
+                @endif
+                @endforeach
+
+            </select>
+        </div>
+             
+        <button type="submit" name="action" value="view" class="btn btn-success" rel="filter"><span class="glyphicon glyphicon-search"></span> View</button>
+
+      
+    </form>
 
     <div class="card-body">
         <div class="table-responsive">
@@ -128,7 +153,7 @@
         </div>
       
        
-        <button type="submit" name="action" value="view" class="btn btn-success" rel="filter"><span class="glyphicon glyphicon-search"></span> View</button>
+        <!-- <button type="submit" name="action" value="view" class="btn btn-success" rel="filter"><span class="glyphicon glyphicon-search"></span> View</button> -->
         <button type="submit" name="action" value="deleteall" class="btn btn-danger">Delete All</button>
       
         </form>
