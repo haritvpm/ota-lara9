@@ -245,7 +245,9 @@
             </tbody>
         </table>
 
-        {!! $forms->links() !!}
+        {{ $forms->onEachSide(5)->links() }}
+
+
         @if ($forms->total() > 0)
         <div><small>Showing {{($forms->currentpage()-1)*$forms->perpage()+1}} to {{(($forms->currentpage()-1)*$forms->perpage())+$forms->count()}}
         of  {{$forms->total()}} forms
