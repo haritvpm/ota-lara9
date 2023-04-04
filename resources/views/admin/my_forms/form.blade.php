@@ -117,7 +117,7 @@
 					</date-picker>  -->
 					</td>
 					
-					<td class="col-md-2"> <input :name="'worknature[' + index + ']'" class="form-control" type="text" v-model="row.worknature" required></td>
+					<td class="col-md-2"> <input :name="'worknature[' + index + ']'" class="form-control" type="text" v-model="row.worknature" maxlength="180"  required></td>
 					<td style="width:1px;"><button class="btn btn-danger"  @click.prevent="removeElement(index);"   data-toggle="tooltip" title="remove row"><i class="fa fa-times"></i></button>
 					
 

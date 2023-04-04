@@ -112,7 +112,7 @@
 					</td>
 					
 					<td class="col-md-1"> <input type="number"  :name="'count[' + index + ']'" class="form-control"  min=1 oninput="validity.valid||(value='');" v-model="row.count"></td>
-					<td class="col-md-2"> <input :name="'worknature[' + index + ']'" class="form-control" type="text" v-model="row.worknature" ></td>
+					<td class="col-md-2"> <input :name="'worknature[' + index + ']'" class="form-control" type="text" v-model="row.worknature" maxlength="180"></td>
 					<td style="width:1px;"><button class="btn  btn-danger" @click.prevent="removeElement(index);"><i class="fa fa-times"></i></button></td>
 
 
