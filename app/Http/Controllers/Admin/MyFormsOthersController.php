@@ -744,11 +744,14 @@ class MyFormsOthersController extends Controller
     public function createovertimes_sitting( Request $request, &$myerrors, $formid=null)
     {
                       
-        $maxsittings = \App\Calender::with('session')
+        $maxsittingdates = \App\Calender::with('session')
                                 ->whereHas('session', function($query)  use ($request) { 
                                     $query->where('name', $request['session']);
                                   })                              
-                                ->where('day_type','Sitting day')->count();
+                                ->where('day_type','Sitting day')->orderby('date','asc')->get();
+
+        $maxsittings = $maxsittingdates->count();
+        $maxsittingdates = $maxsittingdates->pluck('date');
         
         $collection = collect($request->overtimes);
         
@@ -774,10 +777,19 @@ class MyFormsOthersController extends Controller
         $res = $query->get();                      
 
         //\Log::info(print_r($res, true));
+         //Be warned that DateTime object created without explicitely providing the time portion will have the current time set instead of 00:00:00.
+        //If you want to safely compare equality of a DateTime object without explicitly providing the time portion make use of the ! format character.
+        $dateformatwithoutime = '!'.config('app.date_format');
+       
+         //check date overlap
+        $sitting_start = Carbon::createFromFormat( $dateformatwithoutime, $maxsittingdates->first());
+        $sitting_end = Carbon::createFromFormat($dateformatwithoutime, $maxsittingdates->last());
+   
 
 
         $overtimes =$collection->transform(function($overtime) 
-                                           use ($res, $request,$formid, &$myerrors,$maxsittings,$rates) 
+                                           use ($res, $request,$formid, &$myerrors,$maxsittings,$rates, 
+                                           $sitting_start, $sitting_end,$dateformatwithoutime,$maxsittingdates) 
         {
             //$pen = substr($overtime['pen'], 0, strpos($overtime['pen'], '-')+1); //+1 to include '-'
             $pen_actual =   substr( $overtime['pen'],0, strpos( $overtime['pen'],'-' ) ); 
@@ -792,7 +804,7 @@ class MyFormsOthersController extends Controller
 
             //we cannot use pluck, pluck seems to return only distinct 'count'
             $res = $query->get(['count', 'pen']);*/
-
+            //note, designation field is actually Pen. check db to understand :( So we could have just used that instead
             $res_for_pen = $res->reject(function($element) use ($pen_actual) {
                 return strncasecmp($element['pen'], $pen_actual, strlen($pen_actual)) != 0;
             });
@@ -811,22 +823,81 @@ class MyFormsOthersController extends Controller
             {
               
                array_push($myerrors, $overtime['pen'] . ' : Existing sitting days = ' . $totalsittingexisting . ', Plus this, exceeds the maximum of ' . $maxsittings );
+               return null;   
                
             }
-            else
-            {                
-                //$pen_actual =   substr( $overtime['pen'],0, strpos( $overtime['pen'],'-' ) );
-                return new OvertimeOther([
-                    'pen'           => $overtime['pen'],
-                    'designation'   => $pen_actual,//$overtime['designation'],
-                    'from'          => $overtime['from'],
-                    'to'            => $overtime['to'], 
-                    'worknature'    => $overtime['worknature'],
-                    'count'         => $overtime['count'],
-                    'rate'          => '0',//$rates[$overtime['designation']],
-                    
-                    ]);
+            
+
+            /////////////////////
+            //check date overlap
+            $start_one = Carbon::createFromFormat($dateformatwithoutime, $overtime['from']);
+            $end_one = Carbon::createFromFormat($dateformatwithoutime, $overtime['to']);
+
+            $start_one_string = $start_one->format('d-m-Y');
+            $end_one_string = $end_one->format('d-m-Y');
+            $pos1 = $maxsittingdates->search($start_one_string);
+            $pos2 = $maxsittingdates->search($end_one_string);
+
+            //see if user has entered more days than date range
+            
+            $sittingsinrange =  abs($pos2-$pos1)+1;
+            if($pos1 === false ||  $pos2 === false){
+                //user has entered a date that is not a sitting day, manually
+                $sittingsinrange = \App\Calender::with('session')
+                                ->whereHas('session', function($query)  use ($request) { 
+                                    $query->where('name', $request['session']);
+                                })                         
+                                ->where('date', '>=', $start_one)
+                                ->where('date', '<=', $end_one)
+                                ->where('day_type','Sitting day')->count();
             }
+            
+            if( $overtime['count'] >  $sittingsinrange ){
+
+                array_push($myerrors, $overtime['pen'] . ' : From ' . $overtime['from'] . ' to ' . $overtime['to'] . ' there are only ' . $sittingsinrange .' sitting days.');
+                return null;
+            
+            }
+          
+            if( $start_one < $sitting_start || $end_one > $sitting_end ) 
+            {
+
+                array_push($myerrors, $overtime['pen'] .  ' : Select date range between ' . $sitting_start->format('d-m-Y') . ' and ' . $sitting_end->format('d-m-Y') . ' (' . $start_one->format('d-m-Y') . ',' . $end_one->format('d-m-Y') . ')' );
+                return null;
+            }
+            ///////////////////
+            {
+                $emp = $res_for_pen->all();
+              
+                foreach ($emp as $e) {
+
+                    $start_two = Carbon::createFromFormat($dateformatwithoutime, $e['from']);
+                    $end_two = Carbon::createFromFormat($dateformatwithoutime, $e['to']);
+
+                    $isoverlap = ($start_one <= $end_two) && ($end_one >= $start_two);
+
+                    if($isoverlap){
+                    
+                        array_push($myerrors, $overtime['pen'] . ' : Dates overlap with another OT from ' . $e['from'] . ' - ' . $e['to'] . ' for '.$e['count'] . ' day(s) (' . $e->form->creator . ' )' );
+                        return null;
+                    }
+
+                } //foreach
+            }
+            //////////////////
+                            
+            //$pen_actual =   substr( $overtime['pen'],0, strpos( $overtime['pen'],'-' ) );
+            return new OvertimeOther([
+                'pen'           => $overtime['pen'],
+                'designation'   => $pen_actual,//$overtime['designation'],
+                'from'          => $overtime['from'],
+                'to'            => $overtime['to'], 
+                'worknature'    => $overtime['worknature'],
+                'count'         => $overtime['count'],
+                'rate'          => '0',//$rates[$overtime['designation']],
+                
+                ]);
+            
 
         });
     

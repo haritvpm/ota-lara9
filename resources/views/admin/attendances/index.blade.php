@@ -5,6 +5,8 @@
 @can('attendance_create')
     <div style="margin-bottom: 10px;" class="row">
         <div class="col-lg-12">
+    CSV shoould be named &lt;sessionname&gt; xxxx. Example: '16.03 fsdfsfsd.csv'<br>
+
             <a class="btn btn-success" href="{{ route('admin.attendances.create') }}">
                 {{ trans('global.add') }} {{ trans('quickadmin.attendance.title_singular') }}
             </a>
