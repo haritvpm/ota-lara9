@@ -23,7 +23,7 @@ class Form extends Model
 {
     protected $fillable = ['session', 'creator', 'owner', 
     'form_no', 'overtime_slot', 'duty_date', 'date_from', 'date_to',
-'submitted_by', 'submitted_names', 'submitted_on','remarks','updated_at'];
+'submitted_by', 'submitted_names', 'submitted_on','remarks','updated_at', 'worknature'];
     
 
     public static $enum_overtime_slot = ["First" => "First", "Second" => "Second", "Third" => "Third", "Sittings" => "Sittings", "Additional" => "Additional" ];

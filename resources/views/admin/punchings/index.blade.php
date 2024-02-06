@@ -19,51 +19,18 @@
 
     @if(!auth()->user()->isAdminorAudit()) 
 
-    <h4 class="page-title">Create Forms</h4>
+    <h4 class="page-title">Punching Form</h4>
 
     <p>
-        <a href="{{ route('admin.my_forms.create') }}" class="btn btn-success"  data-toggle="tooltip" title="Prepare a form for 1st, 2nd or 3rd OT. Form to be submitted on the next working day itself."  >@lang('quickadmin.qa_new_daily_form')</a>
-        <!-- <a href="{{ route('admin.my_forms.create_sitting') }}" class="btn btn-warning" data-toggle="tooltip" title="Prepare a form for total sitting days attended. Form to be submitted only after an assembly session is over."  > New Sitting-days Form</a> -->
+
+        <a href="{{ route('admin.punchings.create') }}" class="btn btn-warning" data-toggle="tooltip" title="Prepare a form for punching. "  > New Punching Form</a>
     </p>
    
     @endif
 
     <hr>
     <h4 class="page-title">Index of Forms 
-    @if(auth()->user()->isAdmin())
-    <small>Loaded in {{$timetaken}}</small>
-    @endif
     </h4>
-
-    @if(!auth()->user()->isAudit()) 
-    <p>
-        
-        <ul class="nav nav-pills ">
-        @if(!auth()->user()->isAdmin())
-        <li @click="setActive('todo')" :class="{ active: isActive('todo') }"><a href="#">ToDo</a></li>
-        @else
-        <li @click="setActive('all')" :class="{ active: isActive('all') }"><a href="#">All</a></li>
-        
-        <li @click="setActive('Draft')" :class="{ active: isActive('Draft') }"><a href="#">Draft</a></li>
-        @endif
-         <!-- @if($to_approve != -1) -->
-        <!-- <li @click="setActive('To_approve')" :class="{ active: isActive('To_approve') }"><a href="#">To Approve</a></li> -->
-        <!-- @endif -->
-        
-        
-        @if($pending_approval != -1)
-        <li @click="setActive('Pending')" :class="{ active: isActive('Pending') }"><a href="#">Sent for Approval</a></li>
-        @endif
-       
-        <li @click="setActive('Submitted')" :class="{ active: isActive('Submitted') }"><a href="#">Submitted to Accounts</a></li>
-
-      <!--   @if(auth()->user()->isAdmin()) 
-        <li @click="setActive('')" :class="{ active: isActive('') }"><a href="#">All</a></li>
-        @endif -->
-
-        </ul>
-    </p>
-    @endif
 
     <div class="panel panel-default">
     <div class="panel-heading">
@@ -74,27 +41,15 @@
         <table class="table table-bordered table-striped  }}">
             <thead>
                 <tr>
-                    @if(auth()->user()->isAdminorAudit()) 
-                    <th><a href="<?=URL::to('admin/my_forms?sort=id'.$querystr)?>">ID</a></th>
-                    @endif
-
-                    @if(auth()->user()->isAdmin()) 
-                    <th>F.No</th>
-                    @endif
-
-                    <th><a href="<?=URL::to('admin/my_forms?sort=session'.$querystr)?>">Session</a></th>
-                    <th><a href="<?=URL::to('admin/my_forms?sort=creator'.$querystr)?>">Created by</a></th>
-                    <th><a href="<?=URL::to('admin/my_forms?sort=overtime_slot'.$querystr)?>">OT</a></th>
-                    <th><a href="<?=URL::to('admin/my_forms?sort=duty_date'.$querystr)?>">Duty Date</a></th>
-                    <th><a href="<?=URL::to('admin/my_forms?sort=owner'.$querystr)?>">Status</a></th>
-
-                    @if(auth()->user()->isAdmin())
-                    <th>Submtd</th>
-                   <!--  <th>Updated</th> -->
-                    @endif
-
-                  <!--   <th>Remarks</th> -->
-                                        
+                  
+                    <th><a href="<?=URL::to('admin/punchings?sort=id')?>">ID</a></th>
+                    <th><a href="<?=URL::to('admin/punchings?sort=session')?>">Session</a></th>
+                    <th><a href="<?=URL::to('admin/punchings?sort=creator')?>">Created by</a></th>
+                  
+                    <th><a href="<?=URL::to('admin/punchings?sort=pen')?>">PEN</a></th>
+                    <th><a href="<?=URL::to('admin/punchings?sort=pen'
+                    )?>">Name</a></th>
+                    
 
                     <th>&nbsp;</th>
 
@@ -106,124 +61,37 @@
                     @foreach ($forms as $form)
                         <tr data-entry-id="{{ $form->id }}">
                            
-                            @if(auth()->user()->isAdminorAudit()) 
+                          
                             <td ><small> {{ $form->id }}</small> </td>
-                            @endif
-                            @if(auth()->user()->isAdmin()) 
-                            <td >{{ $form->form_no }}</td>
-                            @endif
-                            
+                          
+                                                      
                             <td >{{ $form->session }}</td>
                             <td >
-                            @if( $form->creator == Auth::user()->username )
-                                Me
-                            @else
-                                @if(optional($form->created_by)->Title != null)
-                                   {{ optional($form->created_by)->Title }} <small>({{$form->creator}})</small>
-                                @else
-                                    <small>{{$form->creator}}</small>
-                                @endif
-                            @endif
+                                <small>{{$form->creator}}</small>
                             </td>
                             <td > 
-                            @if( $form->overtime_slot == 'First')
-                                1<sup>st</sup>
-                            @elseif( $form->overtime_slot == 'Second')
-                                2<sup>nd</sup>
-                            @elseif( $form->overtime_slot == 'Third')
-                                3<sup>rd</sup>
-                            @elseif( $form->overtime_slot == 'Additional')
-                                Addl
-                            @else
-                                Sitting 
-                            @endif
+                            <small>{{$form->employee->pen}}</small>
+                            </td>
+                            <td > 
+                            <small>{{$form->employee->name}}</small>
+                            
 
                             </td>
-                            <td>
-                            @if($form->overtime_slot == 'Sittings')
-                            
-                               <!--  @php
-                                $session_no = substr($form->session,strpos($form->session,'.')+1);
-                                @endphp -->
-                                <!-- <small>Session:</small> {{ $session_no }} -->
-                                <!-- {{ $form->date_from }} to {{ $form->date_to }} -->      
-                            
-                            @else
-                            
-                                {{ $form->duty_date }}
-                                @php
-                                $daytype = $form->day_type() ;   
-                                @endphp
-                                @if($daytype == 'S')
-                                <small><i class="fa fa-calendar-o" style="color:green"></i></small>
-                                @elseif($daytype == 'H')
-                                <small><i class="fa fa-calendar-o" style="color:red"></i></small>
-                                @else
-                                <small><i class="fa fa-calendar-o" style="color:black"></i></small>
-                                @endif    
-                                
-                                
-
-                            
-                            @endif
-                            </td>
-
-                                                       
-                            <td>
-                               
-                            @if($form->owner == Auth::user()->username)
-                                @if($form->owner == 'admin')
-                                 <span class="text-default"><i class="fa fa-thumbs-up" style="color:green"></i> @admin</span>
-                                @else
-                                    @if($form->owner != $form->creator)
-                                    <span class="text-default"><i class="fa fa-eye" style="color:red"></i> To approve</span> 
-                                    @else
-                                    <span class="text-default"><i class="fa fa-edit"></i> Draft</span>
-                                    @endif    
-                                @endif
-                            @else
-                                @if($form->owner == 'admin')
-                                <span class="text-default"><i class="fa fa-thumbs-up" style="color:green"></i> <small>Submitted to Accounts</small></span> 
-                                @else
-                                    @if($form->owner == $form->creator)
-                                     <span class="text-default"><i class="fa fa-edit"></i> Draft</span>
-                                    @else
-<i class="fa fa-mail-forward" style="color:blue"></i> at <span class="text-default">{{ optional($form->owned_by)->Title  ?? $form->owner }} {{ optional($form->owned_by)->displayname}}</span>
-                                    @endif                  
-                                @endif                                
-                            @endif
-                            
-                            @if($form->form_no < 0)
-                            <small><span style="color:red"> (Withheld)</span></small>
-                            @endif
-
-                             </td>
-
-                            @if(auth()->user()->isAdmin())
-                            <td ><small>
-                            @if($form->owner == 'admin')
-                            {{ date('d-m-y', strtotime($form->submitted_on)) }}
-                            @endif
-                            </small></td>
-                           <!--  <td ><small>
-                           {{$form->updated_at->timezone('Asia/Kolkata')->format('d-m-y H:i')}}
-                            </small></td> -->
-                            @endif
-
+                           
                           
                             <td class="text-nowrap">
-                                <a href="{{ route('admin.my_forms.show',[$form->id]) }}" class="btn btn-xs btn-primary">@lang('quickadmin.qa_view') </a>  <small>{{$form->overtimes()->count()}} </small>
+                                <a href="{{ route('admin.punchings.show',[$form->id]) }}" class="btn btn-xs btn-primary">@lang('quickadmin.qa_view') </a>  <small>{{$form->overtimes()->count()}} </small>
                                 
                                 <!-- @unless( Auth::user()->isAdminorAudit())                                
                                 @if( Auth::user()->username == $form->owner)
-                                <a href="{{ route('admin.my_forms.edit',[$form->id]) }}" class="btn btn-xs btn-info">@lang('quickadmin.qa_edit')</a>
+                                <a href="{{ route('admin.punchings.edit',[$form->id]) }}" class="btn btn-xs btn-info">@lang('quickadmin.qa_edit')</a>
                                                                
                                 {!! Form::open(array(
                                   
                                     'style' => 'display: inline-block;',
                                     'method' => 'DELETE',
                                     'onsubmit' => "return confirm('".trans("quickadmin.qa_are_you_sure")."');",
-                                    'route' => ['admin.my_forms.destroy', $form->id])) !!}
+                                    'route' => ['admin.punchings.destroy', $form->id])) !!}
                                 {!! Form::submit(trans('quickadmin.qa_delete'), array('class' => 'btn btn-xs btn-danger')) !!}
                                 {!! Form::close() !!}
                                 @endif
@@ -328,7 +196,7 @@
 
         @endif
        
-        <a href="{{route('admin.my_forms.index')}}" class="btn btn-default">Reset</a>
+        <a href="{{route('admin.punchings.index')}}" class="btn btn-default">Reset</a>
 
         <button type="submit" class="btn btn-default" rel="filter">Search</button>
         
@@ -339,7 +207,7 @@
     <!-- view all -->
 
     @if(Auth::user()->isAdminorAudit())
-    <form action="my_forms/getpdf" method="get" id="filter" class="form-inline" target="_blank">
+    <form action="punchings/getpdf" method="get" id="filter" class="form-inline" target="_blank">
 
         <div class="form-group">
          <select class="form-control" name="session">
@@ -394,7 +262,7 @@
 
         <input  type="hidden" name = "status" value="{{  \Request('status')   }}" rel="filter">
         <!-- <input class="form-control" type="submit" value="Filter" rel="filter"> -->
-        <a href="{{route('admin.my_forms.index')}}" class="btn btn-default">Reset</a>
+        <a href="{{route('admin.punchings.index')}}" class="btn btn-default">Reset</a>
         
         <button type="submit" class="btn btn-default" name="viewall" value="viewallhtml">View All (HTML)</button>
          <button type="submit" class="btn btn-default" name="viewall" value="viewallpdf">View All (PDF)</button>

@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Form;
-use App\Overtime;
+use App\PunchingForm;
+use App\Punching;
 use App\Calender;
 use Illuminate\Http\Request;
-use Exception;
 
 use Illuminate\Support\Facades\Gate;
 use App\Http\Controllers\Controller;
@@ -17,9 +16,43 @@ use Carbon\Carbon;
 use Auth;
 use PDF;
 
+use Illuminate\Support\Facades\Log; 
 
-class MyFormsController extends Controller
+class PunchingsController extends Controller
 {
+
+    //the args are set in route file web.php
+    public function ajaxgetpunchtimes($date, $pen)
+    {
+
+
+    $tmp = strpos($pen, '-');
+    if(false !== $tmp){
+        $pen = substr($pen, 0, $tmp);
+    }
+
+    $date = Carbon::createFromFormat(config('app.date_format'), $date)->format('Y-m-d');
+
+       
+    $temp =  Punching::                      
+             where('date',$date)  
+             ->where('pen',$pen) 
+             ->first(); 
+    
+    if($temp){
+        Log::info($temp);
+       
+   
+      return [
+            'punchin' => $temp['punch_in'],
+            'punchout' => $temp['punch_out']
+           
+        ];
+    } else return [];
+        
+    }
+
+
     public function index(Request $request)
     {
         if (! Gate::allows('my_form_access')) {
@@ -29,46 +62,35 @@ class MyFormsController extends Controller
    
        $begintime = microtime(true);
 
-
         //user can login and see forms even after data entry is disabled
         //$session_array = \App\Session::whereDataentryAllowed('Yes')->pluck('name');
 
         
         $session_array = \App\Session::whereshowInDatatable('Yes')->latest()->pluck('name');
 
-        if(auth()->user()->isAudit()){
-            $session_array = \App\Session::latest()->pluck('name');
-
-        }
-
-
-        $forms = Form::with(['created_by','owned_by'])
-                     ->withCount('overtimes')
+     
+        $forms = PunchingForm::with(['created_by'])
                      ->whereIn('session',$session_array)
-                     ->CreatedOrOwnedOrApprovedByLoggedInUser()
-                     ->where('creator','<>','admin') //exclude PA2MLA forms created by admin
-                     ->when(\Auth::user()->isAudit(),
-                            function($q){
-                                return $q->where('form_no','>=', 0);
-                           });
+                     ->CreatedByLoggedInUser()
+                     //->where('creator','<>','admin') //exclude PA2MLA forms created by admin
+                     ;
 
 
         
         // FILTERS
         $str_session = null;                 
         $str_status = null;
-        $str_overtime_slot = null;
+        
         $str_datefilter = null;
         $str_namefilter = null;
         $str_desigfilter = null;
         $str_idfilter = null;
         $str_created_by = null;
-        $str_worknaturefilter=null;
+        
         $str_remarksfilter=null;
         $str_submittedbyfilter=null;
 
         $session = $request->query('session');
-        $overtime_slot = $request->query('overtime_slot');
         $status =  $request->query('status');
         $datefilter =  $request->query('datefilter');
         $namefilter =  $request->query('namefilter');
@@ -107,248 +129,37 @@ class MyFormsController extends Controller
         }
 
         //tab takes care of status. 
-        
-        if (!$request->filled('status')){
-            if(!auth()->user()->isAdminorAudit()){
-                $status = 'todo';
-            }
-            else{
-                
-                if(auth()->user()->isAudit()){
-                    $status = 'Submitted';
-                }
-                else
-                if(auth()->user()->isAdmin()){
-                   // $status = 'todo';
-                }
-            }
-        }
-        else{
-            if(auth()->user()->isAudit()){
-                $status = 'Submitted';
-            }
-            else
-            if(auth()->user()->isAdmin()){
-                // $status = 'Submitted';
-            }
-        }
-
-                
-
-        $forms->filterStatus($status);
-
-        $str_status = '&status='.$status;
-                         
-
-
-        if ($request->filled('idfilter'))
-        {
-            $forms->where(function($query) use ($idfilter)
-                    {
-                      $query->where('id',$idfilter)
-                           ->orwhere('form_no', $idfilter);
-                    });
-                   
-            $str_idfilter = '&idfilter='.$idfilter;
-            
-        }
-
-
-        if ($request->filled('overtime_slot')){
-            if($overtime_slot == 'Non-Sittings'){
-                $forms->where( 'overtime_slot' , '!=', 'Sittings' );    
-            }
-            else
-            if($overtime_slot == 'Withheld'){
-                $forms->where( 'form_no' , '<=', 0 );    
-            }
-            else
-            {
-                $forms->whereOvertimeSlot($overtime_slot);
-            }
-
-            $str_overtime_slot = '&overtime_slot='.$overtime_slot;
-        }
-
-        
-        if ($request->filled('datefilter')){
-            
-            $dates = null;
-            if( strcasecmp($datefilter, 'S') == 0  || 
-                strcasecmp($datefilter, 'NS') == 0 || 
-                strcasecmp($datefilter, 'H') == 0  || 
-                strcasecmp($datefilter, 'W') == 0  )
-            {
-                $session = \App\Session::where('name', $session )->first(); 
-
-                if( strcasecmp($datefilter, 'S') == 0)  {
-
-                    $dates = $session->calender()->where( 'day_type','Sitting day')
-                                                ->pluck('date');
-                } 
-                else if( strcasecmp($datefilter, 'H') == 0){
-
-                    $dates = $session->calender()->where( 'day_type','Prior holiday')
-                                    ->orwhere( 'day_type','Holiday')
-                                    ->pluck('date');
-                } 
-                else if( strcasecmp($datefilter, 'W') == 0)  {
-
-                    $dates = $session->calender()->where( 'day_type','Prior Working day')
-                                            ->orwhere( 'day_type','Intervening saturday')
-                                            ->orwhere( 'day_type','Intervening Working day')
-                                            ->pluck('date');
-                }
-                else {
-                    $dates = $session->calender()->where( 'day_type', '<>', 'Sitting day')
-                                            ->pluck('date');
-                }
-
-            }
-
-            $forms->filterDate( $datefilter, $dates );
-
-            $str_datefilter = '&datefilter='.$datefilter;
-        }
-
-        if ($request->filled('submittedbyfilter')){
-                      
-            $forms->where( 'submitted_by', 'like', '%' . $submittedbyfilter.'%' );
-                             
-            $str_submittedbyfilter = '&submittedbyfilter='. $submittedbyfilter;
-        }
- 
-
-        if ($request->filled('namefilter') || $request->filled('desigfilter')){
-            $forms->with('overtimes');
-        }
-
-        if ($request->filled('namefilter')){
-                    
-            $forms->wherehas( 'overtimes', function($q) use ($namefilter){
-               $q->where('pen','like', '%' . $namefilter.'%' )
-                ->orwhere('name','like', '%' . $namefilter.'%' );
-            }); 
-                
-            $str_namefilter = '&namefilter='. $namefilter;
-        }
-
-        if ($request->filled('worknaturefilter')){
-                      
-            $forms->wherehas( 'overtimes', function($q) use ($worknaturefilter){
-               $q->where('worknature','like', '%' . $worknaturefilter.'%' );
-            });                 
-            $str_worknaturefilter = '&worknaturefilter='. $worknaturefilter;
-        }
-         if ($request->filled('remarksfilter')){
-                      
-            if($remarksfilter == 'nonempty'){
-                $forms->where( 'remarks', '<>', '' );
-            } else {
-                $forms->where( 'remarks', 'like', '%'.$remarksfilter.'%' );
-            }
-                       
-            $str_remarksfilter = '&remarksfilter='. $remarksfilter;
-        }
-
-        if ($request->filled('desigfilter')){
-                        
-             $forms->wherehas( 'overtimes', function($q) use ($desigfilter){
-
-                if( strpos($desigfilter, '^') === 0  )
-                {
-                   $q->where('designation', 'like',  substr($desigfilter,1).'%' );
-                 
-                }
-                elseif( strpos($desigfilter, '=') === 0  )
-                {
-                    $q->where('designation',  'like', substr($desigfilter,1) );
-                 
-                }
-                else
-                {
-                    $q->where('designation', 'like', '%' . $desigfilter.'%' );
-                 
-                }
-
-               /* $q->where('designation','like', '%' . $desigfilter.'%' );*/
-
-
-             }); 
-                 
-             $str_desigfilter = '&desigfilter=' . $desigfilter;
-         }
-     
-
+       
         $sort =  $request->filled('sort') ? $request->query('sort') : 'updated_at'; // if user type in the url a column that doesnt exist app will default to id
         $order = $request->query('order') === 'asc' ? 'asc' : 'desc'; // default desc
                 
         $forms = $forms->orderBy($sort, $order)->distinct()->paginate(10)
                                                ->appends($request->except('page'));
-        $to_approve = 0; 
-        //sections and admins have nothing to approve
-        if ( auth()->user()->isDataEntryLevel() || auth()->user()->isAdminorAudit()) {
-           // It starts with 'http'
-            $to_approve = -1;
-        }
+ 
 
-        $pending_approval = 0;
-        if ( auth()->user()->isFinalLevel() ) {
-           // It starts with 'http'
-            $pending_approval = -1;
-        }
+                                  
+      
+    
         
-
-        //this inverts sorting order for next click                                       
-        $querystr = '&order='.($request->query('order') == 'asc' || null ? 'desc' : 'asc').$str_session.$str_status.$str_overtime_slot.$str_datefilter.$str_namefilter.$str_desigfilter.$str_idfilter.$str_created_by.$str_worknaturefilter.$str_submittedbyfilter;
-
-        $added_bies = \App\User::SimpleUsers()
-                                 ->where('username','not like','de.%')
-                                 ->orderBy('name','asc')
-                                ->get(['username','name'])->pluck('name','username');
-       
-        $added_bies->put( 'de.sn.protocol' , 'Protocol');
-        
-        JavaScript::put([
-           'adminoraudit' => auth()->user()->isAdminorAudit(),
-          
-            
-        ]);
-
         $timetaken = round(microtime(true) - $begintime,4);
 
-        return view('admin.my_forms.index',compact('forms','querystr', 'to_approve',  'pending_approval', 'session_array','session','added_bies', 'timetaken' ));
+        return view('admin.punchings.index',compact('forms', 'session_array','session', 'timetaken' ));
     }
 
 
 
-    public function preparevariablesandGotoView( $issitting, $id=null, $id_to_copy = null )
+    public function preparevariablesandGotoView( $id=null )
     {
-        $enum_overtime_slot = Form::$enum_overtime_slot;
-
+       
         $q = \App\Session::with('calender')->whereDataentryAllowed('Yes'); 
         
-      
-        if( $issitting && \Config::get('custom.check_attendance')){
-           $q = $q->whereSittingsEntry('Yes'); 
-        }
-
+           
         $q = $q->latest();
 
         $session_array = $q->get();
 
-        //if sitting, prevent ongoing sessions
-        if($issitting){
-            $session_array = $session_array->filter(function ($value) {
-                $maxdate = \App\Calender::where('session_id',$value->id)->max('date');
-                
-                return $maxdate <= Carbon::now();
-            });
-           
-        }
-
+        
         $sessions = $session_array->pluck('name');
-
 
         $latest_session = $sessions->first();
          
@@ -359,21 +170,15 @@ class MyFormsController extends Controller
     
             $daysall = $session->calender()->orderby('date','asc');
                        
-            if(!$issitting)
-            {
-                $daysall->where('date', '<=', date('Y-m-d'));
-                $days = $daysall->get(['date','day_type']);
-            }
-            else{
-                $days = $daysall->where( 'day_type','Sitting day')->get(['date','day_type']);
-            }
+          
+            $daysall->where('date', '<=', date('Y-m-d'));
+            $days = $daysall->get(['date','day_type']);
+           
 
             
             foreach ($days as $day) {
               
                 $calenderdaysmap[$day['date']] = $day['day_type'];
-
-
 
                 $calenderdays2[$session->name][] = $day['date'];    
             }
@@ -386,9 +191,9 @@ class MyFormsController extends Controller
         $isspeakeroffice = 0;
 
 
-        if(!$issitting && $id)
+        if($id)
         {
-           $form = Form::findOrFail($id);
+           $form = PunchingForm::findOrFail($id);
            
            //we should set parttime even if it is being edited by house keeping
 
@@ -434,90 +239,36 @@ class MyFormsController extends Controller
         $data["designations"] = json_encode($designations);
         $data["calenderdays2"] = json_encode($calenderdays2);
 
-
-        $presets = \App\Preset::
-                  where('user_id',\Auth::user()->id)
-                ->where('name','not like', 'default_%')
-                ->pluck('name');
        
-        $presets_default = \App\Preset::
-                  where('user_id',\Auth::user()->id)
-                ->where('name','like', 'default_%')
-                ->pluck('pens','name');
-
-       
-        //user wants to copy a form
-        $autoloadpens = null;
-
-        if($id_to_copy != null){
-            $formtocopy = Form::with(['created_by','overtimes'])->findOrFail($id_to_copy);
-            
-            $autoloadpens = $formtocopy->overtimes()->get();
-            
-            $autoloadpens = $autoloadpens->mapWithKeys(function ($item) {
-                if($item['name'] == null)
-                    return [$item['pen'] => $item['designation']];
-                else {
-                    return [$item['pen'] .'-' . $item['name'] =>  $item['designation']];
-                }
-            });
-            
-        }
+        
        
         JavaScript::put([
             'latest_session' => $latest_session,
-            'old_slotselected' => old('overtime_slot') ? old('overtime_slot') : '',
+        
             'old_calenderdayselected' => old('duty_date') ? old('duty_date') : '',
-            'presets' => $presets,
+        
             'ispartimefulltime' => $ispartimefulltime,
             'iswatchnward' => $iswatchnward,
             'isspeakeroffice' => $isspeakeroffice,
-            'autoloadpens' => $autoloadpens,
-            'presets_default' => $presets_default,
+        
+        
             
         ]);
     
         $collapse_sidebar = true;
-        if(!$issitting){
+       
+        { // forms
             if($id)
             {
-                $form = Form::with(['created_by','overtimes'])->findOrFail($id);
+                $form = PunchingForm::with(['created_by'])->findOrFail($id);
 
-                $form->overtimes->transform(function ($item) {
-                    if($item['name'] != null){
-                        $item['pen'] = $item['pen'] . '-' . $item['name'];
-                    }
-                    return $item;
-                                   
-                });
-
+                
                                     
-                return view('admin.my_forms.edit', compact('form', 'data','sessions','enum_overtime_slot', 'collapse_sidebar' ));
+                return view('admin.punchings.edit', compact('form', 'data','sessions', 'collapse_sidebar' ));
             }
             else
             {
-                return view('admin.my_forms.create', compact('data','sessions','enum_overtime_slot', 'collapse_sidebar' ) );
-            }
-        }
-        else{ //sitting forms
-            if($id)
-            {
-                $form = Form::with(['created_by','overtimes'])->findOrFail($id);
-
-                $form->overtimes->transform(function ($item) {
-                    if($item['name'] != null){
-                        $item['pen'] = $item['pen'] . '-' . $item['name'];
-                    }
-                    return $item;
-                                   
-                });
-
-                                    
-                return view('admin.my_forms.edit_sitting', compact('form', 'data','sessions', 'collapse_sidebar' ));
-            }
-            else
-            {
-                return view('admin.my_forms.create_sitting', compact('data','sessions', 'collapse_sidebar') );
+                return view('admin.punchings.create', compact('data','sessions', 'collapse_sidebar') );
             }
         }
        
@@ -536,7 +287,7 @@ class MyFormsController extends Controller
             return abort(401);
         } 
     
-        return $this->preparevariablesandGotoView( false, null);
+        return $this->preparevariablesandGotoView( null);
        
     }
     public function create_copy($id)
@@ -545,7 +296,7 @@ class MyFormsController extends Controller
             return abort(401);
         }  
         
-        //$form = Form::findOrFail($id);
+        //$form = PunchingForm::findOrFail($id);
       
         return $this->preparevariablesandGotoView(false, null, $id ) ;
         
@@ -720,9 +471,6 @@ class MyFormsController extends Controller
 
             } 
            
-           
-
-
 
             {
                         
@@ -732,11 +480,10 @@ class MyFormsController extends Controller
                     'designation'   => $overtime['designation'],
                     'from'          => $overtime['from'],
                     'to'            => $overtime['to'], 
-                    'worknature'    => $overtime['worknature'] ?? '',
+                    'worknature'    => $overtime['worknature'],
                     'count'         => '1',
                     'rate'          => $rates[$overtime['designation']],
-                    'punchin'       => $overtime['punchin'],
-                    'punchout'       => $overtime['punchout'],
+                    
                     ]);
 
             }
@@ -787,7 +534,7 @@ class MyFormsController extends Controller
       
         $formid = \DB::transaction(function() use ( $request, $overtimes)  {
 
-           $form = Form::create( [
+           $form = PunchingForm::create( [
                
                 'session' => $request['session'],
                 'creator' => \Auth::user()->username,
@@ -795,37 +542,14 @@ class MyFormsController extends Controller
                 'duty_date'  => $request['duty_date'],
                 'overtime_slot' => $request['overtime_slot'],
                 'remarks' => $request['remarks'],
-                'worknature'    => $request['worknature'],
             ]);
 
+           
+
             $form->overtimes()->saveMany($overtimes);
-          
+
             return $form->id;
         });
-
-        try  {
-            //also save punchtime to punching table
-            $collection = collect($overtimes);
-
-            $punchtimes =  $collection->map( function($overtime) use ($request) {
-                //we need to convert date here, because createMany of laravel is undefined.
-                //so we have to use Punching::insert which does not call our Model's setDateAttribute
-                $date = Carbon::createFromFormat(config('app.date_format'), $request['duty_date'])->format('Y-m-d');
-
-                return [
-                    'date'  => $date,
-                    'pen'  => $overtime['pen'],
-                    'punch_in'  => $overtime['punchin'],
-                    'punch_out' => $overtime['punchout'],
-                ];
-            } );
-
-            \App\Punching::insert($punchtimes->toArray());
-        } catch(Exception $e){
-        
-            //do nothing. as this may be due to an already existing punching in db for the date and PEN composite key
-          
-        }
 
        
         $request->session()->flash('message-success', 'Success: created form no:' . $formid ); 
@@ -850,7 +574,7 @@ class MyFormsController extends Controller
             return abort(401);
         }       
         
-        $form = Form::findOrFail($id);
+        $form = PunchingForm::findOrFail($id);
 
         $issittingday = ($form->overtime_slot == 'Sittings');
 
@@ -871,7 +595,7 @@ class MyFormsController extends Controller
             return abort(401);
         }
 
-        $form = Form::findOrFail($id);
+        $form = PunchingForm::findOrFail($id);
 
         if( ($form->owner != \Auth::user()->username) && !\Auth::user()->isAdmin())
         {
@@ -977,7 +701,7 @@ class MyFormsController extends Controller
 
         //$overtimes = \App\Overtime::where('form_id', $id)->get();
 
-        $form = Form::with(['created_by','owned_by', 'overtimes'])->findOrFail($id);
+        $form = PunchingForm::with(['created_by','owned_by', 'overtimes'])->findOrFail($id);
         $overtimes = $form->overtimes;
 
         $overtimes->transform(function($overtime) 
@@ -1046,11 +770,7 @@ class MyFormsController extends Controller
         
        
         $cansubmittoaccounts = false;
-        if(!\Auth::user()->isAdminorAudit()){
-            $cansubmittoaccounts= \Auth::user()->routing->cansubmit_to_accounts($form->overtime_slot);
-        }
-
-    
+       
         $descriptionofday = '';
         $needsposting = false;
         if($form->overtime_slot != 'Sittings'   && $form->owner == $loggedinusername && $form->owner != 'admin'){
@@ -1104,7 +824,7 @@ class MyFormsController extends Controller
         $next=null;
         /* if(\Auth::user()->isAdminorAudit() && $form->owner=='admin')
         {
-            $prev = Form::where('id', '<', $form->id)
+            $prev = PunchingForm::where('id', '<', $form->id)
                         ->where('owner','admin')
                         ->where('creator','<>','admin')//no pa2admin
                         ->where('session',$form->session)
@@ -1114,7 +834,7 @@ class MyFormsController extends Controller
                            })
                         ->max('id');
 
-            $next = Form::where('id', '>', $form->id)
+            $next = PunchingForm::where('id', '>', $form->id)
                         ->where('owner','admin')
                         ->where('creator','<>','admin') //no pa2admin
                         ->where('session',$form->session)
@@ -1148,7 +868,7 @@ class MyFormsController extends Controller
             return abort(401);
         } 
 
-        $form = Form::findOrFail($id);
+        $form = PunchingForm::findOrFail($id);
 
         if( ($form->owner != \Auth::user()->username) && !\Auth::user()->isAdmin())
         {
@@ -1164,17 +884,7 @@ class MyFormsController extends Controller
 
         return redirect()->route('admin.my_forms.index');
     }
-
-
-    public function create_sitting()
-    {
-        if (! Gate::allows('my_form_create')) {
-            return abort(401);
-        } 
-          
-        return $this->preparevariablesandGotoView(true, null);
-       
-    }
+   
 
     public function createovertimes_sitting( Request $request, &$myerrors, $formid=null)
     {
@@ -1212,7 +922,7 @@ class MyFormsController extends Controller
         
         $checksecretaryattendance = false;
         if( \Config::get('custom.check_attendance')) {
-            $form = $formid ? Form::find($formid) : null; //if updating a form, get creator field
+            $form = $formid ? PunchingForm::find($formid) : null; //if updating a form, get creator field
             if( \App\User::needsPostingOrder( $form ? $form->creator : \Auth::user()->username) ){
                 $checksecretaryattendance = true;
             }
@@ -1532,7 +1242,7 @@ class MyFormsController extends Controller
         $formid = \DB::transaction(function() use ( $request, $overtimes) 
         {
 
-            $form = Form::create( [
+            $form = PunchingForm::create( [
                 'session' => $request['session'],
                 'creator' => \Auth::user()->username,
                 'owner'=> \Auth::user()->username,
@@ -1565,7 +1275,7 @@ class MyFormsController extends Controller
     public function forward(Request $request, $id)
     {
 
-        $form = Form::findOrFail($id);
+        $form = PunchingForm::findOrFail($id);
     
 
         if( $form->owner != \Auth::user()->username)
@@ -1623,7 +1333,7 @@ class MyFormsController extends Controller
     
     public function submittoaccounts(Request $request, $id)
     {
-        $form = Form::findOrFail($id);
+        $form = PunchingForm::findOrFail($id);
     
 
         if( $form->owner != \Auth::user()->username)
@@ -1643,7 +1353,7 @@ class MyFormsController extends Controller
         $submitted_names .= ($submitted_names != '') ? ( '|' . $submittedname) : $submittedname;
 
 
-        $maxform_no = \App\Form::whereSession($form->session)->max('form_no');
+        $maxform_no = \App\PunchingForm::whereSession($form->session)->max('form_no');
         if($maxform_no < 0){
            $maxform_no = 0; // form no field to -1 for rejected
         }
@@ -1666,165 +1376,14 @@ class MyFormsController extends Controller
 
     }
 
-    public function sendback(Request $request, $id)
-    {
-        $form = Form::findOrFail($id);
     
-
-        if(!\Auth::user()->isAdmin())
-        {
-            if( $form->owner != \Auth::user()->username)
-            {
-                return abort(401);
-            }
-        }
-      
-
-        //change owner
-         $form->update( [
-            'owner' => $form->creator,
-            'submitted_by' => null,
-            'submitted_names' => null,
-            'submitted_on' => null,
-            'form_no' => null,
-            'remarks' => $request['remarks'],
-
-        ]);
-
-
-        return response()->json([
-           'result' => true,
-           
-        ]);
-
-    }
-
-    public function sendonelevelback(Request $request, $id)
-    {
-        $form = Form::findOrFail($id);
-    
-        if(!\Auth::user()->isAdmin())
-        {
-            if( $form->owner != \Auth::user()->username)
-            {
-                return abort(401);
-            }
-        }
-        
-        $strTemp = trim($form->submitted_by);
-
-        if($strTemp == '' || $strTemp == NULL) //NULL means just only one level sent. 
-        {
-            return $this->sendback($request, $id);
-
-        }
-
-        $submittedby = explode(",", trim($strTemp,", ") );
-
-        if( count($submittedby) == 0 )
-        {
-             return response()->json([
-               'result' => false,
-               
-            ]);
-        }      
-
-        $newowner = end($submittedby);
-        array_pop($submittedby);// If array is empty, array_pop returns NULL
-       
-        $newsubmittedby = null;
-        if(count($submittedby) > 0) {
-            $newsubmittedby = implode(",",$submittedby);
-        }
-
-        
-        $submittednames = explode("|", trim($form->submitted_names,"| ") );
-        array_pop($submittednames);
-        $newsubmittednames = implode("|",$submittednames);
-
-        
-
-
-        //change owner
-        
-         $form->update( [
-            'owner' => $newowner,
-            'submitted_by' => $newsubmittedby,
-            'submitted_names' => $newsubmittednames,
-            //'submitted_on' => null,
-            'form_no' => null,
-            'remarks' => $request['remarks'],
-
-        ]);
-
-        return response()->json([
-           'result' => true,
-           
-        ]);
-
-    }
-
-
-    public function ignore(Request $request, $id)
-    {
-        $form = Form::findOrFail($id);
-    
-
-        if( $form->owner != \Auth::user()->username)
-        {
-            return abort(401);
-        }
-      
-
-        if($form->form_no >= 0){
-
-            if($form->form_no == 0){
-                $form->form_no = 1; // so we will set form_no to -1
-            }
-
-            $form->update( [
-                'form_no' => -$form->form_no,
-                'remarks' => $request['remarks'],
-            ]);
-
-        } else  if($form->form_no < 0) {
-
-            if(\Auth::user()->isAdmin()){
-
-            //as the origanl form no might be occupied by now, we cannot just negate it. submit as new
-            $maxform_no = \App\Form::whereSession($form->session)->max('form_no');
-            if($maxform_no < 0){
-               $maxform_no = 0;
-            }
-
-            $form->update( [
-                'form_no' => $maxform_no+1,
-           
-            ]);
-
-            } else {
-                $form->update( [
-                'form_no' => null,
-           
-            ]);
-            }
-
-        }
-
-        return response()->json([
-           'result' => true,
-           
-        ]);
-
-    }
-
     public function update_sitting(Request $request, $id)
     {
         if (! Gate::allows('my_form_edit')) {
             return abort(401);
         } 
 
-        $form = Form::findOrFail($id);
+        $form = PunchingForm::findOrFail($id);
 
     
 
@@ -1933,7 +1492,7 @@ class MyFormsController extends Controller
         $idfilter   =  $request->query('idfilter');
         $createdby =  $request->query('created_by');
 
-        $forms = \App\Form::with(['created_by','owned_by','overtimes'])
+        $forms = \App\PunchingForm::with(['created_by','owned_by','overtimes'])
                        ->filterStatus('Submitted')
                        ->where('creator', '<>','admin')
                        ->where('form_no', '>=', 0);
@@ -2050,7 +1609,7 @@ class MyFormsController extends Controller
             });
 
 
-           // $form = Form::with(['created_by','owned_by'])->findOrFail($id);
+           // $form = PunchingForm::with(['created_by','owned_by'])->findOrFail($id);
 
             $daytype = null;
 

@@ -18,7 +18,7 @@ use Illuminate\Database\Eloquent\Model;
 */
 class Overtime extends Model
 {
-    protected $fillable = ['pen', 'designation', 'from', 'to', 'count', 'worknature', 'form_id','rate', 'name'];
+    protected $fillable = ['pen', 'designation', 'from', 'to', 'count', 'worknature', 'form_id','rate', 'name','punchin', 'punchout'];
     
 
     /**

@@ -283,11 +283,9 @@ th{
                       @endif
 
                     @else
-                    <th>PunchIn</th>
-                    <th>PunchOut</th>
                     <th>@lang('quickadmin.overtimes.fields.from')</th>
                     <th>@lang('quickadmin.overtimes.fields.to')</th>
-                    <!-- <th>@lang('quickadmin.overtimes.fields.worknature')</th> -->
+                    <th>@lang('quickadmin.overtimes.fields.worknature')</th>
                     @endif
 
 
@@ -311,13 +309,6 @@ th{
                     </td>
                     <td field-key='designation' class="text-nowrap"><small>{{ $overtime->designation }}</small></td>
                    
-                    <td field-key='punchin' class="small text-center text-nowrap">
-                    {{ date("h:i a", strtotime($overtime->punchin)) }}  
-                    </td>
-                    <td field-key='punchout' class="small text-center text-nowrap">
-                    {{ date("h:i a", strtotime($overtime->punchout)) }}  
-                    </td>
-
                     @if($form->overtime_slot == 'Sittings')
                     <td field-key='from' class="small text-center text-nowrap">{{ $overtime->from }}</td>
                     <td field-key='to' class="small text-center text-nowrap">{{ $overtime->to }}</td>
@@ -329,9 +320,9 @@ th{
 
                     @if($form->overtime_slot == 'Sittings')
                     <td class="text-center" field-key='count'>{{ $overtime->count }}</td>
-                    <!-- <td field-key='worknature'> <small> {{ $overtime->worknature }}</small></td> -->
+                    <td field-key='worknature'> <small> {{ $overtime->worknature }}</small></td>
                     @else
-                    <!-- <td field-key='worknature'> <small> {{ $overtime->worknature ?? 'assly rel work'}}</small></td> -->
+                    <td field-key='worknature'> <small> {{ $overtime->worknature ?? 'assly rel work'}}</small></td>
                     @endif
 
 
@@ -347,17 +338,10 @@ th{
 
         <br>
 
-        @if($form->worknature != '')
-        <div class="row">
-            <div class="col-md-12 form-group">
-                <p ><strong>WorkNature</strong> : {{ $form->worknature }} </p>
-            </div>
-        </div>
-        @endif
-
         @if($form->remarks != '')
         <div class="row">
             <div class="col-md-12 form-group">
+                
                 <p ><strong>Remarks</strong> : {{ $form->remarks }} </p>
             </div>
         </div>

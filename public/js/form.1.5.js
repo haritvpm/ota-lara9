@@ -110,7 +110,7 @@ var vm = new Vue({
       if (!ispartimefulltime) {
         switch (calenderdaysmap[this.form.duty_date]) {
           case 'Sitting day':
-            return ['Second', 'Third'];
+            return ['First', 'Second', 'Third'];
           case 'Prior holiday':
           case 'Holiday':
             return ['First', 'Second', 'Third', 'Additional'];
@@ -122,7 +122,7 @@ var vm = new Vue({
       } else {
         switch (calenderdaysmap[this.form.duty_date]) {
           case 'Sitting day':
-            return ['Second'];
+            return ['First', 'Second'];
           default:
             return ['First', 'Second'];
         } //switch
@@ -176,20 +176,29 @@ var vm = new Vue({
       var daytype = calenderdaysmap[this.form.duty_date];
       if (daytype !== undefined) {
         daytype = daytype.toLowerCase();
+      } else {
+        daytype = "undefined";
       }
-
-      //if(!ispartimefulltime)
-      //{
-
       def_time_start = "17:30";
       def_time_end = "20:00";
       if (this.form.overtime_slot == 'First') {
-        if (daytype !== undefined && daytype.indexOf('holiday') == -1) {
+        if (daytype.indexOf('sitting') !== -1) {
+          //sitting day
+
+          def_time_start = "8:00";
+          def_time_end = "17:30";
+
+          //todo fulltime its 6-4.30
+          if (ispartimefulltime) {
+            def_time_start = "6:00";
+            def_time_end = "11:30";
+          }
+        } else if (daytype.indexOf('working') != -1 && daytype.indexOf('holiday') == -1) {
           //working day
           //working day
           //sitting day, no first
-          def_time_start = "09:30";
-          def_time_end = "19:00";
+          def_time_start = "10:15";
+          def_time_end = "19:45";
           if (presets_default) {
             if (presets_default.hasOwnProperty('default_workingday_firstot_starttime') && presets_default.hasOwnProperty('default_workingday_firstot_endtime')) {
               def_time_start = presets_default['default_workingday_firstot_starttime'];
@@ -212,7 +221,7 @@ var vm = new Vue({
       }
       /////////SECOND////
       else if (this.form.overtime_slot == 'Second') {
-        if (daytype !== undefined && daytype.indexOf('sitting') != -1) {
+        if (daytype.indexOf('sitting') != -1) {
           //sitting
 
           //sitting day, no first
@@ -225,12 +234,12 @@ var vm = new Vue({
               ;
             }
           }
-        } else if (daytype !== undefined && daytype.indexOf('holiday') == -1)
+        } else if (daytype.indexOf('working') != -1 && daytype.indexOf('holiday') == -1)
           //working
           {
             //working
-            def_time_start = "20:00";
-            def_time_end = "22:30";
+            def_time_start = "19:45";
+            def_time_end = "22:15";
             if (presets_default) {
               if (presets_default.hasOwnProperty('default_workingday_secondot_starttime') && presets_default.hasOwnProperty('default_workingday_secondot_endtime')) {
                 def_time_start = presets_default['default_workingday_secondot_starttime'];
@@ -238,7 +247,7 @@ var vm = new Vue({
                 ;
               }
             }
-          } else if (daytype !== undefined && daytype.indexOf('holiday') != -1)
+          } else if (daytype.indexOf('holiday') != -1)
           //holiday
           {
             //holiday
@@ -257,13 +266,16 @@ var vm = new Vue({
       else if (this.form.overtime_slot == 'Third') {
         def_time_start = "20:30";
         def_time_end = "23:30";
-        if (daytype !== undefined && daytype.indexOf('holiday') == -1)
-          //not holiday
-          {
-            //not holiday
+        if (daytype.indexOf('sitting') != -1) {
+          //sitting
+          def_time_start = "20:00";
+          def_time_end = "22:30";
+        } else if (daytype.indexOf('holiday') == -1)
+          //working day, not holiday
+          {//not holiday
 
-            def_time_start = "20:00";
-            def_time_end = "22:30";
+            // def_time_start = "";
+            // def_time_end = "";
           }
       } else if (this.form.overtime_slot == 'Additional') {
         //only on holidays
@@ -314,9 +326,10 @@ var vm = new Vue({
         pen: "",
         designation: "",
         from: prevrow ? prevrow.from : def_time_start,
-        to: prevrow ? prevrow.to : def_time_end,
-        worknature: prevrow ? prevrow.worknature : presets_default['default_worknature']
+        to: prevrow ? prevrow.to : def_time_end
+        // worknature: prevrow ? prevrow.worknature : presets_default['default_worknature'],
       });
+
       this.pen_names = []; //clear previos selection from dropdown
       this.pen_names_to_desig = [];
       this.$nextTick(function () {
@@ -359,25 +372,26 @@ var vm = new Vue({
       this.pen_names_to_desig = [];
     }
   }, _defineProperty(_methods, "limitText", function limitText(count) {
-    return "and ".concat(count, " other countries");
+    return "and ".concat(count, " other ");
   }), _defineProperty(_methods, "changeSelect", function changeSelect(selectedOption, id) {
+    //console.log(id)
     this.myerrors = [];
     var self = this;
+    var desig = self.pen_names_to_desig[selectedOption];
     //alert('changin');
     self.$nextTick(function () {
-      //for(var i=0; i < self.form.overtimes.length; i++)
-      for (var i = self.form.overtimes.length - 1; i >= 0; i--) {
-        if (self.form.overtimes[i].pen == selectedOption /*&& 
-                                                         self.form.overtimes[i].designation == ''*/) {
-          var desig = self.pen_names_to_desig[selectedOption];
-          if (desig !== undefined) {
-            self.form.overtimes[i].designation = desig;
-            //self.$forceUpdate()
-          }
-
-          break;
-        }
+      if (desig !== undefined) {
+        self.form.overtimes[id].designation = desig;
+        //self.$forceUpdate()
       }
+
+      //set punchtime if not set and available
+      axios.get(urlajaxgetpunchtimes + '/' + self.form.duty_date + '/' + self.form.overtimes[id].pen).then(function (response) {
+        console.log('got punch data');
+        console.log(response);
+        self.form.overtimes[id].punchin = response.data.punchin;
+        self.form.overtimes[id].punchout = response.data.punchout;
+      })["catch"](function (err) {});
     });
 
     //no need we will check on form submit
@@ -406,25 +420,54 @@ var vm = new Vue({
       }
     }
     return true;
+  }), _defineProperty(_methods, "checkTimeWithinPunchingTime", function checkTimeWithinPunchingTime(punchin, punchout, from, to) {
+    var time1 = from.split(":").map(Number);
+    var time2 = to.split(":").map(Number);
+    //warning: months in JS starts from 0
+    var datefrom = Date.UTC(2000, 1, 1, time1[0], time1[1]);
+    var dateto = Date.UTC(2000, 1, 1, time2[0], time2[1]);
+
+    //time after 12 am ?
+    if (dateto <= datefrom) {
+      dateto += 24 * 3600000;
+    }
+    var time3 = punchin.split(":").map(Number);
+    var time4 = punchout.split(":").map(Number);
+    //warning: months in JS starts from 0
+    var datepunchin = Date.UTC(2000, 1, 1, time3[0], time3[1]);
+    var datepunchout = Date.UTC(2000, 1, 1, time4[0], time4[1]);
+    if (datepunchout <= datepunchin) {
+      datepunchout += 24 * 3600000;
+    }
+    if (datepunchin > datefrom || datepunchout < dateto) {
+      return false;
+    }
+    return true;
   }), _defineProperty(_methods, "rowsvalid", function rowsvalid() {
     this.myerrors = [];
     var self = this;
     if (self.form.session == '' || self.form.duty_date == '' || self.form.overtime_slot == '') {
       //this.myerrors.push( 'Please select session/date/OT slot' )
-      this.$swal('Oops', 'Please select session/date/OT', 'error');
+      this.$swal('Error', 'Please select session/date/OT', 'error');
       return false;
     }
 
     //check if date belongs to the session
 
     if (-1 == calenderdays2[self.form.session].indexOf(self.form.duty_date)) {
-      this.$swal('Oops', 'The duty date is not within the range of dates for the session: ' + self.form.session, 'error');
+      this.$swal('Error', 'The duty date is not a calender date for the session: ' + self.form.session, 'error');
       return false;
     }
     for (var i = 0; i < self.form.overtimes.length; i++) {
       var row = self.form.overtimes[i];
-      if (row.pen == '' || row.designation == '' || row.from == '' || row.to == '' || row.from == null || row.to == null || row.worknature == null || row.worknature == '') {
+      if (row.pen == '' || row.designation == '' || row.from == '' || row.to == '' || row.from == null || row.to == null
+      //||row.worknature == null || row.worknature == ''
+      ) {
         this.$swal('Row: ' + (i + 1), "Fill all the fields in every row", 'error');
+        return false;
+      }
+      if (row.punchin == null || row.punchin == '' || row.punchout == null || row.punchout == '') {
+        this.$swal('Row: ' + (i + 1), "Fill punch in/out time for every row", 'error');
         return false;
       }
     }
@@ -432,26 +475,23 @@ var vm = new Vue({
       if (self.form.overtimes.some(function (row) {
         return row.designation != 'Deputy Secretary' && row.designation != 'Joint Secretary' && row.designation != 'Additional Secretary' && row.designation != 'Special Secretary';
       })) {
-        this.$swal('Oops', "Only DS or above can have Additional OT!", 'error');
+        this.$swal('Error', "Only DS or above can have Additional OT!", 'error');
         return false;
       }
     }
 
     //check time diff
     for (var i = 0; i < self.form.overtimes.length; i++) {
+      self.form.overtimes[i].punchin = validateHhMm(self.form.overtimes[i].punchin.trim());
+      self.form.overtimes[i].punchout = validateHhMm(self.form.overtimes[i].punchout.trim());
       self.form.overtimes[i].from = self.form.overtimes[i].from.trim();
       self.form.overtimes[i].to = self.form.overtimes[i].to.trim();
-      /*self.form.overtimes[i].from = self.form.overtimes[i].from.replace('.', ':');
-      self.form.overtimes[i].to = self.form.overtimes[i].to.replace('.', ':');
-       if(!validateHhMm( self.form.overtimes[i].from) || 
-         !validateHhMm( self.form.overtimes[i].to) ){
-          this.myerrors.push( 'Row ' + (i+1) + ': Invalid time format. Enter (HH:MM) in 24 hour format ( examples: 09:30, 17:30).' )
-         return false  
-      }
-      */
-
       self.form.overtimes[i].from = validateHhMm(self.form.overtimes[i].from);
       self.form.overtimes[i].to = validateHhMm(self.form.overtimes[i].to);
+      if (!this.checkTimeWithinPunchingTime(self.form.overtimes[i].punchin, self.form.overtimes[i].punchout, self.form.overtimes[i].from, self.form.overtimes[i].to)) {
+        this.myerrors.push('Row ' + (i + 1) + ': OT period should be within punching times');
+        return false;
+      }
       if (self.form.overtimes[i].from.toLowerCase() == 'invalid date' || self.form.overtimes[i].to.toLowerCase() == 'invalid date') {
         self.form.overtimes[i].from = self.form.overtimes[i].to = '';
         this.myerrors.push('Row ' + (i + 1) + ': Invalid time format. Enter (HH:MM) in 24 hour format ( examples: 09:30, 17:30).');
@@ -474,12 +514,13 @@ var vm = new Vue({
             return false;
           }
         } else
-          //all other employees and full time
+          //all other employees and full time for sitting days
           {
             //no need to enforce ending time. have doubts regarding mla hostel. 
             //need to check night shifts
 
-            if (self.form.overtime_slot == 'Second' && self.form.overtimes[i].from != "17:30" /*|| self.form.overtimes[i].to != "20:00" */ || self.form.overtime_slot == 'Third' && self.form.overtimes[i].from != "20:00") {
+            if (!ispartimefulltime && self.form.overtime_slot == 'First' && (self.form.overtimes[i].from != "08:00" || self.form.overtimes[i].to != "17:30") || self.form.overtime_slot == 'Second' && self.form.overtimes[i].from != "17:30" /*|| self.form.overtimes[i].to != "20:00" */ || self.form.overtime_slot == 'Third' && self.form.overtimes[i].from != "20:00") {
+              //console.log(self.form.overtimes[i].from)
               this.myerrors.push('Row ' + (i + 1) + ': Time should be as per G.O on a sitting day');
               return false;
             }
@@ -516,13 +557,15 @@ var vm = new Vue({
 
       if (!ispartimefulltime && !iswatchnward && !isspeakeroffice) {
         if (calenderdaysmap[this.form.duty_date] == 'Sitting day') {
-          var time730am = Date.UTC(2000, 1, 1, '08', '00');
-          var time530pm = Date.UTC(2000, 1, 1, '10', '30'); //skip possible fulltimes
+          if (self.form.overtime_slot !== 'First') {
+            var time730am = Date.UTC(2000, 1, 1, '08', '00');
+            var time530pm = Date.UTC(2000, 1, 1, '10', '30'); //skip possible fulltimes
 
-          var isoverlap = time730am < dateto && time530pm > datefrom || time730am == datefrom || time530pm == dateto;
-          if (isoverlap) {
-            this.myerrors.push('Row ' + (i + 1) + ': OT cannot be between 8:00 am and 10:30 am on a Sitting day');
-            return false;
+            var isoverlap = time730am < dateto && time530pm > datefrom || time730am == datefrom || time530pm == dateto;
+            if (isoverlap) {
+              this.myerrors.push('Row ' + (i + 1) + ': OT cannot be between 8:00 am and 10:30 am on a Sitting day');
+              return false;
+            }
           }
         } else if (calenderdaysmap[this.form.duty_date].indexOf('oliday') == -1)
           //workingday
@@ -552,7 +595,12 @@ var vm = new Vue({
     var self = this;
     if (self.form.overtimes.length <= 0) {
       //this.myerrors.push("Fill all the required fields!");
-      this.$swal('Oops', "Need at least one row!", 'error');
+      this.$swal('Error', "Need at least one row!", 'error');
+      this.isProcessing = false;
+      return false;
+    }
+    if (self.form.worknature == '') {
+      this.$swal('Error', 'Please enter the nature of work done', 'error');
       this.isProcessing = false;
       return false;
     }
@@ -589,7 +637,12 @@ var vm = new Vue({
     }
     var self = this;
     if (self.form.overtimes.length <= 0) {
-      this.$swal('Oops', "Need at least one row!", 'error');
+      this.$swal('Error', "Need at least one row!", 'error');
+      this.isProcessing = false;
+      return false;
+    }
+    if (self.form.worknature == '') {
+      this.$swal('Error', 'Please enter the nature of work done', 'error');
       this.isProcessing = false;
       return false;
     }

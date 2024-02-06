@@ -22,6 +22,17 @@
             </li>
             @endcan
 
+           
+            @can('user_management_access')
+            <li class="{{ $request->segment(2) == 'punching' ? 'active' : '' }}">
+                <a href="{{ route('admin.punchings.index') }}">
+                    <i class="fa fa-list-o"></i>
+                    <span class="title">Punching</span>
+                </a>
+            </li>
+            @endcan
+
+
             @can('pa2mlaform_access')
             <li class="{{ $request->segment(2) == 'forms' ? 'active' : '' }}">
                 <a href="{{ route('admin.pa2mlaforms.index') }}">

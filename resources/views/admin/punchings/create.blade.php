@@ -2,12 +2,11 @@
 
     <style>
         [v-cloak] { display:none; }
-
     </style>
 
 @section('content')
 
-    <h4 class="page-title">Duty Form</h4>
+    <h4 class="page-title">Punching Form</h4>
         
 
     @if(count($sessions) > 0)
@@ -19,23 +18,15 @@
 
         <div class="panel-body">
         
-
-            <?php
-            $readonly = "";
-            ?> 
-
-            @include('admin.my_forms.form')
+            @include('admin.punchings.form')
  
          </div>
 
         <div class="panel-footer">
-            <a href="{{route('admin.my_forms.index')}}" class="btn btn-default">Cancel</a>
+            <a href="{{route('admin.punchings.index')}}" class="btn btn-default">Cancel</a>
             <button class="btn btn-primary" @click.prevent="create" :disabled="isProcessing"><i class="fa fa-save"></i> Save <i  v-show="isProcessing" class="fa fa-spinner fa-spin"></i></button>
 
-
-            <!--  <a href="#" class="pull-right" v-show ="form.overtimes.length" @click="copytimedown" >Copy First Row</a><span v-show ="form.overtimes.length" class="pull-right">&nbsp;|&nbsp;</span> -->
-             <a href="#" class="pull-right" v-show ="form.overtimes.length" @click="savepreset" >Save as Preset</a><span v-show ="form.overtimes.length" class="pull-right">&nbsp;|&nbsp;</span>
-             <a href="#" class="pull-right" v-show ="presets.length" @click.prevent="loadpreset" >Load Preset</a>
+     
             
         </div>
 
@@ -44,7 +35,7 @@
     @else
     
         Sorry, no sessions available for data entry
-         <a href="{{route('admin.my_forms.index')}}" class="btn btn-primary">OK</a>
+         <a href="{{route('admin.punchings.index')}}" class="btn btn-primary">OK</a>
          
     @endif  
 
@@ -79,11 +70,10 @@
     <script type="text/javascript">
 
     var urlajaxpen = "{{url('admin/employees/ajaxfind')}}"
-    var urlformsubmit = "{{url('admin/my_forms/')}}"
-    var urlformsucessredirect = "{{url('admin/my_forms/')}}"
-    var urlpresetsubmit = "{{url('admin/presets/')}}"
-    var urlajaxpresets = "{{url('admin/presets/ajaxfind')}}"
-    var urlajaxgetpunchtimes = "{{url('admin/punchings/ajaxgetpunchtimes')}}"
+    var urlformsubmit = "{{url('admin/punchings/')}}"
+    var urlformsucessredirect = "{{url('admin/punchings/')}}"
+  //  var urlpresetsubmit = "{{url('admin/presets/')}}"
+   // var urlajaxpresets = "{{url('admin/presets/ajaxfind')}}"
     
     
 
@@ -102,21 +92,20 @@
 
     window._form = {
             session: latest_session,
-            duty_date: '',
-            overtime_slot: '',
+            pen: "",
+          //  aadhaarid: '',
             remarks : '',
-            worknature: '',
-            overtimes: [/* {
-                pen: "",
-                designation: "",
-                from: def_time_start,
-                to: def_time_end,
-                worknature: "",
+            punchings: [/* {
+                date: "",
+                
+                punchin: "",
+                punchout: "",
+                
             } */]
         };
     </script>
 
-  <script type="text/javascript" src="{{ URL::asset('js/form.1.5.js') }}"></script>
+  <script type="text/javascript" src="{{ URL::asset('js/punching.js') }}"></script>
 
 
 

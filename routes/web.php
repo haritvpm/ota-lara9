@@ -199,6 +199,9 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
     Route::resource('categories', 'Admin\CategoriesController');
     Route::post('categories_mass_destroy', ['uses' => 'Admin\CategoriesController@massDestroy', 'as' => 'categories.mass_destroy']);
 
+    Route::get('punchings/ajaxgetpunchtimes/{date}/{pen}',array('as'=>'punchings.ajax','uses'=>'Admin\PunchingsController@ajaxgetpunchtimes'));
+
+    Route::resource('punchings', 'Admin\PunchingsController');
    
     
 
