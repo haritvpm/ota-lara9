@@ -524,7 +524,10 @@ class EmployeesController extends Controller
         
         $csvExporter = new \Laracsv\Export();
 
-        $csvExporter->build($employees, [ "id", "pen","srismt","name", "designation.designation", "designation_id","desig_display",'categories_id', 'categories.category', "added_by","category" ]);
+        //$csvExporter->build($employees, [ "id", "pen","srismt","name", "designation.designation", "designation_id","desig_display",'categories_id', 'categories.category', "added_by","category" ]);
+        
+        $csvExporter->build($employees, [ "pen","srismt","name", "designation.designation", "desig_display",  'categories.category' ]);
+
 
         $csvExporter->download($filename);
 
