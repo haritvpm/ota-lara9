@@ -27,6 +27,10 @@ class UpdateEmployeesRequest extends FormRequest
             'name' => 'min:3|required',
             'pen' => 'min:6|required|unique:employees,pen,'.$this->route('employee'),
             'designation_id' => 'required',
+            'categories_id' => [
+                'required',
+                'integer',
+            ],
         ];
     }
 }

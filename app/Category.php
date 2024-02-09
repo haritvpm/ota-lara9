@@ -11,7 +11,8 @@ use Illuminate\Database\Eloquent\Model;
 */
 class Category extends Model
 {
-    protected $fillable = ['category'];
+    protected $fillable = ['category',
+    'normal_office_hours','punching',];
     
     
     

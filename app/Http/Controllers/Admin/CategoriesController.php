@@ -144,13 +144,17 @@ class CategoriesController extends Controller
         if (! Gate::allows('category_delete')) {
             return abort(401);
         }
-        if ($request->input('ids')) {
-            $entries = Category::whereIn('id', $request->input('ids'))->get();
+        
+        $categories = Category::find(request('ids'));
 
-            foreach ($entries as $entry) {
-                $entry->delete();
-            }
+        foreach ($categories as $category) {
+            $category->delete();
         }
+
+     
+
+        return response(null, Response::HTTP_NO_CONTENT);
+
     }
 
 }

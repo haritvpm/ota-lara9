@@ -58,6 +58,7 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
 
     Route::get('employees/sparksync',['uses' => 'Admin\EmployeesController@sparksync', 'as' => 'employees.sparksync']);
     Route::post('employees/sparksync',['uses' => 'Admin\EmployeesController@sparksync', 'as' => 'employees.sparksyncpost']);
+    Route::post('employees/staff_category_update',['uses' => 'Admin\EmployeesController@staffCategorySync', 'as' => 'employees.staffCategorySync']);
 
     Route::resource('employees', 'Admin\EmployeesController');
    

@@ -12,7 +12,8 @@ use Illuminate\Database\Eloquent\Model;
 */
 class Designation extends Model
 {
-    protected $fillable = ['designation', 'rate'];
+    protected $fillable = ['designation', 'rate', 'punching',
+    'normal_office_hours',];
     
 
     /**

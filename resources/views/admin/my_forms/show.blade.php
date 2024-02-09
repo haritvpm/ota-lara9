@@ -283,8 +283,8 @@ th{
                       @endif
 
                     @else
-                    <th>PunchIn</th>
-                    <th>PunchOut</th>
+                    <th class="text-center">Punch-In</th>
+                    <th class="text-center">Punch-Out</th>
                     <th>@lang('quickadmin.overtimes.fields.from')</th>
                     <th>@lang('quickadmin.overtimes.fields.to')</th>
                     <!-- <th>@lang('quickadmin.overtimes.fields.worknature')</th> -->

@@ -30,6 +30,10 @@ class StoreEmployeesRequest extends FormRequest
                 ),*/
             'pen' => 'min:6|alpha_num|required|unique:employees,pen,'.$this->route('employee'),
             'designation_id' => 'required',
+            'categories_id' => [
+                'required',
+                'integer',
+            ],
         ];
     }
  

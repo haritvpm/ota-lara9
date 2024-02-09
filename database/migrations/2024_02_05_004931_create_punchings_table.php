@@ -20,8 +20,11 @@ return new class extends Migration
                 $table->string('punch_in');
                 $table->string('punch_out');
                 $table->string('pen'); //duplication, just for query
+                $table->string('creator')->nullable();
+                $table->string('session')->nullable();
                 $table->unique(['date', 'pen']);
-                $table->timestamps();
+                $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
+                $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP'));
                 
             });
         }

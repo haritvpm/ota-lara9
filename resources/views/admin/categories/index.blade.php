@@ -8,8 +8,8 @@
         <a href="{{ route('admin.categories.create') }}" class="btn btn-success">@lang('quickadmin.qa_add_new')</a>
         
     </p>
-    @endcan
- -->
+    @endcan -->
+
     
     <p>These categories are hard-coded in OT Processor exe.</p>
 
@@ -22,12 +22,21 @@
             <table class="table table-bordered table-striped ">
                 <thead>
                     <tr>
-                        <!-- @can('category_delete')
-                            <th style="text-align:center;"><input type="checkbox" id="select-all" /></th>
-                        @endcan -->
+                        <th>
+                                        {{ trans('cruds.category.fields.id') }}
+                                    </th>
 
                         <th>@lang('quickadmin.categories.fields.category')</th>
-                                                <!-- <th>&nbsp;</th> -->
+                      
+                        <th>
+                            {{ trans('cruds.category.fields.normal_office_hours') }}
+                        </th>
+                        <th>
+                                        {{ trans('cruds.category.fields.punching') }}
+                                    </th>
+                        <th>
+                            &nbsp;
+                        </th>
 
                     </tr>
                 </thead>
@@ -36,28 +45,40 @@
                     @if (count($categories) > 0)
                         @foreach ($categories as $category)
                             <tr data-entry-id="{{ $category->id }}">
-                                <!-- @can('category_delete')
-                                    <td></td>
-                                @endcan -->
+                            <td>
+                                            {{ $category->id ?? '' }}
+                                        </td>
 
                                 <td field-key='category'>{{ $category->category }}</td>
-                                <!-- <td>
-                                    @can('category_view')
-                                    <a href="{{ route('admin.categories.show',[$category->id]) }}" class="btn btn-xs btn-primary">@lang('quickadmin.qa_view')</a>
-                                    @endcan
-                                    @can('category_edit')
-                                    <a href="{{ route('admin.categories.edit',[$category->id]) }}" class="btn btn-xs btn-info">@lang('quickadmin.qa_edit')</a>
-                                    @endcan
-                                    @can('category_delete')
-{!! Form::open(array(
-                                        'style' => 'display: inline-block;',
-                                        'method' => 'DELETE',
-                                        'onsubmit' => "return confirm('".trans("quickadmin.qa_are_you_sure")."');",
-                                        'route' => ['admin.categories.destroy', $category->id])) !!}
-                                    {!! Form::submit(trans('quickadmin.qa_delete'), array('class' => 'btn btn-xs btn-danger')) !!}
-                                    {!! Form::close() !!}
-                                    @endcan
-                                </td> -->
+                                <td>
+                                            {{ $category->normal_office_hours ?? '' }}
+                                        </td>
+                                        <td>
+                                            <span style="display:none">{{ $category->punching ?? '' }}</span>
+                                            <input type="checkbox" disabled="disabled" {{ $category->punching ? 'checked' : '' }}>
+                                        </td>
+                                        <td>
+                                            <!-- @can('category_show')
+                                                <a class="btn btn-xs btn-primary" href="{{ route('admin.categories.show', $category->id) }}">
+                                                    {{ trans('global.view') }}
+                                                </a>
+                                            @endcan -->
+
+                                            @can('category_edit')
+                                                <a class="btn btn-xs btn-info" href="{{ route('admin.categories.edit', $category->id) }}">
+                                                    {{ trans('global.edit') }}
+                                                </a>
+                                            @endcan
+
+                                            <!-- @can('category_delete')
+                                                <form action="{{ route('admin.categories.destroy', $category->id) }}" method="POST" onsubmit="return confirm('{{ trans('global.areYouSure') }}');" style="display: inline-block;">
+                                                    <input type="hidden" name="_method" value="DELETE">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                                    <input type="submit" class="btn btn-xs btn-danger" value="{{ trans('global.delete') }}">
+                                                </form>
+                                            @endcan -->
+
+                                        </td>
 
                             </tr>
                         @endforeach

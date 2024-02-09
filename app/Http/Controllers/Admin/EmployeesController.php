@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Employee;
+use App\Category;
 use Carbon\Carbon;
 
 
@@ -100,13 +101,14 @@ class EmployeesController extends Controller
                     ->get(['designation'])->pluck('designation');
 
 
-        $empwithnocategory = -1;
+        $empwithnocategory = '';
         if(\Auth::user()->isAdmin())
         {
-           $empwithnocategory = Employee::where('categories_id',null)
-           ->where('category','<>','Relieved')->count();
+           $empwithnocategory = Employee::select('pen')->where('categories_id',null)
+           //->where('category', '<>', 'Relieved')
+           ->pluck('pen')->implode(',');
         }
-
+//dd($empwithnocategory);
 
         
         $data["designations"] = json_encode($designations);
@@ -516,13 +518,13 @@ class EmployeesController extends Controller
     public function download_emp()
     {        
 
-        $desig = \App\Employee::orderby('id','desc')->get();
+        $employees = \App\Employee::with(['designation', 'categories'])->orderby('id','desc')->get();
 
         $filename =  'sectt_employees-'.  date('Y-m-d') . '.csv';
         
         $csvExporter = new \Laracsv\Export();
 
-        $csvExporter->build($desig, [ "id", "pen","srismt","name","designation_id","desig_display",'categories_id',"added_by","category" ]);
+        $csvExporter->build($employees, [ "id", "pen","srismt","name", "designation.designation", "designation_id","desig_display",'categories_id', 'categories.category', "added_by","category" ]);
 
         $csvExporter->download($filename);
 
@@ -836,6 +838,74 @@ class EmployeesController extends Controller
         
 
 
+    }
+
+    //we used staff.csv as a local file with ot processor.exe.
+    //now moving this online
+    public function staffCategorySync(Request $request)
+    {
+        $mapCategories_to_id = \App\Category::All()->mapWithKeys(function($cat){
+            return [$cat->category => $cat->id];
+        });
+       
+        $staffcsv_pen_to_categoryId = [];
+        $pen_to_desig_display = [];
+
+
+        $file = $request->file('file');
+        $fileContents = file($file->getPathname());
+
+        foreach ($fileContents as $line) {
+            $data = str_getcsv($line);
+            $pen = str_replace('"', "", trim($data[0]));
+            // $desig = $data[3];
+            $desig_display = $data[4];
+            if(strlen($pen) >=5){
+                $category = str_replace('"', "", trim($data[5]));
+                $staffcsv_pen_to_categoryId[$pen] = $mapCategories_to_id[$category];
+                $staffcsvpen_to_desig_display[$pen] = $desig_display;
+            }
+        }
+        //dd($staffcsv_pen_to_categoryId);
+
+
+/*
+            Employee::where('pen')->update([
+                'categories_id' => 
+                ,
+                'desig_display' => $desig_display,
+                // Add more fields as needed
+            ]);*/
+
+            $emps = Employee::select('id', 'pen')->get();
+
+            foreach ($emps->chunk(1000) as $chunk) {
+               $cases = [];
+               $ids = [];
+               $params_cat = [];
+               $params_desig_display = [];
+            
+               foreach ($chunk as $emp) {
+                    if (array_key_exists($emp->pen, $staffcsv_pen_to_categoryId)){
+                        $cases[] = "WHEN '{$emp->pen}' then ?";
+                        $params_cat[] = $staffcsv_pen_to_categoryId[$emp->pen];
+                        $params_desig_display[] = $staffcsvpen_to_desig_display[$emp->pen];
+                        $ids[] = $emp->id;
+                    }
+               }
+            
+               $ids = implode(',', $ids);
+               $cases = implode(' ', $cases);
+            
+               if (!empty($ids)) {
+                   \DB::update("UPDATE employees SET `categories_id` = CASE `pen` {$cases} END WHERE `id` in ({$ids})", $params_cat);
+                   
+                   \DB::update("UPDATE employees SET `desig_display` = CASE `pen` {$cases} END WHERE `id` in ({$ids})", $params_desig_display);
+                   
+               }
+            }
+
+        return redirect()->back()->with('success', 'CSV file imported successfully.');
     }
 
 

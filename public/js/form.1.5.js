@@ -87,6 +87,8 @@ var vm = new Vue({
 
     // alert(JSON.stringify(presets_default)); 
     //alert(JSON.stringify(presets_default));                      
+    //this.$refs.multiselectRef.$refs.search.setAttribute("autocomplete", "off")
+    // console.log( this.$refs.multiselectRef )
   },
   computed: {
     configdate: function configdate() {
@@ -326,10 +328,11 @@ var vm = new Vue({
         pen: "",
         designation: "",
         from: prevrow ? prevrow.from : def_time_start,
-        to: prevrow ? prevrow.to : def_time_end
+        to: prevrow ? prevrow.to : def_time_end,
         // worknature: prevrow ? prevrow.worknature : presets_default['default_worknature'],
+        // allowpunch_edit: true,
+        punching_id: null
       });
-
       this.pen_names = []; //clear previos selection from dropdown
       this.pen_names_to_desig = [];
       this.$nextTick(function () {
@@ -386,11 +389,21 @@ var vm = new Vue({
       }
 
       //set punchtime if not set and available
+      //reset for example if user selects another person after selecting a person with punchtime
+      // self.form.overtimes[id].allowpunch_edit=true;
+      self.form.overtimes[id].punchin = "";
+      self.form.overtimes[id].punchout = "";
+      self.form.overtimes[id].punching_id = null;
       axios.get(urlajaxgetpunchtimes + '/' + self.form.duty_date + '/' + self.form.overtimes[id].pen).then(function (response) {
         console.log('got punch data');
         console.log(response);
-        self.form.overtimes[id].punchin = response.data.punchin;
-        self.form.overtimes[id].punchout = response.data.punchout;
+        if (response.data && response.data.hasOwnProperty('punchin') && response.data.hasOwnProperty('punchout')) {
+          self.form.overtimes[id].punchin = response.data.punchin;
+          self.form.overtimes[id].punchout = response.data.punchout;
+          self.form.overtimes[id].punching_id = response.data.id;
+          //allow punching edit if there is not associated punching id for this form
+          self.form.overtimes[id].allowpunch_edit = response.data.id ? false : true;
+        }
       })["catch"](function (err) {});
     });
 

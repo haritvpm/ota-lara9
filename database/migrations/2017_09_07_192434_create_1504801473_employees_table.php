@@ -21,7 +21,7 @@ class Create1504801473EmployeesTable extends Migration
                 $table->string('pen')->unique();
                 $table->string('added_by');
                 $table->enum('category', array('Staff', 'Provisional','Staff - Admin Data Entry'))->default('Staff');
-                $table->string('excel_category')->nullable();
+                // $table->string('excel_category')->nullable();
                 $table->string('desig_display')->nullable();;
 
                 $table->timestamps();

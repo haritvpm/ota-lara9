@@ -21,14 +21,20 @@ class Punching extends Model
     // ];
 
     protected $fillable = [
+        
         'pen',
+        'name',
         'date',
         'punch_in',
         'punch_out',
-        'form_id',
+             
         'created_at',
         'updated_at',
         'deleted_at',
+        'session',
+        'creator',
+       
+       // 'allowpunch_edit',
     ];
 
     // protected function serializeDate(DateTimeInterface $date)
@@ -40,10 +46,6 @@ class Punching extends Model
 
    
 
-    public function form()
-    {
-        return $this->belongsTo(PunchingForm::class, 'form_id');
-    }
 
 
  /**

@@ -23,14 +23,7 @@
             @endcan
 
            
-            @can('user_management_access')
-            <li class="{{ $request->segment(2) == 'punching' ? 'active' : '' }}">
-                <a href="{{ route('admin.punchings.index') }}">
-                    <i class="fa fa-list-o"></i>
-                    <span class="title">Punching</span>
-                </a>
-            </li>
-            @endcan
+        
 
 
             @can('pa2mlaform_access')
@@ -72,9 +65,22 @@
             </li>
             @endcan
 
+            @can('user_management_access')
+            <li class="treeview">
+                <a href="#">
+                    <i class="fa fa-users"></i>
+                    <span class="title">Employee Management</span>
+                    <span class="pull-right-container">
+                        <i class="fa fa-angle-left pull-right"></i>
+                    </span>
+                </a>
+                <ul class="treeview-menu">
+                
+
             @if(  \Config::get('custom.show_legsectt'))
             @can('employee_access')
-            <li class="{{ $request->segment(2) == 'employees' ? 'active' : '' }}">
+            
+            <li class="{{ $request->segment(2) == 'employees' ? 'active active-sub' : '' }}">
                 <a href="{{ route('admin.employees.index') }}">
                     <i class="fa fa-user"></i>
                     <span class="title">@lang('quickadmin.employees.title')</span>
@@ -84,7 +90,7 @@
             @endif
              
             @can('employees_other_access')
-            <li class="{{ $request->segment(2) == 'employees_others' ? 'active' : '' }}">
+            <li class="{{ $request->segment(2) == 'employees_others' ? 'active active-sub' : '' }}">
                 <a href="{{ route('admin.employees_others.index') }}">
                     <i class="fa fa-user"></i>
                     <span class="title">@lang('quickadmin.employees-other.title')</span>
@@ -92,6 +98,54 @@
             </li>
             @endcan
 
+            @if(  \Config::get('custom.show_legsectt'))
+                @can('designation_access')
+                <li class="{{ $request->segment(2) == 'designations' ? 'active active-sub' : '' }}">
+                        <a href="{{ route('admin.designations.index') }}">
+                            <i class="fa fa-rupee"></i>
+                            <span class="title">
+                                @lang('quickadmin.designations.title')
+                            </span>
+                        </a>
+                    </li>
+                @endcan
+                @endif
+
+                 @can('designations_other_access')
+                <li class="{{ $request->segment(2) == 'designations_others' ? 'active active-sub' : '' }}">
+                        <a href="{{ route('admin.designations_others.index') }}">
+                            <i class="fa fa-rupee"></i>
+                            <span class="title">
+                                @lang('quickadmin.designations-other.title')
+                            </span>
+                        </a>
+                    </li>
+                @endcan
+                @can('category_access')
+                <li class="{{ $request->segment(2) == 'categories' ? 'active active-sub' : '' }}">
+                        <a href="{{ route('admin.categories.index') }}">
+                            <i class="fa fa-gears"></i>
+                            <span class="title">
+                                @lang('quickadmin.categories.title')
+                            </span>
+                        </a>
+                    </li>
+                @endcan
+
+
+
+            </ul>
+            </li>
+            @endcan
+           
+            @can('attendance_access')
+            <li class="{{ $request->segment(2) == 'punching' ? 'active' : '' }}">
+                <a href="{{ route('admin.punchings.index') }}">
+                    <i class="fa fa-list"></i>
+                    <span class="title">Punching</span>
+                </a>
+            </li>
+            @endcan
 
             @can('attendance_access')
             <li class="{{ $request->segment(2) == 'attendances' ? 'active' : '' }}">
@@ -147,39 +201,7 @@
                     </li>
                 @endcan
                 
-                @if(  \Config::get('custom.show_legsectt'))
-                @can('designation_access')
-                <li class="{{ $request->segment(2) == 'designations' ? 'active active-sub' : '' }}">
-                        <a href="{{ route('admin.designations.index') }}">
-                            <i class="fa fa-rupee"></i>
-                            <span class="title">
-                                @lang('quickadmin.designations.title')
-                            </span>
-                        </a>
-                    </li>
-                @endcan
-                @endif
-
-                 @can('designations_other_access')
-                <li class="{{ $request->segment(2) == 'designations_others' ? 'active active-sub' : '' }}">
-                        <a href="{{ route('admin.designations_others.index') }}">
-                            <i class="fa fa-rupee"></i>
-                            <span class="title">
-                                @lang('quickadmin.designations-other.title')
-                            </span>
-                        </a>
-                    </li>
-                @endcan
-                <!-- @can('category_access')
-                <li class="{{ $request->segment(2) == 'categories' ? 'active active-sub' : '' }}">
-                        <a href="{{ route('admin.categories.index') }}">
-                            <i class="fa fa-gears"></i>
-                            <span class="title">
-                                @lang('quickadmin.categories.title')
-                            </span>
-                        </a>
-                    </li>
-                @endcan -->
+                
                 </ul>
             </li>
             @endcan

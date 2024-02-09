@@ -29,6 +29,12 @@
                        
                         <th>@lang('quickadmin.designations.fields.designation')</th>
                         <th>@lang('quickadmin.designations.fields.rate')</th>
+                        <th>
+                            {{ trans('cruds.designation.fields.punching') }}
+                        </th>
+                        <th>
+                            {{ trans('cruds.designation.fields.normal_office_hours') }}
+                        </th>
                         <!-- <th>@lang('quickadmin.designations.fields.designation-mal')</th> -->
                                                 <th>&nbsp;</th>
 
@@ -43,7 +49,13 @@
 
                                 <td field-key='designation'>{{ $designation->designation }}</td>
                                 <td field-key='rate'>{{ $designation->rate }}</td>
-                                <!-- <td field-key='designation_mal'>{{ $designation->designation_mal }}</td> -->
+                                <td>
+                                    <span style="display:none">{{ $designation->punching ?? '' }}</span>
+                                    <input type="checkbox" disabled="disabled" {{ $designation->punching ? 'checked' : '' }}>
+                                </td>
+                                <td>
+                                    {{ $designation->normal_office_hours ?? '' }}
+                                </td>
                                 <td>
                                     @can('designation_view')
                                     <a href="{{ route('admin.designations.show',[$designation->id]) }}" class="btn btn-xs btn-primary">@lang('quickadmin.qa_view')</a>

@@ -36,18 +36,25 @@
                 </div>
             </div>
 
-            <!-- <div class="row">
-                <div class="col-xs-12 form-group">
-                    {!! Form::label('designation_mal', trans('quickadmin.designations.fields.designation-mal').'', ['class' => 'control-label']) !!}
-                    {!! Form::text('designation_mal', old('designation_mal'), ['class' => 'form-control', 'placeholder' => '']) !!}
-                    <p class="help-block"></p>
-                    @if($errors->has('designation_mal'))
-                        <p class="help-block">
-                            {{ $errors->first('designation_mal') }}
-                        </p>
-                    @endif
-                </div>
-            </div> -->
+            <div class="form-group {{ $errors->has('punching') ? 'has-error' : '' }}">
+                            <div>
+                                <input type="hidden" name="punching" value="0">
+                                <input type="checkbox" name="punching" id="punching" value="1" {{ $designation->punching || old('punching', 0) === 1 ? 'checked' : '' }}>
+                                <label for="punching" style="font-weight: 400">{{ trans('cruds.designation.fields.punching') }}</label>
+                            </div>
+                            @if($errors->has('punching'))
+                                <span class="help-block" role="alert">{{ $errors->first('punching') }}</span>
+                            @endif
+                            <span class="help-block">{{ trans('cruds.designation.fields.punching_helper') }}</span>
+            </div>
+            <div class="form-group {{ $errors->has('normal_office_hours') ? 'has-error' : '' }}">
+                <label for="normal_office_hours">{{ trans('cruds.designation.fields.normal_office_hours') }}</label>
+                <input class="form-control" type="number" name="normal_office_hours" id="normal_office_hours" value="{{ old('normal_office_hours', $designation->normal_office_hours) }}" step="1">
+                @if($errors->has('normal_office_hours'))
+                    <span class="help-block" role="alert">{{ $errors->first('normal_office_hours') }}</span>
+                @endif
+                <span class="help-block">{{ trans('cruds.designation.fields.normal_office_hours_helper') }}</span>
+        </div>
             
         </div>
     </div>

@@ -25,6 +25,12 @@ class UpdateCategoriesRequest extends FormRequest
         return [
             
             'category' => 'required|unique:categories,category,'.$this->route('category'),
+            'normal_office_hours' => [
+                'nullable',
+                'integer',
+                'min:0',
+                'max:24',
+            ],
         ];
     }
 }

@@ -20,8 +20,15 @@
 
          <a href="{{ route('admin.employees.sparksync') }}" class="btn btn-warning">Spark Sync</a>
          &nbsp;
+         <hr>
+         <form action="{{ route('admin.employees.staffCategorySync') }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            <input type="file" name="file" accept=".csv">
+            <button type="submit">Import Staff CSV</button>
+        </form>
         Employees with no category set : {{$empwithnocategory}}<br>
-        Right now, category and desig display in intranet do not affect EXCEL. 
+       
+        <hr>
 
         @endif
         
@@ -86,7 +93,7 @@
                         <th>ID</th>
                         
                         <th>@lang('quickadmin.employees.fields.added-by')</th>
-                        <th>@lang('quickadmin.employees.fields.categories')</th>
+                        <th>Excel Category</th>
                         <th>@lang('quickadmin.employees.fields.desig-display')</th>
                    
                          @endif
@@ -162,7 +169,7 @@
                 {data: 'added_by', name: 'added_by'},
                 {data: 'categories.category', name: 'categories.category'},
                 {data: 'desig_display', name: 'desig_display'},
-                //{data: 'created_at', name: 'created_at'},
+              // {data: 'created_at', name: 'created_at'},
                // {data: 'updated_at', name: 'created_at'},
                
                 @endif

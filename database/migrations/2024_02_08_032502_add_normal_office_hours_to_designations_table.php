@@ -13,11 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('punching_forms', function (Blueprint $table) {
-            $table->integer('employee_id')->unsigned()->nullable();
-            $table->foreign('employee_id', 'employee_fk_9464877')->references('id')->on('employees');
+        Schema::table('designations', function (Blueprint $table) {
+            $table->integer('normal_office_hours')->default(7)->nullable();
 
-           
         });
     }
 
@@ -28,7 +26,7 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('punchings', function (Blueprint $table) {
+        Schema::table('designations', function (Blueprint $table) {
             //
         });
     }

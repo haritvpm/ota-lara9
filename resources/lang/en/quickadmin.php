@@ -223,7 +223,7 @@ return [
         ],
     ],
 	'categories' => [
-		'title' => 'categories',
+		'title' => 'Categories',
 		'fields' => [
 			'category' => 'Category',
 		],

@@ -79,7 +79,7 @@
             
                 <div class="col-xs-5 form-group">
                     {!! Form::label('category', 'Category', ['class' => 'control-label']) !!}
-                    {!! Form::select('category', $enum_category, old('category'), ['class' => 'form-control ']) !!}
+                    {!! Form::select('category', $enum_category, old('category'), ['class' => 'form-control']) !!}
                     <p class="help-block"></p>
                     @if($errors->has('category'))
                         <p class="help-block">

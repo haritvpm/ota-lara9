@@ -91,7 +91,7 @@
 					:options-limit="100" 
 					:tabindex="3" 
 					@select="changeSelect" 
-											
+									
 					@search-change="asyncFind">
 					<span slot="noResult"></span>										
 					</multiselect>
@@ -108,36 +108,29 @@
 					<div class="small"> @{{ row.designation }}</div> 
 					</td>
 					<td class="col-md-1">
-					<input  :name="'punchin[' + index + ']'" type="text" v-model="row.punchin" required class="form-control" >
+					<input  :name="'punchin[' + index + ']'" type="text" v-model="row.punchin" required class="form-control" :disabled="row.punching_id" autocomplete="off">
 					<!-- <date-picker v-model="row.from" :config="configtime"
 						:required="true"                
 						class="form-control">
 					</date-picker> --> 
 					</td>
 					<td class="col-md-1">
-					<input  :name="'punchout[' + index + ']'" type="text" v-model="row.punchout" required class="form-control" >
-					<!-- <date-picker v-model="row.from" :config="configtime"
-						:required="true"                
-						class="form-control">
-					</date-picker> --> 
+					<input  :name="'punchout[' + index + ']'" type="text" v-model="row.punchout" required class="form-control" :disabled="row.punching_id"  autocomplete="off">
+					
 					</td>
 					<td class="col-md-1">
-					<input  :name="'from[' + index + ']'" type="text" v-model="row.from" required class="form-control" >
-					<!-- <date-picker v-model="row.from" :config="configtime"
-						:required="true"                
-						class="form-control">
-					</date-picker> --> 
+					<input  :name="'from[' + index + ']'" type="text" v-model="row.from" required class="form-control"  autocomplete="off">
+					
 					</td>
 					
 					<td class="col-md-1">
-					<input  :name="'to[' + index + ']'" type="text" v-model="row.to" required class="form-control">
-					<!-- <date-picker v-model="row.to" :config="configtime"
-						:required="true"                
-						>
-					</date-picker>  -->
+					<input  :name="'to[' + index + ']'" type="text" v-model="row.to" required class="form-control"  autocomplete="off">
+					
 					</td>
 					
-					<!-- <td class="col-md-2"> <input :name="'worknature[' + index + ']'" class="form-control" type="text" v-model="row.worknature" maxlength="180"  required></td> -->
+					
+					
+					
 					<td style="width:1px;"><button class="btn btn-danger"  @click.prevent="removeElement(index);"   data-toggle="tooltip" title="remove row"><i class="fa fa-times"></i></button>
 					
 

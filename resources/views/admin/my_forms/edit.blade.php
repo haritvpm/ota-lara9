@@ -95,6 +95,7 @@
     var urlajaxpen = "{{url('admin/employees/ajaxfind')}}"
     var urlformsubmit = "{{url('admin/my_forms/')}}"
     var urlformsucessredirect = "{{url('admin/my_forms/')}}"
+    var urlajaxgetpunchtimes = "{{url('admin/punchings/ajaxgetpunchtimes')}}"
         
     var calenderdaysmap = {!! $data['calenderdaysmap'] !!};
     var designations = {!! $data['designations'] !!};

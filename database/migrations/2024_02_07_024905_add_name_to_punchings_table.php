@@ -13,12 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('punching_forms', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('creator');
-            $table->string('session')->nullable();
-        
-            $table->timestamps();
+        Schema::table('punchings', function (Blueprint $table) {
+            $table->string('name')->nullable();
+           
         });
     }
 
@@ -29,6 +26,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('punching_forms');
+        Schema::table('punchings', function (Blueprint $table) {
+            //
+        });
     }
 };

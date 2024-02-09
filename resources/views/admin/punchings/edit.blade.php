@@ -5,111 +5,66 @@
     </style>
 
 @section('content')
-
-
-    <h4 class="page-title">Duty Form</h4>
-    
-    @if(count($sessions) > 0)
-
-    <input type="hidden" name="_token" value="{{ csrf_token() }}">
-
-
-    <div class="panel panel-default" id="app">
-        <div class="panel-heading">
-            Edit
-
-             <div class = "pull-right">
-             <small> Created, Updated : 
-            {{ date('d-m-Y', strtotime($form->created_at)) }}, {{ date('d-m-Y', strtotime($form->updated_at)) }}, No.{{ $form->id }}
-            </small>
-             </div>
-        </div>
-                
-
-        <div class="panel-body">
-        
-
-            <div class="row">
-                <div class="col-md-4 form-group">           
-                    Created:  By <strong>{{$form->created_by->Title}}</strong>
+<div class="content">
+Editing will not affect already submitted OT forms, as they have their own fields. This will help autofetch for any new forms
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    {{ trans('global.edit') }} {{ trans('cruds.punching.title_singular') }}
                 </div>
-              
-                
+                <div class="panel-body">
+                    <form method="POST" action="{{ route("admin.punchings.update", [$punching->id]) }}" enctype="multipart/form-data">
+                        @method('PUT')
+                        @csrf
+                        
+                        <div class="form-group {{ $errors->has('pen') ? 'has-error' : '' }}">
+                            <label class="required" for="pen">{{ trans('cruds.punching.fields.pen') }}</label>
+                            <input  readonly class="form-control" type="text" name="pen" id="pen" value="{{ old('pen', $punching->pen) }}" required>
+                           
+                        </div>
+                        <div class="form-group {{ $errors->has('name') ? 'has-error' : '' }}">
+                            <label for="name">{{ trans('cruds.punching.fields.name') }}</label>
+                            <input readonly class="form-control" type="text" name="name" id="name" value="{{ old('name', $punching->name) }}">
+                          
+                        </div>
+
+                        
+                        <div class="form-group {{ $errors->has('date') ? 'has-error' : '' }}">
+                            <label class="required" for="date">{{ trans('cruds.punching.fields.date') }}</label>
+                            <input readonly class="form-control date" type="text" name="date" id="date" value="{{ old('date', $punching->date) }}" required>
+                           
+                        </div>
+                        <div class="form-group {{ $errors->has('punch_in') ? 'has-error' : '' }}">
+                            <label class="required" for="punch_in">{{ trans('cruds.punching.fields.punch_in') }}</label>
+                            <input class="form-control" type="text" name="punch_in" id="punch_in" value="{{ old('punch_in', $punching->punch_in) }}" required>
+                            @if($errors->has('punch_in'))
+                                <span class="help-block" role="alert">{{ $errors->first('punch_in') }}</span>
+                            @endif
+                            <span class="help-block">{{ trans('cruds.punching.fields.punch_in_helper') }}</span>
+                        </div>
+                        <div class="form-group {{ $errors->has('punch_out') ? 'has-error' : '' }}">
+                            <label class="required" for="punch_out">{{ trans('cruds.punching.fields.punch_out') }}</label>
+                            <input class="form-control" type="text" name="punch_out" id="punch_out" value="{{ old('punch_out', $punching->punch_out) }}" required>
+                            @if($errors->has('punch_out'))
+                                <span class="help-block" role="alert">{{ $errors->first('punch_out') }}</span>
+                            @endif
+                            <span class="help-block">{{ trans('cruds.punching.fields.punch_out_helper') }}</span>
+                        </div>
+                       
+
+                        <div class="form-group">
+                            <button class="btn btn-danger" type="submit">
+                                {{ trans('global.save') }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
 
 
-            <?php
-            // $readonly = "disabled";
-            $readonly = "";
-            ?> 
 
-            @include('admin.my_forms.form')
- 
         </div>
-
-        <div class="panel-footer">
-            <a href="{{ URL::previous() }}" class="btn btn-default">Cancel</a>
-            <button class="btn btn-primary" @click.prevent="update" :disabled="isProcessing"><i class="fa fa-save"></i> Save <i  v-show="isProcessing" class="fa fa-spinner fa-spin"></i></button>
-            <small>&nbsp; (click Cancel if you have not made any changes)</small>
-        </div>
-
     </div>
-
-     @else
-    
-        Sorry, no sessions available for data entry
-         <a href="{{route('admin.my_forms.index')}}" class="btn btn-primary">OK</a>
-         
-    @endif  
-
-@stop
-
-<script type="text/javascript" src="{{ URL::asset('js/vue-sweetalert.js') }}"></script>
-
-<!-- <script type="text/javascript" src="{{ URL::asset('js/flatpickr.min.js') }}"></script>
-<script type="text/javascript" src="{{ URL::asset('js/vue-flatpickr.min.js') }}"></script> -->
-
-
-@section('javascript')
-    @parent
-
-    <!-- <script>
-            $('.date').datepicker({
-                autoclose: true,
-                dateFormat: "{{ config('app.date_format_js') }}"
-            });
-        </script> -->
-    <!--   
-    <script>
-        var oldFormData = {
-        old: "{{ json_encode(Session::getOldInput()) }}",
-        oldname: "{{ json_encode( old('name') ) }}",
-        
-        //...
-        }
-    </script>
-    -->
-
-    <script type="text/javascript">
-
-    var urlajaxpen = "{{url('admin/employees/ajaxfind')}}"
-    var urlformsubmit = "{{url('admin/my_forms/')}}"
-    var urlformsucessredirect = "{{url('admin/my_forms/')}}"
-        
-    var calenderdaysmap = {!! $data['calenderdaysmap'] !!};
-    var designations = {!! $data['designations'] !!};
-    Vue.component('Multiselect', VueMultiselect.default);
-    // Vue.component('flat-pickr', VueFlatpickr.default);
-    
-    Vue.component('date-picker', VueBootstrapDatetimePicker.default);
-
-    Vue.use(VueSweetAlert.default)
-    var calenderdays2 = {!! $data['calenderdays2'] !!};
-
-
-    window._form = {!! $form->toJson() !!};
-    
-    </script>
-
-  <script type="text/javascript" src="{{ URL::asset('js/punching.js') }}"></script>
-@stop
+</div>
+@endsection
