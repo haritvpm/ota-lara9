@@ -739,6 +739,7 @@ class MyFormsController extends Controller
                     'worknature'    => $overtime['worknature'] ?? '',
                     'count'         => '1',
                     'rate'          => $rates[$overtime['designation']],
+                    'punching'       => $overtime['punching'],
                     'punchin'       => $overtime['punchin'],
                     'punchout'       => $overtime['punchout'],
                     'punching_id'    => $overtime['punching_id'] ?? null,

@@ -312,10 +312,10 @@ th{
                     <td field-key='designation' class="text-nowrap"><small>{{ $overtime->designation }}</small></td>
                    
                     <td field-key='punchin' class="small text-center text-nowrap">
-                    {{ date("h:i a", strtotime($overtime->punchin)) }}  
+                     @if($overtime->punching) {{ date("h:i a", strtotime($overtime->punchin)) }} @endif
                     </td>
                     <td field-key='punchout' class="small text-center text-nowrap">
-                    {{ date("h:i a", strtotime($overtime->punchout)) }}  
+                    @if($overtime->punching) {{ date("h:i a", strtotime($overtime->punchout)) }}  @endif
                     </td>
 
                     @if($form->overtime_slot == 'Sittings')

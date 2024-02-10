@@ -193,7 +193,7 @@ class EmployeesController extends Controller
     public function ajaxfind($search)
     {
        
-      $temp =  Employee::with('designation')
+      $temp =  Employee::with(['designation', 'categories'])
                 ->wherehas( 'designation', function($q){
                     $q->wherenotin('designation', ['Personal Assistant to MLA']);
                 })
@@ -207,23 +207,30 @@ class EmployeesController extends Controller
             //})->orderby('name','asc')->pluck('name','pen')->take(100);
                         
 
-       
-/*
-       $combined = $temp->map(function ($name, $key) {
-            return $key . '-' . $name ;
-        });
-         
-       return $combined->values();
-       */
-/*
-        $combined = $temp->transform(function ($item) {
-            return $item->pen . '-' . $item->name;
-        });*/
+        /* 
+        category = mla hostel non-gazetted (office hours = 7), in that desig part time has oh (3)
+        //so office hours of desig takes precedence
 
+        category = personal staff (punching = false), in that desig assistant  has punching (true)
+        //so punching has to be enabled in both categiry and designation
+*/
 
         $combined = $temp->mapWithKeys(function ($item) {
-            return [ $item->pen . '-' . $item->name => $item->designation->designation];
+        //    return [ $item->pen . '-' . $item->name => $item->designation->designation];
+            return [ $item->pen . '-' . $item->name => 
+                [
+                    'desig' =>  $item->designation->designation,
+                    'desig_normal_office_hours' =>  $item->designation->normal_office_hours,
+                    'desig_punching' =>  $item->designation->punching,
+                    'category_punching' =>  $item->categories->punching,
+
+                ]
+            ];
         });
+
+     //   $penname_to_category = $temp->mapWithKeys(function ($item) {
+      //      return [ $item->pen . '-' . $item->name => $item->designation->designation];
+      //  });
                
 
         return [

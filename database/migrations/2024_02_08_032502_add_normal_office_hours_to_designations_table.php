@@ -17,6 +17,9 @@ return new class extends Migration
             $table->integer('normal_office_hours')->default(7)->nullable();
 
         });
+
+        DB::table('designations')->where('designation','like','Part Time%')->update(array( 'normal_office_hours'=> 3));
+        
     }
 
     /**

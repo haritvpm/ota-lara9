@@ -14,8 +14,13 @@ return new class extends Migration
     public function up()
     {
         Schema::table('overtimes', function (Blueprint $table) {
-            $table->string('punchin')->nullable();;
-            $table->string('punchout')->nullable();;
+        
+          //if(!Schema::hasColumn( 'overtimes','punching'))
+          {
+            // $table->unique('category'); 
+            //default 0 to make sure old forms does not have punching
+            $table->boolean('punching')->default(0)->nullable();
+            } 
         });
     }
 
@@ -27,7 +32,10 @@ return new class extends Migration
     public function down()
     {
         Schema::table('overtimes', function (Blueprint $table) {
-            //
+          if(Schema::hasColumn( 'overtimes','punching'))
+          {
+            $table->dropColumn('punching');
+          }
         });
     }
 };

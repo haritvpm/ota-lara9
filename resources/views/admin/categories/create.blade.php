@@ -19,14 +19,7 @@
                             @endif
                             <span class="help-block">{{ trans('cruds.category.fields.category_helper') }}</span>
                         </div>
-                        <div class="form-group {{ $errors->has('normal_office_hours') ? 'has-error' : '' }}">
-                            <label for="normal_office_hours">{{ trans('cruds.category.fields.normal_office_hours') }}</label>
-                            <input class="form-control" type="number" name="normal_office_hours" id="normal_office_hours" value="{{ old('normal_office_hours', '7') }}" step="1">
-                            @if($errors->has('normal_office_hours'))
-                                <span class="help-block" role="alert">{{ $errors->first('normal_office_hours') }}</span>
-                            @endif
-                            <span class="help-block">{{ trans('cruds.category.fields.normal_office_hours_helper') }}</span>
-                        </div>
+                        
                         <div class="form-group {{ $errors->has('punching') ? 'has-error' : '' }}">
                             <div>
                                 <input type="hidden" name="punching" value="0">

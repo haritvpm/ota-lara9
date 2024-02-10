@@ -504,9 +504,15 @@ var vm = new Vue({
       var desig = self.pen_names_to_desig[selectedOption];
       //alert('changin');
       self.$nextTick(() => {
-        if (desig !== undefined) {
+
+        self.form.overtimes[id].punching = true
+        self.form.overtimes[id].normal_office_hours = 0
+
+        if (desig !== undefined && desig.desig) {
          
-          self.form.overtimes[id].designation = desig
+          self.form.overtimes[id].designation = desig.desig
+          self.form.overtimes[id].punching = desig.category_punching && desig.desig_punching
+          self.form.overtimes[id].normal_office_hours = desig.desig_normal_office_hours
           //self.$forceUpdate()
         }
 
@@ -517,8 +523,9 @@ var vm = new Vue({
         self.form.overtimes[id].punchout = ""
         self.form.overtimes[id].punching_id = null
         
-        axios.get(urlajaxgetpunchtimes  + '/'+  self.form.duty_date + '/' + self.form.overtimes[id].pen)
-        .then(response => {
+        if(desig !== undefined && self.form.overtimes[id].punching ){
+          axios.get(urlajaxgetpunchtimes  + '/'+  self.form.duty_date + '/' + self.form.overtimes[id].pen)
+          .then(response => {
 
             console.log('got punch data')
             console.log(response)
@@ -533,6 +540,9 @@ var vm = new Vue({
           .catch(err => {
             
           });
+        }
+
+
 
       })
 
@@ -644,13 +654,16 @@ var vm = new Vue({
           return false
         }
 
-        if (row.punchin == null || row.punchin == ''
-          || row.punchout == null || row.punchout == ''
-        ) {
+        if(self.form.overtimes[i].punching){
+          if ( row.punching && (row.punchin == null || row.punchin == ''
+            || row.punchout == null || row.punchout == ''
+          )) {
 
-          this.$swal('Row: ' + (i + 1), "Fill punch in/out time for every row", 'error')
-          return false
+            this.$swal('Row: ' + (i + 1), "Fill punch in/out time for every row", 'error')
+            return false
+          }
         }
+
       }
 
 
@@ -672,8 +685,10 @@ var vm = new Vue({
       //check time diff
       for (var i = 0; i < self.form.overtimes.length; i++) {
 
+        if(self.form.overtimes[i].punching){
         self.form.overtimes[i].punchin = validateHhMm(self.form.overtimes[i].punchin.trim());
         self.form.overtimes[i].punchout = validateHhMm(self.form.overtimes[i].punchout.trim());
+        }
 
         self.form.overtimes[i].from = self.form.overtimes[i].from.trim();
         self.form.overtimes[i].to = self.form.overtimes[i].to.trim();
@@ -681,15 +696,16 @@ var vm = new Vue({
         self.form.overtimes[i].from = validateHhMm(self.form.overtimes[i].from)
         self.form.overtimes[i].to = validateHhMm(self.form.overtimes[i].to)
 
-        if (!this.checkTimeWithinPunchingTime(self.form.overtimes[i].punchin, self.form.overtimes[i].punchout, self.form.overtimes[i].from, self.form.overtimes[i].to)) {
-          this.myerrors.push('Row ' + (i + 1) + ': OT period should be within punching times')
-          return false
-        }
-
+      
         if (self.form.overtimes[i].from.toLowerCase() == 'invalid date' ||
           self.form.overtimes[i].to.toLowerCase() == 'invalid date') {
           self.form.overtimes[i].from = self.form.overtimes[i].to = ''
           this.myerrors.push('Row ' + (i + 1) + ': Invalid time format. Enter (HH:MM) in 24 hour format ( examples: 09:30, 17:30).')
+          return false
+        }
+
+          if (!this.checkTimeWithinPunchingTime(self.form.overtimes[i].punchin, self.form.overtimes[i].punchout, self.form.overtimes[i].from, self.form.overtimes[i].to)) {
+          this.myerrors.push('Row ' + (i + 1) + ': OT period should be within punching times')
           return false
         }
 
@@ -705,7 +721,7 @@ var vm = new Vue({
 
               if (self.form.overtimes[i].from != "14:00" || self.form.overtimes[i].to != "16:30") {
 
-                this.myerrors.push('Row ' + (i + 1) + ': Parttime employees time should be as per G.O on a sitting day')
+                this.myerrors.push('Row ' + (i + 1) + ': Parttime employees time should be 14:00 to 16:30 as per G.O on a sitting day')
                 return false
 
               }
@@ -753,24 +769,34 @@ var vm = new Vue({
 
         }
 
-        var diffhours = (dateto - datefrom) / 3600000
+        var diffhours = parseFloat( (dateto - datefrom) / 3600000)
 
-        var minothour = 3;
+        let minothour = parseFloat( 3) 
         var daytypedesc = 'holiday';
 
         if (calenderdaysmap[this.form.duty_date].indexOf('oliday') == -1) { //working day or sitting day
           minothour = 2.5;
           daytypedesc = 'sitting/working day'
         }
-
-        // alert (diffhours);
+      //  alert (minothour);
 
         if (diffhours < minothour) {
           this.myerrors.push('Row ' + (i + 1) + ': At least ' + minothour + ' hours needed for OT on a ' + daytypedesc)
           return false
 
         }
-
+       
+        //new validation after adding normal_office_hours
+       
+        if (calenderdaysmap[this.form.duty_date].indexOf('oliday') == -1) { //working day or sitting day
+          console.log(self.form.overtimes[i].normal_office_hours)
+          let othours_needed =  2.5 + self.form.overtimes[i].normal_office_hours
+          if (self.form.overtime_slot == 'First' && diffhours < othours_needed) {
+            this.myerrors.push(`Row  ${i + 1} : At least ${othours_needed} hours needed for First OT on a ${daytypedesc}`)
+            return false
+        }
+          
+        }
 
         //if this is sitting day, do not allow times between 7.30 am and 5.30 pm
 
@@ -800,6 +826,8 @@ var vm = new Vue({
 
               var isoverlap = ((time730am < dateto) && (time530pm > datefrom)) ||
                 (time730am == datefrom || time530pm == dateto);
+
+            
 
               if (isoverlap && diffhours < 9.5) {
                 this.myerrors.push('Row ' + (i + 1) + ': Warning - at least 2.5 hours needed for OT on a working day')
@@ -878,13 +906,14 @@ var vm = new Vue({
     },
 
     update: function () {
+    //  console.log('update 1')
 
       if (this.isProcessing) {
         return;
       }
 
       this.isProcessing = true;
-
+    //  console.log('update 2')
       if (!this.rowsvalid()) {
         this.isProcessing = false;
         return
@@ -1129,8 +1158,8 @@ var vm = new Vue({
 
 
 
-    copytimedownonerow: function () {
-
+    copytimedownonerow () {
+      console.log('copytimedownonerow')
       for (var i = 0; i < this.form.overtimes.length - 1; i++) {
 
         if (this.form.overtimes[i].from != '' && this.form.overtimes[i].to != '' &&

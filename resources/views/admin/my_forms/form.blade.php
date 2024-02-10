@@ -108,14 +108,14 @@
 					<div class="small"> @{{ row.designation }}</div> 
 					</td>
 					<td class="col-md-1">
-					<input  :name="'punchin[' + index + ']'" type="text" v-model="row.punchin" required class="form-control" :disabled="row.punching_id" autocomplete="off">
+					<input  :name="'punchin[' + index + ']'" type="text" v-model="row.punchin" required class="form-control" :disabled="!row.punching" :readonly="row.punching_id" autocomplete="off">
 					<!-- <date-picker v-model="row.from" :config="configtime"
 						:required="true"                
 						class="form-control">
 					</date-picker> --> 
 					</td>
 					<td class="col-md-1">
-					<input  :name="'punchout[' + index + ']'" type="text" v-model="row.punchout" required class="form-control" :disabled="row.punching_id"  autocomplete="off">
+					<input  :name="'punchout[' + index + ']'" type="text" v-model="row.punchout" required class="form-control" :disabled="!row.punching" :readonly="row.punching_id"  autocomplete="off">
 					
 					</td>
 					<td class="col-md-1">

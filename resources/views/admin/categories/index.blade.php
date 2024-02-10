@@ -28,9 +28,7 @@
 
                         <th>@lang('quickadmin.categories.fields.category')</th>
                       
-                        <th>
-                            {{ trans('cruds.category.fields.normal_office_hours') }}
-                        </th>
+                      
                         <th>
                                         {{ trans('cruds.category.fields.punching') }}
                                     </th>
@@ -47,38 +45,36 @@
                             <tr data-entry-id="{{ $category->id }}">
                             <td>
                                             {{ $category->id ?? '' }}
-                                        </td>
+                            </td>
 
-                                <td field-key='category'>{{ $category->category }}</td>
-                                <td>
-                                            {{ $category->normal_office_hours ?? '' }}
-                                        </td>
-                                        <td>
-                                            <span style="display:none">{{ $category->punching ?? '' }}</span>
-                                            <input type="checkbox" disabled="disabled" {{ $category->punching ? 'checked' : '' }}>
-                                        </td>
-                                        <td>
-                                            <!-- @can('category_show')
-                                                <a class="btn btn-xs btn-primary" href="{{ route('admin.categories.show', $category->id) }}">
-                                                    {{ trans('global.view') }}
-                                                </a>
-                                            @endcan -->
+                            <td field-key='category'>{{ $category->category }}</td>
 
-                                            @can('category_edit')
-                                                <a class="btn btn-xs btn-info" href="{{ route('admin.categories.edit', $category->id) }}">
-                                                    {{ trans('global.edit') }}
-                                                </a>
-                                            @endcan
+                            <td>
+                                <span style="display:none">{{ $category->punching ?? '' }}</span>
+                                <input type="checkbox" disabled="disabled" {{ $category->punching ? 'checked' : '' }}>
+                            </td>
+                            <td>
+                                <!-- @can('category_show')
+                                    <a class="btn btn-xs btn-primary" href="{{ route('admin.categories.show', $category->id) }}">
+                                        {{ trans('global.view') }}
+                                    </a>
+                                @endcan -->
 
-                                            <!-- @can('category_delete')
-                                                <form action="{{ route('admin.categories.destroy', $category->id) }}" method="POST" onsubmit="return confirm('{{ trans('global.areYouSure') }}');" style="display: inline-block;">
-                                                    <input type="hidden" name="_method" value="DELETE">
-                                                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                                    <input type="submit" class="btn btn-xs btn-danger" value="{{ trans('global.delete') }}">
-                                                </form>
-                                            @endcan -->
+                                @can('category_edit')
+                                    <a class="btn btn-xs btn-info" href="{{ route('admin.categories.edit', $category->id) }}">
+                                        {{ trans('global.edit') }}
+                                    </a>
+                                @endcan
 
-                                        </td>
+                                <!-- @can('category_delete')
+                                    <form action="{{ route('admin.categories.destroy', $category->id) }}" method="POST" onsubmit="return confirm('{{ trans('global.areYouSure') }}');" style="display: inline-block;">
+                                        <input type="hidden" name="_method" value="DELETE">
+                                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                        <input type="submit" class="btn btn-xs btn-danger" value="{{ trans('global.delete') }}">
+                                    </form>
+                                @endcan -->
+
+                            </td>
 
                             </tr>
                         @endforeach
