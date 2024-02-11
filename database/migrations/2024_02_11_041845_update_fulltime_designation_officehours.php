@@ -14,15 +14,12 @@ return new class extends Migration
     public function up()
     {
         Schema::table('designations', function (Blueprint $table) {
-            $table->integer('normal_office_hours')->default(7)->nullable();
 
+            //14 is for fulltime
+            $category_fulltime = DB::table('categories')->where('category','FullTime Employees')->value('id');
+            $designation_ids =DB::table('employees')->where('categories_id',$category_fulltime)->pluck('designation_id');
+             DB::table('designations')->wherein('id', $designation_ids ) ->update(array( 'normal_office_hours'=> 6));
         });
-
-        DB::table('designations')->where('designation','like','Part Time%')->update(array( 'normal_office_hours'=> 3));
-        
-               
-        
-       
     }
 
     /**

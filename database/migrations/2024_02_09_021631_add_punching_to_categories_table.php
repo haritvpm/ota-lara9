@@ -42,6 +42,9 @@ return new class extends Migration
                 ['category' => 'Relieved/Retired', 'punching' => 0],
             ]);
         }
+       
+
+        
     }
 
     /**

@@ -114,7 +114,7 @@ var vm = new Vue({
     slotoptions: function () {
       if (this.form.duty_date.length == 0) return "";
 
-      if (!ispartimefulltime) {
+      if (!ispartimefulltime && !iswatchnward) {
         switch (calenderdaysmap[this.form.duty_date]) {
           case "Sitting day":
             return ["First", "Second", "Third"];
@@ -128,13 +128,9 @@ var vm = new Vue({
             return ["First", "Second", "Third"];
         }
       } else {
-        switch (calenderdaysmap[this.form.duty_date]) {
-          case "Sitting day":
-            return ["First", "Second"];
-
-          default:
-            return ["First", "Second"];
-        } //switch
+        
+          return ["First", "Second"];
+       
       }
     },
   },
@@ -625,7 +621,7 @@ var vm = new Vue({
       return true;
     },
 
-    checkTimeIsAsPerGOOnSittingDay(overtime_slot, row) {
+    checkTimeIsAsPerGOOnSittingDay(overtime_slot, row,i) {
       if (row.isPartime) {
         //parttime emp
         if (overtime_slot == "First") {
@@ -857,7 +853,7 @@ var vm = new Vue({
         //make sure our times are according to G.O if this is 2nd or 3rd ot on a sitting day
         //note same form can have both part time and full time empl. amspkr office
         if (isSittingDay) {
-          if (!this.checkTimeIsAsPerGOOnSittingDay(overtime_slot, row)) {
+          if (!this.checkTimeIsAsPerGOOnSittingDay(overtime_slot, row,i)) {
             return false;
           }
         }

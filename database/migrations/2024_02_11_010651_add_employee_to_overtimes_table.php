@@ -14,8 +14,10 @@ return new class extends Migration
     public function up()
     {
         Schema::table('overtimes', function (Blueprint $table) {
+            if(!Schema::hasColumn( 'overtimes','employee_id')){
             $table->integer('employee_id')->unsigned()->nullable();
             $table->foreign('employee_id', '8858_89f48fa5ef36')->references('id')->on('employees');
+            }
         });
     }
 
