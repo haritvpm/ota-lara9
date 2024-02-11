@@ -78,7 +78,7 @@ class PresetsController extends Controller
       
       $placeholder = implode(', ', array_fill(0, count($arr), '?')); //this returns like  '?, ?'
       
-      $empl = \App\Employee::with('designation')
+      $empl = \App\Employee::with(['categories','designation'])
                     ->wherein('pen', $arr )
                     ->orderByRaw("FIELD(pen, $placeholder)", $arr )
                    
@@ -86,7 +86,14 @@ class PresetsController extends Controller
       
 
       $combined = $empl->mapWithKeys(function ($emp) {
-           return   [ ($emp->pen . '-' . $emp->name) => $emp->designation['designation']]; 
+           return   [ ($emp->pen . '-' . $emp->name) => 
+           [
+            'desig' => $emp->designation['designation'],
+            'category' =>  $emp?->categories?->category,
+            'employee_id' => $emp?->id,
+            'punching'   => ($emp?->categories?->punching ?? true) && ($emp?->designation?->punching ?? true)
+            ]
+            ]; 
       });
       
       return $combined;

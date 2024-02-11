@@ -1,3 +1,4 @@
+"use strict";
 
 const dateofdutyprefix = 'Date of Duty';
 
@@ -31,7 +32,7 @@ var vm = new Vue({
     form: {},
     errors: {},
     myerrors: [],
-    muloptions: designations,
+   // muloptions: designations,
     pen_names: [],
     pen_names_to_desig: [],
     presets: presets,
@@ -507,12 +508,16 @@ var vm = new Vue({
 
         self.form.overtimes[id].punching = true
         self.form.overtimes[id].normal_office_hours = 0
+        self.form.overtimes[id].category = ""
 
         if (desig !== undefined && desig.desig) {
          
           self.form.overtimes[id].designation = desig.desig
-          self.form.overtimes[id].punching = desig.category_punching && desig.desig_punching
+          self.form.overtimes[id].punching = desig.punching
           self.form.overtimes[id].normal_office_hours = desig.desig_normal_office_hours
+          self.form.overtimes[id].category = desig.category
+          self.form.overtimes[id].employee_id = desig.employee_id
+          
           //self.$forceUpdate()
         }
 
@@ -584,24 +589,26 @@ var vm = new Vue({
 
     },
 
-    checkTimeWithinPunchingTime(punchin, punchout, from, to) {
-
-      var time1 = from.split(":").map(Number);
-      var time2 = to.split(":").map(Number);
+    stringTimeToDate(sTimeWithSemicolonSeperator){
+      var time = sTimeWithSemicolonSeperator.split(":").map(Number);
       //warning: months in JS starts from 0
-      var datefrom = Date.UTC(2000, 1, 1, time1[0], time1[1]);
-      var dateto = Date.UTC(2000, 1, 1, time2[0], time2[1]);
+      return Date.UTC(2000, 1, 1, time[0], time[1]);
+      
+    },
+    checkTimeWithinPunchingTime(row) {
+
+      if(!row.punching) return true;
+
+      const datefrom = this.stringTimeToDate(row.from) 
+      let dateto = this.stringTimeToDate(row.to)
 
       //time after 12 am ?
       if (dateto <= datefrom) {
         dateto += 24 * 3600000;
       }
+      const datepunchin = this.stringTimeToDate(row.punchin)
+      let datepunchout = this.stringTimeToDate(row.punchout)
 
-      var time3 = punchin.split(":").map(Number);
-      var time4 = punchout.split(":").map(Number);
-      //warning: months in JS starts from 0
-      var datepunchin = Date.UTC(2000, 1, 1, time3[0], time3[1]);
-      var datepunchout = Date.UTC(2000, 1, 1, time4[0], time4[1]);
       if (datepunchout <= datepunchin) {
         datepunchout += 24 * 3600000;
       }
@@ -613,52 +620,108 @@ var vm = new Vue({
       return true;
     },
 
-    rowsvalid() {
+    checkTimeIsAsPerGOOnSittingDay(overtime_slot, row) {
 
+      if (row.isPartime) {
+        //parttime emp
+        if (overtime_slot == 'First') {
+        }
+        else
+        if (overtime_slot == 'Second') {
+          //no need to strict time. let them decide for themselves.
+         /* if (row.from != "14:00" || row.to != "16:30") {
+
+            this.myerrors.push('Row ' + (i + 1) + ': Parttime employees time should be 14:00 to 16:30 on a sitting day')
+            return false
+          }*/
+
+        }
+        else {
+         
+        }
+
+      }
+      else 
+      if( row.isFulltime){
+        
+       // if (overtime_slot !== 'First') {
+      //    this.myerrors.push('Row ' + (i + 1) + ': FullTime employees cannot have Second/third OT')
+       //   return false
+      //  }
+      }
+      else 
+      if( row.isWatchnward){
+        
+      }
+      else //all other employees for sitting days
+      {
+
+        //no need to enforce ending time. have doubts regarding mla hostel. 
+        //need to check night shifts
+
+        if (
+          (overtime_slot == 'First' && (row.from != "08:00" || row.to != "17:30"))
+          ||
+          (overtime_slot == 'Second' && (row.from != "17:30" /*|| row.to != "20:00" */))
+          ||
+          (overtime_slot == 'Third' && (row.from != "20:00"))) {
+                    
+          return false
+        }
+
+      }
+      return true;
+    },
+
+    checkIfOTOverlapsWithOfficeHours(overtime_slot, datefrom, dateto, sNormalStart, sNormalEnd){
+
+      if (overtime_slot === 'First') return true;
+
+      var officeTimeStart = sNormalStart.split(":").map(Number); //
+      var officeTimeEnd = sNormalEnd.split(":").map(Number);
+    
+      var time730am = Date.UTC(2000, 1, 1, officeTimeStart[0], officeTimeStart[1]);
+      var time530pm = Date.UTC(2000, 1, 1, officeTimeEnd[0], officeTimeEnd[1]); 
+
+      var isoverlap = ((time730am < dateto) && (time530pm > datefrom)) ||
+        (time730am == datefrom || time530pm == dateto);
+
+      if (isoverlap) {
+       
+        return false
+      }
+             
+
+      return true
+    },
+    rowsvalid() {
 
       this.myerrors = [];
 
-
       var self = this
 
-
-
       if (self.form.session == '' || self.form.duty_date == '' || self.form.overtime_slot == '') {
-        //this.myerrors.push( 'Please select session/date/OT slot' )
         this.$swal('Error', 'Please select session/date/OT', 'error')
-
         return false
       }
 
-
-
       //check if date belongs to the session
-
       if (-1 == calenderdays2[self.form.session].indexOf(self.form.duty_date)) {
         this.$swal('Error', 'The duty date is not a calender date for the session: ' + self.form.session, 'error')
         return false
       }
 
-
       for (var i = 0; i < self.form.overtimes.length; i++) {
-
         var row = self.form.overtimes[i];
         if (row.pen == '' || row.designation == '' ||
-          row.from == '' || row.to == '' ||
-          row.from == null || row.to == null
-          //||row.worknature == null || row.worknature == ''
-
-        ) {
-
+          row.from == '' || row.to == '' || row.from == null || row.to == null) {
           this.$swal('Row: ' + (i + 1), "Fill all the fields in every row", 'error')
           return false
         }
 
         if(self.form.overtimes[i].punching){
           if ( row.punching && (row.punchin == null || row.punchin == ''
-            || row.punchout == null || row.punchout == ''
-          )) {
-
+            || row.punchout == null || row.punchout == '' )) {
             this.$swal('Row: ' + (i + 1), "Fill punch in/out time for every row", 'error')
             return false
           }
@@ -666,120 +729,81 @@ var vm = new Vue({
 
       }
 
-
-
-
       if (self.form.overtime_slot == 'Additional') {
         if (self.form.overtimes.some(row => row.designation != 'Deputy Secretary' &&
-          row.designation != 'Joint Secretary' &&
-          row.designation != 'Additional Secretary' &&
-          row.designation != 'Special Secretary'
-        )) {
-
+          row.designation != 'Joint Secretary' &&  row.designation != 'Additional Secretary' &&
+          row.designation != 'Special Secretary'  )) {
           this.$swal('Error', "Only DS or above can have Additional OT!", 'error')
           return false
         }
       }
 
+      const isSittingDay = calenderdaysmap[this.form.duty_date] == 'Sitting day'
+      const isSittingOrWorkingDay = calenderdaysmap[this.form.duty_date].indexOf('oliday') == -1
+      const isWorkingDay = calenderdaysmap[this.form.duty_date].indexOf('orking') != -1
+      const isHoliDay = calenderdaysmap[this.form.duty_date].indexOf('oliday') != -1
+      const overtime_slot = self.form.overtime_slot
+     
+      let minothour = parseFloat(3) 
+      var daytypedesc = 'holiday';
+      if (isSittingOrWorkingDay) {
+        minothour = 2.5;
+        daytypedesc = 'working day'
+        if(isSittingDay){
+          daytypedesc = 'sitting day'
+        }
+      }
 
       //check time diff
       for (var i = 0; i < self.form.overtimes.length; i++) {
 
-        if(self.form.overtimes[i].punching){
-        self.form.overtimes[i].punchin = validateHhMm(self.form.overtimes[i].punchin.trim());
-        self.form.overtimes[i].punchout = validateHhMm(self.form.overtimes[i].punchout.trim());
+        var row = self.form.overtimes[i];
+       console.log(row)
+        row.isPartime = row.designation.toLowerCase().indexOf("part time") != -1;
+        row.isFulltime = row.category.toLowerCase().indexOf("FullTime") != -1;
+        row.isWatchnward = row.category.toLowerCase().indexOf("Watch") != -1;
+    
+        if(row.punching){
+          row.punchin = validateHhMm(row.punchin.trim());
+          row.punchout = validateHhMm(row.punchout.trim());
         }
 
-        self.form.overtimes[i].from = self.form.overtimes[i].from.trim();
-        self.form.overtimes[i].to = self.form.overtimes[i].to.trim();
-
-        self.form.overtimes[i].from = validateHhMm(self.form.overtimes[i].from)
-        self.form.overtimes[i].to = validateHhMm(self.form.overtimes[i].to)
+        row.from = validateHhMm(row.from.trim())
+        row.to = validateHhMm(row.to.trim())
 
       
-        if (self.form.overtimes[i].from.toLowerCase() == 'invalid date' ||
-          self.form.overtimes[i].to.toLowerCase() == 'invalid date') {
-          self.form.overtimes[i].from = self.form.overtimes[i].to = ''
+        if (row.from.toLowerCase() == 'invalid date' || row.to.toLowerCase() == 'invalid date') {
+          row.from = row.to = ''
           this.myerrors.push('Row ' + (i + 1) + ': Invalid time format. Enter (HH:MM) in 24 hour format ( examples: 09:30, 17:30).')
           return false
         }
 
-          if (!this.checkTimeWithinPunchingTime(self.form.overtimes[i].punchin, self.form.overtimes[i].punchout, self.form.overtimes[i].from, self.form.overtimes[i].to)) {
+        if (!this.checkTimeWithinPunchingTime(row)) {
           this.myerrors.push('Row ' + (i + 1) + ': OT period should be within punching times')
           return false
         }
 
         //make sure our times are according to G.O if this is 2nd or 3rd ot on a sitting day
         //note same form can have both part time and full time empl. amspkr office
-        if (!iswatchnward &&
-          calenderdaysmap[this.form.duty_date] == 'Sitting day') {
-
-          if (self.form.overtimes[i].designation.toLowerCase().indexOf("part time") != -1) {
-            //parttime emp
-
-            if (self.form.overtime_slot == 'Second') {
-
-              if (self.form.overtimes[i].from != "14:00" || self.form.overtimes[i].to != "16:30") {
-
-                this.myerrors.push('Row ' + (i + 1) + ': Parttime employees time should be 14:00 to 16:30 as per G.O on a sitting day')
-                return false
-
-              }
-            } else {
-              this.myerrors.push('Row ' + (i + 1) + ': Parttime employees cannot have third OT on a sitting day')
-              return false
-            }
-
-          }
-          else //all other employees and full time for sitting days
-          {
-
-            //no need to enforce ending time. have doubts regarding mla hostel. 
-            //need to check night shifts
-
-            if (
-              (!ispartimefulltime && self.form.overtime_slot == 'First' && (self.form.overtimes[i].from != "08:00" || self.form.overtimes[i].to != "17:30"))
-              ||
-              (self.form.overtime_slot == 'Second' && (self.form.overtimes[i].from != "17:30" /*|| self.form.overtimes[i].to != "20:00" */))
-              ||
-              (self.form.overtime_slot == 'Third' && (self.form.overtimes[i].from != "20:00"))) {
-              //console.log(self.form.overtimes[i].from)
-              this.myerrors.push('Row ' + (i + 1) + ': Time should be as per G.O on a sitting day')
-              return false
-
-            }
-
-
+        if (isSittingDay) {
+          if (!this.checkTimeIsAsPerGOOnSittingDay(overtime_slot, row)) {
+            this.myerrors.push('Row ' + (i + 1) + ': Time should be as per G.O on a sitting day')
+            return false
           }
 
         }
 
 
 
-        //date.parse returns number of milliseconds elapsed since 1970
-        var time1 = self.form.overtimes[i].from.split(":").map(Number);
-        var time2 = self.form.overtimes[i].to.split(":").map(Number);
-
-        //warning: months in JS starts from 0
-        var datefrom = Date.UTC(2000, 1, 1, time1[0], time1[1]);
-        var dateto = Date.UTC(2000, 1, 1, time2[0], time2[1]);
+        const datefrom = this.stringTimeToDate(row.from) 
+        let dateto = this.stringTimeToDate(row.to)
 
         if (dateto <= datefrom) {
           dateto += 24 * 3600000;
-
         }
 
         var diffhours = parseFloat( (dateto - datefrom) / 3600000)
-
-        let minothour = parseFloat( 3) 
-        var daytypedesc = 'holiday';
-
-        if (calenderdaysmap[this.form.duty_date].indexOf('oliday') == -1) { //working day or sitting day
-          minothour = 2.5;
-          daytypedesc = 'sitting/working day'
-        }
-      //  alert (minothour);
-
+      
         if (diffhours < minothour) {
           this.myerrors.push('Row ' + (i + 1) + ': At least ' + minothour + ' hours needed for OT on a ' + daytypedesc)
           return false
@@ -788,55 +812,60 @@ var vm = new Vue({
        
         //new validation after adding normal_office_hours
        
-        if (calenderdaysmap[this.form.duty_date].indexOf('oliday') == -1) { //working day or sitting day
-          console.log(self.form.overtimes[i].normal_office_hours)
-          let othours_needed =  2.5 + self.form.overtimes[i].normal_office_hours
-          if (self.form.overtime_slot == 'First' && diffhours < othours_needed) {
+        if (isSittingOrWorkingDay) { 
+          let othours_needed =  2.5 + row.normal_office_hours
+          if (overtime_slot == 'First' && diffhours < othours_needed) {
             this.myerrors.push(`Row  ${i + 1} : At least ${othours_needed} hours needed for First OT on a ${daytypedesc}`)
             return false
+          }
         }
-          
+
+        //partime emp cannot have 3rd OT on sitting and 2nd or 3rd ot on working days
+        if( row.isPartime){
+          if(isSittingDay){
+            if (overtime_slot === 'Third') {
+              this.myerrors.push('Row ' + (i + 1) + ': Parttime employees cannot have third OT on sitting day')
+              return false
+            }
+          }
+          else
+          if (isWorkingDay) { 
+              if (overtime_slot !== 'First') {
+                this.myerrors.push('Row ' + (i + 1) + ': Parttime employees cannot have second/third OT on working day')
+                return false
+              }
+          } 
         }
+
+        //fulltime emp cannot have 2nd or 3rd OT on sitting/working days
+        if( row.isFulltime){
+          if (isSittingOrWorkingDay) {
+              if (overtime_slot !== 'First') {
+                this.myerrors.push('Row ' + (i + 1) + ': FullTime employees cannot have second/third OT on working/sitting day')
+                return false
+              }
+          }
+        }
+
 
         //if this is sitting day, do not allow times between 7.30 am and 5.30 pm
 
-        if (!ispartimefulltime && !iswatchnward && !isspeakeroffice) {
-          if (calenderdaysmap[this.form.duty_date] == 'Sitting day') {
+        if (!row.isPartime && !row.isFulltime && !row.isWatchnward && !isspeakeroffice) {
+          if (isSittingDay || isWorkingDay) {
+            if (overtime_slot !== 'First'){
+              let sNormalStart = "10:15"
+              let sNormalEnd = "17:15"
+              if(isSittingDay) {
+                sNormalStart = "08:00"
+                sNormalEnd = "17:30"
+              }
 
-            if (self.form.overtime_slot !== 'First') {
-              var time730am = Date.UTC(2000, 1, 1, '08', '00');
-              var time530pm = Date.UTC(2000, 1, 1, '10', '30'); //skip possible fulltimes
-
-              var isoverlap = ((time730am < dateto) && (time530pm > datefrom)) ||
-                (time730am == datefrom || time530pm == dateto);
-
-              if (isoverlap) {
-                this.myerrors.push('Row ' + (i + 1) + ': OT cannot be between 8:00 am and 10:30 am on a Sitting day')
+              if(!this.checkIfOTOverlapsWithOfficeHours(overtime_slot, datefrom, dateto, sNormalStart, sNormalEnd)){
+                this.myerrors.push(`Row ${i + 1} : OT cannot be between ${sNormalStart} and ${sNormalEnd} am on a ${daytypedesc}`)
                 return false
               }
             }
-
           }
-          else
-            if (calenderdaysmap[this.form.duty_date].indexOf('oliday') == -1) //workingday
-            {
-              //working day.
-              var time730am = Date.UTC(2000, 1, 1, '10', '15');
-              var time530pm = Date.UTC(2000, 1, 1, '17', '15');
-
-              var isoverlap = ((time730am < dateto) && (time530pm > datefrom)) ||
-                (time730am == datefrom || time530pm == dateto);
-
-            
-
-              if (isoverlap && diffhours < 9.5) {
-                this.myerrors.push('Row ' + (i + 1) + ': Warning - at least 2.5 hours needed for OT on a working day')
-                return false
-              }
-            }
-
-
-
         }
 
       }
@@ -1142,11 +1171,13 @@ var vm = new Vue({
           if (!entryfound) {
             self.form.overtimes.push({
               pen: key,
-              designation: obj[key],
+              designation: obj[key].desig,
               from: timefrom,
               to: timeto,
               worknature: worknature,
-
+              category: obj[key].category,
+              employee_id : obj[key].employee_id,
+              punching: obj[key].punching,
             });
           }
 

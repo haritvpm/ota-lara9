@@ -105,7 +105,7 @@
 					</td> -->
 					<td>
 						
-					<div class="small"> @{{ row.designation }}</div> 
+					<div class="small"> @{{ row.designation }}, @{{ row.category }},  @{{ row.punching }} </div> 
 					</td>
 					<td class="col-md-1">
 					<input  :name="'punchin[' + index + ']'" type="text" v-model="row.punchin" required class="form-control" :disabled="!row.punching" :readonly="row.punching_id" autocomplete="off">

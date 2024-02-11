@@ -21,7 +21,7 @@ class Overtime extends Model
     protected $fillable = ['pen', 'designation', 'from', 'to', 'count', 'worknature', 'form_id','rate', 'name',
     
     'punching', //whether punching is applicable to this employee
-    'punchin', 'punchout', 'punching_id'];
+    'punchin', 'punchout', 'punching_id', 'employee_id'];
     
 
     /**
@@ -49,7 +49,13 @@ class Overtime extends Model
                
 
     }
+    public function employee($sortby=null)
+    {
+        
+        return $this->belongsTo(Employee::class, 'employee_id');
+               
 
+    }
     public function getPENNameAttribute()
     {
         if($this->name){

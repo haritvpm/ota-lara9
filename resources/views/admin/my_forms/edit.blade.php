@@ -98,7 +98,7 @@
     var urlajaxgetpunchtimes = "{{url('admin/punchings/ajaxgetpunchtimes')}}"
         
     var calenderdaysmap = {!! $data['calenderdaysmap'] !!};
-    var designations = {!! $data['designations'] !!};
+    // var designations = {! $data['designations'] !};
     Vue.component('Multiselect', VueMultiselect.default);
     // Vue.component('flat-pickr', VueFlatpickr.default);
     

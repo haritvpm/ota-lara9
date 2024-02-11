@@ -427,11 +427,10 @@ class MyFormsController extends Controller
             $ispartimefulltime = 1;            
         }
 
-        $designations = \App\Designation::orderby('designation','asc')
-                    ->get(['designation'])->pluck('designation');
+       // $designations = \App\Designation::orderby('designation','asc')->get(['designation'])->pluck('designation');
 
         $data["calenderdaysmap"] = json_encode($calenderdaysmap);
-        $data["designations"] = json_encode($designations);
+      //  $data["designations"] = json_encode($designations); //we no longer allow user to set deisg, it is auto selected
         $data["calenderdays2"] = json_encode($calenderdays2);
 
 
@@ -450,16 +449,21 @@ class MyFormsController extends Controller
         $autoloadpens = null;
 
         if($id_to_copy != null){
-            $formtocopy = Form::with(['created_by','overtimes'])->findOrFail($id_to_copy);
+            $formtocopy = Form::with(['created_by','overtimes','overtimes.employee.categories'])->findOrFail($id_to_copy);
             
             $autoloadpens = $formtocopy->overtimes()->get();
             
             $autoloadpens = $autoloadpens->mapWithKeys(function ($item) {
-                if($item['name'] == null)
-                    return [$item['pen'] => $item['designation']];
-                else {
-                    return [$item['pen'] .'-' . $item['name'] =>  $item['designation']];
-                }
+               
+                return [$item['pen'] .'-' . $item['name'] => 
+                [
+                    'desig' => $item['designation'],
+                    'category' =>  $item?->employee?->categories?->category,
+                    'employee_id' => $item?->employee?->id,
+                    'punching'   => ($item?->employee?->categories?->punching ?? true) && ($item?->employee?->designation?->punching ?? true),
+                ]
+            ];
+                
             });
             
         }
@@ -481,7 +485,7 @@ class MyFormsController extends Controller
         if(!$issitting){
             if($id)
             {
-                $form = Form::with(['created_by','overtimes'])->findOrFail($id);
+                $form = Form::with(['created_by','overtimes','overtimes.employee.categories'])->findOrFail($id);
 
                 $form->overtimes->transform(function ($item) use ($form) {
                     if($item['name'] != null){
@@ -489,6 +493,7 @@ class MyFormsController extends Controller
                        // $item['allowpunch_edit'] = $item['punching_id'] == null; //otherwise it will be disabled on edit
 
                     }
+                    $item['category'] = $item?->employee?->categories?->category;
                     return $item;
                                    
                 });
@@ -743,6 +748,7 @@ class MyFormsController extends Controller
                     'punchin'       => $overtime['punchin'],
                     'punchout'       => $overtime['punchout'],
                     'punching_id'    => $overtime['punching_id'] ?? null,
+                    'employee_id' => $overtime['employee_id'],
                     ]);
 
             }

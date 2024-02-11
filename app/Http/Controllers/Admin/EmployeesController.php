@@ -221,8 +221,11 @@ class EmployeesController extends Controller
                 [
                     'desig' =>  $item->designation->designation,
                     'desig_normal_office_hours' =>  $item->designation->normal_office_hours,
-                    'desig_punching' =>  $item->designation->punching,
-                    'category_punching' =>  $item->categories->punching,
+                  //  'desig_punching' =>  $item->designation->punching,
+                  //  'category_punching' => $item->categories->punching,
+                    'punching' =>   $item?->categories?->punching && $item->designation->punching,
+                    'category' =>  $item?->categories?->category,
+                    'employee_id' =>  $item->id,
 
                 ]
             ];

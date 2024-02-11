@@ -16,6 +16,5 @@ class Category extends Model
     //'normal_office_hours',
     'punching',];
     
-    
-    
+        
 }
