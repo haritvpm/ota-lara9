@@ -105,7 +105,8 @@
 					</td> -->
 					<td>
 						
-					<div class="small"> @{{ row.designation }}, @{{ row.category }},  @{{ row.punching }} </div> 
+					<!-- <div class="small"> @{{ row.designation }} </div>  -->
+					<div class="small"> @{{ row.designation }}, @{{ row.category }},  @{{ row.punching }}, @{{row.normal_office_hours}} </div> 
 					</td>
 					<td class="col-md-1">
 					<input  :name="'punchin[' + index + ']'" type="text" v-model="row.punchin" required class="form-control" :disabled="!row.punching" :readonly="row.punching_id" autocomplete="off">
@@ -131,7 +132,7 @@
 					
 					
 					
-					<td style="width:1px;"><button class="btn btn-danger"  @click.prevent="removeElement(index);"   data-toggle="tooltip" title="remove row"><i class="fa fa-times"></i></button>
+					<td style="width:1px;"><button class="btn btn-danger"  @click.prevent="removeElement(index);" ><i class="fa fa-times"></i></button>
 					
 
 					</td>

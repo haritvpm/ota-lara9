@@ -91,7 +91,8 @@ class PresetsController extends Controller
             'desig' => $emp->designation['designation'],
             'category' =>  $emp?->categories?->category,
             'employee_id' => $emp?->id,
-            'punching'   => ($emp?->categories?->punching ?? true) && ($emp?->designation?->punching ?? true)
+            'punching'   => ($emp?->categories?->punching ?? true) && ($emp?->designation?->punching ?? true),
+            'normal_office_hours'=> $emp?->designation->normal_office_hours,
             ]
             ]; 
       });

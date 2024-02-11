@@ -449,7 +449,7 @@ class MyFormsController extends Controller
         $autoloadpens = null;
 
         if($id_to_copy != null){
-            $formtocopy = Form::with(['created_by','overtimes','overtimes.employee.categories'])->findOrFail($id_to_copy);
+            $formtocopy = Form::with(['created_by','overtimes','overtimes.employee.categories','overtimes.employee.designation'])->findOrFail($id_to_copy);
             
             $autoloadpens = $formtocopy->overtimes()->get();
             
@@ -461,6 +461,7 @@ class MyFormsController extends Controller
                     'category' =>  $item?->employee?->categories?->category,
                     'employee_id' => $item?->employee?->id,
                     'punching'   => ($item?->employee?->categories?->punching ?? true) && ($item?->employee?->designation?->punching ?? true),
+                    'normal_office_hours' =>   $item?->employee?->designation?->normal_office_hours,
                 ]
             ];
                 
@@ -485,7 +486,7 @@ class MyFormsController extends Controller
         if(!$issitting){
             if($id)
             {
-                $form = Form::with(['created_by','overtimes','overtimes.employee.categories'])->findOrFail($id);
+                $form = Form::with(['created_by','overtimes','overtimes.employee.categories','overtimes.employee.designation'])->findOrFail($id);
 
                 $form->overtimes->transform(function ($item) use ($form) {
                     if($item['name'] != null){
@@ -494,6 +495,8 @@ class MyFormsController extends Controller
 
                     }
                     $item['category'] = $item?->employee?->categories?->category;
+                    $item['normal_office_hours'] = $item?->employee?->designation?->normal_office_hours;
+                    
                     return $item;
                                    
                 });
