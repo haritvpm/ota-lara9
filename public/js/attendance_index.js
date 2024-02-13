@@ -1,1 +1,152 @@
-new Vue({el:"#app",data:{empname:"",emppen:"",sitting_date:moment(new Date,"DD MM YYYY").format("DD-MM-YYYY"),sitting_date_display:"",list:[],myerrors:[],mysuccess:[]},mounted:function(){this.datechange()},watch:{emppen:function(){this.empname="",this.list=[],this.myerrors=[],this.mysuccess=[],this.emppen.length>=3&&this.asyncFind()}},computed:{configdate:function(){return{format:"DD-MM-YYYY",useCurrent:!0,showTodayButton:!0,maxDate:new Date,enabledDates:Object.keys(calenderdaysmap).map((function(e){return moment(e,"DD-MM-YYYY").format("YYYY-MM-DD")}))}}},methods:{asyncFind:_.debounce((function(){this.empname="Searching...",this.mydelayedsearch(this.emppen.trim())}),300),mydelayedsearch:function(e){var t=this;if(t.list=[],this.myerrors=[],this.mysuccess=[],calenderdaysmap.hasOwnProperty(this.sitting_date)){if(e.length>=3){t.empname="Searching...";var a=t.emppen+"|"+moment(t.sitting_date,"DD MM YYYY").format("DD-MM-YYYY");axios.get(urlajaxpen+"/"+a).then((function(e){if(e.data.pen_names.length)for(var a=0;a<e.data.pen_names.length;a++)t.list.push({name:e.data.pen_names[a],desig:e.data.pen_names_to_desig[e.data.pen_names[a]],absent:e.data.pen_names_to_absent[e.data.pen_names[a]]});else t.myerrors.push(t.emppen+" not found")})).catch((function(e){t.myerrors.push(t.emppen+" not found")}))}}else this.myerrors.push("Please select a sitting day")},datechange:function(){calenderdaysmap.hasOwnProperty(this.sitting_date)?0!=moment().diff(moment(this.sitting_date,"DD MM YYYY"),"days")?this.sitting_date_display=moment(this.sitting_date,"DD MM YYYY").fromNow()+" (session: "+calenderdaysmap[this.sitting_date]+")":this.sitting_date_display="Today (session: "+calenderdaysmap[this.sitting_date]+")":this.sitting_date_display="Not a sitting day",this.emppen="",this.myerrors=[],this.mysuccess=[]},mark:function(e){var t=this;this.myerrors=[],this.mysuccess=[];var a=t.list[e].name+"|"+moment(t.sitting_date,"DD MM YYYY").format("DD-MM-YYYY");axios.get(urlajaxpenupdate+"/"+a).then((function(a){a.data?a.data.res?(a.data.absent?t.myerrors.push(t.list[e].name+" marked as absent/late"):t.mysuccess.push(t.list[e].name+" marked as present"),t.list=[],t.list.push({name:a.data.name,desig:a.data.desig,absent:a.data.absent})):t.myerrors.push(t.list[e].name+" unable to change attendance"):t.emppen=""})).catch((function(e){}))}}});
+/******/ (() => { // webpackBootstrap
+var __webpack_exports__ = {};
+/*!*************************************************!*\
+  !*** ./resources/assets/js/attendance_index.js ***!
+  \*************************************************/
+var vm = new Vue({
+  el: '#app',
+  data: {
+    empname: '',
+    emppen: '',
+    sitting_date: moment(new Date(), "DD MM YYYY").format("DD-MM-YYYY"),
+    sitting_date_display: '',
+    list: [],
+    myerrors: [],
+    mysuccess: []
+  },
+  mounted: function mounted() {
+    this.datechange();
+  },
+  watch: {
+    emppen: function emppen() {
+      this.empname = '';
+      this.list = [];
+      this.myerrors = [];
+      this.mysuccess = [];
+      if (this.emppen.length >= 3) {
+        this.asyncFind();
+      }
+    }
+    // sitting_date: function() {
+
+    //   //  this.sitting_date_display = moment(this.sitting_date,"DD MM YYYY").format("DD-MM-YYYY");
+
+    // },
+  },
+
+  computed: {
+    configdate: function configdate() {
+      var self = this;
+      return {
+        //dateFormat: 'd-m-Y',
+        //enable: calenderdays2[self.form.session]
+
+        //
+        format: 'DD-MM-YYYY',
+        useCurrent: true,
+        showTodayButton: true,
+        maxDate: new Date(),
+        //we have to convert the keys (dates) in calenderdaysmap to YYYY-MM-DD format
+        enabledDates: Object.keys(calenderdaysmap).map(function (x) {
+          return moment(x, "DD-MM-YYYY").format('YYYY-MM-DD');
+        })
+      };
+    }
+  },
+  // define methods under the `methods` object
+  methods: {
+    asyncFind: _.debounce(function () {
+      var app = this;
+
+      //  this.isLoading = true
+      // Make a request for a user with a given ID
+      app.empname = 'Searching...';
+      this.mydelayedsearch(app.emppen.trim());
+    }, 300),
+    mydelayedsearch: function mydelayedsearch(query) {
+      var app = this;
+      app.list = [];
+      this.myerrors = [];
+      this.mysuccess = [];
+      if (!calenderdaysmap.hasOwnProperty(this.sitting_date)) {
+        this.myerrors.push('Please select a sitting day');
+        return;
+      }
+      if (query.length >= 3) {
+        app.empname = 'Searching...';
+        var sendobj = app.emppen + '|' + moment(app.sitting_date, "DD MM YYYY").format("DD-MM-YYYY");
+        axios.get(urlajaxpen + '/' + sendobj).then(function (response) {
+          if (response.data.pen_names.length) {
+            for (var i = 0; i < response.data.pen_names.length; i++) {
+              app.list.push({
+                'name': response.data.pen_names[i],
+                'desig': response.data.pen_names_to_desig[response.data.pen_names[i]],
+                'absent': response.data.pen_names_to_absent[response.data.pen_names[i]]
+              });
+            }
+
+            //app.designations = response.data.designations;
+            //alert (JSON.stringify(app.list)) 
+            // alert (JSON.stringify(response.data.pen_names_to_absent)) 
+          } else {
+            //app.empname = 'not found'
+            app.myerrors.push(app.emppen + ' not found');
+          }
+        })["catch"](function (response) {
+          //alert (JSON.stringify(response.data))    // alerts {"myProp":"Hello"};
+          //app.empname = 'unknown'
+          app.myerrors.push(app.emppen + ' not found');
+        });
+      }
+    },
+    datechange: function datechange() {
+      // alert(this.sitting_date);
+      if (calenderdaysmap.hasOwnProperty(this.sitting_date)) {
+        if (moment().diff(moment(this.sitting_date, "DD MM YYYY"), "days") != 0)
+          //prevent diff if today
+          {
+            this.sitting_date_display = moment(this.sitting_date, "DD MM YYYY").fromNow() + " (session: " + calenderdaysmap[this.sitting_date] + ")";
+          } else {
+          this.sitting_date_display = "Today (session: " + calenderdaysmap[this.sitting_date] + ")";
+        }
+      } else {
+        this.sitting_date_display = 'Not a sitting day';
+      }
+      this.emppen = '';
+      this.myerrors = [];
+      this.mysuccess = [];
+    },
+    mark: function mark(index) {
+      var app = this;
+      this.myerrors = [];
+      this.mysuccess = [];
+      var sendobj = app.list[index].name + '|' + moment(app.sitting_date, "DD MM YYYY").format("DD-MM-YYYY");
+      axios.get(urlajaxpenupdate + '/' + sendobj).then(function (response) {
+        if (response.data) {
+          if (response.data.res) {
+            if (response.data.absent) {
+              app.myerrors.push(app.list[index].name + ' marked as absent/late');
+            } else {
+              app.mysuccess.push(app.list[index].name + ' marked as present');
+            }
+            app.list = [];
+            app.list.push({
+              'name': response.data.name,
+              'desig': response.data.desig,
+              'absent': response.data.absent
+            });
+          } else {
+            app.myerrors.push(app.list[index].name + ' unable to change attendance');
+          }
+        } else {
+          //alert('fail');
+          app.emppen = '';
+        }
+      })["catch"](function (response) {
+        //alert (JSON.stringify(response.data))    
+      });
+    } //mark
+  }
+});
+/******/ })()
+;

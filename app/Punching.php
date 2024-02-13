@@ -31,7 +31,7 @@ class Punching extends Model
         'created_at',
         'updated_at',
         'deleted_at',
-        'session',
+        'aadhaarid',
         'creator',
        
        // 'allowpunch_edit',
@@ -52,7 +52,8 @@ class Punching extends Model
      * Set attribute to date format
      * @param $input
      */
-    public function setDateAttribute($input)
+    /*
+     public function setDateAttribute($input)
     {
         if ($input != null && $input != '') {
             $this->attributes['date'] = Carbon::createFromFormat(config('app.date_format'), $input)->format('Y-m-d');
@@ -60,16 +61,15 @@ class Punching extends Model
             $this->attributes['date'] = null;
         }
     }
-    // public function getDateAttribute($value)
-    // {
-    //     return $value ? Carbon::parse($value)->format(config('panel.date_format')) : null;
-    // }
+   */
+
     /**
      * Get attribute from date format
      * @param $input
      *
      * @return string
      */
+    /*
     public function getDateAttribute($input)
     {
         $zeroDate = str_replace(['Y', 'm', 'd'], ['0000', '00', '00'], config('app.date_format'));
@@ -79,7 +79,7 @@ class Punching extends Model
         } else {
             return '';
         }
-    }
+    }*/
 
    
 }

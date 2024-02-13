@@ -17,11 +17,11 @@ return new class extends Migration
             Schema::create('punchings', function (Blueprint $table) {
                 $table->increments('id');
                 $table->date('date');
-                $table->string('punch_in');
-                $table->string('punch_out');
+                $table->string('punch_in')->nullable();
+                $table->string('punch_out')->nullable();
                 $table->string('pen'); //duplication, just for query
                 $table->string('creator')->nullable();
-                $table->string('session')->nullable();
+            //    $table->string('session')->nullable();
                 $table->unique(['date', 'pen']);
                 $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
                 $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP'));

@@ -1,1 +1,386 @@
-(()=>{var e;function r(e){return r="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol&&e!==Symbol.prototype?"symbol":typeof e},r(e)}function t(e,t,o){return(t=function(e){var t=function(e,t){if("object"!==r(e)||null===e)return e;var o=e[Symbol.toPrimitive];if(void 0!==o){var s=o.call(e,t||"default");if("object"!==r(s))return s;throw new TypeError("@@toPrimitive must return a primitive value.")}return("string"===t?String:Number)(e)}(e,"string");return"symbol"===r(t)?t:String(t)}(t))in e?Object.defineProperty(e,t,{value:o,enumerable:!0,configurable:!0,writable:!0}):e[t]=o,e}new Vue({el:"#app",data:{isProcessing:!1,form:{},errors:{},myerrors:[],muloptions:designations,pen_names:[],pen_names_to_desig:[],presets,calenderdays2},created:function(){Vue.set(this.$data,"form",_form),this.sessionchanged(),""!=this.form.session&&this.form.overtimes.length},mounted:function(){},computed:{configdate:function(){return{format:"DD-MM-YYYY",useCurrent:!1,enabledDates:Object.keys(calenderdaysmap).map((function(e){return moment(e,"DD-MM-YYYY").format("YYYY-MM-DD")}))}},isActive:function(){}},watch:{},methods:(e={sessionchanged:function(){null!=calenderdays2[this.form.session]?(this.form.date_from=calenderdays2[this.form.session][0],this.form.date_to=calenderdays2[this.form.session][calenderdays2[this.form.session].length-1]):(this.form.date_from="",this.form.date_to="")},onChange:function(){this.myerrors=[]},addRow:function(){var e=this;this.rowsvalid()&&(e.form.overtimes.push({pen:"",designation:"",from:e.form.date_from,to:e.form.date_to,count:"",worknature:""}),this.pen_names=[],this.pen_names_to_desig=[],this.$nextTick((function(){e.$refs["field-"+(e.form.overtimes.length-1)][0].$el.focus()})))},removeElement:function(e){(""==this.form.overtimes[e].pen||confirm("Remove this row?"))&&(this.form.overtimes.splice(e,1),this.myerrors=[])},limitText:function(e){return"and ".concat(e," more")},asyncFind:_.debounce((function(e){this.mydelayedsearch(e),this.myerrors=[]}),500),mydelayedsearch:function(e){var r=this;e.length>=3&&axios.get(urlajaxpen+"/"+e).then((function(e){r.pen_names=e.data.pen_names,r.pen_names_to_desig=e.data.pen_names_to_desig})).catch((function(e){}))},clearAll:function(){this.pen_names=[],this.pen_names_to_desig=[]}},t(e,"limitText",(function(e){return"and ".concat(e," other countries")})),t(e,"changeSelect",(function(e){this.myerrors=[];var r=this;r.$nextTick((function(){for(var t=r.form.overtimes.length-1;t>=0;t--)if(r.form.overtimes[t].pen==e){var o=r.pen_names_to_desig[e];void 0!==o&&(r.form.overtimes[t].designation=o);break}}))})),t(e,"checkDuplicates",(function(){for(var e=this,r={},t=0;t<e.form.overtimes.length;t++){if(null!=r[e.form.overtimes[t].pen])return this.myerrors.push("Duplicate name found: "+e.form.overtimes[t].pen),!1;r[e.form.overtimes[t].pen]=!0}return!0})),t(e,"rowsvalid",(function(){this.myerrors=[];var e=this;if(""==e.form.session||""==e.form.date_from||""==e.form.date_to)return this.$swal("Oops","Please select session/dates!","error"),!1;if(null==calenderdays2[e.form.session])return this.$swal("Oops","Session calender not valid","error"),!1;if(-1==calenderdays2[e.form.session].indexOf(e.form.date_from)||-1==calenderdays2[e.form.session].indexOf(e.form.date_to))return this.$swal("Oops","Please select a valid from-date/to-date for the selected session","error"),!1;var r=e.form.date_from.split("-").map(Number),t=e.form.date_to.split("-").map(Number);if(new Date(r[2],r[1]-1,r[0])>new Date(t[2],t[1]-1,t[0]))return this.$swal("Oops","Date-from cannot be greater than Date-to!","error"),!1;for(var o=0;o<e.form.overtimes.length;o++){var s=e.form.overtimes[o];if(""==s.pen||""==s.designation||""==s.from||""==s.to||null==s.from||null==s.to||+s.count<=0||isNaN(+s.count))return this.$swal("Row: "+(o+1),"Fill all the required fields in each row!","error"),!1}var n=calenderdays2[this.form.session].length;if(e.form.overtimes.some((function(e){return+e.count>n})))return this.myerrors.push("Total sitting days cannot be more than "+n),!1;for(o=0;o<e.form.overtimes.length;o++){r=e.form.overtimes[o].from.split("-").map(Number),t=e.form.overtimes[o].to.split("-").map(Number);if(new Date(r[2],r[1]-1,r[0])>new Date(t[2],t[1]-1,t[0]))return this.myerrors.push("Row "+(o+1)+": Period-from cannot be greater than period-to"),!1}return this.checkDuplicates()})),t(e,"create",(function(){if(!this.isProcessing)if(this.isProcessing=!0,this.rowsvalid()){var e=this;if(e.form.overtimes.length<=0)return this.$swal("Oops","Need at least one row!","error"),this.isProcessing=!1,!1;axios.post(urlformsubmit,e.form).then((function(r){r.data.created?window.location.href=urlformsucessredirect+"/"+r.data.id:e.isProcessing=!1})).catch((function(r){e.$swal({type:"error",title:"Error",text:"Please read the error(s) shown in red",timer:2500});var t=r.response;e.isProcessing=!1,e.errors=t.data}))}else this.isProcessing=!1})),t(e,"update",(function(){if(!this.isProcessing)if(this.isProcessing=!0,this.rowsvalid()){var e=this;if(e.form.overtimes.length<=0)return this.$swal("Oops","Need at least one row!","error"),this.isProcessing=!1,!1;var r=urlformsubmit+"/"+e.form.id;axios.put(r,e.form).then((function(r){r.data.created?window.location.href=urlformsucessredirect+"/"+r.data.id:e.isProcessing=!1})).catch((function(r){e.$swal({type:"error",title:"Error",text:"Please read the error(s) shown in red",timer:2500});var t=r.response;e.isProcessing=!1,e.errors=t.data}))}else this.isProcessing=!1})),t(e,"loadpreset",(function(){var e=this;0!=presets.length?e.$swal({text:"Load Preset",input:"select",inputOptions:presets,inputPlaceholder:"Select preset",showCancelButton:!0,useRejections:!1,inputValidator:function(e){return new Promise((function(r,t){e?r():t("You need to select something)")}))},showLoaderOnConfirm:!0,preConfirm:function(r){return new Promise((function(t,o){axios.get(urlajaxpresets+"/"+presets[r]).then((function(r){var o=r.data;for(var s in o)if(o.hasOwnProperty(s)){for(var n=!1,i=0;i<e.form.overtimes.length;i++){if(e.form.overtimes[i].pen==s){n=!0;break}}n||e.form.overtimes.push({pen:s,designation:o[s],from:e.form.date_from,to:e.form.date_to,count:"",worknature:""})}t()})).catch((function(e){o(e.response.data)}))}))}}).then((function(e){})):e.$swal("Sorry, no presets to load.")})),e)})})();
+/******/ (() => { // webpackBootstrap
+var __webpack_exports__ = {};
+/*!*************************************************!*\
+  !*** ./resources/assets/js/form_sitting.1.5.js ***!
+  \*************************************************/
+var _methods;
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
+function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return _typeof(key) === "symbol" ? key : String(key); }
+function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (_typeof(res) !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
+var vm = new Vue({
+  el: '#app',
+  data: {
+    isProcessing: false,
+    form: {},
+    errors: {},
+    myerrors: [],
+    muloptions: designations,
+    pen_names: [],
+    pen_names_to_desig: [],
+    presets: presets,
+    calenderdays2: calenderdays2
+  },
+  created: function created() {
+    Vue.set(this.$data, 'form', _form);
+    //copy name to PEN field
+
+    /*
+      for(var i=0; i < this.form.overtimes.length; i++){
+         
+         //copy if we have a name
+         if(this.form.overtimes[i].name != null){
+           this.form.overtimes[i].pen += '-' +this.form.overtimes[i].name ;
+       }
+          
+      }*/
+
+    this.sessionchanged();
+    if (this.form.session != '' && this.form.overtimes.length == 0) {//sessions available for dataentry,
+      //and this is a new form, not editing existing
+      // this.addRow();
+    }
+  },
+  mounted: function mounted() {},
+  computed: {
+    configdate: function configdate() {
+      var self = this;
+      return {
+        //dateFormat: 'd-m-Y',
+        //enable: calenderdays2[self.form.session]  
+        format: 'DD-MM-YYYY',
+        useCurrent: false,
+        // useStrict : true,
+
+        enabledDates: Object.keys(calenderdaysmap).map(function (x) {
+          return moment(x, "DD-MM-YYYY").format('YYYY-MM-DD');
+        })
+      };
+    },
+    isActive: function isActive() {}
+  },
+  watch: {},
+  methods: (_methods = {
+    sessionchanged: function sessionchanged() {
+      //this.configdate.enable =  calenderdays2[this.form.session]
+      if (calenderdays2[this.form.session] != undefined) {
+        this.form.date_from = calenderdays2[this.form.session][0];
+        this.form.date_to = calenderdays2[this.form.session][calenderdays2[this.form.session].length - 1];
+      } else {
+        this.form.date_from = '';
+        this.form.date_to = '';
+      }
+    },
+    onChange: function onChange() {
+      this.myerrors = [];
+      //this.slotoptions = this.slotoptions
+      // this.selectdaylabel =  ': ' + calenderdaysmap [this.form.duty_date]
+      //this.form.overtime_slot =''
+    },
+
+    addRow: function addRow() {
+      //  var elem = document.createElement('tr');
+      var self = this;
+      if (!this.rowsvalid()) {
+        return;
+      }
+
+      //var prevrow = self.form.overtimes.length > 0 ? self.form.overtimes[self.form.overtimes.length - 1] : null;
+
+      self.form.overtimes.push({
+        pen: "",
+        designation: "",
+        from: self.form.date_from,
+        to: self.form.date_to,
+        count: "",
+        worknature: ""
+      });
+      this.pen_names = []; //clear previos selection from dropdown
+      this.pen_names_to_desig = [];
+      this.$nextTick(function () {
+        self.$refs["field-" + (self.form.overtimes.length - 1)][0].$el.focus();
+      });
+    },
+    removeElement: function removeElement(index) {
+      if (this.form.overtimes[index].pen == '' || confirm("Remove this row?")) {
+        //this.myerrors = [];
+        this.form.overtimes.splice(index, 1);
+        this.myerrors = [];
+      }
+    },
+    limitText: function limitText(count) {
+      return "and ".concat(count, " more");
+    },
+    asyncFind: _.debounce(function (query) {
+      //  this.isLoading = true
+      // Make a request for a user with a given ID
+      this.mydelayedsearch(query);
+      this.myerrors = [];
+    }, 500),
+    mydelayedsearch: function mydelayedsearch(query) {
+      var self = this;
+      if (query.length >= 3) {
+        //axios.headers.common['X-CSRF-TOKEN'] = '{{csrf_token()}}';
+        //axios.get('/overtime-allowance/public/admin/employees/ajaxfind/'+ query).then(response => {
+        axios.get(urlajaxpen + '/' + query).then(function (response) {
+          // console.log(response.data);
+          self.pen_names = response.data.pen_names;
+          self.pen_names_to_desig = response.data.pen_names_to_desig;
+          //this.isLoading = false
+        })["catch"](function (response) {
+          // alert (JSON.stringify(response.data))    // alerts {"myProp":"Hello"};
+        });
+      }
+    },
+    clearAll: function clearAll() {
+      this.pen_names = [];
+      this.pen_names_to_desig = [];
+    }
+  }, _defineProperty(_methods, "limitText", function limitText(count) {
+    return "and ".concat(count, " other countries");
+  }), _defineProperty(_methods, "changeSelect", function changeSelect(selectedOption) {
+    this.myerrors = [];
+    var self = this;
+    self.$nextTick(function () {
+      //for(var i=0; i < self.form.overtimes.length; i++)
+      for (var i = self.form.overtimes.length - 1; i >= 0; i--) {
+        if (self.form.overtimes[i].pen == selectedOption) {
+          var desig = self.pen_names_to_desig[selectedOption];
+          //added no change if a desig already exists
+          //to prevent an issue where designation is changeed was wrong
+          //try with vince - vincent prasad and dr vincent
+          if (desig !== undefined
+          /*&& self.form.overtimes[i].designation == null*/) {
+            self.form.overtimes[i].designation = desig;
+
+            //self.$forceUpdate()
+          }
+
+          break;
+        }
+      }
+    });
+  }), _defineProperty(_methods, "checkDuplicates", function checkDuplicates() {
+    var self = this;
+    //see if there are duplicates
+    var obj = {};
+    for (var i = 0; i < self.form.overtimes.length; i++) {
+      if (obj[self.form.overtimes[i].pen] == undefined) {
+        obj[self.form.overtimes[i].pen] = true;
+      } else {
+        this.myerrors.push('Duplicate name found: ' + self.form.overtimes[i].pen);
+        return false;
+      }
+    }
+    return true;
+  }), _defineProperty(_methods, "rowsvalid", function rowsvalid() {
+    this.myerrors = [];
+    var self = this;
+    if (self.form.session == '' || self.form.date_from == '' || self.form.date_to == '') {
+      //this.myerrors.push( 'Please select session/dates' )
+      this.$swal('Oops', "Please select session/dates!", 'error');
+      return false;
+    }
+    if (calenderdays2[self.form.session] == undefined) {
+      this.$swal('Oops', 'Session calender not valid', 'error');
+      return false;
+    }
+    if (-1 == calenderdays2[self.form.session].indexOf(self.form.date_from) || -1 == calenderdays2[self.form.session].indexOf(self.form.date_to)) {
+      this.$swal('Oops', 'Please select a valid from-date/to-date for the selected session', 'error');
+      return false;
+    }
+
+    //check if date from less than date to
+
+    {
+      //date.parse returns number of milliseconds elapsed since 1970
+      var date1 = self.form.date_from.split("-").map(Number);
+      var date2 = self.form.date_to.split("-").map(Number);
+
+      //warning: months in JS starts from 0
+      var datefrom = new Date(date1[2], date1[1] - 1, date1[0]);
+      var dateto = new Date(date2[2], date2[1] - 1, date2[0]);
+      if (datefrom > dateto) {
+        //it can be equial though
+        //this.myerrors.push( 'Date-from cannot be greater than Date-to')
+        this.$swal('Oops', "Date-from cannot be greater than Date-to!", 'error');
+        return false;
+      }
+    }
+    for (var i = 0; i < self.form.overtimes.length; i++) {
+      var row = self.form.overtimes[i];
+      if (row.pen == '' || row.designation == '' || row.from == '' || row.to == '' || row.from == null || row.to == null || +row.count <= 0 || isNaN(+row.count)) {
+        //this.myerrors.push("Fill all the required fields!");
+        this.$swal('Row: ' + (i + 1), "Fill all the required fields in each row!", 'error');
+        return false;
+      }
+    }
+    var totalsittings = calenderdays2[this.form.session].length;
+    if (self.form.overtimes.some(function (row) {
+      return +row.count > totalsittings;
+    })) {
+      this.myerrors.push("Total sitting days cannot be more than " + totalsittings);
+      return false;
+    }
+
+    //check time diff
+    for (var i = 0; i < self.form.overtimes.length; i++) {
+      //date.parse returns number of milliseconds elapsed since 1970
+      var date1 = self.form.overtimes[i].from.split("-").map(Number);
+      var date2 = self.form.overtimes[i].to.split("-").map(Number);
+
+      //warning: months in JS starts from 0
+      var datefrom = new Date(date1[2], date1[1] - 1, date1[0]);
+      var dateto = new Date(date2[2], date2[1] - 1, date2[0]);
+      if (datefrom > dateto) {
+        this.myerrors.push('Row ' + (i + 1) + ': Period-from cannot be greater than period-to');
+        return false;
+      }
+    }
+    return this.checkDuplicates();
+  }), _defineProperty(_methods, "create", function create() {
+    if (this.isProcessing) {
+      return;
+    }
+    this.isProcessing = true;
+    if (!this.rowsvalid()) {
+      this.isProcessing = false;
+      return;
+    }
+    var self = this;
+    if (self.form.overtimes.length <= 0) {
+      //this.myerrors.push("Fill all the required fields!");
+      this.$swal('Oops', "Need at least one row!", 'error');
+      this.isProcessing = false;
+      return false;
+    }
+    axios.post(urlformsubmit, self.form).then(function (response) {
+      //self.$swal.close();
+      // alert('success ajax');
+      if (response.data.created) {
+        window.location.href = urlformsucessredirect + "/" + response.data.id;
+      } else {
+        self.isProcessing = false;
+      }
+    })["catch"](function (error) {
+      //console.log( error.response );
+      //self.$swal.close();
+      //self.$swal('Oops', "!", 'error')
+      self.$swal({
+        type: 'error',
+        title: 'Error',
+        text: 'Please read the error(s) shown in red',
+        timer: 2500
+      });
+      var response = error.response;
+      self.isProcessing = false;
+      //alert(JSON.stringify(response.data));    // alerts {"myProp":"Hello"};
+      // Vue.set(self.$data, 'errors', response.data);
+      self.errors = response.data;
+    });
+  }), _defineProperty(_methods, "update", function update() {
+    if (this.isProcessing) {
+      return;
+    }
+    this.isProcessing = true;
+    if (!this.rowsvalid()) {
+      this.isProcessing = false;
+      return;
+    }
+    var self = this;
+    if (self.form.overtimes.length <= 0) {
+      //this.myerrors.push("Fill all the required fields!");
+      this.$swal('Oops', "Need at least one row!", 'error');
+      this.isProcessing = false;
+      return false;
+    }
+
+    //this.$swal('Please wait')
+    //this.$swal.showLoading()
+
+    var updateurl = urlformsubmit + '/' + self.form.id;
+    axios.put(updateurl, self.form).then(function (response) {
+      //self.$swal.close();
+      // alert('success ajax');
+      if (response.data.created) {
+        window.location.href = urlformsucessredirect + "/" + response.data.id;
+        ;
+      } else {
+        self.isProcessing = false;
+      }
+    })["catch"](function (error) {
+      //console.log( error.response );
+      self.$swal({
+        type: 'error',
+        title: 'Error',
+        text: 'Please read the error(s) shown in red',
+        timer: 2500
+      });
+      //self.$swal.close();
+      var response = error.response;
+      self.isProcessing = false;
+      // alert (JSON.stringify(response.data));    // alerts {"myProp":"Hello"};
+      // Vue.set(self.$data, 'errors', response.data);
+      self.errors = response.data;
+    });
+  }), _defineProperty(_methods, "loadpreset", function loadpreset() {
+    var self = this;
+    if (presets.length == 0) {
+      self.$swal('Sorry, no presets to load.');
+      return;
+    }
+    self.$swal({
+      text: 'Load Preset',
+      input: 'select',
+      inputOptions: presets,
+      inputPlaceholder: 'Select preset',
+      showCancelButton: true,
+      useRejections: false,
+      inputValidator: function inputValidator(value) {
+        return new Promise(function (resolve, reject) {
+          if (value) {
+            resolve();
+          } else {
+            reject('You need to select something)');
+          }
+        });
+      },
+      showLoaderOnConfirm: true,
+      preConfirm: function preConfirm(index) {
+        return new Promise(function (resolve, reject) {
+          axios.get(urlajaxpresets + '/' + presets[index]).then(function (response) {
+            var obj = response.data;
+            for (var key in obj) {
+              if (obj.hasOwnProperty(key)) {
+                //we can either clear items or we check for duplicates
+                var entryfound = false;
+                for (var i = 0; i < self.form.overtimes.length; i++) {
+                  var pen_name = self.form.overtimes[i].pen;
+                  if (pen_name == key) {
+                    entryfound = true;
+                    break;
+                  }
+                }
+                if (!entryfound) {
+                  self.form.overtimes.push({
+                    pen: key,
+                    designation: obj[key],
+                    from: self.form.date_from,
+                    to: self.form.date_to,
+                    count: "",
+                    worknature: ""
+                  });
+                }
+              }
+            }
+            resolve();
+          })["catch"](function (error) {
+            reject(error.response.data);
+          });
+        });
+      }
+    }).then(function (result) {}); //success 
+  }), _methods)
+});
+/******/ })()
+;

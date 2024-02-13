@@ -353,6 +353,8 @@ class MyFormsController extends Controller
         $latest_session = $sessions->first();
          
         $calenderdaysmap = [];
+        $calenderdaypunching = [];
+        $daylenmultiplier = [];
         $calenderdays2 = array();
      
         foreach ($session_array as $session) {
@@ -361,19 +363,23 @@ class MyFormsController extends Controller
                        
             if(!$issitting)
             {
-                $daysall->where('date', '<=', date('Y-m-d'));
-                $days = $daysall->get(['date','day_type']);
+                $daysall->where( function ($query) {
+                    $query->wherenot('punching','AEBAS_FETCH_PENDING') 
+                        ->orwherenull('punching') ;
+                })->where('date', '<=', date('Y-m-d'));
+                
+                $days = $daysall->get();
             }
             else{
-                $days = $daysall->where( 'day_type','Sitting day')->get(['date','day_type']);
+                $days = $daysall->where( 'day_type','Sitting day')->get();
             }
 
             
             foreach ($days as $day) {
               
+                $calenderdaypunching[$day['date']] = $day['punching'] ?? 'NOPUNCHING';
                 $calenderdaysmap[$day['date']] = $day['day_type'];
-
-
+                $daylenmultiplier[$day['date']] = $day['daylength_multiplier'] ?? 1.0;
 
                 $calenderdays2[$session->name][] = $day['date'];    
             }
@@ -432,7 +438,9 @@ class MyFormsController extends Controller
         $data["calenderdaysmap"] = json_encode($calenderdaysmap);
       //  $data["designations"] = json_encode($designations); //we no longer allow user to set deisg, it is auto selected
         $data["calenderdays2"] = json_encode($calenderdays2);
-
+        $data["calenderdaypunching"] = json_encode($calenderdaypunching);
+        
+        $data["daylenmultiplier"] = json_encode($daylenmultiplier);
 
         $presets = \App\Preset::
                   where('user_id',\Auth::user()->id)
@@ -823,7 +831,7 @@ class MyFormsController extends Controller
             $collection = collect($overtimes);
 
             $punchtimes =  $collection->map( function($overtime) use ($request) {
-                //we need to convert date here, because createMany of laravel is undefined.
+                //we need to convert date here, because insert/createMany of laravel is undefined.
                 //so we have to use Punching::insert which does not call our Model's setDateAttribute
                 $date = Carbon::createFromFormat(config('app.date_format'), $request['duty_date'])->format('Y-m-d');
 
@@ -838,8 +846,9 @@ class MyFormsController extends Controller
                     
                 ];
             } );
+        //temporarily commenting this. we fetch from nic. so no need to save user entered data
 
-            \App\Punching::insert($punchtimes->toArray());
+            //\App\Punching::insert($punchtimes->toArray());
         } catch(Exception $e){
         
             //do nothing. as this may be due to an already existing punching in db for the date and PEN composite key
@@ -975,7 +984,7 @@ class MyFormsController extends Controller
 
             $punchtimes =  $collection->map( function($overtime) use ($request) {
                 //we need to convert date here, because createMany of laravel is undefined.
-                //so we have to use Punching::insert which does not call our Model's setDateAttribute
+                //so we have to use Punching::upsert which does not call our Model's setDateAttribute
                 $date = Carbon::createFromFormat(config('app.date_format'), $request['duty_date'])->format('Y-m-d');
 
                 return [
@@ -993,7 +1002,9 @@ class MyFormsController extends Controller
         // the second argument lists the column(s) that uniquely identify records within the associated table. The method's third and final argument is an array of the columns that should be updated if a matching record already exists in the database.
         //only allow punching time update if it was the original section whose data we saved.
         //this does not affect ot form as they have their own
-            \App\Punching::upsert($punchtimes->toArray(), ['date', 'pen', 'creator','punching_id'], ['punch_in', 'punch_out']);
+
+        //temporarily commenting this. we fetch from nic. so no need to save user entered data
+          //  \App\Punching::upsert($punchtimes->toArray(), ['date', 'pen', 'creator','punching_id'], ['punch_in', 'punch_out']);
 
         } catch(Exception $e){
         

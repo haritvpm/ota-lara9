@@ -86,7 +86,9 @@
     var urlajaxgetpunchtimes = "{{url('admin/punchings/ajaxgetpunchtimes')}}"
     
     
-
+    
+    var calenderdaypunching = {!! $data['calenderdaypunching'] !!};
+    var daylenmultiplier = {!! $data['daylenmultiplier'] !!};
     var calenderdaysmap = {!! $data['calenderdaysmap'] !!};
     // var designations = {! $data['designations'] !};
     Vue.component('Multiselect', VueMultiselect.default);

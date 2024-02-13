@@ -17,6 +17,29 @@
 
 </style>
 
+<div class="panel panel-default" id="app">
+        <div class="panel-heading">
+            Fetch Punching Data
+        </div>
+
+        <div class="panel-body">
+
+	<form action="{{url('admin/punchings/fetch')}}" method="get" id="filter" class="form-inline">
+        
+        <div class="form-group">     
+        	Date <input required class="form-control" placeholder="dd-mm-yyyy" type="search" name = "reportdate" value="{{ \Request('reportdate')}}" >
+		</div>
+      
+	  
+        <div class="form-group">                                
+                  
+        <button type="submit" class="btn btn-danger" rel="filter"><span class="glyphicon glyphicon-refresh"></span></button>
+
+        </div>
+    </form>
+
+  </div>
+
     <!-- <h3 class="page-title">Search</h3> -->
     
     <div class="panel panel-default" id="app">
@@ -28,21 +51,7 @@
 
 
 	<form action="" method="get" id="filter" class="form-inline">
-		<div class="form-group">
-        Session <select class="form-control" name="session">
-				
-				@foreach($sessions as $session)
-                @if($session == \Request('session'))
-                   <option selected>{{$session}}</option>
-                @else
-				    <option>{{$session}}</option>
-                @endif
-				@endforeach
-				        
-        </select>
-        </div>
-      
-        
+	       
         <div class="form-group">     
         	Date <input required class="form-control" placeholder="dd-mm-yyyy" type="search" name = "datefilter" value="{{ \Request('datefilter')}}" >
 		</div>
@@ -63,7 +72,7 @@
          <div class="form-group">                                
                   
         <!-- <input class="form-control" type="submit" value="Filter" rel="filter"> -->
-        <button type="submit" class="btn btn-danger" rel="filter"><span class="glyphicon glyphicon-search"></span></button>
+        <button type="submit" class="btn btn-primary" rel="filter"><span class="glyphicon glyphicon-search"></span></button>
         <!-- <a href="{{url('admin/searches/')}}" data-toggle="tooltip" title="reset" class="btn btn-default pull-right"><span class="glyphicon glyphicon-remove-circle"></span></a> -->
         </div>
     </form>

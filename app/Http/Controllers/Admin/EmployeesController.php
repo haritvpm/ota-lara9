@@ -226,6 +226,7 @@ class EmployeesController extends Controller
                     'punching' =>   $item?->categories?->punching && $item->designation->punching,
                     'category' =>  $item?->categories?->category,
                     'employee_id' =>  $item->id,
+                    'aadhaarid' =>  $item->aadhaarid,
 
                 ]
             ];

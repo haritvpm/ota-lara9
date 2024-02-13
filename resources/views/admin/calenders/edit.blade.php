@@ -59,6 +59,31 @@
                     @endif
                 </div>
             </div>
+            <div class="row">
+                <div class="col-xs-12 form-group">
+                <label for="daylength_multiplier">{{ trans('cruds.calender.fields.daylength_multiplier') }}</label>
+                            <input class="form-control" type="number" name="daylength_multiplier" id="daylength_multiplier" value="{{ old('daylength_multiplier', $calender->daylength_multiplier) }}" step="0.01" max="1">
+                            @if($errors->has('daylength_multiplier'))
+                                <span class="help-block" role="alert">{{ $errors->first('daylength_multiplier') }}</span>
+                            @endif
+                            <span class="help-block">{{ trans('cruds.calender.fields.daylength_multiplier_helper') }}</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12 form-group">
+                   <label>Punching</label>
+                            <select class="form-control" name="punching" id="punching">
+                                <option value disabled {{ old('punching', null) === null ? 'selected' : '' }}>{{ trans('global.pleaseSelect') }}</option>
+                                @foreach(App\Calender::PUNCHING_SELECT as $key => $label)
+                                    <option value="{{ $key }}" {{ old('punching', $calender->punching) === (string) $key ? 'selected' : '' }}>{{ $label }}</option>
+                                @endforeach
+                            </select>
+                            @if($errors->has('punching'))
+                                <span class="help-block" role="alert">{{ $errors->first('punching') }}</span>
+                            @endif
+                </div>             
+            </div>
+
            
             
         </div>

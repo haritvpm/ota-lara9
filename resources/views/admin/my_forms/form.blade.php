@@ -56,7 +56,7 @@
 			<option  v-for="option in slotoptions" > @{{ option }} </option>
 		</select>
 	</div>	
-	
+
 </div>
 <hr>
 <div class="row" v-cloak>
@@ -68,8 +68,10 @@
 					<th>No</th>
 					<th>PEN - Name</th>
 					<th>Designation</th>
-					<th>PunchIn</th>
-					<th>PunchOut</th>
+					
+					<th v-show="dayHasPunching">PunchIn</th>
+					<th v-show="dayHasPunching">PunchOut</th>
+					
 					<th>Time-From</th>
 					<th>Time-To</th>
 					<!-- <th>Work-Nature</th> -->
@@ -108,17 +110,21 @@
 					<!-- <div class="small"> @{{ row.designation }} </div>  -->
 					<div class="small"> @{{ row.designation }}, @{{ row.category }},  @{{ row.punching }}, @{{row.normal_office_hours}} </div> 
 					</td>
-					<td class="col-md-1">
-					<input  :name="'punchin[' + index + ']'" type="text" v-model="row.punchin" required class="form-control" :disabled="!row.punching" :readonly="row.punching_id" autocomplete="off">
+					
+					
+					<td v-show="dayHasPunching" class="col-md-1">
+					<input  :name="'punchin[' + index + ']'" type="text" v-model="row.punchin" required class="form-control" :disabled="!row.punching" :readonly="!allowPunchingEntry" autocomplete="off">
+					<!-- :readonly="row.punching_id" -->
 					<!-- <date-picker v-model="row.from" :config="configtime"
 						:required="true"                
 						class="form-control">
 					</date-picker> --> 
 					</td>
-					<td class="col-md-1">
-					<input  :name="'punchout[' + index + ']'" type="text" v-model="row.punchout" required class="form-control" :disabled="!row.punching" :readonly="row.punching_id"  autocomplete="off">
-					
+					<td v-show="dayHasPunching" class="col-md-1">
+					<input  :name="'punchout[' + index + ']'" type="text" v-model="row.punchout" required class="form-control" :disabled="!row.punching" :readonly="!allowPunchingEntry"  autocomplete="off">
 					</td>
+				
+
 					<td class="col-md-1">
 					<input  :name="'from[' + index + ']'" type="text" v-model="row.from" required class="form-control"  autocomplete="off">
 					
@@ -156,7 +162,7 @@
 
 				 <span v-show ="form.overtimes.length>1" class="pull-right">Copy from First Row:&nbsp;</span>
 
-				 <span v-show ="form.overtimes.length>1" class="pull-right">Copy Time to Next Row: F4 | &nbsp;</span>
+				 <!-- <span v-show ="form.overtimes.length>1" class="pull-right">Copy Time to Next Row: F4 | &nbsp;</span> -->
 
 			</div>
         </div>

@@ -14,9 +14,15 @@ use Carbon\Carbon;
 */
 class Calender extends Model
 {
-    protected $fillable = ['date', 'day_type', 'description', 'session_id'];
+    protected $fillable = ['date', 'day_type', 'description', 'session_id', 'daylength_multiplier',  'punching',
+];
 
-
+public const PUNCHING_SELECT = [
+    'MANUALENTRY'         => 'MANUALENTRY', ////allow edit. only some people punched. so let them enter it all
+    'AEBAS'               => 'AEBAS', //// full data received. enforce punching
+    'AEBAS_FETCH_PENDING' => 'AEBAS_FETCH_PENDING',
+    'NOPUNCHING'          => 'NOPUNCHING', ////NIC server was down completely. dont enforce punching for office
+];
     public static $enum_day_type = ["Sitting day" => "Sitting day", "Prior holiday" => "Prior holiday", "Prior Working day" => "Prior Working day", "Holiday" => "Holiday", "Intervening saturday" => "Intervening saturday", "Intervening Working day" => "Intervening Working day"];
 
     /**

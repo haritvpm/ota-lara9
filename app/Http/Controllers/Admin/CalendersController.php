@@ -25,11 +25,12 @@ class CalendersController extends Controller
             return abort(401);
         }
 
-
-        
+              
         if (request()->ajax()) {
             $query = Calender::query();
-            $query->with("session")->orderby('date','desc');
+            $query->with("session")->whereHas('session', function ($query) {
+                $query->where('show_in_datatable', 'Yes');
+               })->orderby('date','desc');
             $template = 'actionsTemplate';
             
             $table = Datatables::of($query);
@@ -38,6 +39,10 @@ class CalendersController extends Controller
                 'data-entry-id' => '{{$id}}',
             ]);
             $table->addColumn('massDelete', '&nbsp;');
+             $table->addColumn('punching_', function ($row) {
+               return Calender::PUNCHING_SELECT[$row->punching] ?? '' ;
+               
+             });
             $table->addColumn('actions', '&nbsp;')->rawColumns(['actions']);;
             $table->editColumn('actions', function ($row) use ($template) {
                 $gateKey  = 'calender_';

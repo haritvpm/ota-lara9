@@ -33,7 +33,7 @@ var vm = new Vue({
 		pen_names_to_desig: [],
 		presets: presets,
 		presets_default: presets_default,
-
+		
 		configtime: {
 
 
@@ -107,6 +107,16 @@ var vm = new Vue({
 				return ["First", "Second"];
 			}
 		},
+		_daylenmultiplier: function () {
+			return this.form.duty_date ? daylenmultiplier[this.form.duty_date] ?? 1.0 : 1.0
+		},
+		dayHasPunching: function () {
+			return calenderdaypunching[this.form.duty_date] !== 'NOPUNCHING' || calenderdaypunching[this.form.duty_date] == '' 
+		},
+		allowPunchingEntry: function () {
+			return this.form.duty_date ? calenderdaypunching[this.form.duty_date] === 'MANUALENTRY' : false
+		},
+
 	},
 
 	watch: {},
@@ -157,6 +167,7 @@ var vm = new Vue({
 			this.form.overtime_slot = "";
 
 			if (this.form.duty_date != "" && this.form.duty_date != null) {
+						
 				if (calenderdaysmap[this.form.duty_date] !== undefined) this.selectdaylabel = ": " + calenderdaysmap[this.form.duty_date];
 				else this.selectdaylabel = ": Not valid for the session";
 
@@ -354,7 +365,7 @@ var vm = new Vue({
 				from: prevrow ? prevrow.from : "",
 				to: prevrow ? prevrow.to : "",
 				// worknature: prevrow ? prevrow.worknature : presets_default['default_worknature'],
-				punching: true,
+				punching: self.dayHasPunching,
 				punching_id: null,
 			});
 
@@ -423,18 +434,18 @@ var vm = new Vue({
 			this.myerrors = [];
 			var self = this;
 			var desig = self.pen_names_to_desig[selectedOption];
-			//alert('changin');
 			self.$nextTick(() => {
 				let row = self.form.overtimes[id];
-				row.punching = true;
+				row.punching = self.dayHasPunching;
 				row.normal_office_hours = 0;
 				row.category = "";
 				if (desig !== undefined && desig.desig) {
 					row.designation = desig.desig;
-					row.punching = desig.punching;
-					row.normal_office_hours = desig.desig_normal_office_hours;
+					row.punching &&= desig.punching;
+					row.normal_office_hours = desig.desig_normal_office_hours * this._daylenmultiplier;
 					row.category = desig.category;
 					row.employee_id = desig.employee_id;
+					row.aadhaarid = desig.aadhaarid;
 					//if you add any new prop here, check to update in EmployeesController:ajaxfind,
 					//MyFormsController:preparevariablesandGotoView in two locations for edit and copytonewform since we need these variables when we try to edit this
 					//and also in loadpresetdata in this file itself
@@ -458,7 +469,7 @@ var vm = new Vue({
 
 				if (desig !== undefined && row.punching) {
 					axios
-						.get(urlajaxgetpunchtimes + "/" + self.form.duty_date + "/" + row.pen)
+						.get(urlajaxgetpunchtimes + "/" + self.form.duty_date + "/" + row.pen + "/" + row.aadhaarid)
 						.then((response) => {
 							console.log("got punch data");
 							console.log(response);
@@ -578,7 +589,7 @@ var vm = new Vue({
 				} else if( overtime_slot == "Second"  ){
 					
 					diffFrom = diffdatefunc("17:30", row.from)
-					diffTo = diffdatefunc("17:30", row.to)
+					diffTo = diffdatefunc("20:00", row.to)
 				} 
 				else if( overtime_slot == "Third"  ){
 					diffFrom = diffdatefunc("20:00", row.from)
@@ -642,7 +653,8 @@ var vm = new Vue({
 
 				if (self.form.overtimes[i].punching) {
 					if (row.punching && (row.punchin == null || row.punchin == "" || row.punchout == null || row.punchout == "")) {
-						this.$swal("Row: " + (i + 1), "Fill punch in/out time for every row", "error");
+						this.$swal("Row: " + (i + 1), "Punch in/out time not found", "error");
+						//this.$swal("Row: " + (i + 1), "Fill punch in/out time for every row", "error");
 						return false;
 					}
 				}
@@ -728,7 +740,7 @@ var vm = new Vue({
 				//new validation after adding normal_office_hours
 
 				if (isSittingOrWorkingDay) {
-					let othours_needed = minothour + row.normal_office_hours;
+					let othours_needed = minothour + row.normal_office_hours * this._daylenmultiplier;
 					if (overtime_slot == "First" && diffhours < othours_needed) {
 						this.myerrors.push(`Row  ${i + 1} : At least ${minothour_ideal + row.normal_office_hours} hours needed for First OT on a ${daytypedesc}`);
 						return false;

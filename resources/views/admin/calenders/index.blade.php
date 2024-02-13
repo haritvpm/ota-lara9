@@ -27,7 +27,11 @@
                         <th>@lang('quickadmin.calenders.fields.day-type')</th>
                         <th>Description</th>
                         <th>@lang('quickadmin.calenders.fields.session')</th>
-
+                        <th>
+                                        {{ trans('cruds.calender.fields.daylength_multiplier') }}
+                                    </th> <th>
+                                    Punching
+                                    </th>
                                                 <th>&nbsp;</th>
 
                     </tr>
@@ -48,7 +52,9 @@
                 {data: 'day_type', name: 'day_type'},
                 {data: 'description', name: 'description'},
                 {data: 'session.name', name: 'session.name'},
-                
+                {data: 'daylength_multiplier', name: 'daylength_multiplier'},
+                {data: 'punching_', name: 'punching_'},
+               
                 {data: 'actions', name: 'actions', searchable: false, sortable: false}
             ];
             processAjaxTables();
