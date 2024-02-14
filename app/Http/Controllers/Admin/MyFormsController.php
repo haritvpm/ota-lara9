@@ -662,12 +662,8 @@ class MyFormsController extends Controller
                                     ->where('id', '!=', $formid); //skip this item if on update
                         })->get();
             */
-
-
-            
-            /*$res_for_thisslot = $emp->reject(function($element) use ($request) {
-                return stripos($element->form->overtime_slot, $request['overtime_slot']) === false;
-            });*/
+         
+           
 
             ///////////
             $res_for_thisslot = $emp->reject(function($element) use ($request) {
@@ -684,18 +680,7 @@ class MyFormsController extends Controller
                  array_push($myerrors, 'Already entered ' . $request['overtime_slot'] . ' OT on this day for '  .  $empslot->implode(','));
                  return null;
             }
-
-            //this is to prevent DS and above getting more than 3 OTs including additional OT
-/*
-            $emp =  \App\Overtime::with('form')
-                    ->where('pen', 'like' , $pen . '%')
-                    ->whereHas('form', function($query)  use ($request,$date,$formid) { 
-                        $query->where('duty_date', $date)
-                              ->where('session', $request['session'])
-                              ->where('id', '!=', $formid); //skip this item if on update;
-                    })->get();
-            */
-                  
+                
                         
             if( $emp->count() >= 3  )
             {
@@ -827,28 +812,34 @@ class MyFormsController extends Controller
         });
 
         try  {
-            //also save punchtime to punching table
-            $collection = collect($overtimes);
+        //using try catch because this can cause exception if we try to save a 2nd form during manual edit of punching times
+           
+            $date = Carbon::createFromFormat(config('app.date_format'), $request['duty_date'])->format('Y-m-d');
+            //also save punchtime to punching table if this is manual entry day
+            $calenderdate = Calender::where('date', $date)->first();
 
-            $punchtimes =  $collection->map( function($overtime) use ($request) {
-                //we need to convert date here, because insert/createMany of laravel is undefined.
+            if( $calenderdate?->punching == 'MANUALENTRY' ){
+                             
+                $collection = collect($overtimes);
+
+                $punchtimes =  $collection->map( function($overtime) use ($date) {
+                // date shoulbe in 'Y-m-d', because insert/createMany of laravel is undefined.
                 //so we have to use Punching::insert which does not call our Model's setDateAttribute
-                $date = Carbon::createFromFormat(config('app.date_format'), $request['duty_date'])->format('Y-m-d');
+                    return [
+                      //  'session' => $request['session'],
+                        'creator' => \Auth::user()->username,
+                        'date'  => $date,
+                        'pen'  => $overtime['pen'],
+                        'aadhaarid'  => '-', //composite keys wont work if we give null. so something else
+                        'name'  => $overtime['name'],
+                        'punch_in'  => $overtime['punchin'],
+                        'punch_out' => $overtime['punchout'],
+                        
+                    ];
+                } );
+                \App\Punching::insert($punchtimes->toArray());
 
-                return [
-                    'session' => $request['session'],
-                    'creator' => \Auth::user()->username,
-                    'date'  => $date,
-                    'pen'  => $overtime['pen'],
-                    'name'  => $overtime['name'],
-                    'punch_in'  => $overtime['punchin'],
-                    'punch_out' => $overtime['punchout'],
-                    
-                ];
-            } );
-        //temporarily commenting this. we fetch from nic. so no need to save user entered data
-
-            //\App\Punching::insert($punchtimes->toArray());
+            }
         } catch(Exception $e){
         
             //do nothing. as this may be due to an already existing punching in db for the date and PEN composite key
@@ -978,33 +969,40 @@ class MyFormsController extends Controller
         });
 
         //update ot times if user is the one who created it in the first place
+        //using try catch because this can cause exception if we try to save a 2nd form during manual edit of punching times
         try  {
+
+            $date = Carbon::createFromFormat(config('app.date_format'), $request['duty_date'])->format('Y-m-d');
+
             //also save punchtime to punching table
-            $collection = collect($overtimes);
+            $calenderdate = Calender::where('date',$date)->first();
+            
+            if( $calenderdate?->punching == 'MANUALENTRY' )
+            {
+                $collection = collect($overtimes);
 
-            $punchtimes =  $collection->map( function($overtime) use ($request) {
-                //we need to convert date here, because createMany of laravel is undefined.
+                $punchtimes =  $collection->map( function($overtime) use ($date) {
+                //date has  to be 'Y-m-d' here, because createMany of laravel is undefined.
                 //so we have to use Punching::upsert which does not call our Model's setDateAttribute
-                $date = Carbon::createFromFormat(config('app.date_format'), $request['duty_date'])->format('Y-m-d');
 
-                return [
-                    'session' => $request['session'],
-                    'creator' => \Auth::user()->username,
-                    'date'  => $date,
-                    'pen'  => $overtime['pen'],
-                    'name'  => $overtime['name'],
-                    'punch_in'  => $overtime['punchin'],
-                    'punch_out' => $overtime['punchout'],
-                    'punching_id' => $overtime['punching_id'],
-                    
-                ];
-            } );
-        // the second argument lists the column(s) that uniquely identify records within the associated table. The method's third and final argument is an array of the columns that should be updated if a matching record already exists in the database.
-        //only allow punching time update if it was the original section whose data we saved.
-        //this does not affect ot form as they have their own
-
-        //temporarily commenting this. we fetch from nic. so no need to save user entered data
-          //  \App\Punching::upsert($punchtimes->toArray(), ['date', 'pen', 'creator','punching_id'], ['punch_in', 'punch_out']);
+                    return [
+                     //   'session' => $request['session'],
+                        'creator' => \Auth::user()->username,
+                        'date'  => $date,
+                        'pen'  => $overtime['pen'],
+                        'name'  => $overtime['name'],
+                        'aadhaarid'  => '-', //date-aadhaarid-pen composite keys wont work if we give null. so something else
+                        'punch_in'  => $overtime['punchin'],
+                        'punch_out' => $overtime['punchout'],
+                        'punching_id' => $overtime['punching_id'],
+                        
+                    ];
+                } );
+                // the second argument lists the column(s) that uniquely identify records within the associated table. The method's third and final argument is an array of the columns that should be updated if a matching record already exists in the database.
+                //only allow punching time update if it was the original section whose data we saved.
+                //this does not affect ot form as they have their own
+                \App\Punching::upsert($punchtimes->toArray(), ['date', 'pen', 'creator','punching_id'], ['punch_in', 'punch_out']);
+            }
 
         } catch(Exception $e){
         

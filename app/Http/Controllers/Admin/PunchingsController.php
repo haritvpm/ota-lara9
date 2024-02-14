@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Punching;
 use App\Calender;
+use App\Employee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Gate;
@@ -224,6 +225,7 @@ class PunchingsController extends Controller
         $url = 'http://localhost:3000/data';
 
         $insertedcount = 0;
+        $pen_to_aadhaarid = [];
         for ($offset=0;   ; $offset += $count+1 ) { 
             
             $response = Http::withHeaders([
@@ -248,12 +250,15 @@ class PunchingsController extends Controller
                 //user may punchin but not punchout. so treat these separately
                 
                 //org_emp_code from api can be klaid, mobilenumber or empty. 
-
+                $org_emp_code = $dataItem['org_emp_code'];
+                $attendanceId = $dataItem['emp_id'];
+                
+                //date-aadhaarid-pen composite keys wont work if we give null. so something to pen
                 //punchout date can be diff to punchin date, not sure
                 if($dateIn && $intime && $dateOut && $outtime && ($dateIn === $dateOut)){
-                    $matchThese = ['aadhaarid' =>$dataItem['emp_id'] ,'date'=> $dateIn];
-                    $vals = ['punch_in'=> $intime,'punch_out'=> $outtime, 'pen'=>null];
-                    if($dataItem['org_emp_code'] != '')  $vals['pen'] = $dataItem['org_emp_code' ];
+                    $matchThese = ['aadhaarid' => $attendanceId ,'date'=> $dateIn];
+                    $vals = ['punch_in'=> $intime,'punch_out'=> $outtime, 'pen'=>'-'];
+                    if($org_emp_code != '')  $vals['pen'] = $org_emp_code;
                   
                     $punch = Punching::updateOrCreate($matchThese,$vals);
                 }
@@ -261,10 +266,10 @@ class PunchingsController extends Controller
                 if($dateIn && $intime){
                    // $date = Carbon::createFromFormat('Y-m-d', $dateIn)->format(config('app.date_format'));
                    //org_emp_code can be null. since empty can cause unique constraint violations, dont allow
-                    $matchThese = ['aadhaarid' =>$dataItem['emp_id'] ,'date'=> $dateIn];
-                    $vals = ['punch_in'=> $intime,'pen'=>null];
+                    $matchThese = ['aadhaarid' =>$attendanceId ,'date'=> $dateIn];
+                    $vals = ['punch_in'=> $intime,'pen'=>'-'];
 
-                    if($dataItem['org_emp_code'] != '') $vals['pen'] = $dataItem['org_emp_code' ];
+                    if($org_emp_code != '') $vals['pen'] = $org_emp_code;
                     
                     $punch = Punching::updateOrCreate($matchThese,$vals);
                    
@@ -272,16 +277,20 @@ class PunchingsController extends Controller
                 else
                 if($dateOut && $outtime){
                    // $date = Carbon::createFromFormat('Y-m-d', $dateOut)->format(config('app.date_format'));
-                    $matchThese = ['aadhaarid' =>$dataItem['emp_id'],'date'=> $dateOut];
-                    $vals = ['punch_out'=> $outtime,'pen'=>null];
-                    if($dataItem['org_emp_code'] != '')  $vals['pen'] = $dataItem['org_emp_code' ];
+                    $matchThese = ['aadhaarid' =>$attendanceId,'date'=> $dateOut];
+                    $vals = ['punch_out'=> $outtime,'pen'=>'-'];
+                    if($org_emp_code != '')  $vals['pen'] = $org_emp_code;
                     
                     $punch = Punching::updateOrCreate($matchThese,$vals);
                    
                 }
                 $insertedcount++;
-            }
 
+              
+                if($org_emp_code != '' && $org_emp_code != null){
+                    $pen_to_aadhaarid[$org_emp_code] = $attendanceId;
+                }
+            }
             //if reached end of data, break
             if(count($jsonData) <  $count){ 
                
@@ -292,7 +301,41 @@ class PunchingsController extends Controller
 
         if( $insertedcount ){
             $calenderdate->update( [ 'punching' => 'AEBAS']);
+
+            //$lastfetch = Setting::firstOrCreate( ['name' => 'lastfetch'], 
+                                              //  ['value' => Carbon::now() ]);
+            //$lastfetch->value = Carbon::now();
+           // $lastfetch->save();
         }
+
+        //Update our employee db with aadhaarid from api
+        //since org_emp_code can be empty or even mobile number, make sure this is our pen
+        $emps = Employee::select('id', 'pen','aadhaarid')->wherein('pen', array_keys($pen_to_aadhaarid))->get();
+        foreach ($emps->chunk(1000) as $chunk) {
+            $cases = [];
+            $ids = [];
+            $params_aadhaarid = [];
+                        
+            foreach ($chunk as $emp) {
+                    if(!$emp->aadhaarid || $emp->aadhaarid == ''){ //only if it is not set already
+                    if (array_key_exists($emp->pen, $pen_to_aadhaarid) ){
+                        $cases[] = "WHEN '{$emp->pen}' then ?";
+                        $params_aadhaarid[] = $pen_to_aadhaarid[$emp->pen];
+                        $ids[] = $emp->id;
+                    }
+                }
+            }
+            
+            $ids = implode(',', $ids);
+            $cases = implode(' ', $cases);
+            
+            if (!empty($ids)) {
+                //dd( $params_aadhaarid);
+                \DB::update("UPDATE employees SET `aadhaarid` = CASE `pen` {$cases} END WHERE `id` in ({$ids})", $params_aadhaarid);
+                
+            }
+        }
+
 
         \Session::flash('message-success', "Fetched\Processed: {$insertedcount} records for {$reportdate}" );
 

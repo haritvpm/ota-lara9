@@ -10,7 +10,15 @@
     </p>
     @endcan
 
-    
+    <p>
+   
+MANUALENTRY: User can enter/edit punching time. <br>
+AEBAS: Data from AEBAS fetched. Punching time will be autofetched for user form. No editing.<br>
+AEBAS_FETCH_PENDING: Data is to be fetched from AEBAS. Users will not be able to create form for this day.<br>
+NOPUNCHING: NIC server was down completely. No need to enter punching times for users<br>
+If empty(nothing is set), means old sessions before punching
+
+</p>
 
     <div class="panel panel-default">
         <div class="panel-heading">

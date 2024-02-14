@@ -66,7 +66,7 @@ return [
 	],
 	
 	'calenders' => [
-		'title' => 'Calenders',
+		'title' => 'Calender',
 		'fields' => [
 			'date' => 'Date',
 			'day-type' => 'Type of Day',
