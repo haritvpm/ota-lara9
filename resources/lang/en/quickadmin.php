@@ -47,8 +47,9 @@ return [
 			'added-by' => 'Added by',
 			'srismt' => 'Sri/Smt',
 			'name-mal' => 'Name mal',
-			'categories' => 'Categories',
-			'desig-display' => 'Desig display',
+			'categories' => 'Excel Category',
+			'desig-display' => 'Excel Desig',
+			'aadhaarid'=> 'AttendanceId',
 		],
 	],
 	

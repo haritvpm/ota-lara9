@@ -1,5 +1,7 @@
+
+
 @can($gateKey.'view')
-    <a href="{{ route($routeKey.'.show', $row->id) }}"
+    <a href="{{ route($routeKey.'.show', $row->id ) }}"
        class="btn btn-xs btn-primary">@lang('quickadmin.qa_view')</a>
 @endcan
 @can($gateKey.'edit')

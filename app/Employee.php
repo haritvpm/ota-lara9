@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 */
 class Employee extends Model
 {
-    protected $fillable = ['srismt', 'name',  'pen', 'category', 'designation_id',  'added_by', 'desig_display', 'categories_id','aadhaarid'];
+    protected $fillable = ['srismt', 'name',  'pen', 'category', 'designation_id',  'added_by', 'desig_display', 'categories_id','aadhaarid','created_at'];
    
     public static $enum_srismt = ["Sri" => "Sri", "Smt" => "Smt", "Kum" => "Kum"];
 
@@ -21,6 +21,7 @@ class Employee extends Model
 
     public static $enum_category = ["Staff" => "Staff", "Provisional" => "Provisional"];
 
+    public $timestamps = true;
 
     /**
      * Set to null if empty

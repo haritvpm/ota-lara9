@@ -14,8 +14,8 @@ return new class extends Migration
     public function up()
     {
         Schema::table('punchings', function (Blueprint $table) {
-            $table->string('aadhaarid')->nullable();
-            
+            $table->unique(['date', 'aadhaarid']);
+
         });
     }
 

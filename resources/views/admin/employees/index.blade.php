@@ -27,7 +27,7 @@
             <button type="submit">Import Staff CSV</button>
         </form>
         Employees with no category set : {{$empwithnocategory}}<br>
-       
+        Employees with redundant Desig Display : {{$empswithduplicatedesigdisplay}}<br>
         <hr>
 
         @endif
@@ -86,7 +86,8 @@
                         <th>@lang('quickadmin.employees.fields.name')</th>
    
                         <th>@lang('quickadmin.employees.fields.pen')</th>
-                        <th style="text-align:center;"><span class="glyphicon glyphicon-search"></span></th>
+                        <th>@lang('quickadmin.employees.fields.aadhaarid')</th>
+                        <!-- <th style="text-align:center;"><span class="glyphicon glyphicon-search"></span></th> -->
                         <th>@lang('quickadmin.employees.fields.designation')</th>
                         <th>Type</th>
                         @if(\Auth::user()->isAdmin())
@@ -146,7 +147,7 @@
 @stop
 
 @section('javascript') 
-    <script>
+<script>
       /*  @can('employee_delete')
             window.route_mass_crud_entries_destroy = '{{ route('admin.employees.mass_destroy') }}';
         @endcan*/
@@ -161,24 +162,24 @@
                 {data: 'name', name: 'name'},
                 //{data: 'name_mal', name: 'name_mal'},
                 {data: 'pen', name: 'pen'},
-                {data: 'search', name: 'search'},
-                {data: 'designation.designation', name: 'designation.designation'},
+                {data: 'aadhaarid', name: 'aadhaarid'},
+                //{data: 'search', name: 'search'},
+                {data: 'designation_designation', name: 'designation.designation'},
                 {data: 'category', name: 'category'},
                 @if(\Auth::user()->isAdmin())
                 {data: 'id', name: 'id'},
                 {data: 'added_by', name: 'added_by'},
                 {data: 'categories.category', name: 'categories.category'},
                 {data: 'desig_display', name: 'desig_display'},
-              // {data: 'created_at', name: 'created_at'},
-               // {data: 'updated_at', name: 'created_at'},
+            //    {data: 'created_at', name: 'created_at'},
+              // {data: 'updated_at', name: 'updated_at'},
                
                 @endif
                 {data: 'actions', name: 'actions', searchable: false, sortable: false}
             ];
             processAjaxTables();
         });
-    </script>
-
+    </script>   
 <script type="text/javascript">
 
 //var urlajaxpen = "{{url('admin/employees/ajaxfind')}}"

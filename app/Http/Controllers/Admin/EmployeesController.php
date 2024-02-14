@@ -34,9 +34,10 @@ class EmployeesController extends Controller
 
         if (request()->ajax()) {
             
-            $query = Employee::latest();
-            $query->with("designation"); 
-            $query->with("categories");
+           // $query = Employee::query();
+           //imp: 'select' is needed else id of empl row will change to relation id, after sorting a relationship column. 
+           //this will affect view/edit/delete
+            $query = Employee::with(['designation', 'categories'])->select('employees.*'); 
 
             $ShowRelievedEmployees = \App\Setting::where('name', 'ShowRelievedEmployees')->value('value');
 
@@ -55,40 +56,47 @@ class EmployeesController extends Controller
                 $query =  $query->where('pen', 'like', 'TMP%') ; //users with no PEN
             }
                             
-            $template = 'actionsTemplate';
-            
+                  
             $table = Datatables::of($query);
 
             $table->setRowAttr([
                 'data-entry-id' => '{{$id}}',
             ]);
-            $table->addColumn('massDelete', '&nbsp;');
+            $table->editColumn('id', function ($row) {
+                return $row->id ? $row->id : '';
+            });
+            $table->addColumn('designation_designation', function ($row) {
+                return $row->designation ? $row->designation->designation : '';
+            });
+          //  $table->addColumn('massDelete', '&nbsp;');
             $table->addColumn('actions', '&nbsp;');
-            $table->addColumn('search', '&nbsp;');
+            //$table->addColumn('search', '&nbsp;');
 
-            $table->editColumn('actions', function ($row) use ($template) {
+            $table->editColumn('actions', function ($row)  {
                 $gateKey  = 'employee_';
                 $routeKey = 'admin.employees';
 
-                return view($template, compact('row', 'gateKey', 'routeKey'));
+                return view( 'actionsTemplate', compact('row', 'gateKey', 'routeKey'));
             });
             $table->editColumn('name', function($row){
                 return $row->srismt.'. '.$row->name;
-                });
+            });
 
-             $table->editColumn('search', function($row) use ($session_latest){
+            // $table->editColumn('search', function($row) use ($session_latest){
 
 
-                $url = route('admin.searches.index', ['namefilter' => $row->pen, 'session' => $session_latest, 
-                  'created_by' => '', 'status' => '']);
+            //     $url = route('admin.searches.index', ['namefilter' => $row->pen, 'session' => $session_latest, 
+            //       'created_by' => '', 'status' => '']);
 
-                return '<a href=' . $url . '><span class="glyphicon glyphicon-search"></span></a>' ;
+            //     return '<a href=' . $url . '><span class="glyphicon glyphicon-search"></span></a>' ;
 
                
-                });
+            // });
 
-            $table->rawColumns(['actions', 'search']);
-            
+           // $table->rawColumns(['actions']);
+            // $table->rawColumns(['actions', 'search']);
+            $table->rawColumns(['actions', 'designation']);
+
             $table->editColumn('categories.category', function ($row) {
                 return $row->categories ? $row->categories->category : '';
             });
@@ -100,21 +108,30 @@ class EmployeesController extends Controller
         $designations = \App\Designation::orderby('designation','asc')
                     ->get(['designation'])->pluck('designation');
 
+        $data["designations"] = json_encode($designations);
 
         $empwithnocategory = '';
+        $empswithduplicatedesigdisplay = [];
         if(\Auth::user()->isAdmin())
         {
            $empwithnocategory = Employee::select('pen')->where('categories_id',null)
            //->where('category', '<>', 'Relieved')
            ->pluck('pen')->implode(',');
+        
+
+            //show all employees with redundant desig display
+            $empswithduplicatedesigdisplay =  Employee::with('designation')->get()
+                                        ->filter(function ($e) {
+                                            return 0 == strcasecmp($e->designation->designation, $e->desig_display);
+                                        })->pluck('pen')->implode(',');;
         }
-//dd($empwithnocategory);
 
         
-        $data["designations"] = json_encode($designations);
+ //    
 
 
-        return view('admin.employees.index', compact('data','empwithnocategory'));
+       
+        return view('admin.employees.index', compact('data','empwithnocategory','empswithduplicatedesigdisplay'));
     }
 
     /*
@@ -789,16 +806,16 @@ class EmployeesController extends Controller
 
         
         $date_ago = Carbon::today()->subYears(1);
-
-          
+         
         
         
-        $emp_withinvalidpens = \App\Employee::whereDate('created_at', '>', $date_ago->toDateString())
+        $emp_withinvalidpens = \App\Employee::/*whereDate('created_at', '>', $date_ago->toDateString())
                 ->whereDate('updated_at', '>', $date_ago->toDateString())
-                ->where(function($query) {
+                ->*/where(function($query) {
                      $query->whereRaw('LENGTH(pen) < 6')
                             ->orwhereRaw('LENGTH(pen) > 7')
-                            ->orWhere('pen','LIKE','% %');
+                            ->orWhere('pen','LIKE','% %')
+                            ->orWhere('pen','LIKE','%:%');
                 })
                 ->orderby('id','desc')->pluck('name','pen');
 
@@ -831,7 +848,8 @@ class EmployeesController extends Controller
           ->where(function($query) {
             $query->whereRaw('LENGTH(pen) < 6')
                    ->orwhereRaw('LENGTH(pen) > 7')
-                   ->orWhere('pen','LIKE','% %');
+                   ->orWhere('pen','LIKE','% %')
+                   ->orWhere('pen','LIKE','%:%');
             })
             ->get();
 
@@ -858,6 +876,9 @@ class EmployeesController extends Controller
     //now moving this online
     public function staffCategorySync(Request $request)
     {
+ 
+       
+  
         $mapCategories_to_id = \App\Category::All()->mapWithKeys(function($cat){
             return [$cat->category => $cat->id];
         });
@@ -918,6 +939,21 @@ class EmployeesController extends Controller
                    
                }
             }
+
+
+         //if desig displa is same as designaion, set desig display to empty
+         $emps = Employee::with('designation') ->get();
+         $empswithduplicatedesigdisplay =   $emps->filter(function ($e) {
+                                         return 0==strcasecmp($e->designation->designation, $e->desig_display);
+                                     })->pluck('id');
+ 
+         if($empswithduplicatedesigdisplay->count()){
+             Employee::wherein('id',$empswithduplicatedesigdisplay )
+                  ->update([
+                  'desig_display' => '',]);
+         }
+ 
+      
 
         return redirect()->back()->with('success', 'CSV file imported successfully.');
     }

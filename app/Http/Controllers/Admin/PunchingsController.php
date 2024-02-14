@@ -245,16 +245,37 @@ class PunchingsController extends Controller
                 $outtime =null;
                 $this->processPunchingData($jsonData[$i], $dateIn, $intime, $dateOut, $outtime);
                 //user may punchin but not punchout. so treat these separately
+                
+                //org_emp_code from api can be klaid, mobilenumber or empty. 
+
+                //punchout date can be diff to punchin date, not sure
+                if($dateIn && $intime && $dateOut && $outtime && ($dateIn === $dateOut)){
+                    $matchThese = ['aadhaarid' =>$dataItem['emp_id'] ,'date'=> $dateIn];
+                    $vals = ['punch_in'=> $intime,'punch_out'=> $outtime, 'pen'=>null];
+                    if($dataItem['org_emp_code'] != '')  $vals['pen'] = $dataItem['org_emp_code' ];
+                  
+                    $punch = Punching::updateOrCreate($matchThese,$vals);
+                }
+                else
                 if($dateIn && $intime){
                    // $date = Carbon::createFromFormat('Y-m-d', $dateIn)->format(config('app.date_format'));
-                    $matchThese = ['pen'=>$dataItem['org_emp_code'],'date'=> $dateIn];
-                    $punch = Punching::updateOrCreate($matchThese,['punch_in'=> $intime, 'aadhaarid' =>$dataItem['emp_id'] ]);
+                   //org_emp_code can be null. since empty can cause unique constraint violations, dont allow
+                    $matchThese = ['aadhaarid' =>$dataItem['emp_id'] ,'date'=> $dateIn];
+                    $vals = ['punch_in'=> $intime,'pen'=>null];
+
+                    if($dataItem['org_emp_code'] != '') $vals['pen'] = $dataItem['org_emp_code' ];
+                    
+                    $punch = Punching::updateOrCreate($matchThese,$vals);
                    
                 }
+                else
                 if($dateOut && $outtime){
                    // $date = Carbon::createFromFormat('Y-m-d', $dateOut)->format(config('app.date_format'));
-                    $matchThese = ['pen'=>$dataItem['org_emp_code'],'date'=> $dateOut];
-                    $punch = Punching::updateOrCreate($matchThese,['punch_out'=> $outtime, 'aadhaarid' =>$dataItem['emp_id'] ]);
+                    $matchThese = ['aadhaarid' =>$dataItem['emp_id'],'date'=> $dateOut];
+                    $vals = ['punch_out'=> $outtime,'pen'=>null];
+                    if($dataItem['org_emp_code'] != '')  $vals['pen'] = $dataItem['org_emp_code' ];
+                    
+                    $punch = Punching::updateOrCreate($matchThese,$vals);
                    
                 }
                 $insertedcount++;

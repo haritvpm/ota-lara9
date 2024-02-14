@@ -57,7 +57,7 @@
 
 
             <div class="row">
-                <div class="col-xs-7 form-group">
+                <div class="col-xs-6 form-group">
                     {!! Form::label('pen', trans('quickadmin.employees.fields.pen').'*', ['class' => 'control-label']) !!}
                    
                    @if(strncasecmp($employee->pen,"TMP",3)!=0)
@@ -78,6 +78,17 @@
                         </p>
                     @endif
                 </div>
+                <div class="col-xs-6 form-group">
+                   
+                            <label for="aadhaarid">{{ trans('quickadmin.employees.fields.aadhaarid') }}</label>
+                            <input class="form-control" type="text" name="aadhaarid" id="aadhaarid" value="{{ old('aadhaarid', $employee->aadhaarid) }}">
+                            @if($errors->has('aadhaarid'))
+                                <span class="help-block" role="alert">{{ $errors->first('aadhaarid') }}</span>
+                            @endif
+                         
+                    
+                </div>
+
             </div>
             <div class="row">
                 <div class="col-xs-12 form-group">

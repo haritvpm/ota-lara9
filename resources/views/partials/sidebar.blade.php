@@ -169,17 +169,6 @@
                     </span>
                 </a>
                 <ul class="treeview-menu">
-                
-                @can('role_access')
-                <li class="{{ $request->segment(2) == 'roles' ? 'active active-sub' : '' }}">
-                        <a href="{{ route('admin.roles.index') }}">
-                            <i class="fa fa-briefcase"></i>
-                            <span class="title">
-                                @lang('quickadmin.roles.title')
-                            </span>
-                        </a>
-                    </li>
-                @endcan
                 @can('user_access')
                 <li class="{{ $request->segment(2) == 'users' ? 'active active-sub' : '' }}">
                         <a href="{{ route('admin.users.index') }}">
@@ -190,6 +179,17 @@
                         </a>
                     </li>
                 @endcan
+                @can('role_access')
+                <li class="{{ $request->segment(2) == 'roles' ? 'active active-sub' : '' }}">
+                        <a href="{{ route('admin.roles.index') }}">
+                            <i class="fa fa-briefcase"></i>
+                            <span class="title">
+                                @lang('quickadmin.roles.title')
+                            </span>
+                        </a>
+                    </li>
+                @endcan
+              
                 @can('routing_access')
                 <li class="{{ $request->segment(2) == 'routings' ? 'active active-sub' : '' }}">
                         <a href="{{ route('admin.routings.index') }}">
