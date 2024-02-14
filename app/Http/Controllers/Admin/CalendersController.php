@@ -43,13 +43,23 @@ class CalendersController extends Controller
                return Calender::PUNCHING_SELECT[$row->punching] ?? '' ;
                
              });
+             
+             $table->addColumn('punchin_actions', '&nbsp;')->rawColumns(['punchin_actions']);;
+             $table->editColumn('punchin_actions', function ($row) {
+                 $gateKey  = 'calender_';
+                 $routeKey = 'admin.punchings';
+ 
+                 return view('actionsTemplatePunching', compact('row', 'gateKey', 'routeKey'));
+             });
+             
             $table->addColumn('actions', '&nbsp;')->rawColumns(['actions']);;
-            $table->editColumn('actions', function ($row) use ($template) {
+            $table->editColumn('actions', function ($row) {
                 $gateKey  = 'calender_';
                 $routeKey = 'admin.calenders';
 
-                return view($template, compact('row', 'gateKey', 'routeKey'));
+                return view('actionsTemplate', compact('row', 'gateKey', 'routeKey'));
             });
+
 
             return $table->make(true);
         }

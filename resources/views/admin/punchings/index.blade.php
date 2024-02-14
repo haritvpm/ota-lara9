@@ -16,7 +16,7 @@
 }
 
 </style>
-
+<!-- 
 <div class="panel panel-default" id="app">
         <div class="panel-heading">
             Fetch Punching Data
@@ -38,7 +38,7 @@
         </div>
     </form>
 
-  </div>
+  </div> -->
 
     <!-- <h3 class="page-title">Search</h3> -->
     
@@ -58,9 +58,9 @@
               
 
         @if(\Auth::user()->isAdmin())
-	    	<input  class="form-control" placeholder="Name/Pen" type="text" name = "namefilter" value="{{\Request('namefilter')}}" rel="filter">
+	    	<input  class="form-control" placeholder="AttendanceId/PEN" type="text" name = "namefilter" value="{{\Request('namefilter')}}" rel="filter">
     	@else
-    		<input  class="form-control" placeholder="Name/Pen" type="text" name = "namefilter" value="{{\Request('namefilter')}}" rel="filter" required>
+    		<input  class="form-control" placeholder="AttendanceId/PEN" type="text" name = "namefilter" value="{{\Request('namefilter')}}" rel="filter" required>
     	@endif
     	
     
@@ -91,7 +91,7 @@
                 <tr>
                    
                     <th>PEN</th>
-                    <th>Name</th>
+                    <th>AttendanceId</th>
                     <th>Duty Date</th>
                     <th>Punchin</th>
                     <th>Punchout</th>
@@ -110,7 +110,7 @@
                         <tr>
 
                             <td >{{ $punching->pen }}</td>
-                            <td >{{ $punching->name }}</td>
+                            <td >{{ $punching->aadhaarid }}</td>
                             <td >{{ $punching->date }}</td>
                             <td >{{ $punching->punch_in }}</td>
                             <td >{{ $punching->punch_out }}</td>

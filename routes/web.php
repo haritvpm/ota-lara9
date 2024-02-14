@@ -202,7 +202,7 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
 
     Route::get('punchings/ajaxgetpunchtimes/{date}/{pen}/{aadhaarid}',array('as'=>'punchings.ajax','uses'=>'Admin\PunchingsController@ajaxgetpunchtimes'));
 
-    Route::get('punchings/fetch','Admin\PunchingsController@fetch');
+    Route::get('punchings/fetch/{reportdate}','Admin\PunchingsController@fetch')->name('punchings.fetch');;
     Route::resource('punchings', 'Admin\PunchingsController');
    
     

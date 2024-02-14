@@ -200,22 +200,23 @@ class PunchingsController extends Controller
         }
     }
 
-    public function fetch(Request $request)
+    public function fetch($reportdate)
     {
+
         $apikey = 'OTlSaDVtaHRGRFV0VUVBaE5FV3FtV2R0cHpnZmdQUC9xWGpqTkhSSDNSYmZMWGFPQnIwN1drRjZyaENPVVpJWjlLby95eXp1M3N5YUZMNHhGVW1ZS21zTXN1N1B4NStwQ1p3dE1lNDl5U1U9';
         $offset = 0;
         $count = 500;
       
         // should be in format 2024-02-11
-        $reportdate = Carbon::createFromFormat(config('app.date_format'), $request->query('reportdate'))->format('Y-m-d');
+        $reportdate = Carbon::createFromFormat(config('app.date_format'), $reportdate)->format('Y-m-d');
      
         $url = "https://basreports.attendance.gov.in/api/unibasglobal/api/attendance/offset/{$offset}/count/{$count}/reportdate/{$reportdate}/apikey/{$apikey}";
 
        // Log::info($url);
        //if this date is not in calender, do nothing
-     
-        if(! Calender::where('date', $reportdate )->exists()){
-            $request->session()->flash('message-success', 'No such date in calender'  );
+        $calenderdate = Calender::where('date', $reportdate )->first();
+        if(! $calenderdate ){
+            \Session::flash('message-success', 'No such date in calender'  );
             return view('admin.punchings.index');
 
         }
@@ -289,9 +290,13 @@ class PunchingsController extends Controller
            
         }
 
-        $request->session()->flash('message-success', 'Processed: ' . $insertedcount );
+        if( $insertedcount ){
+            $calenderdate->update( [ 'punching' => 'AEBAS']);
+        }
 
-        return view('admin.punchings.index');
+        \Session::flash('message-success', "Fetched\Processed: {$insertedcount} records for {$reportdate}" );
+
+        return view('admin.calenders.index');
     }
     
 
