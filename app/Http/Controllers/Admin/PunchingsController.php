@@ -50,6 +50,7 @@ class PunchingsController extends Controller
             'punchin' => $temp['punch_in'],
             'punchout' => $temp['punch_out'],
             'creator' => $temp['creator'],
+            'aadhaarid' => $temp['aadhaarid'],
             'id' => $temp['id']
         ];
     } else return [];
@@ -203,17 +204,14 @@ class PunchingsController extends Controller
 
     public function fetch($reportdate)
     {
-
-        $apikey = 'OTlSaDVtaHRGRFV0VUVBaE5FV3FtV2R0cHpnZmdQUC9xWGpqTkhSSDNSYmZMWGFPQnIwN1drRjZyaENPVVpJWjlLby95eXp1M3N5YUZMNHhGVW1ZS21zTXN1N1B4NStwQ1p3dE1lNDl5U1U9';
+        $apikey =  env('AEBAS_KEY');
         $offset = 0;
         $count = 500;
       
         // should be in format 2024-02-11
         $reportdate = Carbon::createFromFormat(config('app.date_format'), $reportdate)->format('Y-m-d');
      
-        $url = "https://basreports.attendance.gov.in/api/unibasglobal/api/attendance/offset/{$offset}/count/{$count}/reportdate/{$reportdate}/apikey/{$apikey}";
-
-       // Log::info($url);
+       
        //if this date is not in calender, do nothing
         $calenderdate = Calender::where('date', $reportdate )->first();
         if(! $calenderdate ){
@@ -222,17 +220,23 @@ class PunchingsController extends Controller
 
         }
 
-        $url = 'http://localhost:3000/data';
+     
 
         $insertedcount = 0;
         $pen_to_aadhaarid = [];
         for ($offset=0;   ; $offset += $count+1 ) { 
             
+            
+            $url = "https://basreports.attendance.gov.in/api/unibasglobal/api/attendance/offset/{$offset}/count/{$count}/reportdate/{$reportdate}/apikey/{$apikey}";
+            // $url = 'http://localhost:3000/data';
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
+            ])->withOptions([
+                'verify' => false,
             ])->get($url);
 
             if($response->status() !== 200){
+               \Session::flash('message-danger',  $response->status() );
                 break;
             }
             $jsonData = $response->json();
@@ -308,39 +312,133 @@ class PunchingsController extends Controller
            // $lastfetch->save();
         }
 
-        //Update our employee db with aadhaarid from api
-        //since org_emp_code can be empty or even mobile number, make sure this is our pen
-        $emps = Employee::select('id', 'pen','aadhaarid')->wherein('pen', array_keys($pen_to_aadhaarid))->get();
-        foreach ($emps->chunk(1000) as $chunk) {
-            $cases = [];
-            $ids = [];
-            $params_aadhaarid = [];
-                        
-            foreach ($chunk as $emp) {
-                    if(!$emp->aadhaarid || $emp->aadhaarid == ''){ //only if it is not set already
-                    if (array_key_exists($emp->pen, $pen_to_aadhaarid) ){
-                        $cases[] = "WHEN '{$emp->pen}' then ?";
-                        $params_aadhaarid[] = $pen_to_aadhaarid[$emp->pen];
-                        $ids[] = $emp->id;
+        if(count($pen_to_aadhaarid)){
+            //Update our employee db with aadhaarid from api
+            //since org_emp_code can be empty or even mobile number, make sure this is our pen
+            $emps = Employee::select('id', 'pen','aadhaarid')
+                    ->wherein('pen', array_keys($pen_to_aadhaarid))->get();
+            foreach ($emps->chunk(1000) as $chunk) {
+                $cases = [];
+                $ids = [];
+                $params_aadhaarid = [];
+                            
+                foreach ($chunk as $emp) {
+                        if(!$emp->aadhaarid || $emp->aadhaarid == ''){ //only if it is not set already
+                        if (array_key_exists($emp->pen, $pen_to_aadhaarid) ){
+                            $cases[] = "WHEN '{$emp->pen}' then ?";
+                            $params_aadhaarid[] = $pen_to_aadhaarid[$emp->pen];
+                            $ids[] = $emp->id;
+                        }
                     }
                 }
-            }
-            
-            $ids = implode(',', $ids);
-            $cases = implode(' ', $cases);
-            
-            if (!empty($ids)) {
-                //dd( $params_aadhaarid);
-                \DB::update("UPDATE employees SET `aadhaarid` = CASE `pen` {$cases} END WHERE `id` in ({$ids})", $params_aadhaarid);
                 
+                $ids = implode(',', $ids);
+                $cases = implode(' ', $cases);
+                
+                if (!empty($ids)) {
+                    //dd( $params_aadhaarid);
+                    \DB::update("UPDATE employees SET `aadhaarid` = CASE `pen` {$cases} END WHERE `id` in ({$ids})", $params_aadhaarid);
+                    
+                }
             }
-        }
+        }      
 
 
         \Session::flash('message-success', "Fetched\Processed: {$insertedcount} records for {$reportdate}" );
 
         return view('admin.calenders.index');
     }
-    
+    ////
+     
+    public function fetchApi(Request $request)
+    {
+       
+        $apikey =  env('AEBAS_KEY');
+        $offset = 0;
+        $count = 500;
+        $apinum = $request->query('apinum');
+        $reportdate = $request->query('reportdate','01-01-2000');
+
+        $returnkey = "successattendance";
+         // should be in format 2024-02-11
+        $reportdate = Carbon::createFromFormat(config('app.date_format'), $reportdate)->format('Y-m-d');
+     
+       
+     
+       
+        $data = [];
+
+        
+        for ($offset=0;   ; $offset += $count+1 ) { 
+            
+            $url = "https://basreports.attendance.gov.in/api/unibasglobal/api/attendance/offset/{$offset}/count/{$count}/reportdate/{$reportdate}/apikey/{$apikey}";
+
+            if(1 == $apinum){
+                $url = "https://basreports.attendance.gov.in/api/unibasglobal/api/employee/offset/{$offset}/count/{$count}/apikey/{$apikey}";
+                $returnkey = "employee";
+            }else
+            if( $apinum == 6 ){
+                $url = "https://basreports.attendance.gov.in/api/unibasglobal/api/trace/offset/{$offset}/count/{$count}/reportdate/{$reportdate}/apikey/{$apikey}";
+                $returnkey = "attendancetrace";
+
+            }
+            // $url = 'http://localhost:3000/data';
+            Log::info($url);
+            $response = Http::withHeaders([
+                'Access-Control-Allow-Origin' => '*',
+                'Content-Type' => 'application/json',
+            ])->withOptions([
+                'verify' => false,
+            ])->get($url);
+                      
+            
+            if($response->status() !== 200){
+                \Session::flash('message-danger',  $response->status() );
+                return view('admin.punchings.index');
+                //break;
+            }
+            $jsonData = $response->json();
+            $jsonData =  $jsonData[$returnkey];
+            array_push($data,$jsonData);
+            //if reached end of data, break
+            if(count($jsonData) <  $count){ 
+               
+                break;
+            }
+           
+        }
+       
+        if(!count($data)) {
+
+            \Session::flash('message-danger', "No Data" );
+            return view('admin.punchings.index');
+        }
+
+        $list = array_values($data);
+        # add headers for each column in the CSV download
+        array_unshift($list, array_keys($data[0]));
+       
+
+        $callback = function() use ($list) 
+        {
+            $FH = fopen('php://output', 'w');
+            foreach ($list as $row) { 
+                fputcsv($FH, $row);
+            }
+            fclose($FH);
+        };
+
+        $headers = [
+            'Cache-Control'       => 'must-revalidate, post-check=0, pre-check=0'
+            ,   'Content-type'        => 'text/csv'
+            ,   'Content-Disposition' => 'attachment; filename=fetch.csv'
+            ,   'Expires'             => '0'
+            ,   'Pragma'              => 'public'
+        ];
+        
+        return response()->stream($callback, 200, $headers);
+    }
+ 
+ 
 
 }

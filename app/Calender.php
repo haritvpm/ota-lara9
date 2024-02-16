@@ -68,5 +68,10 @@ public const PUNCHING_SELECT = [
     {
         return $this->belongsTo(Session::class, 'session_id');
     }
+    public function getIsHolidayAttribute()
+    {
+        return str_contains($this->day_type,'oliday');
+        
+    }
 
 }

@@ -21,7 +21,9 @@ class Overtime extends Model
     protected $fillable = ['pen', 'designation', 'from', 'to', 'count', 'worknature', 'form_id','rate', 'name',
     
     'punching', //whether punching is applicable to this employee
-    'punchin', 'punchout', 'punching_id', 'employee_id'];
+    'punchin', 'punchout', 'punching_id', 'employee_id',
+    'normal_office_hours' //this is not saved. just for backend validation
+];
     
 
     /**

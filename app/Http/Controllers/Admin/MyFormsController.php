@@ -576,6 +576,8 @@ class MyFormsController extends Controller
     {
         
         $date = Carbon::createFromFormat(config('app.date_format'), $request['duty_date'])->format('Y-m-d');
+
+      
            
 
         $collection = collect($request->overtimes);
@@ -595,8 +597,11 @@ class MyFormsController extends Controller
         $designations = $collection->pluck('designation');
 
         $rates = \App\Designation::wherein ('designation', $designations )->pluck('rate','designation');
-       
+        $calender_day = \App\Calender::where('date', $date)->first();
+        //$isHolidey = str_contains($calender_day->day_type,'oliday');
        //\Log::info(print_r($rates, true));
+      
+       
 
 ///////////////
 
@@ -620,7 +625,6 @@ class MyFormsController extends Controller
                     ->wherein('pen',$pens )
                     ->whereHas('form', function($query)  use ($request,$date,$formid) { 
                           $query->where('duty_date', $date)
-                                //->where('overtime_slot', $request['overtime_slot'])
                                 ->where('overtime_slot', '<>' ,'Sittings')
                                 ->where('session', $request['session'])
                                 ->where('id', '!=', $formid); //skip this item if on update
@@ -634,7 +638,7 @@ class MyFormsController extends Controller
         $rates = \App\Designation::wherein ('designation', $designations )->pluck('rate','designation');
      
         $overtimes = $collection->transform(function($overtime)  
-                                            use ($res, $request,$date, &$myerrors,$formid,$rates) 
+                                            use ($res, $request,$date, &$myerrors,$formid,$rates,$calender_day) 
         {
             $pen = $overtime['pen'];
             $tmp = strpos($pen, '-');
@@ -642,7 +646,7 @@ class MyFormsController extends Controller
                 $pen = substr($pen, 0, $tmp);
             }
 
-
+            //all ots for this particular employee only
             $emp = $res->reject(function($element) use ($pen) {
                 //return strpos($element['pen'], $pen) === false;
                 return strncasecmp($element['pen'], $pen, strlen($pen)) != 0;
@@ -691,42 +695,67 @@ class MyFormsController extends Controller
 
             }
 
-            $timefrom_comp = strtotime($overtime['from']);
-            $timeto_comp = strtotime($overtime['to']);
+            $strtimes_totimestamps = function ( $from, $to )  {
+              $timefrom = strtotime($from);   $timeto = strtotime($to);
+               if($timeto <= $timefrom){  $timeto += 24*60*60; }
+               return [ $timefrom,$timeto ];
+            };
 
-            if($timeto_comp <= $timefrom_comp){
-                    $timeto_comp += 24*60*60;
-                }
+            //time of this form
+            //$timefrom_comp = strtotime($overtime['from']);
+           // $timeto_comp = strtotime($overtime['to']);
 
+           // if($timeto_comp <= $timefrom_comp){
+           //         $timeto_comp += 24*60*60;
+           // }
+           [$timefrom_comp, $timeto_comp] = $strtimes_totimestamps( $overtime['from'], $overtime['to']);
 
+            //check overlap with other OTS of this day for this employee
             foreach ($emp as $e) {
-                $timefrom = strtotime($e['from']);
-                $timeto = strtotime(  $e['to']);
-                if($timeto <= $timefrom){
-                    $timeto += 24*60*60;
-                }
+                //$timefrom = strtotime($e['from']);
+                //$timeto = strtotime(  $e['to']);
+                //if($timeto <= $timefrom){
+                //    $timeto += 24*60*60;
+               // }
+                [$timefrom, $timeto] = $strtimes_totimestamps($e['from'], $e['to']);
 
-/*
-                 $isoverlap = ($timefrom > $timefrom_comp && $timefrom < $timeto_comp) ||
-                   ($timefrom_comp > $timefrom && $timefrom_comp < $timeto) || 
-                   ( $timefrom == $timefrom_comp || 
-                    $timeto  ==  $timeto_comp )
-                   ;
-                   */
-                    $isoverlap = (($timefrom < $timeto_comp) && ($timeto > $timefrom_comp)) || 
-                    ($timefrom == $timefrom_comp) || 
-                    ($timeto == $timeto_comp) ;
+                /*
+                 $isoverlap = ($timefrom > $timefrom_comp && $timefrom < $timeto_comp) ||  ($timefrom_comp > $timefrom && $timefrom_comp < $timeto) || 
+                   ( $timefrom == $timefrom_comp ||  $timeto  ==  $timeto_comp ) ;
+                */
+                $isoverlap = (($timefrom < $timeto_comp) && ($timeto > $timefrom_comp)) || 
+                              ($timefrom == $timefrom_comp) ||  ($timeto == $timeto_comp) ;
 
-                   if($isoverlap){
+                if($isoverlap){
                      //list($pen, $name) = array_map('trim', explode("-", $overtime['pen']));
-                array_push($myerrors, $overtime['name'] . '-' . $overtime['pen'] . ' : Times overlap with another OT from ' . $e['from'] . ' - ' . $e['to'] . ' (' . $e->form->overtime_slot . ' OT) on this day (' . $e->form->creator . ' )' );
+                    array_push($myerrors, $overtime['name'] . '-' . $overtime['pen'] . ' : Times overlap with another OT from ' . $e['from'] . ' - ' . $e['to'] . ' (' . $e->form->overtime_slot . ' OT) on this day (' . $e->form->creator . ' )' );
                     return null;
-                   }
+                }
 
             } 
            
-           
+            //check if time is the minimum recommended
+            /* incomplete. grace time of 10 min for whole day. instead allow for each OT
+            $normal_office_hours = $overtime['normal_office_hours'];
+          //  dd( $normal_office_hours);
+         
+            $needed_mins_forthisOT = $calender_day->isHoliday ? 180 : 150;
+            if( $request['overtime_slot'] === 'First' ){
+                $needed_mins_forthisOT += $normal_office_hours*60* $calender_day->daylength_multiplier;
+            }
 
+            $mins_forthisOT = ceil(abs($timeto_comp - $timefrom_comp) / 60);
+           
+           // array_push($myerrors,$mins_forthisOT .'-' .$needed_mins_forthisOT );
+       
+            if( $mins_forthisOT <  $needed_mins_forthisOT){
+                //check grace time by adding times for all OTs.
+                $total_time_allotherOTs = $emp->sum(function ($ot) use($strtimes_totimestamps) {
+                    [$timefrom_thisOT, $timeto_thisOT] = $strtimes_totimestamps( $ot['from'],$ot['to']);
+                    return ceil(abs($timeto_thisOT - $timefrom_thisOT) / 60);
+                });
+            }
+            */
 
 
             {

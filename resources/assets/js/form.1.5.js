@@ -161,11 +161,14 @@ var vm = new Vue({
 			}
 		},
 
-		onChange: function () {
+		onChange: function (e) {
+			if( e?.type != 'dp' ) return ; //this func seems to be called twice on date change. this prevents that as the first call does not have that set
+			var self = this;
 			this.myerrors = [];
 			this.slotoptions = this.slotoptions;
 			this.form.overtime_slot = "";
-
+			console.log('date change' )
+			console.log(e)
 			if (this.form.duty_date != "" && this.form.duty_date != null) {
 						
 				if (calenderdaysmap[this.form.duty_date] !== undefined) this.selectdaylabel = ": " + calenderdaysmap[this.form.duty_date];
@@ -182,6 +185,23 @@ var vm = new Vue({
 							"."
 					);
 				}
+
+				if( e.oldDate != e.date )
+				{
+					for (let i = 0; i < this.form.overtimes.length; i++) { 
+						this.fetchPunchingTimeForRow(i)
+						//Vue.set(this.form.overtimes, this.form.overtimes)
+						//this.form.overtimes = Object.assign({},form.overtimes);
+					}
+					
+		
+					self.$nextTick(() => {
+						console.log('updated') // => 'updated'
+					})
+				}
+			
+		
+								
 			}
 		},
 		onChangeSlot: function () {
@@ -199,6 +219,7 @@ var vm = new Vue({
 		},
 
 		getDefaultTimes(overtime_slot, row) {
+			if(!this.form.duty_date) return { def_time_start:"", def_time_end:"" };
 			const { isSittingDay, isSittingOrWorkingDay, isWorkingDay, isHoliDay } = this.getDayTypes();
 
 			let def_time_start = "";
@@ -442,7 +463,7 @@ var vm = new Vue({
 				if (desig !== undefined && desig.desig) {
 					row.designation = desig.desig;
 					row.punching &&= desig.punching;
-					row.normal_office_hours = desig.desig_normal_office_hours * this._daylenmultiplier;
+					row.normal_office_hours = desig.desig_normal_office_hours ;
 					row.category = desig.category;
 					row.employee_id = desig.employee_id;
 					row.aadhaarid = desig.aadhaarid;
@@ -453,34 +474,15 @@ var vm = new Vue({
 					console.log(row);
 					if (0 == id) {
 						const { def_time_start, def_time_end } = this.getDefaultTimes(this.form.overtime_slot, row);
-						row.from = def_time_start;
-						row.to = def_time_end;
+						row.from = def_time_start ?? "";
+						row.to = def_time_end ?? "";
 					}
 
 					//self.$forceUpdate()
 				}
 
-				//set punchtime if not set and available
-				//reset for example if user selects another person after selecting a person with punchtime
-				// self.form.overtimes[id].allowpunch_edit=true;
-				row.punchin = "";
-				row.punchout = "";
-				row.punching_id = null;
-
-				if (desig !== undefined && row.punching) {
-					axios
-						.get(urlajaxgetpunchtimes + "/" + self.form.duty_date + "/" + row.pen + "/" + row.aadhaarid)
-						.then((response) => {
-							console.log("got punch data");
-							console.log(response);
-							if (response.data && response.data.hasOwnProperty("punchin") && response.data.hasOwnProperty("punchout")) {
-								row.punchin = response.data.punchin;
-								row.punchout = response.data.punchout;
-								row.punching_id = response.data.id;
-							}
-						})
-						.catch((err) => {});
-				}
+				this.fetchPunchingTimeForRow(id) 
+				
 			});
 
 			//no need we will check on form submit
@@ -491,9 +493,39 @@ var vm = new Vue({
 			
 			//alert(id) unable to get id. so a hack
 		},
-		updateSelect(selectedOption, id) {
-			//not workin
-			//alert('updated');
+		//this can be used to update punching times if we chage calender dates after entering/loading employees.
+		fetchPunchingTimeForRow(index) {
+			var self = this;
+			let row = self.form.overtimes[index];
+			if(row.pen == "" || !self.form.duty_date) return;
+			//set punchtime if not set and available
+			//reset for example if user selects another person after selecting a person with punchtime
+			// self.form.overtimes[id].allowpunch_edit=true;
+			 row.punchin = "";
+			 row.punchout = "";
+			 row.punching_id = null;
+			 row.punching &&= self.dayHasPunching;
+
+			if ( row.punching) {
+				axios
+					.get(urlajaxgetpunchtimes + "/" + self.form.duty_date + "/" +  row.pen + "/" +  row.aadhaarid)
+					.then((response) => {
+						console.log("got punch data");
+						console.log(response);
+						if (response.data && response.data.hasOwnProperty("punchin") && response.data.hasOwnProperty("punchout")) {
+							console.log("set punch data");
+							 row.punchin = response.data.punchin;
+							 row.punchout = response.data.punchout;
+							 row.aadhaarid = response.data.aadhaarid;
+							 row.punching_id = response.data.id;
+						}
+					})
+					.catch((err) => {});
+			}
+
+			//Vue.set(this.form.overtimes,index, row)
+
+			//this.form.overtimes.splice(index, 1,  self.form.overtimes[index]);
 		},
 		checkDuplicates() {
 			var self = this;
@@ -543,7 +575,7 @@ var vm = new Vue({
 		checkSittingDayTimeIsAsPerGO(overtime_slot, row, i) {
 			//we need to give some leeway. so commenting
      			
-      if (row.isPartime) {
+      		if (row.isPartime) {
 				//parttime emp
         /*
 				if (overtime_slot == "First") {
@@ -598,7 +630,7 @@ var vm = new Vue({
 				} 
 			
 				// a flexy time of 15 mins eitherway
-				if( (diffFrom && diffFrom > 15) || (diffTo && diffTo > 15)) {
+				if( (diffFrom && diffFrom > 10) || (diffTo && diffTo > 10)) {
 					this.myerrors.push("Row " + (i + 1) + ": Time should be as per G.O on a sitting day");
 					return false;
 				}
@@ -622,6 +654,7 @@ var vm = new Vue({
 			return true;
 		},
 		getDayTypes() {
+
 			const isSittingDay = calenderdaysmap[this.form.duty_date] == "Sitting day";
 			const isSittingOrWorkingDay = calenderdaysmap[this.form.duty_date].indexOf("oliday") == -1;
 			const isWorkingDay = calenderdaysmap[this.form.duty_date].indexOf("orking") != -1;
@@ -661,15 +694,11 @@ var vm = new Vue({
 			}
 
 			if (self.form.overtime_slot == "Additional") {
-				if (
-					self.form.overtimes.some(
+				if (self.form.overtimes.some(
 						(row) =>
-							row.designation != "Deputy Secretary" &&
-							row.designation != "Joint Secretary" &&
-							row.designation != "Additional Secretary" &&
-							row.designation != "Special Secretary"
-					)
-				) {
+							row.designation != "Deputy Secretary" && row.designation != "Joint Secretary" &&
+							row.designation != "Additional Secretary" && row.designation != "Special Secretary"
+					)) {
 					this.$swal("Error", "Only DS or above can have Additional OT!", "error");
 					return false;
 				}
@@ -683,8 +712,8 @@ var vm = new Vue({
 			let minothour = parseFloat(2.75); //corrected to allow leeway 15 minutes
 			var daytypedesc = "holiday";
 			if (isSittingOrWorkingDay) {
-        minothour_ideal = parseFloat(2.5);
-				minothour = parseFloat(2.25);
+        		minothour_ideal = parseFloat(2.5);
+				minothour = parseFloat(2.3); //12 min leeway
 				daytypedesc = "working day";
 				if (isSittingDay) {
 					daytypedesc = "sitting day";
@@ -836,16 +865,11 @@ var vm = new Vue({
 				})
 				.catch((error) => {
 					self.$swal({
-						type: "error",
-						title: "Error",
-						text: "Please see the error(s) shown in red at the top",
-						timer: 2500,
+						type: "error",	title: "Error",	text: "Please see the error(s) shown in red at the top",timer: 2500,
 					});
 					// alert('fail ajax');
 					const response = error.response;
 					self.isProcessing = false;
-					// alert (JSON.stringify(response.data));    // alerts {"myProp":"Hello"};
-					// Vue.set(self.$data, 'errors', response.data);
 					self.errors = response.data;
 				});
 		},
@@ -898,24 +922,17 @@ var vm = new Vue({
 				})
 				.catch((error) => {
 					self.$swal({
-						type: "error",
-						title: "Error",
-						text: "Please read the error(s) shown in red at the top",
-						timer: 2500,
+						type: "error",	title: "Error",	text: "Please read the error(s) shown in red at the top",	timer: 2500,
 					});
 					//self.$swal.close();
 					const response = error.response;
 					self.isProcessing = false;
-					// alert (JSON.stringify(response.data));    // alerts {"myProp":"Hello"};
-					// Vue.set(self.$data, 'errors', response.data);
 					self.errors = response.data;
 				});
 		},
 
 		savepreset: function () {
 			var self = this;
-
-			// alert (JSON.stringify(presets));
 
 			var pens = [];
 
@@ -1031,7 +1048,7 @@ var vm = new Vue({
 
 			var timefrom = "";
 			var timeto = "";
-			var worknature = self.presets_default["default_worknature"];
+			//var worknature = self.presets_default["default_worknature"];
 
 			if (this.form.overtime_slot != "") {
 				timefrom = def_time_start;
@@ -1041,34 +1058,41 @@ var vm = new Vue({
 			if (self.form.overtimes.length > 0) {
 				timefrom = self.form.overtimes[0].from;
 				timeto = self.form.overtimes[0].to;
-				worknature = self.form.overtimes[0].worknature;
+				//worknature = self.form.overtimes[0].worknature;
 			}
 
 			for (var key in obj) {
 				if (obj.hasOwnProperty(key)) {
 					//we can either clear items or we check for duplicates
-					var entryfound = false;
+				
+					let index = -1;
 					for (var i = 0; i < self.form.overtimes.length; i++) {
 						var pen_name = self.form.overtimes[i].pen;
 						if (pen_name == key) {
-							entryfound = true;
+							index = i;
 							break;
 						}
 					}
 
-					if (!entryfound) {
+					if (index === -1) {
 						self.form.overtimes.push({
 							pen: key,
 							designation: obj[key].desig,
 							from: timefrom,
 							to: timeto,
-							worknature: worknature,
+							//worknature: worknature,
 							category: obj[key].category,
 							employee_id: obj[key].employee_id,
 							punching: obj[key].punching,
 							normal_office_hours: obj[key].normal_office_hours,
 						});
+
+						index = self.form.overtimes.length -1
 					}
+
+						
+					this.fetchPunchingTimeForRow(index)
+				
 				}
 			}
 		}, //loadpresetdata

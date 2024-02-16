@@ -21,11 +21,11 @@
          <a href="{{ route('admin.employees.sparksync') }}" class="btn btn-warning">Spark Sync</a>
          &nbsp;
          <hr>
-         <form action="{{ route('admin.employees.staffCategorySync') }}" method="POST" enctype="multipart/form-data">
+         <!-- <form action="{{ route('admin.employees.staffCategorySync') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <input type="file" name="file" accept=".csv">
             <button type="submit">Import Staff CSV</button>
-        </form>
+        </form> -->
         Employees with no category set : {{$empwithnocategory}}<br>
         Employees with redundant Desig Display : {{$empswithduplicatedesigdisplay}}<br>
         <hr>

@@ -40,7 +40,7 @@
 			<label for="duty_date">Date</label>
 			 @{{ selectdaylabel }}		
 			  
-			<date-picker {{$readonly}} v-model="form.duty_date" @dp-hide="onChange"
+			<date-picker {{$readonly}} v-model="form.duty_date" @dp-change="onChange"
 					:config="configdate"
 					placeholder="Select date"
 					:required="true"
@@ -79,7 +79,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				<tr v-for="(row, index) in form.overtimes" :class="{ info: index%2 }">
+				<tr v-for="(row, index) in form.overtimes" :class="{ info: index%2 }" >
 					<td style="width:1px;"> <small> 
 <button  class="btn btn-default" data-toggle="tooltip" title="Insert row" @click.prevent="insertElement(index+1);"> <span v-text="index+1"></span> </small> </button></td>
 					
@@ -107,8 +107,8 @@
 					</td> -->
 					<td>
 						
-					<!-- <div class="small"> @{{ row.designation }} </div>  -->
-					<div class="small"> @{{ row.designation }}, @{{ row.category }},  @{{ row.punching }}, @{{row.normal_office_hours}} </div> 
+					<div class="small"> @{{ row.designation }} </div> 
+					<!-- <div class="small"> @{{ row.designation }}, @{{ row.category }},  @{{ row.punching }}, @{{row.normal_office_hours}} </div>  -->
 					</td>
 					
 					

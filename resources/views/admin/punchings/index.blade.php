@@ -16,20 +16,23 @@
 }
 
 </style>
-<!-- 
-<div class="panel panel-default" id="app">
+
+  <div class="panel panel-default" id="app">
         <div class="panel-heading">
-            Fetch Punching Data
+            Fetch Punching API
         </div>
 
         <div class="panel-body">
 
-	<form action="{{url('admin/punchings/fetch')}}" method="get" id="filter" class="form-inline">
+	<form action="{{url('admin/punchings/fetchApi')}}" method="get" id="filter" class="form-inline">
         
         <div class="form-group">     
-        	Date <input required class="form-control" placeholder="dd-mm-yyyy" type="search" name = "reportdate" value="{{ \Request('reportdate')}}" >
+            ApiNum <input required class="form-control" placeholder="1/5/6" name = "apinum" value="{{ \Request('apinum')}}" >
 		</div>
-      
+
+        <div class="form-group">     
+        	Date (for 5/6) <input class="form-control" placeholder="dd-mm-yyyy" name = "reportdate" value="{{ \Request('reportdate')}}" >
+		</div>
 	  
         <div class="form-group">                                
                   
@@ -38,11 +41,12 @@
         </div>
     </form>
 
-  </div> -->
-
+  </div>
+  </div>
+  
+  <div class="panel panel-default" id="app">
     <!-- <h3 class="page-title">Search</h3> -->
-    
-    <div class="panel panel-default" id="app">
+     
         <div class="panel-heading">
             Search Punching
         </div>
@@ -162,6 +166,7 @@
   
   </div>
   </div>
+  
 
 <!-- export -->
 
