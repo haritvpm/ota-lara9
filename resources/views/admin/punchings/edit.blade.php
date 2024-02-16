@@ -41,16 +41,22 @@ Editing will not affect already submitted OT forms, as they have their own field
                         </div> -->
 
                         <div class="form-group {{ $errors->has('punch_in') ? 'has-error' : '' }}">
-                            <label class="required" for="punch_in">{{ trans('cruds.punching.fields.punch_in') }}</label>
-                            <input class="form-control" type="text" name="punch_in" id="punch_in" value="{{ old('punch_in', $punching->punch_in) }}" required>
+                            <label class="required" for="punch_in">{{ trans('cruds.punching.fields.punch_in') }} {{$punching->punchin_from_aebas ? '(From AEBAS)':'(Manual Entry)'}}</label>
+                            <!-- do not allow editing if we got this time from aebas. and also if this time is not null -->
+                      
+                            <input  {{   $punching->punchin_from_aebas && $punching->punch_in  ? 'readonly' : '' }} class="form-control" type="text" name="punch_in" id="punch_in" value="{{ old('punch_in', $punching->punch_in) }}" required>
+                           
+
                             @if($errors->has('punch_in'))
                                 <span class="help-block" role="alert">{{ $errors->first('punch_in') }}</span>
                             @endif
                             <span class="help-block">{{ trans('cruds.punching.fields.punch_in_helper') }}</span>
                         </div>
                         <div class="form-group {{ $errors->has('punch_out') ? 'has-error' : '' }}">
-                            <label class="required" for="punch_out">{{ trans('cruds.punching.fields.punch_out') }}</label>
-                            <input class="form-control" type="text" name="punch_out" id="punch_out" value="{{ old('punch_out', $punching->punch_out) }}" required>
+                            <label class="required" for="punch_out">{{ trans('cruds.punching.fields.punch_out') }} {{$punching->punchout_from_aebas ? '(From AEBAS)':'(Manual Entry)'}}</label>
+                           
+                            <input {{   $punching->punchout_from_aebas && $punching->punch_out  ? 'readonly' : '' }}  class="form-control" type="text" name="punch_out" id="punch_out" value="{{ old('punch_out', $punching->punch_out) }}" required>
+                          
                             @if($errors->has('punch_out'))
                                 <span class="help-block" role="alert">{{ $errors->first('punch_out') }}</span>
                             @endif

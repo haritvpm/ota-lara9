@@ -48,8 +48,8 @@ class PresetsController extends Controller
         else{
             $presets = Preset::where('user_id',\Auth::user()->id)->orderby('updated_at', 'desc')->get();
         }
-
-     
+      //  $presets = $presets->toArray();
+    // dd($presets);
 
         return view('admin.presets.index', compact('presets'));
     }
@@ -255,7 +255,7 @@ class PresetsController extends Controller
         $preset = Preset::findOrFail($id);
 
         $loadedpreset = $this->ajaxfind($preset->name, $id );
-       
+      // dd( $loadedpreset );
         return view('admin.presets.show', compact('preset', 'loadedpreset'));
     }
 

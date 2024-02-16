@@ -715,12 +715,14 @@ var vm = new Vue({
           if (overtime_slot !== "First") {
             var sNormalStart = "10:15";
             var sNormalEnd = "17:15";
+            var sNormalEndWithGrace = "17:00";
             if (isSittingDay) {
               sNormalStart = "08:00";
               sNormalEnd = "17:30";
+              sNormalEndWithGrace = "17:15";
             }
-            if (!this.checkIfOTOverlapsWithOfficeHours(overtime_slot, datefrom, dateto, sNormalStart, sNormalEnd)) {
-              this.myerrors.push("Row ".concat(i + 1, " : OT cannot be between ").concat(sNormalStart, " and ").concat(sNormalEnd, " am on a ").concat(daytypedesc));
+            if (!this.checkIfOTOverlapsWithOfficeHours(overtime_slot, datefrom, dateto, sNormalStart, sNormalEndWithGrace)) {
+              this.myerrors.push("Row ".concat(i + 1, " : 2nd/3rd OT cannot be between ").concat(sNormalStart, " and ").concat(sNormalEnd, " am on a ").concat(daytypedesc));
               return false;
             }
           }

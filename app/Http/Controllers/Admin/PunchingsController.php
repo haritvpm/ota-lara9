@@ -135,7 +135,7 @@ class PunchingsController extends Controller
     public function store(Request $request)
     {
         $punching = Punching::create($request->all());
-
+       
         return redirect()->route('admin.punchings.index');
     }
 
@@ -147,14 +147,17 @@ class PunchingsController extends Controller
 
       //  $punching->load('form');
 
-        return view('admin.punchings.edit', compact('punching'));
+      return view('admin.punchings.edit', compact('punching'));
+      //return view('admin.punchings.edit', compact('punching'));
     }
 
     public function update(Request $request, Punching $punching)
     {
+    
         $punching->update($request->all());
+        $reportdate = Carbon::createFromFormat('Y-m-d', $punching->date)->format(config('app.date_format'));
 
-        return redirect()->route('admin.punchings.index');
+        return redirect()->route('admin.punchings.index', ['datefilter'=> $reportdate]);
     }
 
     public function show(Punching $punching)
@@ -261,7 +264,7 @@ class PunchingsController extends Controller
                 //punchout date can be diff to punchin date, not sure
                 if($dateIn && $intime && $dateOut && $outtime && ($dateIn === $dateOut)){
                     $matchThese = ['aadhaarid' => $attendanceId ,'date'=> $dateIn];
-                    $vals = ['punch_in'=> $intime,'punch_out'=> $outtime, 'pen'=>'-'];
+                    $vals = ['punch_in'=> $intime,'punch_out'=> $outtime, 'pen'=>'-', 'punchin_from_aebas' => true, 'punchout_from_aebas'=> true];
                     if($org_emp_code != '')  $vals['pen'] = $org_emp_code;
                   
                     $punch = Punching::updateOrCreate($matchThese,$vals);
@@ -271,7 +274,7 @@ class PunchingsController extends Controller
                    // $date = Carbon::createFromFormat('Y-m-d', $dateIn)->format(config('app.date_format'));
                    //org_emp_code can be null. since empty can cause unique constraint violations, dont allow
                     $matchThese = ['aadhaarid' =>$attendanceId ,'date'=> $dateIn];
-                    $vals = ['punch_in'=> $intime,'pen'=>'-'];
+                    $vals = ['punch_in'=> $intime,'pen'=>'-', 'punchin_from_aebas' => true, 'punchout_from_aebas'=> false];
 
                     if($org_emp_code != '') $vals['pen'] = $org_emp_code;
                     
@@ -282,7 +285,7 @@ class PunchingsController extends Controller
                 if($dateOut && $outtime){
                    // $date = Carbon::createFromFormat('Y-m-d', $dateOut)->format(config('app.date_format'));
                     $matchThese = ['aadhaarid' =>$attendanceId,'date'=> $dateOut];
-                    $vals = ['punch_out'=> $outtime,'pen'=>'-'];
+                    $vals = ['punch_out'=> $outtime,'pen'=>'-', 'punchin_from_aebas' => false, 'punchout_from_aebas'=> true];
                     if($org_emp_code != '')  $vals['pen'] = $org_emp_code;
                     
                     $punch = Punching::updateOrCreate($matchThese,$vals);

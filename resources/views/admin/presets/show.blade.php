@@ -37,7 +37,7 @@
                                 {{ $key }}
                             
                             </td>
-                            <td>{{ $val }}</td>
+                            <td>{{ $val['desig'] }}</td>
                            
 
                         </tr>

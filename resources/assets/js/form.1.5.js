@@ -816,13 +816,15 @@ var vm = new Vue({
 						if (overtime_slot !== "First") {
 							let sNormalStart = "10:15";
 							let sNormalEnd = "17:15";
+							let sNormalEndWithGrace = "17:00";
 							if (isSittingDay) {
 								sNormalStart = "08:00";
 								sNormalEnd = "17:30";
+								sNormalEndWithGrace = "17:15";
 							}
 
-							if (!this.checkIfOTOverlapsWithOfficeHours(overtime_slot, datefrom, dateto, sNormalStart, sNormalEnd)) {
-								this.myerrors.push(`Row ${i + 1} : OT cannot be between ${sNormalStart} and ${sNormalEnd} am on a ${daytypedesc}`);
+							if (!this.checkIfOTOverlapsWithOfficeHours(overtime_slot, datefrom, dateto, sNormalStart, sNormalEndWithGrace)) {
+								this.myerrors.push(`Row ${i + 1} : 2nd/3rd OT cannot be between ${sNormalStart} and ${sNormalEnd} am on a ${daytypedesc}`);
 								return false;
 							}
 						}

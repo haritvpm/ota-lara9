@@ -33,6 +33,7 @@ class Punching extends Model
         'deleted_at',
         'aadhaarid',
         'creator',
+        'punchin_from_aebas', 'punchout_from_aebas',
        
        // 'allowpunch_edit',
     ];
