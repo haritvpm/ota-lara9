@@ -154,6 +154,7 @@
 		<div class="col-md-12 form-group">
 			<div class="row">
 				<button type="button" class="btn btn-success btn-sm" @click.prevent="addRow"><i class="fa fa-plus"></i> Add row</button>
+				<!-- <button type="button" class="btn btn-primary btn-sm" @click.prevent="fetchPunching"><i class="fa fa-clock-o"></i> Get Punching Times</button> -->
 
 				
 				<!-- <a href="#" class="pull-right" v-show ="form.overtimes.length>1" @click="copyworknaturedown" >WorkNature</a> -->

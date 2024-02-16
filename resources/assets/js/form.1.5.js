@@ -23,6 +23,7 @@ var vm = new Vue({
 	el: "#app",
 
 	data: {
+		
 		selectdaylabel: "", //dateofdutyprefix,
 		isProcessing: false,
 		form: {},
@@ -190,14 +191,8 @@ var vm = new Vue({
 				{
 					for (let i = 0; i < this.form.overtimes.length; i++) { 
 						this.fetchPunchingTimeForRow(i)
-						//Vue.set(this.form.overtimes, this.form.overtimes)
-						//this.form.overtimes = Object.assign({},form.overtimes);
 					}
 					
-		
-					self.$nextTick(() => {
-						console.log('updated') // => 'updated'
-					})
 				}
 			
 		
@@ -365,7 +360,19 @@ var vm = new Vue({
 			}
 			return { def_time_start, def_time_end };
 		},
-
+		fetchPunching: function () {
+			for (let i = 0; i < this.form.overtimes.length; i++) { 
+				this.fetchPunchingTimeForRow(i)
+				//Vue.set(this.form.overtimes, this.form.overtimes)
+				
+				var self = this;
+		
+				self.$nextTick(() => {
+					this.form.worknature = this.form.worknature
+					Vue.set(this.form,'overtimes' ,this.form.overtimes)
+				})
+			}
+		},
 		addRow: function () {
 			this.insertElement(this.form.overtimes.length);
 		},
@@ -510,22 +517,23 @@ var vm = new Vue({
 				axios
 					.get(urlajaxgetpunchtimes + "/" + self.form.duty_date + "/" +  row.pen + "/" +  row.aadhaarid)
 					.then((response) => {
-						console.log("got punch data");
-						console.log(response);
+						//console.log("got punch data");
+						//console.log(response);
 						if (response.data && response.data.hasOwnProperty("punchin") && response.data.hasOwnProperty("punchout")) {
-							console.log("set punch data");
+							//console.log("set punch data");
 							 row.punchin = response.data.punchin;
 							 row.punchout = response.data.punchout;
 							 row.aadhaarid = response.data.aadhaarid;
 							 row.punching_id = response.data.id;
+							 //vue does not update time if we change date as it does not watch for array changes
+							 //https://v2.vuejs.org/v2/guide/reactivity#Change-Detection-Caveats
+							 Vue.set(this.form.overtimes,index, row)
 						}
 					})
 					.catch((err) => {});
 			}
 
-			//Vue.set(this.form.overtimes,index, row)
-
-			//this.form.overtimes.splice(index, 1,  self.form.overtimes[index]);
+			
 		},
 		checkDuplicates() {
 			var self = this;

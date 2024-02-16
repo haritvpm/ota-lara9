@@ -160,17 +160,10 @@ var vm = new Vue({
         if (e.oldDate != e.date) {
           for (var i = 0; i < this.form.overtimes.length; i++) {
             this.fetchPunchingTimeForRow(i);
-            //Vue.set(this.form.overtimes, this.form.overtimes)
-            //this.form.overtimes = Object.assign({},form.overtimes);
           }
-
-          self.$nextTick(function () {
-            console.log('updated'); // => 'updated'
-          });
         }
       }
     },
-
     onChangeSlot: function onChangeSlot() {
       this.myerrors = [];
       if (this.form.overtimes.length > 0 && this.form.overtimes[0].from == "") {
@@ -322,6 +315,19 @@ var vm = new Vue({
         def_time_end: def_time_end
       };
     },
+    fetchPunching: function fetchPunching() {
+      var _this = this;
+      for (var i = 0; i < this.form.overtimes.length; i++) {
+        this.fetchPunchingTimeForRow(i);
+        //Vue.set(this.form.overtimes, this.form.overtimes)
+
+        var self = this;
+        self.$nextTick(function () {
+          _this.form.worknature = _this.form.worknature;
+          Vue.set(_this.form, 'overtimes', _this.form.overtimes);
+        });
+      }
+    },
     addRow: function addRow() {
       this.insertElement(this.form.overtimes.length);
     },
@@ -365,12 +371,12 @@ var vm = new Vue({
       this.myerrors = [];
     }, 500),
     mydelayedsearch: function mydelayedsearch(query) {
-      var _this = this;
+      var _this2 = this;
       if (query.length >= 3) {
         axios.get(urlajaxpen + "/" + query).then(function (response) {
           // console.log(response.data);
-          _this.pen_names = response.data.pen_names;
-          _this.pen_names_to_desig = response.data.pen_names_to_desig;
+          _this2.pen_names = response.data.pen_names;
+          _this2.pen_names_to_desig = response.data.pen_names_to_desig;
           //this.isLoading = false
           //alert (JSON.stringify(this.pen_names_to_desig))
         })["catch"](function (response) {
@@ -389,7 +395,7 @@ var vm = new Vue({
     row.isFulltime = row.category.toLowerCase().indexOf("fulltime") != -1;
     row.isWatchnward = row.category.toLowerCase().indexOf("watch") != -1;
   }), _defineProperty(_methods, "changeSelect", function changeSelect(selectedOption, id) {
-    var _this2 = this;
+    var _this3 = this;
     //console.log(id)
     this.myerrors = [];
     var self = this;
@@ -409,12 +415,12 @@ var vm = new Vue({
         //if you add any new prop here, check to update in EmployeesController:ajaxfind,
         //MyFormsController:preparevariablesandGotoView in two locations for edit and copytonewform since we need these variables when we try to edit this
         //and also in loadpresetdata in this file itself
-        _this2.setEmployeeTypes(row);
+        _this3.setEmployeeTypes(row);
         console.log(row);
         if (0 == id) {
-          var _this2$getDefaultTime = _this2.getDefaultTimes(_this2.form.overtime_slot, row),
-            _def_time_start = _this2$getDefaultTime.def_time_start,
-            _def_time_end = _this2$getDefaultTime.def_time_end;
+          var _this3$getDefaultTime = _this3.getDefaultTimes(_this3.form.overtime_slot, row),
+            _def_time_start = _this3$getDefaultTime.def_time_start,
+            _def_time_end = _this3$getDefaultTime.def_time_end;
           row.from = _def_time_start !== null && _def_time_start !== void 0 ? _def_time_start : "";
           row.to = _def_time_end !== null && _def_time_end !== void 0 ? _def_time_end : "";
         }
@@ -422,7 +428,7 @@ var vm = new Vue({
         //self.$forceUpdate()
       }
 
-      _this2.fetchPunchingTimeForRow(id);
+      _this3.fetchPunchingTimeForRow(id);
     });
 
     //no need we will check on form submit
@@ -433,6 +439,7 @@ var vm = new Vue({
 
     //alert(id) unable to get id. so a hack
   }), _defineProperty(_methods, "fetchPunchingTimeForRow", function fetchPunchingTimeForRow(index) {
+    var _this4 = this;
     var self = this;
     var row = self.form.overtimes[index];
     if (row.pen == "" || !self.form.duty_date) return;
@@ -445,21 +452,20 @@ var vm = new Vue({
     row.punching && (row.punching = self.dayHasPunching);
     if (row.punching) {
       axios.get(urlajaxgetpunchtimes + "/" + self.form.duty_date + "/" + row.pen + "/" + row.aadhaarid).then(function (response) {
-        console.log("got punch data");
-        console.log(response);
+        //console.log("got punch data");
+        //console.log(response);
         if (response.data && response.data.hasOwnProperty("punchin") && response.data.hasOwnProperty("punchout")) {
-          console.log("set punch data");
+          //console.log("set punch data");
           row.punchin = response.data.punchin;
           row.punchout = response.data.punchout;
           row.aadhaarid = response.data.aadhaarid;
           row.punching_id = response.data.id;
+          //vue does not update time if we change date as it does not watch for array changes
+          //https://v2.vuejs.org/v2/guide/reactivity#Change-Detection-Caveats
+          Vue.set(_this4.form.overtimes, index, row);
         }
       })["catch"](function (err) {});
     }
-
-    //Vue.set(this.form.overtimes,index, row)
-
-    //this.form.overtimes.splice(index, 1,  self.form.overtimes[index]);
   }), _defineProperty(_methods, "checkDuplicates", function checkDuplicates() {
     var self = this;
     //see if there are duplicates
@@ -496,7 +502,7 @@ var vm = new Vue({
     }
     return true;
   }), _defineProperty(_methods, "checkSittingDayTimeIsAsPerGO", function checkSittingDayTimeIsAsPerGO(overtime_slot, row, i) {
-    var _this3 = this;
+    var _this5 = this;
     //we need to give some leeway. so commenting
 
     if (row.isPartime) {
@@ -535,7 +541,7 @@ var vm = new Vue({
       var diffFrom = null;
       var diffTo = null;
       var diffdatefunc = function diffdatefunc(t1, t2) {
-        return Math.abs(Math.round((_this3.stringTimeToDate(t1) - _this3.stringTimeToDate(t2)) / 60000));
+        return Math.abs(Math.round((_this5.stringTimeToDate(t1) - _this5.stringTimeToDate(t2)) / 60000));
       };
       if (overtime_slot == "First") {
         diffFrom = diffdatefunc("08:00", row.from);
