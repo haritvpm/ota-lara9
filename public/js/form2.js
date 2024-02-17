@@ -66,7 +66,9 @@ var vm = new Vue({
       this.loadpresetdata(autoloadpens);
     }
   },
-  mounted: function mounted() {},
+  mounted: function mounted() {
+    this.updateDateDependencies();
+  },
   computed: {
     configdate: function configdate() {
       var self = this;
@@ -147,31 +149,25 @@ var vm = new Vue({
     },
     onChange: function onChange(e) {
       if ((e === null || e === void 0 ? void 0 : e.type) != 'dp') return; //this func seems to be called twice on date change. this prevents that as the first call does not have that set
+
+      this.updateDateDependencies();
+      if (this.form.duty_date != "" && this.form.duty_date != null) {
+        if (e.oldDate != e.date) {
+          this.fetchPunching();
+        }
+      }
+    },
+    updateDateDependencies: function updateDateDependencies() {
+      if (this.form.duty_date == "" || this.form.duty_date == null) return;
       var self = this;
       this.myerrors = [];
       this.slotoptions = this.slotoptions;
       this.form.overtime_slot = "Multi";
-      // console.log( e.oldDate )
-      // console.log( e.date )
-      //if this is not a copy to new form, which does not have a date,clear existing data
-      //prevent calling twice after we set the date
-      if (e.oldDate && e.oldDate != e.date) {
-        //this.form.overtimes = [] 
-        //punching times, whether firstOTname is sitting or first all is affected when date changes. so let user add it again
-      }
-      console.log('date change');
       this.firstOTName = "";
-      if (this.form.duty_date != "" && this.form.duty_date != null) {
-        if (calenderdaysmap[this.form.duty_date] !== undefined) this.selectdaylabel = ": " + calenderdaysmap[this.form.duty_date];else this.selectdaylabel = ": Not valid for the session";
-        this.firstOTLabel = this.selectdaylabel.indexOf("Sitting") !== -1 ? 'Sit' : "1<sup>st</sup>";
-        if (-1 == calenderdays2[this.form.session].indexOf(this.form.duty_date)) {
-          this.myerrors.push("For session " + this.form.session + ", please select a date between : " + calenderdays2[this.form.session][0] + " and " + calenderdays2[this.form.session][calenderdays2[this.form.session].length - 1] + ".");
-        }
-        if (e.oldDate != e.date) {
-          for (var i = 0; i < this.form.overtimes.length; i++) {
-            this.fetchPunchingTimeForRow(i);
-          }
-        }
+      if (calenderdaysmap[this.form.duty_date] !== undefined) this.selectdaylabel = ": " + calenderdaysmap[this.form.duty_date];else this.selectdaylabel = ": Not valid for the session";
+      this.firstOTLabel = this.selectdaylabel.indexOf("Sitting") !== -1 ? 'Sit' : "1<sup>st</sup>";
+      if (-1 == calenderdays2[this.form.session].indexOf(this.form.duty_date)) {
+        this.myerrors.push("For session " + this.form.session + ", please select a date between : " + calenderdays2[this.form.session][0] + " and " + calenderdays2[this.form.session][calenderdays2[this.form.session].length - 1] + ".");
       }
     },
     onChangeSlot: function onChangeSlot() {
@@ -189,14 +185,8 @@ var vm = new Vue({
     fetchPunching: function fetchPunching() {
       for (var i = 0; i < this.form.overtimes.length; i++) {
         this.fetchPunchingTimeForRow(i);
-
-        // var self = this;
-        // self.$nextTick(() => {
-        // 	Vue.set(this.form,'overtimes' ,this.form.overtimes)
-        // })
       }
     },
-
     addRow: function addRow() {
       this.insertElement(this.form.overtimes.length);
     },
@@ -357,26 +347,31 @@ var vm = new Vue({
     var time = sTimeWithSemicolonSeperator.split(":").map(Number);
     //warning: months in JS starts from 0
     return Date.UTC(2000, 1, 1, time[0], time[1]);
-  }), _defineProperty(_methods, "checkTimeWithinPunchingTime", function checkTimeWithinPunchingTime(row) {
-    if (!row.punching) return true;
-    var datefrom = this.stringTimeToDate(row.from);
-    var dateto = this.stringTimeToDate(row.to);
+  }), _defineProperty(_methods, "strTimesToDatesNormalized", function strTimesToDatesNormalized(from, to) {
+    var datefrom = this.stringTimeToDate(from);
+    var dateto = this.stringTimeToDate(to);
 
     //time after 12 am ?
     if (dateto <= datefrom) {
       dateto += 24 * 3600000;
     }
-    var datepunchin = this.stringTimeToDate(row.punchin);
-    var datepunchout = this.stringTimeToDate(row.punchout);
-    if (datepunchout <= datepunchin) {
-      datepunchout += 24 * 3600000;
-    }
+    return {
+      datefrom: datefrom,
+      dateto: dateto
+    };
+  }), _defineProperty(_methods, "checkTimeWithinPunchingTime", function checkTimeWithinPunchingTime(row) {
+    if (!row.punching) return true;
+    var _this$strTimesToDates = this.strTimesToDatesNormalized(row.from, row.to),
+      datefrom = _this$strTimesToDates.datefrom,
+      dateto = _this$strTimesToDates.dateto;
+    var _this$strTimesToDates2 = this.strTimesToDatesNormalized(row.punchin, row.punchout),
+      datepunchin = _this$strTimesToDates2.datefrom,
+      datepunchout = _this$strTimesToDates2.dateto;
     if (datepunchin > datefrom || datepunchout < dateto) {
       return false;
     }
     return true;
-  }), _defineProperty(_methods, "checkSittingDayTimeIsAsPerGO", function checkSittingDayTimeIsAsPerGO(overtime_slot, row, i) {
-    var _this4 = this;
+  }), _defineProperty(_methods, "checkSittingDayTimeIsAsPerGO", function checkSittingDayTimeIsAsPerGO(row, i) {
     //we need to give some leeway. so commenting
 
     if (row.isPartime) {
@@ -412,33 +407,27 @@ var vm = new Vue({
     else {
       //no need to enforce ending time. have doubts regarding mla hostel.
       //need to check night shifts
-      var diffFrom = null;
-      var diffTo = null;
-      var diffdatefunc = function diffdatefunc(t1, t2) {
-        return Math.round((_this4.stringTimeToDate(t1) - _this4.stringTimeToDate(t2)) / 60000);
-      };
-      if (this.hasFirst(row)) {
-        diffFrom = diffdatefunc(row.from, "08:00");
-        diffTo = diffdatefunc("17:30", row.to);
-        // a flexy time of 5 mins eitherway
-        if (diffFrom && diffFrom > 5 || diffTo && diffTo > 5) {
-          this.myerrors.push("Row " + (i + 1) + ": Time should be as per G.O on a sitting day");
+      //let diffFrom = null
+      //let diffTo = null
+      //const diffdatefunc = (t1, t2) => Math.round((this.stringTimeToDate(t1) - this.stringTimeToDate(t2)) / 60000); 
+
+      if (this.hasFirst(row.slots)) {
+        var datefrom = this.stringTimeToDate(row.from);
+        var dateto = this.stringTimeToDate(row.to);
+        var time800am = this.stringTimeToDate("08:05"); // a flexy time of 5 mins eitherway
+        var time530pm = this.stringTimeToDate("17:25");
+        var isok = time800am >= datefrom && time530pm <= dateto;
+        if (!isok) {
+          this.myerrors.push("Row " + (i + 1) + ": For sitting OT, time should include 08:00 to 17:30 as per GO");
           return false;
         }
-      } else if (overtime_slot == "Second") {
-
-        //	diffFrom = diffdatefunc("17:30", row.from)
-        //	diffTo = diffdatefunc("20:00", row.to)
-      } else if (overtime_slot == "Third") {
-        //diffFrom = diffdatefunc("20:00", row.from)
-        //diffTo = diffdatefunc("22:30", row.to)
       }
     }
     return true;
-  }), _defineProperty(_methods, "checkIfOTOverlapsWithOfficeHours", function checkIfOTOverlapsWithOfficeHours(datefrom, dateto, sNormalStart, sNormalEnd) {
-    var time730am = this.stringTimeToDate(sNormalStart);
+  }), _defineProperty(_methods, "checkIf2ndOTOverlapsWithOfficeHours", function checkIf2ndOTOverlapsWithOfficeHours(datefrom, dateto, sNormalStart, sNormalEnd) {
+    var time800am = this.stringTimeToDate(sNormalStart);
     var time530pm = this.stringTimeToDate(sNormalEnd);
-    var isoverlap = time730am < dateto && time530pm > datefrom || time730am == datefrom || time530pm == dateto;
+    var isoverlap = time800am < dateto && time530pm > datefrom || time800am == datefrom || time530pm == dateto;
     if (isoverlap) {
       return false;
     }
@@ -489,7 +478,7 @@ var vm = new Vue({
         return false;
       }
     }
-    if (self.form.overtime_slot == "Additional") {
+    if (this.hasAddl(row.slots)) {
       if (self.form.overtimes.some(function (row) {
         return !self.canShowAddlOT(row);
       })) {
@@ -502,13 +491,12 @@ var vm = new Vue({
       isSittingOrWorkingDay = _this$getDayTypes.isSittingOrWorkingDay,
       isWorkingDay = _this$getDayTypes.isWorkingDay,
       isHoliDay = _this$getDayTypes.isHoliDay;
-    var overtime_slot = self.form.overtime_slot;
     var minothour_ideal = parseFloat(3);
-    var minothour = parseFloat(2.75); //corrected to allow leeway 15 minutes
+    var minothour = parseFloat(2.8); //corrected to allow leeway 12 minutes
     var daytypedesc = "holiday";
     if (isSittingOrWorkingDay) {
       minothour_ideal = parseFloat(2.5);
-      minothour = parseFloat(2.3); //12 min leeway
+      minothour = parseFloat(2.4); //6 min leeway
       daytypedesc = "working day";
       if (isSittingDay) {
         daytypedesc = "sitting day";
@@ -536,43 +524,43 @@ var vm = new Vue({
         return false;
       }
 
-      //make sure our times are according to G.O if this is 2nd or 3rd ot on a sitting day
+      //make sure our times are according to G.O
       //note same form can have both part time and full time empl. amspkr office
       if (isSittingDay) {
-        if (!this.checkSittingDayTimeIsAsPerGO(overtime_slot, row, i)) {
+        if (!this.checkSittingDayTimeIsAsPerGO(row, i)) {
           return false;
         }
       }
-      var datefrom = this.stringTimeToDate(row.from);
-      var dateto = this.stringTimeToDate(row.to);
-      if (dateto <= datefrom) {
-        dateto += 24 * 3600000;
-      }
+      var _this$strTimesToDates3 = this.strTimesToDatesNormalized(row.from, row.to),
+        datefrom = _this$strTimesToDates3.datefrom,
+        dateto = _this$strTimesToDates3.dateto;
       var diffhours = parseFloat((dateto - datefrom) / 3600000);
-      if (diffhours < minothour) {
-        this.myerrors.push("Row " + (i + 1) + ": At least " + minothour_ideal + " hours needed for OT on a " + daytypedesc);
-        return false;
+
+      //add totalhours needed
+      var othours_practical = minothour * row.slots.length; //if three OT, 3 * 2.5
+      var othours_ideal = minothour_ideal * row.slots.length; //if three OT, 3 * 2.5
+      if (isSittingOrWorkingDay && this.hasFirst(row.slots)) {
+        console.log('oh: ' + this._daylenmultiplier);
+        othours_practical += row.normal_office_hours * this._daylenmultiplier;
+        othours_ideal += row.normal_office_hours * this._daylenmultiplier;
       }
-
+      console.log('difneeded: ' + othours_practical);
+      console.log('dif: ' + diffhours);
       //new validation after adding normal_office_hours
-
-      if (isSittingOrWorkingDay) {
-        var othours_needed = minothour + row.normal_office_hours * this._daylenmultiplier;
-        if (overtime_slot == "First" && diffhours < othours_needed) {
-          this.myerrors.push("Row  ".concat(i + 1, " : At least ").concat(minothour_ideal + row.normal_office_hours, " hours needed for First OT on a ").concat(daytypedesc));
-          return false;
-        }
+      if (diffhours < othours_practical) {
+        this.myerrors.push("Row  ".concat(i + 1, " : At least ").concat(othours_ideal, " hours needed for the selected OT(s) on a ").concat(daytypedesc));
+        return false;
       }
 
       //partime emp cannot have 3rd OT on sitting and 2nd or 3rd ot on working days
       if (row.isPartime) {
         if (isSittingDay) {
-          if (overtime_slot === "Third") {
+          if (this.hasThird(row.slots)) {
             this.myerrors.push("Row " + (i + 1) + ": Parttime employees cannot have third OT on sitting day");
             return false;
           }
         } else if (isWorkingDay) {
-          if (overtime_slot !== "First") {
+          if (this.hasThird(row.slots) || this.hasSecond(row.slots)) {
             this.myerrors.push("Row " + (i + 1) + ": Parttime employees cannot have second/third OT on working day");
             return false;
           }
@@ -582,29 +570,28 @@ var vm = new Vue({
       //fulltime emp cannot have 2nd or 3rd OT on sitting/working days
       if (row.isFulltime) {
         if (isSittingOrWorkingDay) {
-          if (overtime_slot !== "First") {
+          if (this.hasThird(row.slots) || this.hasSecond(row.slots)) {
             this.myerrors.push("Row " + (i + 1) + ": FullTime employees cannot have second/third OT on working/sitting day");
             return false;
           }
         }
       }
-
-      //if this is sitting day, do not allow times between 7.30 am and 5.30 pm
-
       if (!row.isPartime && !row.isFulltime && !row.isWatchnward && !isspeakeroffice) {
         if (isSittingDay || isWorkingDay) {
           //if there is second, third, but no first
-          if (row.slots.length && !this.hasFirst(row.slots)) {
+          if (!this.hasFirst(row.slots) && row.slots.length) {
             var sNormalStart = "10:15";
+            var sNormalStartWithGrace = "10:20";
             var sNormalEnd = "17:15";
-            var sNormalEndWithGrace = "17:05";
+            var sNormalEndWithGrace = "17:10";
             if (isSittingDay) {
               sNormalStart = "08:00";
+              sNormalStartWithGrace = "08:05";
               sNormalEnd = "17:30";
-              sNormalEndWithGrace = "17:20";
+              sNormalEndWithGrace = "17:25";
             }
             //if this slot does not contain sitting ot on a sitting day and first ot on a working day show error
-            if (!this.checkIfOTOverlapsWithOfficeHours(datefrom, dateto, sNormalStart, sNormalEndWithGrace)) {
+            if (!this.checkIf2ndOTOverlapsWithOfficeHours(datefrom, dateto, sNormalStartWithGrace, sNormalEndWithGrace)) {
               this.myerrors.push("Row ".concat(i + 1, " : 2nd/3rd OT cannot be between ").concat(sNormalStart, " and ").concat(sNormalEnd, " am on a ").concat(daytypedesc));
               return false;
             }
@@ -615,6 +602,12 @@ var vm = new Vue({
     return this.checkDuplicates();
   }), _defineProperty(_methods, "hasFirst", function hasFirst(slots) {
     return slots.includes("First");
+  }), _defineProperty(_methods, "hasSecond", function hasSecond(slots) {
+    return slots.includes("Second");
+  }), _defineProperty(_methods, "hasThird", function hasThird(slots) {
+    return slots.includes("Third");
+  }), _defineProperty(_methods, "hasAddl", function hasAddl(slots) {
+    return slots.includes("Additional");
   }), _defineProperty(_methods, "create", function create() {
     if (this.isProcessing) {
       //alert('no dbl click');

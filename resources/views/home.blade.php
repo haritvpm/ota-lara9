@@ -113,7 +113,7 @@
 @if(auth()->user()->isAdmin() || !auth()->user()->isOD())
  <div class="row">
     <!-- <div class="col-md-2">
-         <a href="<?=URL::to('admin/my_forms')?>">
+         <a href="<?=URL::to('admin/my_forms2')?>">
          <div class="info-box">
                     
           <span class="info-box-icon bg-yellow"><i class="fa fa-star-o"></i></span>
@@ -126,8 +126,8 @@
         </a>
     </div> -->
     <div class="col-md-3">
-         <!-- a href="<?=URL::to('admin/my_forms?status=Draft')?>"-->
-         <a href="<?=URL::to('admin/my_forms')?>">
+         <!-- a href="<?=URL::to('admin/my_forms2?status=Draft')?>"-->
+         <a href="<?=URL::to('admin/my_forms2')?>">
          <div class="info-box bg-gray">
           <!-- Apply any bg-* class to to the icon to color it -->
           <span class="info-box-icon"><i class="fa fa-edit"></i></span>
@@ -142,8 +142,8 @@
 
     @if($to_approve != -1)
     <div class="col-md-3">
-          <!-- <a href="<?=URL::to('admin/my_forms?status=To_approve')?>"> -->
-          <a href="<?=URL::to('admin/my_forms')?>">
+          <!-- <a href="<?=URL::to('admin/my_forms2?status=To_approve')?>"> -->
+          <a href="<?=URL::to('admin/my_forms2')?>">
          <div class="info-box  bg-red">
           <!-- Apply any bg-* class to to the icon to color it -->
           <span class="info-box-icon"><i class="fa fa-eye"></i></span>
@@ -159,7 +159,7 @@
 
     @if($pending_approval != -1)
     <div class="col-md-3">
-         <a href="<?=URL::to('admin/my_forms?status=Pending')?>">
+         <a href="<?=URL::to('admin/my_forms2?status=Pending')?>">
          <div class="info-box  bg-blue">
           <!-- Apply any bg-* class to to the icon to color it -->
           <span class="info-box-icon"><i class="fa fa-mail-forward"></i></span>
@@ -174,7 +174,7 @@
      @endif
 
     <div class="col-md-3">
-         <a href="<?=URL::to('admin/my_forms?status=Submitted')?>">
+         <a href="<?=URL::to('admin/my_forms2?status=Submitted')?>">
          <div class="info-box  bg-green">
           <!-- Apply any bg-* class to to the icon to color it -->
           <span class="info-box-icon"><i class="fa fa-thumbs-up"></i></span>

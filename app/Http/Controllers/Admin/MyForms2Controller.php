@@ -614,29 +614,27 @@ class MyForms2Controller extends Controller
             */
          
            
-
-            $emp->each(function ($element) use ($request, $overtime,&$myerrors) {
-                \Log::info(explode(';', $element->slots));
-                \Log::info($overtime['slots']);
+            $otcount = 0;
+            $emp->each(function ($element) use ($request, $overtime,&$myerrors,&$otcount) {
+                // \Log::info(explode(';', $element->slots));
+                // \Log::info($overtime['slots']);
                 $common = array_intersect( explode(';', $element->slots), $overtime['slots']);
                 if (count($common)) {
-
                     array_push($myerrors, 'Already entered ' . implode(',',$common)  . ' OT for this day for '  .  $overtime['pen'] . '-' . $overtime['name']. ' (' . $element->form->creator . ' )' );
                 }
+                $otcount += $element->count;
             });  
-            if (count($myerrors)) {
-                return null;
-            }         
-                        
-                        
-            if( $emp->count() >= 3  )
+                                   
+            if( $otcount >= 3  )
             {
                 //list($pen, $name) = array_map('trim', explode("-", $overtime['pen']));
                 array_push($myerrors, $overtime['name'] . ' -' . $overtime['pen'] . ' : 3 OTs already entered for the day');
-
-                //return null;
-
+              //  return null;
             }
+
+            if (count($myerrors)) {
+                return null;
+            }  
 
             $strtimes_totimestamps = function ( $from, $to )  {
               $timefrom = strtotime($from);   $timeto = strtotime($to);

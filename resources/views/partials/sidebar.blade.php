@@ -20,6 +20,8 @@
                     <span class="title">My forms</span>
                 </a>
             </li>
+            @endcan
+            @can('pa2mlaform_access')
             <li class="{{ $request->segment(2) == 'my_forms' ? 'active' : '' }}">
                 <a href="{{ route('admin.my_forms.index') }}">
                     <i class="fa fa-file-o"></i>
