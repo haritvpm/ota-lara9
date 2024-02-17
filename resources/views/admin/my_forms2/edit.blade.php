@@ -7,7 +7,7 @@
 @section('content')
 
 
-    <h4 class="page-title">Duty Form</h4>
+    <h4 class="page-title">OT Form</h4>
     
     @if(count($sessions) > 0)
 
@@ -43,7 +43,7 @@
             $readonly = "";
             ?> 
 
-            @include('admin.my_forms.form')
+            @include('admin.my_forms2.form')
  
         </div>
 
@@ -58,7 +58,7 @@
      @else
     
         Sorry, no sessions available for data entry
-         <a href="{{route('admin.my_forms.index')}}" class="btn btn-primary">OK</a>
+         <a href="{{route('admin.my_forms2.index')}}" class="btn btn-primary">OK</a>
          
     @endif  
 
@@ -93,8 +93,8 @@
     <script type="text/javascript">
 
     var urlajaxpen = "{{url('admin/employees/ajaxfind')}}"
-    var urlformsubmit = "{{url('admin/my_forms/')}}"
-    var urlformsucessredirect = "{{url('admin/my_forms/')}}"
+    var urlformsubmit = "{{url('admin/my_forms2/')}}"
+    var urlformsucessredirect = "{{url('admin/my_forms2/')}}"
     var urlajaxgetpunchtimes = "{{url('admin/punchings/ajaxgetpunchtimes')}}"
         
     var calenderdaypunching = {!! $data['calenderdaypunching'] !!};
@@ -114,5 +114,5 @@
     
     </script>
 
-  <script type="text/javascript" src="{{ URL::asset('js/form.1.5.js') }}"></script>
+  <script type="text/javascript" src="{{ URL::asset('js/form2.js') }}"></script>
 @stop

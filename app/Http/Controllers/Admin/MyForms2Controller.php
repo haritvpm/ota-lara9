@@ -309,33 +309,19 @@ class MyForms2Controller extends Controller
 
 
 
-    public function preparevariablesandGotoView( $issitting, $id=null, $id_to_copy = null )
+    public function preparevariablesandGotoView( $id=null, $id_to_copy = null )
     {
         $enum_overtime_slot = Form::$enum_overtime_slot;
 
         $q = \App\Session::with('calender')->whereDataentryAllowed('Yes'); 
         
       
-        if( $issitting && \Config::get('custom.check_attendance')){
-           $q = $q->whereSittingsEntry('Yes'); 
-        }
-
+      
         $q = $q->latest();
 
         $session_array = $q->get();
-
-        //if sitting, prevent ongoing sessions
-        if($issitting){
-            $session_array = $session_array->filter(function ($value) {
-                $maxdate = \App\Calender::where('session_id',$value->id)->max('date');
-                
-                return $maxdate <= Carbon::now();
-            });
-           
-        }
-
+       
         $sessions = $session_array->pluck('name');
-
 
         $latest_session = $sessions->first();
          
@@ -348,18 +334,14 @@ class MyForms2Controller extends Controller
     
             $daysall = $session->calender()->orderby('date','asc');
                        
-            if(!$issitting)
-            {
-                $daysall->where( function ($query) {
-                    $query->wherenot('punching','AEBAS_FETCH_PENDING') 
-                        ->orwherenull('punching') ;
-                })->where('date', '<=', date('Y-m-d'));
-                
-                $days = $daysall->get();
-            }
-            else{
-                $days = $daysall->where( 'day_type','Sitting day')->get();
-            }
+        
+            $daysall->where( function ($query) {
+                $query->wherenot('punching','AEBAS_FETCH_PENDING') 
+                    ->orwherenull('punching') ;
+            })->where('date', '<=', date('Y-m-d'));
+            
+            $days = $daysall->get();
+                  
 
             
             foreach ($days as $day) {
@@ -379,7 +361,7 @@ class MyForms2Controller extends Controller
         $isspeakeroffice = 0;
 
 
-        if(!$issitting && $id)
+        if($id)
         {
            $form = Form::findOrFail($id);
            
@@ -457,6 +439,7 @@ class MyForms2Controller extends Controller
                     'employee_id' => $item?->employee?->id,
                     'punching'   => ($item?->employee?->categories?->punching ?? true) && ($item?->employee?->designation?->punching ?? true),
                     'normal_office_hours' =>   $item?->employee?->designation?->normal_office_hours,
+                    'slots' =>  explode(';',  $item->slots) ,
                 ]
             ];
                 
@@ -478,57 +461,33 @@ class MyForms2Controller extends Controller
         ]);
     
         $collapse_sidebar = true;
-        if(!$issitting){
-            if($id)
-            {
-                $form = Form::with(['created_by','overtimes','overtimes.employee.categories','overtimes.employee.designation'])->findOrFail($id);
+     
+        if($id)
+        {
+            $form = Form::with(['created_by','overtimes','overtimes.employee.categories','overtimes.employee.designation'])->findOrFail($id);
 
-                $form->overtimes->transform(function ($item) use ($form) {
-                    if($item['name'] != null){
-                        $item['pen'] = $item['pen'] . '-' . $item['name'];
-                       // $item['allowpunch_edit'] = $item['punching_id'] == null; //otherwise it will be disabled on edit
+            $form->overtimes->transform(function ($item) use ($form) {
+                if($item['name'] != null){
+                    $item['pen'] = $item['pen'] . '-' . $item['name'];
+                    // $item['allowpunch_edit'] = $item['punching_id'] == null; //otherwise it will be disabled on edit
 
-                    }
-                    $item['category'] = $item?->employee?->categories?->category;
-                    $item['normal_office_hours'] = $item?->employee?->designation?->normal_office_hours;
-                    
-                    return $item;
-                                   
-                });
+                }
+                $item['category'] = $item?->employee?->categories?->category;
+                $item['normal_office_hours'] = $item?->employee?->designation?->normal_office_hours;
+                $item['slots'] =  explode(';',  $item->slots);
+                return $item;
+                                
+            });
 
-                                    
-                return view('admin.my_forms2.edit', compact('form', 'data','sessions','enum_overtime_slot', 'collapse_sidebar' ));
-            }
-            else
-            {
-                return view('admin.my_forms2.create', compact('data','sessions','enum_overtime_slot', 'collapse_sidebar' ) );
-            }
+                                
+            return view('admin.my_forms2.edit', compact('form', 'data','sessions','enum_overtime_slot', 'collapse_sidebar' ));
         }
-        else{ //sitting forms
-            if($id)
-            {
-                $form = Form::with(['created_by','overtimes'])->findOrFail($id);
-
-                $form->overtimes->transform(function ($item) {
-                    if($item['name'] != null){
-                        $item['pen'] = $item['pen'] . '-' . $item['name'];
-                        
-
-                    }
-                    return $item;
-                                   
-                });
-
-                                    
-                return view('admin.my_forms2.edit_sitting', compact('form', 'data','sessions', 'collapse_sidebar' ));
-            }
-            else
-            {
-                return view('admin.my_forms2.create_sitting', compact('data','sessions', 'collapse_sidebar') );
-            }
+        else
+        {
+            return view('admin.my_forms2.create', compact('data','sessions','enum_overtime_slot', 'collapse_sidebar' ) );
         }
+        
        
-
                 
     }
 
@@ -543,7 +502,7 @@ class MyForms2Controller extends Controller
             return abort(401);
         } 
     
-        return $this->preparevariablesandGotoView( false, null);
+        return $this->preparevariablesandGotoView(null);
        
     }
     public function create_copy($id)
@@ -554,7 +513,7 @@ class MyForms2Controller extends Controller
         
         //$form = Form::findOrFail($id);
       
-        return $this->preparevariablesandGotoView(false, null, $id ) ;
+        return $this->preparevariablesandGotoView(null, $id ) ;
         
     }
 
@@ -612,7 +571,7 @@ class MyForms2Controller extends Controller
                     ->wherein('pen',$pens )
                     ->whereHas('form', function($query)  use ($request,$date,$formid) { 
                           $query->where('duty_date', $date)
-                                ->where('overtime_slot', '<>' ,'Sittings')
+                                ->where('overtime_slot', 'Multi')
                                 ->where('session', $request['session'])
                                 ->where('id', '!=', $formid); //skip this item if on update
                     })->get();
@@ -656,22 +615,19 @@ class MyForms2Controller extends Controller
          
            
 
-            ///////////
-            $res_for_thisslot = $emp->reject(function($element) use ($request) {
-                return stripos($element->form->overtime_slot, $request['overtime_slot']) === false;
-            });
-            //////////////
+            $emp->each(function ($element) use ($request, $overtime,&$myerrors) {
+                \Log::info(explode(';', $element->slots));
+                \Log::info($overtime['slots']);
+                $common = array_intersect( explode(';', $element->slots), $overtime['slots']);
+                if (count($common)) {
+
+                    array_push($myerrors, 'Already entered ' . implode(',',$common)  . ' OT for this day for '  .  $overtime['pen'] . '-' . $overtime['name']. ' (' . $element->form->creator . ' )' );
+                }
+            });  
+            if (count($myerrors)) {
+                return null;
+            }         
                         
-            $empslot = $res_for_thisslot->map(function ($item, $key) {
-                            return $item['pen'] . '-' . $item['name'] ;
-                        });
-                                               
-        
-            if( count($empslot) > 0){
-                 array_push($myerrors, 'Already entered ' . $request['overtime_slot'] . ' OT on this day for '  .  $empslot->implode(','));
-                 return null;
-            }
-                
                         
             if( $emp->count() >= 3  )
             {
@@ -715,7 +671,7 @@ class MyForms2Controller extends Controller
 
                 if($isoverlap){
                      //list($pen, $name) = array_map('trim', explode("-", $overtime['pen']));
-                    array_push($myerrors, $overtime['name'] . '-' . $overtime['pen'] . ' : Times overlap with another OT from ' . $e['from'] . ' - ' . $e['to'] . ' (' . $e->form->overtime_slot . ' OT) on this day (' . $e->form->creator . ' )' );
+                    array_push($myerrors, $overtime['name'] . '-' . $overtime['pen'] . ' : Times overlap with another OT from ' . $e['from'] . ' - ' . $e['to'] .  ' on this day (' . $e->form->creator . ' )' );
                     return null;
                 }
 
@@ -754,13 +710,14 @@ class MyForms2Controller extends Controller
                     'from'          => $overtime['from'],
                     'to'            => $overtime['to'], 
                     'worknature'    => $overtime['worknature'] ?? '',
-                    'count'         => '1',
+                    'count'         => count( $overtime['slots']),
                     'rate'          => $rates[$overtime['designation']],
                     'punching'       => $overtime['punching'],
                     'punchin'       => $overtime['punchin'],
                     'punchout'       => $overtime['punchout'],
                     'punching_id'    => $overtime['punching_id'] ?? null,
                     'employee_id' => $overtime['employee_id'],
+                    'slots' =>  implode(';',  $overtime['slots']) ,
                     ]);
 
             }
@@ -887,9 +844,9 @@ class MyForms2Controller extends Controller
         
         $form = Form::findOrFail($id);
 
-        $issittingday = ($form->overtime_slot == 'Sittings');
+        // $issittingday = ($form->overtime_slot == 'Sittings');
 
-        return $this->preparevariablesandGotoView($issittingday, $id ) ;
+        return $this->preparevariablesandGotoView($id ) ;
         
     }
 
@@ -1243,7 +1200,7 @@ class MyForms2Controller extends Controller
         return redirect()->route('admin.my_forms2.index');
     }
 
-
+/* 
     public function create_sitting()
     {
         if (! Gate::allows('my_form_create')) {
@@ -1311,12 +1268,7 @@ class MyForms2Controller extends Controller
                                 ->get();
 
             //$pensinattendance = $attendance->pluck( 'employee.pen' );
-            /*$pensnotinattendance = $pens->diff($pensinattendance);
-            if($pensnotinattendance->count())
-            {
-                array_push($myerrors,  'Attendance not found for:' . $pensnotinattendance->implode(',') );
-                return null;
-            }*/
+           
         }
 
 
@@ -1338,10 +1290,7 @@ class MyForms2Controller extends Controller
 
         //we cannot use pluck, pluck seems to return only distinct 'count'
         $res = $query->get();
-        /*foreach ($res as $e) {
-         array_push($myerrors,  $e['pen'] . $e['from']);
-}*/
-  
+       
 
         ////////////////////////////////
 
@@ -1499,19 +1448,7 @@ class MyForms2Controller extends Controller
                    if($coma_items < $leaves){
                      $allleavesentered = false;
                    }
-
-                   /*
-                   //but if user has entered a range, it is ok
-                   if($hasnums && $leaves > 9){ //should have digits. 
-                    if(FALSE !== stripos($colleave, "to") ||
-                       //FALSE !== stripos($colleave, "-") || // this can occur in dates itself.
-                       FALSE !== stripos($colleave, "and") ||
-                      // FALSE !== stripos($colleave, "&") ||
-                       FALSE !== stripos($colleave, "from") ){
-                    
-                        $allleavesentered = true;
-                    }
-                   }*/ 
+                  
 
                 }
 
@@ -1541,7 +1478,7 @@ class MyForms2Controller extends Controller
                 foreach ($emp as $e) {
 
                     //if supply, disregard dateoverlap with previous entry made by this section
-                    if(false !== stripos( $overtime['worknature'],'SUPPL') /*&& $e->form->isSameSectionCreator*/ ){
+                    if(false !== stripos( $overtime['worknature'],'SUPPL') ){
                         continue;
                     }
 
@@ -1639,7 +1576,7 @@ class MyForms2Controller extends Controller
 
 
     }
-
+ */
     public function forward(Request $request, $id)
     {
 

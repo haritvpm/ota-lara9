@@ -67,7 +67,7 @@
 					
 					<th>Time-From</th>
 					<th>Time-To</th>
-					<th>OT</th>
+					<th class="text-center">OT</th>
 					<th></th>
 				</tr>
 			</thead>
@@ -98,11 +98,11 @@
 					
 					
 					<td v-show="dayHasPunching" class="col-md-1">
-					<input  :name="'punchin[' + index + ']'" type="text" v-model="row.punchin" required class="form-control" :disabled="!row.punching" :readonly="!allowPunchingEntry" autocomplete="off">
+					<input  :name="'punchin[' + index + ']'" type="text" v-model="row.punchin" required class="form-control" :disabled="!dayHasPunching || !row.punching" :readonly="!allowPunchingEntry" autocomplete="off">
 					</td>
 					
 					<td v-show="dayHasPunching" class="col-md-1">
-					<input  :name="'punchout[' + index + ']'" type="text" v-model="row.punchout" required class="form-control" :disabled="!row.punching" :readonly="!allowPunchingEntry"  autocomplete="off">
+					<input  :name="'punchout[' + index + ']'" type="text" v-model="row.punchout" required class="form-control" :disabled="!dayHasPunching || !row.punching" :readonly="!allowPunchingEntry"  autocomplete="off">
 					</td>
 				
 
@@ -114,7 +114,7 @@
 					<input  :name="'to[' + index + ']'" type="text" v-model="row.to" required class="form-control"  autocomplete="off">
 					</td>
 					
-					<td>
+					<td  class="col-md-2">
 					
 					
 					<input v-if="slotoptions.includes('First')" type="checkbox"   :id="'Firstslot[' + index + ']'" value="First" v-model="row.slots">

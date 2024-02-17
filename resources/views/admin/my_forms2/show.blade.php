@@ -160,29 +160,15 @@ th{
 
                     <tr>
                         
-                        
-                        @if($form->overtime_slot == 'Sittings')
-                        <th>
-                        Period
-                        </th>
-                         <td>
-                        <small> From</small> {{$form->date_from}} <small>to</small> {{$form->date_to}}
-                        <span style="display:inline-block; width: 20;"></span>
-                         @lang('quickadmin.forms.fields.overtime-slot')
-                        <strong> {{ $form->overtime_slot }}</strong> 
-                         </td>
-                        @else
+                 
                             <th>
                            @lang('quickadmin.forms.fields.duty-date')
                            </th>
                             <td>
                            {{ $form->duty_date }} ({{ $descriptionofday  ?? $daytype}})
-                           <span style="display:inline-block; width: 20;"></span>
-                         @lang('quickadmin.forms.fields.overtime-slot')
-                        <strong> {{ $form->overtime_slot }}</strong> 
+                           
                             </td>
-                        @endif
-                
+                     
 
                        
                     </tr>
@@ -271,24 +257,13 @@ th{
                     <th>Sl.</th>
                     <th>PEN-Name</th>
                     <th>@lang('quickadmin.overtimes.fields.designation')</th>
-                    @if($form->overtime_slot == 'Sittings')
-                    <th class="text-center">Period from</th>
-                    <th class="text-center">Period to</th>
-                    <th class="text-center">Sitting days attended</th>
-                    
-                      @if( \Config::get('custom.check_attendance')) 
-                      <th>Remarks if any</th>
-                      @else
-                      <th>Leave/Late</th>
-                      @endif
-
-                    @else
+              
                     <th class="text-center">Punch-In</th>
                     <th class="text-center">Punch-Out</th>
                     <th>@lang('quickadmin.overtimes.fields.from')</th>
                     <th>@lang('quickadmin.overtimes.fields.to')</th>
-                    <!-- <th>@lang('quickadmin.overtimes.fields.worknature')</th> -->
-                    @endif
+                    <th>OTs</th>
+                  
 
 
                 </tr>
@@ -318,21 +293,12 @@ th{
                     @if($overtime->punching) {{ date("h:i a", strtotime($overtime->punchout)) }}  @endif
                     </td>
 
-                    @if($form->overtime_slot == 'Sittings')
-                    <td field-key='from' class="small text-center text-nowrap">{{ $overtime->from }}</td>
-                    <td field-key='to' class="small text-center text-nowrap">{{ $overtime->to }}</td>
-                    @else
+                 
                     <td field-key='from' class=" text-nowrap">{{ date("h:i a", strtotime($overtime->from)) }}</td>
                     <td field-key='to' class=" text-nowrap">{{ date("h:i a", strtotime($overtime->to)) }}</td>
-                    @endif
-
-
-                    @if($form->overtime_slot == 'Sittings')
-                    <td class="text-center" field-key='count'>{{ $overtime->count }}</td>
-                    <!-- <td field-key='worknature'> <small> {{ $overtime->worknature }}</small></td> -->
-                    @else
-                    <!-- <td field-key='worknature'> <small> {{ $overtime->worknature ?? 'assly rel work'}}</small></td> -->
-                    @endif
+                                    
+                    <td field-key='ots'> <small> {{ $overtime->slots }}</small></td> 
+                  
 
 
                 </tr>
@@ -420,14 +386,14 @@ th{
 
 
  <div class ="btn-toolbar">
-    <a href="{{route('admin.my_forms.index')}}" class="btn btn-default hidden-print"><i class="fa fa-arrow-left"></i>&nbsp;@lang('quickadmin.qa_back_to_list')</a>
+    <a href="{{route('admin.my_forms2.index')}}" class="btn btn-default hidden-print"><i class="fa fa-arrow-left"></i>&nbsp;@lang('quickadmin.qa_back_to_list')</a>
 
    <button class="btn btn-default hidden-print" onClick="window.print()">Print</button>
 
 
     @if($form->creator == auth()->user()->username && !Auth::user()->isAdminorAudit() && $form->overtime_slot != 'Sittings')
     
-      <a href="{{ route('admin.my_forms.create_copy',[$form->id]) }}" class="btn btn-default hidden-print">  Copy to New Form</a>
+      <a href="{{ route('admin.my_forms2.create_copy',[$form->id]) }}" class="btn btn-default hidden-print">  Copy to New Form</a>
     
     @endif
 
@@ -442,14 +408,14 @@ th{
             'style' => 'display: inline-block;',
             'method' => 'DELETE',
             'onsubmit' => "return confirm('Are you sure you want to delete this entire form?');",
-            'route' => ['admin.my_forms.destroy', $form->id])) !!}
+            'route' => ['admin.my_forms2.destroy', $form->id])) !!}
 
         {!! Form::submit('Delete Form', array('class' => 'btn btn-default hidden-print')) !!}
         {!! Form::close() !!}
         @endif
 
         @if(!Auth::user()->isAdmin()) 
-        &nbsp;<a href="{{ route('admin.my_forms.edit',[$form->id]) }}" class="btn btn-default hidden-print"><i class="fa fa-edit"></i>&nbsp;@lang('quickadmin.qa_edit')</a>
+        &nbsp;<a href="{{ route('admin.my_forms2.edit',[$form->id]) }}" class="btn btn-default hidden-print"><i class="fa fa-edit"></i>&nbsp;@lang('quickadmin.qa_edit')</a>
         @endif
 
 
@@ -533,8 +499,8 @@ th{
 
 
 <script type="text/javascript">
- var editurl = "{{ route('admin.my_forms.edit',[$form->id]) }}";
- var deleteurl = "{{ route('admin.my_forms.destroy',[$form->id]) }}";
+ var editurl = "{{ route('admin.my_forms2.edit',[$form->id]) }}";
+ var deleteurl = "{{ route('admin.my_forms2.destroy',[$form->id]) }}";
 
   window.addEventListener("keydown", function (event) {
   if (event.defaultPrevented) {
@@ -582,12 +548,12 @@ th{
 
 
 <script type="text/javascript">
-    var urlformforward = "{{url('admin/my_forms/forward/')}}"
-    var urlformsubmittoaccounts = "{{url('admin/my_forms/submittoaccounts/')}}"
-    var urlformsendback = "{{url('admin/my_forms/sendback/')}}"
-    var urlformsendonelevelback = "{{url('admin/my_forms/sendonelevelback/')}}"
-    var urlformignore = "{{url('admin/my_forms/ignore/')}}"
-    var urlredirect = "{{url('admin/my_forms/')}}"
+    var urlformforward = "{{url('admin/my_forms2/forward/')}}"
+    var urlformsubmittoaccounts = "{{url('admin/my_forms2/submittoaccounts/')}}"
+    var urlformsendback = "{{url('admin/my_forms2/sendback/')}}"
+    var urlformsendonelevelback = "{{url('admin/my_forms2/sendonelevelback/')}}"
+    var urlformignore = "{{url('admin/my_forms2/ignore/')}}"
+    var urlredirect = "{{url('admin/my_forms2/')}}"
 </script>
 
 

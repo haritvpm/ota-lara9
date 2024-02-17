@@ -26,7 +26,7 @@ class Form extends Model
 'submitted_by', 'submitted_names', 'submitted_on','remarks','updated_at', 'worknature'];
     
 
-    public static $enum_overtime_slot = ["First" => "First", "Second" => "Second", "Third" => "Third", "Sittings" => "Sittings", "Additional" => "Additional" ];
+    public static $enum_overtime_slot = ["First" => "First",  "First" => "First", "Second" => "Second", "Third" => "Third", "Sittings" => "Sittings", "Additional" => "Additional" ];
 
     public function day_type()
     {

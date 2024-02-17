@@ -13,9 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('overtimes', function (Blueprint $table) {
-            $table->string('slots');
-
+        Schema::table('forms', function (Blueprint $table) {
+         //   $table->enum('overtime_slot', ['Multi','First', 'Second', 'Third', 'Sittings', 'Additional'])->change();
+         DB::statement("ALTER TABLE forms MODIFY COLUMN overtime_slot enum('Multi','First', 'Second', 'Third', 'Sittings', 'Additional') ");
         });
     }
 
@@ -26,8 +26,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('overtimes', function (Blueprint $table) {
-            $table->dropColumn('slots');
+        Schema::table('forms', function (Blueprint $table) {
+            //
         });
     }
 };
