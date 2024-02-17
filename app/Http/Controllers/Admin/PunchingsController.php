@@ -80,8 +80,8 @@ class PunchingsController extends Controller
         // }
 
         // $str_sessionfilter = null;                 
-        $str_datefilter = null;
-        $str_namefilter = null;
+        // $str_datefilter = null;
+        // $str_namefilter = null;
         // $session = $request->query('session');
         $datefilter=  $request->query('datefilter');
         $namefilter=  $request->query('namefilter');
@@ -106,7 +106,7 @@ class PunchingsController extends Controller
             $punchings = $punchings->where( 'date',$date);
 			               		
 
-            $str_datefilter = '&datefilter='.$datefilter;
+           // $str_datefilter = '&datefilter='.$datefilter;
         } else {
             $punchings = $punchings->where( 'date','0000-00-00');
         }
@@ -114,9 +114,11 @@ class PunchingsController extends Controller
         
         if ($request->filled('namefilter')){
                     
-            $punchings = $punchings->where('pen','like', '%' . $namefilter.'%' );
-                            
-            $str_namefilter = '&namefilter='. $namefilter;
+            $punchings = $punchings->where( function ($query) use ($namefilter) {
+                $query->where('pen','like', '%' . $namefilter.'%' )
+                    ->orwhere('aadhaarid','like', '%' . $namefilter.'%' ) ;
+            });
+        
         }
         
         $punchings =  $punchings->paginate(10)->appends($request->except('page'));

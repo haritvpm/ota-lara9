@@ -802,7 +802,7 @@ class MyForms2Controller extends Controller
                         'date'  => $date,
                         'pen'  => $overtime['pen'],
                         'aadhaarid'  => '-', //composite keys wont work if we give null. so something else
-                        'name'  => $overtime['name'],
+                     //   'name'  => $overtime['name'],
                         'punch_in'  => $overtime['punchin'],
                         'punch_out' => $overtime['punchout'],
                         
@@ -941,7 +941,8 @@ class MyForms2Controller extends Controller
 
         //update ot times if user is the one who created it in the first place
         //using try catch because this can cause exception if we try to save a 2nd form during manual edit of punching times
-        try  {
+        //try  
+        {
 
             $date = Carbon::createFromFormat(config('app.date_format'), $request['duty_date'])->format('Y-m-d');
 
@@ -951,7 +952,7 @@ class MyForms2Controller extends Controller
             if( $calenderdate?->punching == 'MANUALENTRY' )
             {
                 $collection = collect($overtimes);
-
+\Log::info($date );
                 $punchtimes =  $collection->map( function($overtime) use ($date) {
                 //date has  to be 'Y-m-d' here, because createMany of laravel is undefined.
                 //so we have to use Punching::upsert which does not call our Model's setDateAttribute
@@ -961,21 +962,24 @@ class MyForms2Controller extends Controller
                         'creator' => \Auth::user()->username,
                         'date'  => $date,
                         'pen'  => $overtime['pen'],
-                        'name'  => $overtime['name'],
+                     //   'name'  => $overtime['name'],
                         'aadhaarid'  => '-', //date-aadhaarid-pen composite keys wont work if we give null. so something else
                         'punch_in'  => $overtime['punchin'],
                         'punch_out' => $overtime['punchout'],
-                        'punching_id' => $overtime['punching_id'],
+                     //   'punching_id' => $overtime['punching_id'],
                         
                     ];
                 } );
                 // the second argument lists the column(s) that uniquely identify records within the associated table. The method's third and final argument is an array of the columns that should be updated if a matching record already exists in the database.
                 //only allow punching time update if it was the original section whose data we saved.
                 //this does not affect ot form as they have their own
-                \App\Punching::upsert($punchtimes->toArray(), ['date', 'pen', 'creator','punching_id'], ['punch_in', 'punch_out']);
+                \App\Punching::upsert($punchtimes->toArray(), ['date', 'pen', 'aadhaarid'], ['punch_in', 'punch_out' ]);
+                //\App\Punching::upsert($punchtimes->toArray(), ['date', 'pen', 'aadhaarid'], ['punching_id','creator','punch_in', 'punch_out','aadhaarid' ]);
             }
 
-        } catch(Exception $e){
+        }
+        // catch(Exception $e)
+        {
         
             //do nothing. as this may be due to an already existing punching in db for the date and PEN composite key
           

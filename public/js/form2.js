@@ -449,6 +449,7 @@ var vm = new Vue({
     return row.designation == "Deputy Secretary" || row.designation == "Joint Secretary" || row.designation == "Additional Secretary" || row.designation == "Special Secretary";
   }), _defineProperty(_methods, "rowsvalid", function rowsvalid() {
     this.myerrors = [];
+    this.errors = [];
     var self = this;
     if (self.form.session == "" || self.form.duty_date == "") {
       this.$swal("Error", "Please select session/date", "error");
@@ -477,11 +478,7 @@ var vm = new Vue({
         this.$swal("Error", "Please select the number of OTs", "error");
         return false;
       }
-    }
-    if (this.hasAddl(row.slots)) {
-      if (self.form.overtimes.some(function (row) {
-        return !self.canShowAddlOT(row);
-      })) {
+      if (this.hasAddl(row.slots) && !self.canShowAddlOT(row)) {
         this.$swal("Error", "Only DS or above can have Additional OT!", "error");
         return false;
       }
@@ -614,6 +611,7 @@ var vm = new Vue({
       return;
     }
     this.isProcessing = true;
+    this.errors = [];
     if (!this.rowsvalid()) {
       this.isProcessing = false;
       return;
@@ -657,7 +655,7 @@ var vm = new Vue({
       return;
     }
     this.isProcessing = true;
-    //  console.log('update 2')
+    this.errors = [];
     if (!this.rowsvalid()) {
       this.isProcessing = false;
       return;
