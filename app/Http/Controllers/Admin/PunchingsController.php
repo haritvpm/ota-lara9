@@ -227,7 +227,7 @@ class PunchingsController extends Controller
 
         $insertedcount = 0;
         $pen_to_aadhaarid = [];
-        for ($offset=0;   ; $offset += $count+1 ) { 
+        for ($offset=0;   ; $offset += $count ) { 
             
             
             $url = "https://basreports.attendance.gov.in/api/unibasglobal/api/attendance/offset/{$offset}/count/{$count}/reportdate/{$reportdate}/apikey/{$apikey}";
@@ -372,7 +372,7 @@ class PunchingsController extends Controller
         $data = [];
 
         
-        for ($offset=0;   ; $offset += $count+1 ) { 
+        for ($offset=0;   ; $offset += $count ) { 
             
             $url = "https://basreports.attendance.gov.in/api/unibasglobal/api/attendance/offset/{$offset}/count/{$count}/reportdate/{$reportdate}/apikey/{$apikey}";
 

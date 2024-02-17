@@ -95,23 +95,30 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
     Route::resource('overtimes', 'Admin\OvertimesController');
     Route::post('overtimes_mass_destroy', ['uses' => 'Admin\OvertimesController@massDestroy', 'as' => 'overtimes.mass_destroy']);
     
+
+    Route::get('my_forms2/create_copy/{id}', ['uses' => 'Admin\MyForms2Controller@create_copy', 'as' => 'my_forms2.create_copy'] );
+    Route::get('my_forms2/getpdf', 'Admin\MyForms2Controller@getpdf' , ['uses' => 'Admin\MyForms2Controller@getpdf', 'as' => 'my_forms2.getpdf']);
+    Route::put('my_forms2/forward/{id}', 'Admin\MyForms2Controller@forward');
+    Route::put('my_forms2/submittoaccounts/{id}', 'Admin\MyForms2Controller@submittoaccounts');
+    Route::put('my_forms2/sendback/{id}', 'Admin\MyForms2Controller@sendback');
+    Route::put('my_forms2/ignore/{id}', 'Admin\MyForms2Controller@ignore');
+    Route::put('my_forms2/sendonelevelback/{id}', 'Admin\MyForms2Controller@sendonelevelback');
+    Route::resource('my_forms2', 'Admin\MyForms2Controller');
+
     Route::post('my_forms/store_sitting', 'Admin\MyFormsController@store_sitting');
     Route::get('my_forms/create_sitting', ['uses' => 'Admin\MyFormsController@create_sitting', 'as' => 'my_forms.create_sitting'] );
-
     Route::get('my_forms/create_copy/{id}', ['uses' => 'Admin\MyFormsController@create_copy', 'as' => 'my_forms.create_copy'] );
-
     Route::put('my_forms/update_sitting/{id}', 'Admin\MyFormsController@update_sitting');
-
     Route::get('my_forms/getpdf', 'Admin\MyFormsController@getpdf' , ['uses' => 'Admin\MyFormsController@getpdf', 'as' => 'my_forms.getpdf']);
     Route::put('my_forms/forward/{id}', 'Admin\MyFormsController@forward');
     Route::put('my_forms/submittoaccounts/{id}', 'Admin\MyFormsController@submittoaccounts');
     Route::put('my_forms/sendback/{id}', 'Admin\MyFormsController@sendback');
-     Route::put('my_forms/ignore/{id}', 'Admin\MyFormsController@ignore');
-     Route::put('my_forms/sendonelevelback/{id}', 'Admin\MyFormsController@sendonelevelback');
-
+    Route::put('my_forms/ignore/{id}', 'Admin\MyFormsController@ignore');
+    Route::put('my_forms/sendonelevelback/{id}', 'Admin\MyFormsController@sendonelevelback');
     Route::resource('my_forms', 'Admin\MyFormsController');
 
-    
+   
+ 
     
     Route::resource('pa2mlaforms', 'Admin\PA2MLAFormsController');
 

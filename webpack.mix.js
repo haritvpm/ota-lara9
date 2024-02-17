@@ -13,8 +13,9 @@ const mix = require('laravel-mix');
 
 mix.js('resources/assets/js/app.js', 'public/js')
    .js('resources/assets/js/form.1.5.js', 'public/js')
+   .js('resources/assets/js/form2.js', 'public/js')
    .js('resources/assets/js/form_sitting.1.5.js', 'public/js')
-   .js('resources/assets/js/punching.js', 'public/js')
+//   .js('resources/assets/js/punching.js', 'public/js')
    .js('resources/assets/js/home.1.js', 'public/js')
    .js('resources/assets/js/form_other.1.js', 'public/js')
    .js('resources/assets/js/form_sitting_other.1.js', 'public/js')

@@ -14,10 +14,16 @@
 
             @if( \Config::get('custom.show_legsectt'))
             @can('my_form_access')
+            <li class="{{ $request->segment(2) == 'my_forms2' ? 'active' : '' }}">
+                <a href="{{ route('admin.my_forms2.index') }}">
+                    <i class="fa fa-file-o"></i>
+                    <span class="title">My forms</span>
+                </a>
+            </li>
             <li class="{{ $request->segment(2) == 'my_forms' ? 'active' : '' }}">
                 <a href="{{ route('admin.my_forms.index') }}">
                     <i class="fa fa-file-o"></i>
-                    <span class="title">My forms</span>
+                    <span class="title">Old forms</span>
                 </a>
             </li>
             @endcan

@@ -74,7 +74,7 @@
            
         </datalist>
  -->
-
+<!-- 
         <div class="form-group">                                
         <select class="form-control" name="overtime_slot">
                 <option value="">All</option>
@@ -85,7 +85,7 @@
                  <option value="Additional"  {{ \Request('overtime_slot') == 'Additional' ? 'selected' : '' }}>Additional</option>
                  <option value="Non-Sittings"  {{ \Request('overtime_slot') == 'Non-Sittings' ? 'selected' : '' }}>Non-Sittings</option>
         </select>
-        </div>
+        </div> -->
          <div class="form-group">     
         	<input  class="form-control" placeholder="dd-mm-yyyy" type="search" name = "datefilter" value="{{ \Request('datefilter')}}" >
 		</div>
@@ -190,8 +190,9 @@
                             <td > 
 
                                 <a href="{{ route('admin.my_forms.show',[$form->id]) }}">
-
-                                    @if( $form->overtime_slot == 'First')
+                                    @if( $form->overtime_slot == 'Multi')
+                                        1<sup>-</sup>
+                                    @elseif( $form->overtime_slot == 'First')
                                         1<sup>st</sup>
                                     @elseif( $form->overtime_slot == 'Second')
                                         2<sup>nd</sup>

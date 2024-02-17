@@ -19,10 +19,10 @@
 
     @if(!auth()->user()->isAdminorAudit()) 
 
-    <!-- <h4 class="page-title">Create Forms</h4> -->
+    <h4 class="page-title">Create Forms</h4>
 
     <p>
-        <!-- <a href="{{ route('admin.my_forms.create') }}" class="btn btn-success"  data-toggle="tooltip" title="Prepare a form for 1st, 2nd or 3rd OT. Form to be submitted on the next working day itself."  >@lang('quickadmin.qa_new_daily_form')</a> -->
+        <a href="{{ route('admin.my_forms2.create') }}" class="btn btn-success"  data-toggle="tooltip" title="Prepare a form for 1st, 2nd or 3rd OT. Form to be submitted on the next working day itself."  >@lang('quickadmin.qa_new_daily_form')</a>
         <!-- <a href="{{ route('admin.my_forms.create_sitting') }}" class="btn btn-warning" data-toggle="tooltip" title="Prepare a form for total sitting days attended. Form to be submitted only after an assembly session is over."  > New Sitting-days Form</a> -->
     </p>
    
@@ -75,18 +75,18 @@
             <thead>
                 <tr>
                     @if(auth()->user()->isAdminorAudit()) 
-                    <th><a href="<?=URL::to('admin/my_forms?sort=id'.$querystr)?>">ID</a></th>
+                    <th><a href="<?=URL::to('admin/my_forms2?sort=id'.$querystr)?>">ID</a></th>
                     @endif
 
                     @if(auth()->user()->isAdmin()) 
                     <th>F.No</th>
                     @endif
 
-                    <th><a href="<?=URL::to('admin/my_forms?sort=session'.$querystr)?>">Session</a></th>
-                    <th><a href="<?=URL::to('admin/my_forms?sort=creator'.$querystr)?>">Created by</a></th>
-                    <th><a href="<?=URL::to('admin/my_forms?sort=overtime_slot'.$querystr)?>">OT</a></th>
-                    <th><a href="<?=URL::to('admin/my_forms?sort=duty_date'.$querystr)?>">Duty Date</a></th>
-                    <th><a href="<?=URL::to('admin/my_forms?sort=owner'.$querystr)?>">Status</a></th>
+                    <th><a href="<?=URL::to('admin/my_forms2?sort=session'.$querystr)?>">Session</a></th>
+                    <th><a href="<?=URL::to('admin/my_forms2?sort=creator'.$querystr)?>">Created by</a></th>
+                    <!-- <th><a href="<?=URL::to('admin/my_forms2?sort=overtime_slot'.$querystr)?>">OT</a></th> -->
+                    <th><a href="<?=URL::to('admin/my_forms2?sort=duty_date'.$querystr)?>">Duty Date</a></th>
+                    <th><a href="<?=URL::to('admin/my_forms2?sort=owner'.$querystr)?>">Status</a></th>
 
                     @if(auth()->user()->isAdmin())
                     <th>Submtd</th>
@@ -126,7 +126,9 @@
                             @endif
                             </td>
                             <td > 
-                            @if( $form->overtime_slot == 'First')
+                            @if( $form->overtime_slot == 'Multi')   
+                                -
+                            @elseif( $form->overtime_slot == 'First')
                                 1<sup>st</sup>
                             @elseif( $form->overtime_slot == 'Second')
                                 2<sup>nd</sup>
@@ -134,38 +136,15 @@
                                 3<sup>rd</sup>
                             @elseif( $form->overtime_slot == 'Additional')
                                 Addl
-                            @else
+                            @elseif( $form->overtime_slot == 'Sittings')   
                                 Sitting 
                             @endif
 
                             </td>
                             <td>
-                            @if($form->overtime_slot == 'Sittings')
-                            
-                               <!--  @php
-                                $session_no = substr($form->session,strpos($form->session,'.')+1);
-                                @endphp -->
-                                <!-- <small>Session:</small> {{ $session_no }} -->
-                                <!-- {{ $form->date_from }} to {{ $form->date_to }} -->      
-                            
-                            @else
-                            
+                         
                                 {{ $form->duty_date }}
-                                @php
-                                $daytype = $form->day_type() ;   
-                                @endphp
-                                @if($daytype == 'S')
-                                <small><i class="fa fa-calendar-o" style="color:green"></i></small>
-                                @elseif($daytype == 'H')
-                                <small><i class="fa fa-calendar-o" style="color:red"></i></small>
-                                @else
-                                <small><i class="fa fa-calendar-o" style="color:black"></i></small>
-                                @endif    
-                                
-                                
-
-                            
-                            @endif
+             
                             </td>
 
                                                        
@@ -212,22 +191,9 @@
 
                           
                             <td class="text-nowrap">
-                                <a href="{{ route('admin.my_forms.show',[$form->id]) }}" class="btn btn-xs btn-primary">@lang('quickadmin.qa_view') </a>  <small>{{$form->overtimes()->count()}} </small>
+                                <a href="{{ route('admin.my_forms2.show',[$form->id]) }}" class="btn btn-xs btn-primary">@lang('quickadmin.qa_view') </a>  <small>{{$form->overtimes()->count()}} </small>
                                 
-                                <!-- @unless( Auth::user()->isAdminorAudit())                                
-                                @if( Auth::user()->username == $form->owner)
-                                <a href="{{ route('admin.my_forms.edit',[$form->id]) }}" class="btn btn-xs btn-info">@lang('quickadmin.qa_edit')</a>
-                                                               
-                                {!! Form::open(array(
-                                  
-                                    'style' => 'display: inline-block;',
-                                    'method' => 'DELETE',
-                                    'onsubmit' => "return confirm('".trans("quickadmin.qa_are_you_sure")."');",
-                                    'route' => ['admin.my_forms.destroy', $form->id])) !!}
-                                {!! Form::submit(trans('quickadmin.qa_delete'), array('class' => 'btn btn-xs btn-danger')) !!}
-                                {!! Form::close() !!}
-                                @endif
-                                @endunless -->
+                              
                                
                             </td>
 
@@ -299,20 +265,7 @@
         </div>
         @endif
 
-        <div class="form-group">                                
-        OT <select class="form-control" name="overtime_slot">
-                <option value="">All</option>
-                <option value="First" {{  \Request('overtime_slot')  == 'First' ? 'selected' : '' }}>First</option>
-                <option value="Second" {{ \Request('overtime_slot') == 'Second' ? 'selected' : '' }}>Second</option>
-                <option value="Third"  {{ \Request('overtime_slot') == 'Third' ? 'selected' : '' }}>Third</option>
-                <option value="Sittings"  {{ \Request('overtime_slot') == 'Sittings' ? 'selected' : '' }}>Sittings</option>
-                 <option value="Additional"  {{ \Request('overtime_slot') == 'Additional' ? 'selected' : '' }}>Additional</option>
-                 <option value="Non-Sittings"  {{ \Request('overtime_slot') == 'Non-Sittings' ? 'selected' : '' }}>Non-Sittings</option>
-                 <option value="Withheld"  {{ \Request('overtime_slot') == 'Withheld' ? 'selected' : '' }}>Withheld</option>
-                
-        
-        </select>
-        </div>
+       
         Date <input  class="form-control" placeholder="dd-mm-yyyy|S|W|H|NS" type="text" name = "datefilter" value="{{ \Request('datefilter')  }}" rel="filter">
         <input  class="form-control" placeholder="Name/Pen" type="text" name = "namefilter" value="{{\Request('namefilter')}}" rel="filter">
         <input  class="form-control" placeholder="Designation" type="text" name = "desigfilter" value="{{ \Request('desigfilter')  }}" rel="filter">
@@ -322,8 +275,7 @@
         <input  type="hidden" name = "status" value="all" rel="filter">
 
         @if(Auth::user()->isAdmin())
-         <input  class="form-control" placeholder="WorkNature" type="text" name = "worknaturefilter" value="{{\Request('worknaturefilter')}}" rel="filter">
-        <input  class="form-control" placeholder="Remarks|nonempty" type="text" name = "remarksfilter" value="{{\Request('remarksfilter')}}" rel="filter">
+        
         <input  class="form-control" placeholder="submittedby" type="text" name = "submittedbyfilter" value="{{\Request('submittedbyfilter')}}" rel="filter">
 
         @endif
@@ -376,18 +328,7 @@
         </div>
         @endif
 
-        <div class="form-group">                                
-        OT <select class="form-control" name="overtime_slot">
-                <option value="">All</option>
-                <option value="First" {{  \Request('overtime_slot')  == 'First' ? 'selected' : '' }}>First</option>
-                <option value="Second" {{ \Request('overtime_slot') == 'Second' ? 'selected' : '' }}>Second</option>
-                <option value="Third"  {{ \Request('overtime_slot') == 'Third' ? 'selected' : '' }}>Third</option>
-                <option value="Sittings"  {{ \Request('overtime_slot') == 'Sittings' ? 'selected' : '' }}>Sittings</option>
-                <option value="Additional"  {{ \Request('overtime_slot') == 'Additional' ? 'selected' : '' }}>Additional</option>
-                 <option value="Non-Sittings"  {{ \Request('overtime_slot') == 'Non-Sittings' ? 'selected' : '' }}>Non-Sittings</option>
-        
-        </select>
-        </div>
+
         Date <input  class="form-control" placeholder="dd-mm-yyyy" type="text" name = "datefilter" value="{{ \Request('datefilter')  }}" rel="filter">
         <input  class="form-control" placeholder="Name/Pen" type="text" name = "namefilter" value="{{\Request('namefilter')}}" rel="filter">
         <input  class="form-control" placeholder="Designation" type="text" name = "desigfilter" value="{{ \Request('desigfilter')  }}" rel="filter">
