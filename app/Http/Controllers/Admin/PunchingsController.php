@@ -387,7 +387,7 @@ class PunchingsController extends Controller
                 $returnkey = "attendancetrace";
 
             }
-            $url = 'http://localhost:3000/data';
+           // $url = 'http://localhost:3000/data';
             Log::info($url);
             $response = Http::withHeaders([
                 'Access-Control-Allow-Origin' => '*',

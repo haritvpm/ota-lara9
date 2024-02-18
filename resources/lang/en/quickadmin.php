@@ -233,7 +233,7 @@ return [
 
 	
 
-	'qa_new_daily_form' => 'New Duty Form',
+	'qa_new_daily_form' => 'New OT Form',
 	'qa_create' => 'Create',
 	'qa_save' => 'Save',
 	'qa_edit' => 'Edit',

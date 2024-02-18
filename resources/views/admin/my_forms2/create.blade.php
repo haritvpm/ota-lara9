@@ -7,7 +7,7 @@
 
 @section('content')
 
-    <h4 class="page-title">Duty Form</h4>
+    <h4 class="page-title">OT Form</h4>
         
 
     @if(count($sessions) > 0)

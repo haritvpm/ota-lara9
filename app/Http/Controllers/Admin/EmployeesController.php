@@ -1061,8 +1061,11 @@ class EmployeesController extends Controller
             $rows  = count($update);
            
             File::delete($path);
-
+            $notfound = count($empls_not_found);
             \Session::flash('message-success', "updated  {$updated} / {$rows}" );
+            if($notfound){
+                \Session::flash('message-danger', "Manually map PEN to attendanceId for the {$notfound} employees shown in table below" );
+            }
             
             return redirect()->route('admin.employees.index')->with( ['empls_not_found' => $empls_not_found] );
 

@@ -1026,12 +1026,12 @@ class MyForms2Controller extends Controller
 
             //make ot slots in the correct order
             $slots = [];
-            if( str_contains($overtime->slots,'First'))  $slots[] =  str_contains($form->day_type(),'itting') ? 'Sitting' :   'First';
+            if( str_contains($overtime->slots,'First'))  $slots[] =  str_contains($form->day_type(),'S') ? 'Sitting' :   'First';
             if( str_contains($overtime->slots,'Second')) $slots[] = 'Second';
             if( str_contains($overtime->slots,'Third')) $slots[] = 'Third';
             if( str_contains($overtime->slots,'Additional')) $slots[] = 'Addl';
     
-            $overtime['slots'] = implode(',',$slots);
+            $overtime['slots'] = implode(', ',$slots);
             return $overtime;
         });
 

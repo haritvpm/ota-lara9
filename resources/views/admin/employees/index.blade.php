@@ -21,11 +21,34 @@
          <a href="{{ route('admin.employees.sparksync') }}" class="btn btn-warning">Spark Sync</a>
          &nbsp;
          <button class="btn btn-primary" data-toggle="modal" data-target="#csvImportModal">
-                {{ trans('global.app_csvImport') }}
+                 Import AttendanceId from AEBAS Empl CSV
             </button>
             @include('csvImport.modalfortrait', ['model' => 'Employee', 'route' => 'admin.employees.parseAadhaarCsvImport'])
          <hr>
-        
+         <br>
+@if(Session::has('empls_not_found'))
+    <table class="table table-condensed">
+    <thead>
+      <tr>
+        <th>PEN/org_emp_code</th>
+        <th>AttendanceId</th>
+        <th>Name</th>
+        <th>Designation</th>
+      </tr>
+    </thead>
+    <tbody>
+        @foreach (session()->get('empls_not_found') as $aebasemp )
+        <tr class="danger">
+        <td>{{$aebasemp['pen']}}</td>
+        <td>{{$aebasemp['aadhaarid']}}</td>
+        <td>{{$aebasemp['name']}}</td>
+        <td>{{$aebasemp['designation']}}</td> <td>{{$aebasemp['section']}}</td>
+    
+        @endforeach
+    
+    </tbody>
+  </table>
+  @endif
         Employees with no category set : {{$empwithnocategory}}<br>
         Employees with redundant Desig Display : {{$empswithduplicatedesigdisplay}}<br>
         <hr>
@@ -68,30 +91,7 @@
           
     </div>
 @endif
-<br>
-@if(Session::has('empls_not_found'))
-    <table class="table table-condensed">
-    <thead>
-      <tr>
-        <th>PEN/org_emp_code</th>
-        <th>AttendanceId</th>
-        <th>Name</th>
-        <th>Designation</th>
-      </tr>
-    </thead>
-    <tbody>
-        @foreach (session()->get('empls_not_found') as $aebasemp )
-        <tr>
-        <td>{{$aebasemp['pen']}}</td>
-        <td>{{$aebasemp['aadhaarid']}}</td>
-        <td>{{$aebasemp['name']}}</td>
-        <td>{{$aebasemp['designation']}} -  <td>{{$aebasemp['section']}}</td></td>
-    
-        @endforeach
-    
-    </tbody>
-  </table>
-  @endif
+
  <br>
  <!-- prevent user changing employee details -->
   @if(\Auth::user()->isAdmin())

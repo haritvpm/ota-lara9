@@ -320,10 +320,6 @@ var vm = new Vue({
           row.aadhaarid = response.data.aadhaarid;
           row.punching_id = response.data.id;
 
-          //remove after testing
-          row.from = response.data.punchin;
-          row.to = response.data.punchout;
-
           //vue does not update time if we change date as it does not watch for array changes
           //https://v2.vuejs.org/v2/guide/reactivity#Change-Detection-Caveats
           Vue.set(_this3.form.overtimes, index, row);
@@ -495,11 +491,11 @@ var vm = new Vue({
       isWorkingDay = _this$getDayTypes.isWorkingDay,
       isHoliDay = _this$getDayTypes.isHoliDay;
     var minothour_ideal = parseFloat(3);
-    var minothour = parseFloat(2.8); //corrected to allow leeway 12 minutes
+    var minot_minutes = 170; //corrected to allow leeway 
     var daytypedesc = "holiday";
     if (isSittingOrWorkingDay) {
       minothour_ideal = parseFloat(2.5);
-      minothour = parseFloat(2.4); //6 min leeway
+      minot_minutes = 140; //leeway
       daytypedesc = "working day";
       if (isSittingDay) {
         daytypedesc = "sitting day";
@@ -509,7 +505,7 @@ var vm = new Vue({
     //check time diff
     for (var i = 0; i < self.form.overtimes.length; i++) {
       var row = self.form.overtimes[i];
-      console.log(row);
+      //console.log(row);
       this.setEmployeeTypes(row);
       if (row.punching) {
         row.punchin = validateHhMm(row.punchin.trim());
@@ -537,21 +533,22 @@ var vm = new Vue({
       var _this$strTimesToDates3 = this.strTimesToDatesNormalized(row.from, row.to),
         datefrom = _this$strTimesToDates3.datefrom,
         dateto = _this$strTimesToDates3.dateto;
-      var diffhours = parseFloat((dateto - datefrom) / 3600000);
+      var otmins_actual = parseFloat((dateto - datefrom) / 60000);
 
       //add totalhours needed
-      var othours_practical = minothour * row.slots.length; //if three OT, 3 * 2.5
+      var otmins_practical = minot_minutes * row.slots.length; //if three OT, 3 * 2.5
       var othours_ideal = minothour_ideal * row.slots.length; //if three OT, 3 * 2.5
       if (isSittingOrWorkingDay && this.hasFirst(row.slots)) {
-        console.log('oh: ' + this._daylenmultiplier);
-        othours_practical += row.normal_office_hours * this._daylenmultiplier;
+        //	console.log('oh: ' + this._daylenmultiplier);
+        otmins_practical += row.normal_office_hours * 60 * this._daylenmultiplier;
         othours_ideal += row.normal_office_hours * this._daylenmultiplier;
       }
-      console.log('difneeded: ' + othours_practical);
-      console.log('dif: ' + diffhours);
+      //console.log('otmins_needed: ' + otmins_practical);
+      //console.log('otmins_actual: ' + otmins_actual);
       //new validation after adding normal_office_hours
-      if (diffhours < othours_practical) {
-        this.myerrors.push("Row  ".concat(i + 1, " : At least ").concat(othours_ideal, " hours needed for the selected OT(s) on a ").concat(daytypedesc));
+      var diff = otmins_actual - otmins_practical;
+      if (diff < 0) {
+        this.myerrors.push("Row  ".concat(i + 1, " :Needs ").concat(othours_ideal, " hours for the selected OT(s) on a ").concat(daytypedesc, ". Diff=").concat(Math.abs(diff), " minutes"));
         return false;
       }
 
@@ -599,6 +596,11 @@ var vm = new Vue({
               return false;
             }
           }
+        }
+        //check if there is time left for OT. if so this must be user careless or adding time from another section's time
+        if (diff >= minot_minutes) {
+          this.myerrors.push("Row ".concat(i + 1, " :Time left for another OT. If number of OT is correct, adjust from/to times accordingly"));
+          return false;
         }
       }
     }
