@@ -369,52 +369,45 @@ var vm = new Vue({
     }
     return true;
   }), _defineProperty(_methods, "checkSittingDayTimeIsAsPerGO", function checkSittingDayTimeIsAsPerGO(row, i) {
+    var _this4 = this;
     //we need to give some leeway. so commenting
-
+    var timePeriodIncludesPeriod = function timePeriodIncludesPeriod(from, to, fromReq, toReq) {
+      var datefrom = _this4.stringTimeToDate(from);
+      var dateto = _this4.stringTimeToDate(to);
+      var time800am = _this4.stringTimeToDate(fromReq); // a flexy time of 5 mins eitherway
+      var time530pm = _this4.stringTimeToDate(toReq);
+      return time800am >= datefrom && time530pm <= dateto;
+    };
     if (row.isPartime) {
       //parttime emp
-      /*
-      if (overtime_slot == "First") {
-      if (row.from != "06:00" || row.to != "11:30") {
-      this.myerrors.push("Row " + (i + 1) + ": Parttime employee - time shall be 06:00 to 11:30 as per G.O on a sitting day");
-      return false;
-      }
-      } else if (overtime_slot == "Second") {
-      //no need to strict time. let them decide for themselves.
-      if (row.from != "14:00" || row.to != "16:30") {
-      this.myerrors.push("Row " + (i + 1) + ": Parttime employee - time shall be 14:00 to 16:30 as per G.O on a sitting day");
-      return false;
-      }
+
+      if (this.hasFirst(row.slots)) {
+        if (!timePeriodIncludesPeriod(row.from, row.to, "06:05", "11:25")) {
+          this.myerrors.push("Row " + (i + 1) + ": Parttime employee - time should include 06:00 to 11:30 as per G.O on a sitting day");
+          return false;
+        }
+      } else if (this.hasSecond(row.slots)) {
+        //no need to strict time. let them decide for themselves. 2 to 4.30 is actual
+        if (!timePeriodIncludesPeriod(row.from, row.to, "14:05", "16:25")) {
+          this.myerrors.push("Row " + (i + 1) + ": Parttime employee - time should include 14:00 to 16:30 as per G.O on a sitting day");
+          return false;
+        }
       } else {
-      //no third OT. we check that in parent function
+        //no third OT. we check that in parent function
       }
-      */
     } else if (row.isFulltime) {
-      /*
-      if (overtime_slot == "First") {
-      if (row.from != "06:00" 
-        //|| row.to != "16:30"
-        ) {
-      this.myerrors.push("Row " + (i + 1) + ": Fulltime employee - time shall be from 06:00 a.m. as per G.O on a sitting day");
-      return false;
+      if (this.hasFirst(row.slots)) {
+        ////its acutally 4.30. no need to enforce ending time. have doubts regarding mla hostel.
+        if (!timePeriodIncludesPeriod(row.from, row.to, "06:05", "16:00")) {
+          this.myerrors.push("Row " + (i + 1) + ": Fulltime employee - time shall include 06:00 a.m. to 4.30 pm as per G.O on a sitting day");
+          return false;
+        }
       }
-      }*/
       //no second, third OT. we check that in parent function
     } else if (row.isWatchnward) {} //all other employees for sitting days
     else {
-      //no need to enforce ending time. have doubts regarding mla hostel.
-      //need to check night shifts
-      //let diffFrom = null
-      //let diffTo = null
-      //const diffdatefunc = (t1, t2) => Math.round((this.stringTimeToDate(t1) - this.stringTimeToDate(t2)) / 60000); 
-
       if (this.hasFirst(row.slots)) {
-        var datefrom = this.stringTimeToDate(row.from);
-        var dateto = this.stringTimeToDate(row.to);
-        var time800am = this.stringTimeToDate("08:05"); // a flexy time of 5 mins eitherway
-        var time530pm = this.stringTimeToDate("17:25");
-        var isok = time800am >= datefrom && time530pm <= dateto;
-        if (!isok) {
+        if (!timePeriodIncludesPeriod(row.from, row.to, "08:05", "17:25")) {
           this.myerrors.push("Row " + (i + 1) + ": For sitting OT, time should include 08:00 to 17:30 as per GO");
           return false;
         }
@@ -577,7 +570,7 @@ var vm = new Vue({
           }
         }
       }
-      if (!row.isPartime && !row.isFulltime && !row.isWatchnward && !isspeakeroffice) {
+      if (!row.isPartime && !row.isFulltime && !row.isWatchnward /*  && !isspeakeroffice */) {
         if (isSittingDay || isWorkingDay) {
           //if there is second, third, but no first
           if (!this.hasFirst(row.slots) && row.slots.length) {

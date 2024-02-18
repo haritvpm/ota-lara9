@@ -329,7 +329,7 @@
     </div>
 
 
-    <div >Click <strong><a href="<?=URL::to('admin/my_forms')?>">My Forms</strong></a> to prepare or approve OTA Claim forms
+    <div >Click <strong><a href="<?=URL::to('admin/my_forms2')?>">My Forms</strong></a> to prepare or approve OTA Claim forms
       </div>
     
   @endif

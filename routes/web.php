@@ -52,8 +52,7 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
     Route::get('employees/clearold','Admin\EmployeesController@clearold');
     Route::get('employees/download_emp','Admin\EmployeesController@download_emp');
     Route::get('employees/findinvalidpen','Admin\EmployeesController@findinvalidpen');
-    Route::get('employees/findwithnoaadhaarid','Admin\EmployeesController@findwithnoaadhaarid');
-    
+       
 
     Route::get('employees/create_temppen',['uses' => 'Admin\EmployeesController@create_temppen', 'as' => 'employees.create_temppen']);
 

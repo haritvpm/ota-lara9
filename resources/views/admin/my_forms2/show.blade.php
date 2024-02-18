@@ -130,12 +130,9 @@ th{
 
 
 <div class="panel panel-default">
-    <div class="panel-heading">
-         @if($form->overtime_slot == 'Sittings')
-    <small>Sitting-days Form </small>
-    @else
-    <small>Duty Form </small>
-    @endif  
+  <div class="panel-heading">
+    <small>OT Duty Form </small>
+
 
     <div class = "pull-right">
         <small> Created,Updated : 
@@ -383,7 +380,7 @@ th{
     
 
     @if( strpos(Auth::user()->username,'oo.') !== 0)
-        @if($form->overtime_slot == 'Sittings')
+        @if($hasOnlySittings)
             <p><small>
            Note: Statement may be submitted by an officer not below the rank of <strong><i>Under Secretary</i></strong>
             </small></p>
@@ -401,7 +398,7 @@ th{
    <button class="btn btn-default hidden-print" onClick="window.print()">Print</button>
 
 
-    @if($form->creator == auth()->user()->username && !Auth::user()->isAdminorAudit() && $form->overtime_slot != 'Sittings')
+    @if($form->creator == auth()->user()->username && !Auth::user()->isAdminorAudit())
     
       <a href="{{ route('admin.my_forms2.create_copy',[$form->id]) }}" class="btn btn-default hidden-print">  Copy to New Form</a>
     
@@ -443,7 +440,7 @@ th{
 
          @if(!($form->form_no < 0))
            @if((Auth::user()->isDSorAbove() && 
-                    $form-> overtime_slot != 'Sittings') || 
+                    !$hasOnlySittings) || 
                  Auth::user()->isAdmin())
              &nbsp;<button class="btn btn-default hidden-print" @click="ignoreClick(true)" data-toggle="tooltip" title="Withold this form indefinitely">
               <i class="fa fa-ban"></i>&nbsp;
@@ -481,7 +478,7 @@ th{
         @if($canforward)
           @if(!$cansubmittoaccounts)
           &nbsp;<button class="btn btn-danger pull-right hidden-print" @click="forwardClick('{{$usertitle}}')" data-toggle="tooltip" title="Send this form to a higher official for approval" id="btn_forward" :disabled="!agreechecked ||  ( needsposting && !needspostingchecked)"><i class="fa fa-mail-forward"></i>&nbsp;Forward</button>
-          @elseif($form->overtime_slot != 'Sittings' && $cansubmittoaccounts)
+          @elseif(!$hasOnlySittings && $cansubmittoaccounts)
           &nbsp;<button class="btn btn-default hidden-print" @click="forwardClick('{{$usertitle}}')" data-toggle="tooltip" title="Send this form to a higher official for approval" id="btn_forward" :disabled="!agreechecked ||  ( needsposting && !needspostingchecked)"><i class="fa fa-mail-forward"></i>&nbsp;</button>
           @endif
         @endif

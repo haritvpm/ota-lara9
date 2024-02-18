@@ -152,13 +152,7 @@
 
    <br>
    
-   <form action="{{url('admin/employees/findwithnoaadhaarid')}}" method="get" class="form-inline">
-       Employees with no attendance id set
-        <button type="submit" class="btn btn-danger" >List</button>
-        <!-- <button type="submit" class="btn btn-danger" name="delbtn" value="del">Delete All Forms</button> -->
-                         
-    </form>
-
+  
    <form action="{{url('admin/employees/findinvalidpen')}}" method="get" class="form-inline">
        Employees with invalid PEN for current session
         <button type="submit" class="btn btn-warning" >List</button>

@@ -149,7 +149,7 @@
                     <th>Name</th>
                     <th>Designation</th>
                     <th>Created by</th>
-                    <th>OT</th>
+                   
                     <th>Duty Date</th>
                     <th>From - To</th>
                     <th>Status</th>
@@ -187,26 +187,7 @@
                             @endif
                             </td>
                            
-                            <td > 
-
-                                <a href="{{ route('admin.my_forms.show',[$form->id]) }}">
-                                    @if( $form->overtime_slot == 'Multi')
-                                        1<sup>-</sup>
-                                    @elseif( $form->overtime_slot == 'First')
-                                        1<sup>st</sup>
-                                    @elseif( $form->overtime_slot == 'Second')
-                                        2<sup>nd</sup>
-                                    @elseif( $form->overtime_slot == 'Third')
-                                        3<sup>rd</sup>
-                                    @elseif( $form->overtime_slot == 'Additional')
-                                        Addl
-                                    @else
-                                        Sitting
-                                    @endif
-
-                                </a>
-
-                            </td>
+                            
                             <td>
                             @if($form->overtime_slot == 'Sittings')
                             
@@ -270,11 +251,17 @@
                             </td>
                             @endif
 
-                            <td class="text-center">{{ $overtime->count }}</td>
+                            <td class="text-center">
+                                <a href="{{ route('admin.my_forms2.show',[$form->id]) }}">
+                                 {{ $overtime->count }}
+
+                                </a>   
+                                                   
+                            </td>
                             <!-- <td >₹ {{ $overtime->rate }}</td> -->
                             <!-- <td>
                             	@if(Auth::user()->isAdmin())	
-                            	<a href="{{ route('admin.my_forms.show',[$form->id]) }}">View</a>
+                            	<a href="{{ route('admin.my_forms2.show',[$form->id]) }}">View</a>
                             	@endif
 
                             </td> -->

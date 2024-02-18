@@ -964,26 +964,26 @@ class EmployeesController extends Controller
     }
 
     
-    public function findwithnoaadhaarid()
-    {        
-        if(!\Auth::user()->isAdmin()){
-            return abort(401);
-        }
+    // public function findwithnoaadhaarid()
+    // {        
+    //     if(!\Auth::user()->isAdmin()){
+    //         return abort(401);
+    //     }
        
         
-        $emp_withnoaadhaarid= Employee::wherenull('aadhaarid')
-                ->where('category', '<>', 'Relieved')
-                ->orderby('id','desc')->get();
+    //     $emp_withnoaadhaarid= Employee::wherenull('aadhaarid')
+    //             ->where('category', '<>', 'Relieved')
+    //             ->orderby('id','desc')->get();
 
-        $filename =  'emp_withnoaadhaarids-'.  date('Y-m-d') . '.csv';
+    //     $filename =  'emp_withnoaadhaarids-'.  date('Y-m-d') . '.csv';
     
-        $csvExporter = new \Laracsv\Export();
+    //     $csvExporter = new \Laracsv\Export();
 
-        $csvExporter->build($emp_withnoaadhaarid, [ "pen", "name" ]);
+    //     $csvExporter->build($emp_withnoaadhaarid, [ "pen", "name" ]);
 
-        $csvExporter->download($filename);
+    //     $csvExporter->download($filename);
 
-    }
+    // }
 
     
     public function parseAadhaarCsvImport(Request $request)

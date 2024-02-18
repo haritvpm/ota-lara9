@@ -71,7 +71,7 @@
     </div>
 
     <div class="panel-body table-responsive">
-        <table class="table table-bordered table-striped  }}">
+        <table class="table table-bordered table-striped table-condensed }}">
             <thead>
                 <tr>
                     @if(auth()->user()->isAdminorAudit()) 
@@ -84,7 +84,6 @@
 
                     <th><a href="<?=URL::to('admin/my_forms2?sort=session'.$querystr)?>">Session</a></th>
                     <th><a href="<?=URL::to('admin/my_forms2?sort=creator'.$querystr)?>">Created by</a></th>
-                    <!-- <th><a href="<?=URL::to('admin/my_forms2?sort=overtime_slot'.$querystr)?>">OT</a></th> -->
                     <th><a href="<?=URL::to('admin/my_forms2?sort=duty_date'.$querystr)?>">Duty Date</a></th>
                     <th><a href="<?=URL::to('admin/my_forms2?sort=owner'.$querystr)?>">Status</a></th>
 
@@ -125,22 +124,7 @@
                                 @endif
                             @endif
                             </td>
-                            <td > 
-                            @if( $form->overtime_slot == 'Multi')   
-                                -
-                            @elseif( $form->overtime_slot == 'First')
-                                1<sup>st</sup>
-                            @elseif( $form->overtime_slot == 'Second')
-                                2<sup>nd</sup>
-                            @elseif( $form->overtime_slot == 'Third')
-                                3<sup>rd</sup>
-                            @elseif( $form->overtime_slot == 'Additional')
-                                Addl
-                            @elseif( $form->overtime_slot == 'Sittings')   
-                                Sitting 
-                            @endif
-
-                            </td>
+                           
                             <td>
                          
                                 {{ $form->duty_date }}
@@ -191,7 +175,7 @@
 
                           
                             <td class="text-nowrap">
-                                <a href="{{ route('admin.my_forms2.show',[$form->id]) }}" class="btn btn-xs btn-primary">@lang('quickadmin.qa_view') </a>  <small>{{$form->overtimes()->count()}} </small>
+                                <a href="{{ route('admin.my_forms2.show',[$form->id]) }}" class="btn btn-info">@lang('quickadmin.qa_view') </a>  <small>{{$form->overtimes()->count()}} </small>
                                 
                               
                                
@@ -280,7 +264,7 @@
 
         @endif
        
-        <a href="{{route('admin.my_forms.index')}}" class="btn btn-default">Reset</a>
+        <a href="{{route('admin.my_forms2.index')}}" class="btn btn-default">Reset</a>
 
         <button type="submit" class="btn btn-default" rel="filter">Search</button>
         
@@ -291,56 +275,6 @@
     <!-- view all -->
 
     @if(Auth::user()->isAdminorAudit())
-    <form action="my_forms/getpdf" method="get" id="filter" class="form-inline" target="_blank">
-
-        <div class="form-group">
-         <select class="form-control" name="session">
-                
-                @foreach($session_array as $session)
-                @if($session == \Request('session'))
-                   <option selected>{{$session}}</option>
-                @else
-                    <option>{{$session}}</option>
-                @endif
-                @endforeach
-                        
-        </select>
-        </div>
-       <!--  <div class="form-group">
-         <input  class="form-control" placeholder="Form No." type="text" name = "idfilter" value="{{ \Request('idfilter')  }}" rel="filter">
-        </div> -->
-
-        @if(Auth::user()->isAdminorAudit())
-        <div class="form-group">                                
-        Created By <select class="form-control" name="created_by">
-        
-                <option value="all">Any</option>
-
-                @foreach($added_bies as $val => $added_by)
-                @if($val == \Request('created_by'))
-                <option value="{{$val}}" selected>{{$added_by}} ({{$val}})</option>
-                @else
-                     <option value="{{$val}}">{{$added_by}} ({{$val}})</option>
-                @endif
-                @endforeach
-                              
-        </select>
-        </div>
-        @endif
-
-
-        Date <input  class="form-control" placeholder="dd-mm-yyyy" type="text" name = "datefilter" value="{{ \Request('datefilter')  }}" rel="filter">
-        <input  class="form-control" placeholder="Name/Pen" type="text" name = "namefilter" value="{{\Request('namefilter')}}" rel="filter">
-        <input  class="form-control" placeholder="Designation" type="text" name = "desigfilter" value="{{ \Request('desigfilter')  }}" rel="filter">
-
-        <input  type="hidden" name = "status" value="{{  \Request('status')   }}" rel="filter">
-        <!-- <input class="form-control" type="submit" value="Filter" rel="filter"> -->
-        <a href="{{route('admin.my_forms.index')}}" class="btn btn-default">Reset</a>
-        
-        <button type="submit" class="btn btn-default" name="viewall" value="viewallhtml">View All (HTML)</button>
-         <button type="submit" class="btn btn-default" name="viewall" value="viewallpdf">View All (PDF)</button>
-        
-    </form>
      @endif
   
     </div>
