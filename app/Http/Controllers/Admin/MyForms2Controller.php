@@ -1017,13 +1017,21 @@ class MyForms2Controller extends Controller
         $form = Form::with(['created_by','owned_by', 'overtimes'])->findOrFail($id);
         $overtimes = $form->overtimes;
 
-        $overtimes->transform(function($overtime) 
+        $overtimes->transform(function($overtime) use ( $form )
         {
             $tmp = strpos($overtime['pen'], '-');
             if(false === $tmp){
                 $overtime['pen'] .=   '-' . $overtime['name'];
             }
 
+            //make ot slots in the correct order
+            $slots = [];
+            if( str_contains($overtime->slots,'First'))  $slots[] =  str_contains($form->day_type(),'itting') ? 'Sitting' :   'First';
+            if( str_contains($overtime->slots,'Second')) $slots[] = 'Second';
+            if( str_contains($overtime->slots,'Third')) $slots[] = 'Third';
+            if( str_contains($overtime->slots,'Additional')) $slots[] = 'Addl';
+    
+            $overtime['slots'] = implode(',',$slots);
             return $overtime;
         });
 

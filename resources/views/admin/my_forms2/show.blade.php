@@ -263,6 +263,7 @@ th{
                     <th>@lang('quickadmin.overtimes.fields.from')</th>
                     <th>@lang('quickadmin.overtimes.fields.to')</th>
                     <th>OTs</th>
+                    <th>No</th>
                   
 
 
@@ -298,6 +299,7 @@ th{
                     <td field-key='to' class=" text-nowrap">{{ date("h:i a", strtotime($overtime->to)) }}</td>
                                     
                     <td field-key='ots'> <small> {{ $overtime->slots }}</small></td> 
+                    <td field-key='ots'> <small> {{ $overtime->count }}</small></td> 
                   
 
 

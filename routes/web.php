@@ -52,13 +52,15 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
     Route::get('employees/clearold','Admin\EmployeesController@clearold');
     Route::get('employees/download_emp','Admin\EmployeesController@download_emp');
     Route::get('employees/findinvalidpen','Admin\EmployeesController@findinvalidpen');
-
+    Route::get('employees/findwithnoaadhaarid','Admin\EmployeesController@findwithnoaadhaarid');
+    
 
     Route::get('employees/create_temppen',['uses' => 'Admin\EmployeesController@create_temppen', 'as' => 'employees.create_temppen']);
 
     Route::get('employees/sparksync',['uses' => 'Admin\EmployeesController@sparksync', 'as' => 'employees.sparksync']);
     Route::post('employees/sparksync',['uses' => 'Admin\EmployeesController@sparksync', 'as' => 'employees.sparksyncpost']);
     Route::post('employees/staff_category_update',['uses' => 'Admin\EmployeesController@staffCategorySync', 'as' => 'employees.staffCategorySync']);
+    Route::post('employees/parse-csv-import', 'Admin\EmployeesController@parseAadhaarCsvImport')->name('employees.parseAadhaarCsvImport');
 
     Route::resource('employees', 'Admin\EmployeesController');
    

@@ -20,12 +20,12 @@
 
          <a href="{{ route('admin.employees.sparksync') }}" class="btn btn-warning">Spark Sync</a>
          &nbsp;
+         <button class="btn btn-primary" data-toggle="modal" data-target="#csvImportModal">
+                {{ trans('global.app_csvImport') }}
+            </button>
+            @include('csvImport.modalfortrait', ['model' => 'Employee', 'route' => 'admin.employees.parseAadhaarCsvImport'])
          <hr>
-         <!-- <form action="{{ route('admin.employees.staffCategorySync') }}" method="POST" enctype="multipart/form-data">
-            @csrf
-            <input type="file" name="file" accept=".csv">
-            <button type="submit">Import Staff CSV</button>
-        </form> -->
+        
         Employees with no category set : {{$empwithnocategory}}<br>
         Employees with redundant Desig Display : {{$empswithduplicatedesigdisplay}}<br>
         <hr>
@@ -68,6 +68,30 @@
           
     </div>
 @endif
+<br>
+@if(Session::has('empls_not_found'))
+    <table class="table table-condensed">
+    <thead>
+      <tr>
+        <th>PEN/org_emp_code</th>
+        <th>AttendanceId</th>
+        <th>Name</th>
+        <th>Designation</th>
+      </tr>
+    </thead>
+    <tbody>
+        @foreach (session()->get('empls_not_found') as $aebasemp )
+        <tr>
+        <td>{{$aebasemp['pen']}}</td>
+        <td>{{$aebasemp['aadhaarid']}}</td>
+        <td>{{$aebasemp['name']}}</td>
+        <td>{{$aebasemp['designation']}} -  <td>{{$aebasemp['section']}}</td></td>
+    
+        @endforeach
+    
+    </tbody>
+  </table>
+  @endif
  <br>
  <!-- prevent user changing employee details -->
   @if(\Auth::user()->isAdmin())
@@ -125,13 +149,20 @@
 
    <br>
    
-   <form action="{{url('admin/employees/findinvalidpen')}}" method="get" class="form-inline">
-       List employees with invalid PEN for current session
+   <form action="{{url('admin/employees/findwithnoaadhaarid')}}" method="get" class="form-inline">
+       Employees with no attendance id set
         <button type="submit" class="btn btn-danger" >List</button>
         <!-- <button type="submit" class="btn btn-danger" name="delbtn" value="del">Delete All Forms</button> -->
                          
     </form>
 
+   <form action="{{url('admin/employees/findinvalidpen')}}" method="get" class="form-inline">
+       Employees with invalid PEN for current session
+        <button type="submit" class="btn btn-warning" >List</button>
+        <!-- <button type="submit" class="btn btn-danger" name="delbtn" value="del">Delete All Forms</button> -->
+                         
+    </form>
+ 
     <!-- <form action="{{url('admin/employees/clearold')}}" method="get" class="form-inline">
        List unused Employees
         <button type="submit" class="btn btn-danger" >Dump</button>

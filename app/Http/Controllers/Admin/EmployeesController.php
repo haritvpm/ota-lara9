@@ -14,7 +14,9 @@ use App\Http\Requests\Admin\StoreEmployeesRequest;
 use App\Http\Requests\Admin\UpdateEmployeesRequest;
 use Yajra\DataTables\DataTables;
 use Illuminate\Support\Collection;
-
+use \SpreadsheetReader;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 class EmployeesController extends Controller
 {
     /**
@@ -958,6 +960,118 @@ class EmployeesController extends Controller
         return redirect()->back()->with('success', 'CSV file imported successfully.');
     }
 
+    
+    public function findwithnoaadhaarid()
+    {        
+        if(!\Auth::user()->isAdmin()){
+            return abort(401);
+        }
+       
+        
+        $emp_withnoaadhaarid= Employee::wherenull('aadhaarid')
+                ->where('category', '<>', 'Relieved')
+                ->orderby('id','desc')->get();
 
+        $filename =  'emp_withnoaadhaarids-'.  date('Y-m-d') . '.csv';
+    
+        $csvExporter = new \Laracsv\Export();
+
+        $csvExporter->build($emp_withnoaadhaarid, [ "pen", "name" ]);
+
+        $csvExporter->download($filename);
+
+    }
+
+    
+    public function parseAadhaarCsvImport(Request $request)
+    {
+        try {
+            $file = $request->file('csv_file');
+            $request->validate([
+                'csv_file' => 'mimes:csv,txt',
+            ]);
+
+            $path      = $file->path();
+            $filename = $file->getClientOriginalName();
+     
+           // $hasHeader = $request->input('header', false) ? true : false;
+
+            $reader  = new SpreadsheetReader($path);
+            $headers = $reader->current();
+        
+
+
+            $fields = array('aadhaarid' => array_search("emp_id",($headers)),
+                            'pen' =>  array_search("org_emp_code",($headers)), 
+                            'name' =>  array_search("emp_name",($headers)),
+                            'designation'=> array_search("designation",($headers)),
+                            'section'=> array_search("division",($headers)),
+                            );
+            $update = [];
+                      
+            foreach ($reader as $key => $row) {
+                //  $out->writeln( '------' . $key );
+                if (/*$hasHeader &&*/ $key == 0) {
+                    continue;
+                }
+
+                $tmp = [];
+                foreach ($fields as $header => $k) {
+                    if (isset($row[$k])) {
+                        
+                        //if( $header == 'pen' )
+                        //    $tmp[$header] = str_replace(' ', '',  $row[$k]);
+                       // else
+                            $tmp[$header] = $row[$k];
+                    }
+                }
+
+                
+
+                if (count($tmp) == count($fields) ) {
+                  $update[] = $tmp;
+                } else {
+                    dd($row);
+                }
+            }
+
+            File::delete($path);
+
+            //find if employee exists
+            
+            $pens = array_column($update, 'pen');
+            $pens = array_unique($pens); 
+            
+               
+            $empls_not_found = [];
+            $updated =0;
+            foreach ($update as &$update_item) {
+                
+                $emp =  Employee::where('pen', $update_item['pen'])->first();
+                if($emp){
+                    $updated++;
+                  //  $emp->update( ['aadhaarid' => $update_item['aadhaarid'] ] );
+                }
+                else {
+                    $empls_not_found[] = $update_item;
+                }  
+            }
+                     
+       
+            $rows  = count($update);
+           
+            File::delete($path);
+
+            \Session::flash('message-success', "updated  {$updated} / {$rows}" );
+            
+            return redirect()->route('admin.employees.index')->with( ['empls_not_found' => $empls_not_found] );
+
+        } catch (\Exception $ex) {
+            throw $ex;
+        }
+        
+    }
+
+   
 
 }

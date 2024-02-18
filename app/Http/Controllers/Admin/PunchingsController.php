@@ -360,7 +360,7 @@ class PunchingsController extends Controller
        
         $apikey =  env('AEBAS_KEY');
         $offset = 0;
-        $count = 500;
+        $count = 2000;
         $apinum = $request->query('apinum');
         $reportdate = $request->query('reportdate','01-01-2000');
 
@@ -387,7 +387,7 @@ class PunchingsController extends Controller
                 $returnkey = "attendancetrace";
 
             }
-            // $url = 'http://localhost:3000/data';
+            $url = 'http://localhost:3000/data';
             Log::info($url);
             $response = Http::withHeaders([
                 'Access-Control-Allow-Origin' => '*',
@@ -404,9 +404,9 @@ class PunchingsController extends Controller
             }
             $jsonData = $response->json();
             $jsonData =  $jsonData[$returnkey];
-            array_push($data,$jsonData);
+            $data = array_merge($data,$jsonData);
             //if reached end of data, break
-            if(count($jsonData) <  $count){ 
+            if(count($jsonData) < $count){ 
                
                 break;
             }
@@ -418,9 +418,10 @@ class PunchingsController extends Controller
             \Session::flash('message-danger', "No Data" );
             return view('admin.punchings.index');
         }
+       
 
         $list = array_values($data);
-        # add headers for each column in the CSV download
+      //  dd( $list ); # add headers for each column in the CSV download
         array_unshift($list, array_keys($data[0]));
        
 
@@ -436,7 +437,7 @@ class PunchingsController extends Controller
         $headers = [
             'Cache-Control'       => 'must-revalidate, post-check=0, pre-check=0'
             ,   'Content-type'        => 'text/csv'
-            ,   'Content-Disposition' => 'attachment; filename=fetch.csv'
+            ,   'Content-Disposition' => "attachment; filename={$returnkey}.csv"
             ,   'Expires'             => '0'
             ,   'Pragma'              => 'public'
         ];

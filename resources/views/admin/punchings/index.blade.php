@@ -27,7 +27,7 @@
 	<form action="{{url('admin/punchings/fetchApi')}}" method="get" id="filter" class="form-inline">
         
         <div class="form-group">     
-            ApiNum <input required class="form-control" placeholder="1/5/6" name = "apinum" value="{{ \Request('apinum')}}" >
+            ApiNum <input required class="form-control" placeholder="1 for empl/5 for atten/6 for trace" name = "apinum" value="{{ \Request('apinum')}}" >
 		</div>
 
         <div class="form-group">     

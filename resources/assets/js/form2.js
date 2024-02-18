@@ -572,6 +572,12 @@ var vm = new Vue({
 					
 				}
 
+				//if user selects 1st and 3rd, but not 2nd, with continuous time, it does not make sense. they need to splitup into two forms
+				if ( this.hasFirst(row.slots) && (this.hasThird(row.slots) || this.hasAddl(row.slots) ) && !this.hasSecond(row.slots)) {
+					this.$swal("Error", "Can't have third OT without second", "error");
+					return false;
+				}
+
 			}
 
 			
