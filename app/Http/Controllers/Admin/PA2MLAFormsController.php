@@ -418,7 +418,7 @@ class PA2MLAFormsController extends Controller
                     'worknature'    => $overtime['worknature'],
                     'count'         => $overtime['count'],
                     'rate'          => $rates[$overtime['designation']],
-                    
+                    'slots'         => 'First', //just a dummy
                     ]);
                 
             }

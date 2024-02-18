@@ -257,12 +257,18 @@ class SearchesController extends Controller
 cannot trust form id, as a user might have started a form, but waited long to submit it. so submit date is the key.
 */
         
+
         $overtimes = Overtime::with('form')
                      ->wherehas( 'form', function($q) use ($session){
-                           $q->where('session',$session)
-                             ->where('form_no', '>=', 0)
-                             ->where('owner', 'admin'); //submitted to us
+                           $q->where('session',$session);
+                             
+            
                      }); 
+        //if(!env('APP_DEBUG'))
+        {
+            $overtimes = $overtimes->where('form_no', '>=', 0)->where('owner', 'admin'); //submitted to us
+
+        }
 
         if ($request->filled('created_by')){ 
                           
@@ -356,7 +362,7 @@ cannot trust form id, as a user might have started a form, but waited long to su
         $csvExporter->build($overtimes, [ 'form.form_no', 'form.creator','form.id',
                             'form.overtime_slot', 'form.session','form.duty_date', 
                             'form.date_from', 'form.date_to', 'form.submitted_on',
-                             'id', 'pen', 'designation', 'from', 'to','count', 'name','worknature'
+                             'id', 'pen', 'designation','slots', 'from', 'to','count', 'name','worknature'
                             ]);
         //rate is not needed. we store rates in seperate csv so we can adjust to changes in rate later
 

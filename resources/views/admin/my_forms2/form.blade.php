@@ -114,7 +114,7 @@
 					<input  :name="'to[' + index + ']'" type="text" v-model="row.to" required class="form-control"  autocomplete="off">
 					</td>
 					
-					<td  class="col-md-2">
+					<td class="text-center">
 					
 					
 					<input v-if="slotoptions.includes('First')" type="checkbox"   :id="'Firstslot[' + index + ']'" value="First" v-model="row.slots">
