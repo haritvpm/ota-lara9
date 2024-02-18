@@ -119,6 +119,9 @@
                         
                         <th>@lang('quickadmin.employees.fields.added-by')</th>
                         <th>Excel Category</th>
+                        <th>
+                                    {{ trans('cruds.employee.fields.punching') }}
+                           </th>
                         <th>@lang('quickadmin.employees.fields.desig-display')</th>
                    
                          @endif
@@ -201,6 +204,7 @@
                 {data: 'id', name: 'id'},
                 {data: 'added_by', name: 'added_by'},
                 {data: 'categories.category', name: 'categories.category'},
+                { data: 'punching', name: 'punching' },
                 {data: 'desig_display', name: 'desig_display'},
             //    {data: 'created_at', name: 'created_at'},
               // {data: 'updated_at', name: 'updated_at'},

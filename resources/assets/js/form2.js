@@ -116,7 +116,8 @@ var vm = new Vue({
 			return calenderdaypunching[this.form.duty_date] !== 'NOPUNCHING' || calenderdaypunching[this.form.duty_date] == '' 
 		},
 		allowPunchingEntry: function () {
-			return this.form.duty_date ? calenderdaypunching[this.form.duty_date] === 'MANUALENTRY' : false
+			//if date is not set, make punching true or copytonewform will have punching readonly
+			return this.form.duty_date ? calenderdaypunching[this.form.duty_date] === 'MANUALENTRY' : true
 		},
 
 	},
@@ -366,7 +367,7 @@ var vm = new Vue({
 			 row.punchout = "";
 			 row.punching_id = null;
 			
-			if (  self.dayHasPunching ) {
+			if (  self.dayHasPunching && row.punching ) {
 				axios
 					.get(urlajaxgetpunchtimes + "/" + self.form.duty_date + "/" +  row.pen + "/" +  row.aadhaarid)
 					.then((response) => {
@@ -695,8 +696,8 @@ var vm = new Vue({
 					}
 					//check if there is time left for OT. if so this must be user careless or adding time from another section's time
 					if ( diff >= minot_minutes) {
-						this.myerrors.push(`Row ${i + 1} :Time left for another OT. If number of OT is correct, adjust from/to times accordingly`);
-						return false;
+						//this.myerrors.push(`Row ${i + 1} :Time left for another OT. If number of OT is correct, adjust from/to times accordingly`);
+						//return false;
 					}
 				}
 			}

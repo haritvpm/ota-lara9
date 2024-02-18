@@ -1098,16 +1098,21 @@ class MyForms2Controller extends Controller
     
         $descriptionofday = '';
         $needsposting = false;
-        if($form->overtime_slot != 'Sittings'   && $form->owner == $loggedinusername && $form->owner != 'admin'){
+        
+        $dayhaspunching = true;
+
+        if($form->overtime_slot != 'Sittings' ){
             $date = Carbon::createFromFormat(config('app.date_format'), $form->duty_date)->format('Y-m-d');
-
- 
             $calender = Calender::where('date', $date )->first();
+            $dayhaspunching =  $calender->punching !== 'NOPUNCHING';
             $daytype = $calender->day_type;
-
             $descriptionofday = $calender->description;
 
-            $needsposting = \App\User::needsPostingOrder($form->creator); 
+            if($form->owner == $loggedinusername && $form->owner != 'admin'){
+                $needsposting = \App\User::needsPostingOrder($form->creator); 
+            }
+
+
         }
         
         $submmittedby = $form->SubmitedbyNames;
@@ -1141,43 +1146,18 @@ class MyForms2Controller extends Controller
             'sessionnumber' => $sessionnumber,
             'klasession_for_JS' => $klasession_for_JS,
             'dataentry_allowed' => $session->dataentry_allowed != 'No',
-'needsposting' => $needsposting,
+            'needsposting' => $needsposting,
 
         ]);
 
         $prev=null;
         $next=null;
-        /* if(\Auth::user()->isAdminorAudit() && $form->owner=='admin')
-        {
-            $prev = Form::where('id', '<', $form->id)
-                        ->where('owner','admin')
-                        ->where('creator','<>','admin')//no pa2admin
-                        ->where('session',$form->session)
-                        ->when(\Auth::user()->isAudit(),
-                            function($q){
-                                return $q->where('form_no','>=', 0);
-                           })
-                        ->max('id');
-
-            $next = Form::where('id', '>', $form->id)
-                        ->where('owner','admin')
-                        ->where('creator','<>','admin') //no pa2admin
-                        ->where('session',$form->session)
-                        ->when(\Auth::user()->isAudit(),
-                            function($q){
-                                return $q->where('form_no','>=', 0);
-                           })
-                        ->min('id');
-
-        } */
-
-
-      
+            
 
         return view('admin.my_forms2.show', compact('form', 
                     'overtimes','daytype','submmittedby',  'createdby', 'canforward' , 'cansubmittoaccounts', 'descriptionofday'
                     ,'prev','next', 'romankla', 'sessionnumber_th', 'sessionnumber','malkla',
-                    'needsposting'));
+                    'needsposting','dayhaspunching'));
     }
 
 

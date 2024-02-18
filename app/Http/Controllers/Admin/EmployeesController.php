@@ -97,12 +97,15 @@ class EmployeesController extends Controller
 
            // $table->rawColumns(['actions']);
             // $table->rawColumns(['actions', 'search']);
-            $table->rawColumns(['actions', 'designation']);
+            $table->rawColumns(['actions', 'designation', 'punching']);
 
             $table->editColumn('categories.category', function ($row) {
                 return $row->categories ? $row->categories->category : '';
             });
-            
+            $table->editColumn('punching', function ($row) {
+                //return $row->punching ? 'PUNCHING_YES' : 'PUNCHING_NO';
+               return '<input type="checkbox" disabled ' . ($row->punching ? 'checked' : null) . '>';
+            });
 
             return $table->make(true);
         }
@@ -242,7 +245,7 @@ class EmployeesController extends Controller
                     'desig_normal_office_hours' =>  $item->designation->normal_office_hours,
                   //  'desig_punching' =>  $item->designation->punching,
                   //  'category_punching' => $item->categories->punching,
-                    'punching' =>   $item?->categories?->punching && $item->designation->punching,
+                    'punching' =>   $item?->categories?->punching && $item->designation->punching && $item->punching,
                     'category' =>  $item?->categories?->category,
                     'employee_id' =>  $item->id,
                     'aadhaarid' =>  $item->aadhaarid,

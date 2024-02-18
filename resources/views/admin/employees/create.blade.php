@@ -120,6 +120,20 @@
             </div>
             <div class="row">
                 <div class="col-xs-12 form-group">
+                        <div>
+                                <input type="hidden" name="punching" value="0">
+                                <input type="checkbox" name="punching" id="punching" value="1" {{ old('punching', 0) == 1 || old('punching') === null ? 'checked' : '' }}>
+                                <label for="punching" style="font-weight: 400">{{ trans('cruds.employee.fields.punching') }}</label>
+                            </div>
+                            @if($errors->has('punching'))
+                                <span class="help-block" role="alert">{{ $errors->first('punching') }}</span>
+                            @endif
+                            <span class="help-block">{{ trans('cruds.employee.fields.punching_helper') }}</span>
+                </div>
+            </div>
+           
+            <div class="row">
+                <div class="col-xs-12 form-group">
                     {!! Form::label('desig_display', trans('quickadmin.employees.fields.desig-display').'', ['class' => 'control-label']) !!}
                     {!! Form::text('desig_display', old('desig_display'), ['class' => 'form-control', 'placeholder' => '']) !!}
                     <p class="help-block"></p>

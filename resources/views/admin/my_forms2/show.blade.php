@@ -257,9 +257,14 @@ th{
                     <th>Sl.</th>
                     <th>PEN-Name</th>
                     <th>@lang('quickadmin.overtimes.fields.designation')</th>
-              
+                   
+                    @if ($dayhaspunching)
                     <th class="text-center">Punch-In</th>
                     <th class="text-center">Punch-Out</th>
+                    @endif
+                 
+
+                    
                     <th>@lang('quickadmin.overtimes.fields.from')</th>
                     <th>@lang('quickadmin.overtimes.fields.to')</th>
                     <th>OTs</th>
@@ -287,12 +292,15 @@ th{
                     </td>
                     <td field-key='designation' class="text-nowrap"><small>{{ $overtime->designation }}</small></td>
                    
+                    @if ($dayhaspunching)
                     <td field-key='punchin' class="small text-center text-nowrap">
                      @if($overtime->punching) {{ date("h:i a", strtotime($overtime->punchin)) }} @endif
                     </td>
                     <td field-key='punchout' class="small text-center text-nowrap">
                     @if($overtime->punching) {{ date("h:i a", strtotime($overtime->punchout)) }}  @endif
                     </td>
+                    @endif
+                   
 
                  
                     <td field-key='from' class=" text-nowrap">{{ date("h:i a", strtotime($overtime->from)) }}</td>
