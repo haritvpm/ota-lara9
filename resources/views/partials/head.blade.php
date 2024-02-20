@@ -33,6 +33,8 @@
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.3/themes/smoothness/jquery-ui.css">
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 
+<link href="{{ URL::asset('css/custom.css') }}" rel="stylesheet"><!-- for data table  -->
+
 
 <style type="text/css">
 textarea {

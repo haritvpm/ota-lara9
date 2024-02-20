@@ -14,7 +14,7 @@
     <input type="hidden" name="_token" value="{{ csrf_token() }}">
 
 
-    <div class="card" id="app">
+    <div class="card p-2" id="app">
         <div class="card-title">
             Edit
         </div>

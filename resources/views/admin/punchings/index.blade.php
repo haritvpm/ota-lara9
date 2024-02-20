@@ -24,7 +24,7 @@
 	  
         <div class="form-group">                                
                   
-        <button type="submit" class="btn btn-danger" rel="filter"><span class="glyphicon glyphicon-refresh"></span></button>
+        <button type="submit" class="btn btn-danger" rel="filter"><i class="fa fa-refresh" aria-hidden="true"></i></button>
 
         </div>
     </form>
@@ -32,14 +32,14 @@
   </div>
   </div>
   
-  <div class="card p-2" id="app">
+  <div class="" id="app">
     <!-- <h3 class="page-title">Search</h3> -->
      
-        <div class="card-title">
+        <div class="">
             Search Punching
         </div>
 
-        <div class="card-body">
+        <div class="">
 
 
 	<form action="" method="get" id="filter" class="form-inline">
@@ -65,7 +65,7 @@
                   
         <!-- <input class="form-control" type="submit" value="Filter" rel="filter"> -->
         <button type="submit" class="btn btn-primary" rel="filter"><i class="fas fa-fw  fa-search"></i></button>
-        <!-- <a href="{{url('admin/searches/')}}" data-toggle="tooltip" title="reset" class="btn btn-default pull-right"><span class="glyphicon glyphicon-remove-circle"></span></a> -->
+        <!-- <a href="{{url('admin/searches/')}}" data-toggle="tooltip" title="reset" class="btn btn-default pull-right"><i class="fa fa-minus-circle" aria-hidden="true"></i></a> -->
         </div>
     </form>
 

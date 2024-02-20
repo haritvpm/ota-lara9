@@ -5,7 +5,7 @@
     
     {!! Form::model($designation, ['method' => 'PUT', 'route' => ['admin.designations.update', $designation->id]]) !!}
 
-    <div class="card">
+    <div class="card p-2">
         <div class="card-title">
             @lang('quickadmin.qa_edit')
         </div>

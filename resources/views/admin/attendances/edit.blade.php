@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('content')
 
-<div class="card">
+<div class="card p-2">
     <div class="card-header">
         {{ trans('global.edit') }} {{ trans('quickadmin.attendance.title_singular') }}
     </div>

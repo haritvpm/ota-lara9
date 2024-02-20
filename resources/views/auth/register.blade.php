@@ -4,7 +4,7 @@
 <div class="container">
     <div class="row">
         <div class="col-md-8 col-md-offset-2">
-            <div class="card">
+            <div class="card p-2">
                 <div class="card-title">Register</div>
                 <div class="card-body">
                     <form class="form-horizontal" role="form" method="POST" action="{{ url('/register') }}">

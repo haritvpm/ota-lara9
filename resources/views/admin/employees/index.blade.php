@@ -98,8 +98,8 @@
 
     <div class="">
        
-        <div class="">
-            <table class="table table-borderless table-striped ajaxTable"> 
+        <div class="table-responsive">
+            <table class="table table-borderless table-striped ajaxTable "> 
              
                 <thead>
                     <tr>

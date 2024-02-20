@@ -5,7 +5,7 @@
     
     {!! Form::model($employees_other, ['method' => 'PUT', 'route' => ['admin.employees_others.update', $employees_other->id]]) !!}
 
-    <div class="card">
+    <div class="card p-2">
         <div class="card-title">
             @lang('quickadmin.qa_edit')
         </div>

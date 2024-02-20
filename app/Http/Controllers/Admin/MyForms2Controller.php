@@ -867,6 +867,7 @@ class MyForms2Controller extends Controller
                 'duty_date'  => $request['duty_date'],
                 'remarks' => $request['remarks'],
                 'updated_at' => Carbon::now(),
+                'worknature'    => $request['worknature'],
 
             ]);
 

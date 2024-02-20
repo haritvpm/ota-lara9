@@ -4,7 +4,7 @@
     <h3 class="page-title">@lang('quickadmin.calenders.title')</h3>
     {!! Form::open(['method' => 'POST', 'route' => ['admin.calenders.store']]) !!}
 
-    <div class="card"  id="app">
+    <div class="card p-2"  id="app">
         <div class="card-title">
             @lang('quickadmin.qa_create')
         </div>

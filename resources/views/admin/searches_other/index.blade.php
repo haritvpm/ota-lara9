@@ -82,7 +82,7 @@
           
         <!-- <input class="form-control" type="submit" value="Filter" rel="filter"> -->
         <button type="submit" class="btn btn-danger" rel="filter"><i class="fas fa-fw  fa-search"></i></button>
-        <!-- <a href="{{url('admin/searches/')}}" data-toggle="tooltip" title="reset" class="btn btn-default pull-right"><span class="glyphicon glyphicon-remove-circle"></span></a> -->
+        <!-- <a href="{{url('admin/searches/')}}" data-toggle="tooltip" title="reset" class="btn btn-default pull-right"><i class="fa fa-minus-circle" aria-hidden="true"></i></a> -->
         </div>
     </form>
 

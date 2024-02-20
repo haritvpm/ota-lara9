@@ -12,7 +12,7 @@
 
     @if(count($sessions) > 0)
 
-    <div class="card" id="app">
+    <div class="card p-2" id="app">
         <div class="card-title">
             @lang('quickadmin.qa_create')
         </div>

@@ -129,7 +129,7 @@ th{
   
 
 
-<div class="card">
+<div class="card p-2">
   <div class="card-title">
     <small>OT Duty Form </small>
 
@@ -346,9 +346,9 @@ th{
        @if($cansubmittoaccounts || $canforward)
        
          
-         <div class="hidden-print checkbox checkbox-success">
-              <input id="checkbox2" type="checkbox" v-model="agreechecked">
-              <label for="checkbox2" >
+         <div class="hidden-print form-check checkbox-success">
+              <input class="form-check-input"  id="checkbox2" type="checkbox" v-model="agreechecked">
+              <label class="form-check-label" for="checkbox2" >
                 <p class="malfont"  v-html="approvaltext+' - <strong>{{Auth::user()->DispNameWithName}}</strong>'">
                  
                 </p>
@@ -363,9 +363,9 @@ th{
 
     @if($needsposting && !Auth::user()->isAdmin())
                 
-       <div class="hidden-print checkbox checkbox-danger">
-            <input id="checkbox3" type="checkbox" v-model="needspostingchecked">
-            <label for="checkbox3" >
+       <div class="hidden-print form-check checkbox-danger">
+            <input class="form-check-input"  id="checkbox3" type="checkbox" v-model="needspostingchecked">
+            <label class="form-check-label" for="checkbox3" >
               <p class="malfont"  v-html="approvalpostingcheckedtext+' - <strong>{{Auth::user()->DispNameWithName}}</strong>'">
                
               </p>

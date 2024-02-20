@@ -13,7 +13,7 @@
 	@else
 		{!! Form::open(['method' => 'PATCH', 'route' => ['auth.change_displayname']]) !!}
 		<!-- If no success message in flash session show change password form  -->
-		<div class="card">
+		<div class="card p-2">
 			<div class="card-title">
 				@lang('quickadmin.qa_edit') 
 			</div>

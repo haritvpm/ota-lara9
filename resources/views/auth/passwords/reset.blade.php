@@ -3,7 +3,7 @@
 @section('content')
     <div class="row">
         <div class="col-md-8 col-md-offset-2">
-            <div class="card">
+            <div class="card p-2">
                 <div class="card-title">@lang('quickadmin.qa_reset_password')</div>
                 <div class="card-body">
                     @if (count($errors) > 0)

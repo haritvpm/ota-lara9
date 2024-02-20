@@ -14,7 +14,7 @@
 
     {!! Form::open(['method' => 'POST', 'route' => ['admin.users.store']]) !!}
 
-    <div class="card">
+    <div class="card p-2">
         <div class="card-title">
             @lang('quickadmin.qa_create')
         </div>

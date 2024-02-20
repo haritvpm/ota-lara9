@@ -5,7 +5,7 @@
     
     {!! Form::model($overtime, ['method' => 'PUT', 'route' => ['admin.overtimes.update', $overtime->id]]) !!}
 
-    <div class="card">
+    <div class="card p-2">
         <div class="card-title">
             @lang('quickadmin.qa_edit')
         </div>

@@ -1052,8 +1052,11 @@ class EmployeesController extends Controller
                 
                 $emp =  Employee::where('pen', $update_item['pen'])->first();
                 if($emp){
-                    $updated++;
-                  //  $emp->update( ['aadhaarid' => $update_item['aadhaarid'] ] );
+
+                    if(!$emp->aadhaarid || $emp->aadhaarid == ''){
+                        $updated++;
+                        $emp->update( ['aadhaarid' => $update_item['aadhaarid'] ] );
+                    }
                 }
                 else {
                     $empls_not_found[] = $update_item;

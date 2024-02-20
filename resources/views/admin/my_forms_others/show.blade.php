@@ -33,7 +33,7 @@ th{
     
 </h5>
 
-<div class="card" >
+<div class="card p-2" >
     <div class="card-title">
     @if($form->overtime_slot == 'Sittings')
     Sitting-days Form

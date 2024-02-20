@@ -4,7 +4,7 @@
    <!--  <h6 class="page-title">@lang('quickadmin.employees-other.title')</h6> -->
     {!! Form::open(['method' => 'POST', 'route' => ['admin.employees_others.store']]) !!}
 
-    <div class="card">
+    <div class="card p-2">
         <div class="card-title">
             @lang('quickadmin.employees-other.title') -  @lang('quickadmin.qa_create') 
         </div>

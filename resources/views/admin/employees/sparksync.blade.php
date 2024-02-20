@@ -5,7 +5,7 @@
 
     @if( $inputview == 0)
 
-    <div class="card">
+    <div class="card p-2">
         {!! Form::open(['method' => 'POST', 'route' => ['admin.employees.sparksync']]) !!}
 
            <div class="card-body">

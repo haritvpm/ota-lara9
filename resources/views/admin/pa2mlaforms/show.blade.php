@@ -22,7 +22,7 @@
 </h4>
 
 
-<div class="card">
+<div class="card p-2">
     <div class="card-title">
        
     PA to MLA Form

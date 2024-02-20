@@ -12,10 +12,10 @@
 
     
 
-    <div class="card">
+    <div class="">
      
 
-        <div class="panel-body table-responsive">
+        <div class="">
             <table class="table table-bordered table-striped {{ count($sessions) > 0 ? 'datatable' : '' }} ">
                 <thead>
                     <tr>

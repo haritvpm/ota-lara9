@@ -29,7 +29,7 @@ background: url("images/bg/pexels-jakub-novacek-924824.jpg") no-repeat center ce
 <div class="bg"></div>
     <div class="row justify-content-md-center">
         <div class="col-md-4">
-            <div class="card">
+            <div class="card p-2">
               
                 
                 <div class="card-body">

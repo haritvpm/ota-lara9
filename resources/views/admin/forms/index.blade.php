@@ -6,7 +6,7 @@
     
     
 
-    <div class="card">
+    <div class="card p-2">
         
 
         <div class="panel-body table-responsive">

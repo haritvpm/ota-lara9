@@ -4,7 +4,7 @@
     <h3 class="page-title">@lang('quickadmin.sessions.title')</h3>
     {!! Form::open(['method' => 'POST', 'route' => ['admin.sessions.store']]) !!}
 
-    <div class="card">
+    <div class="card p-2">
         <div class="card-title">
             @lang('quickadmin.qa_create')
         </div>

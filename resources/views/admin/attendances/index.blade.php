@@ -17,7 +17,7 @@
         </div>
     </div>
 @endcan
-<div class="card">
+<div class="card p-2">
 
   
 
