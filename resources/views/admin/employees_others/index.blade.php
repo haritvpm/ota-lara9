@@ -12,12 +12,9 @@
 
     
 
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            @lang('quickadmin.qa_list')
-        </div>
-
-        <div class="panel-body table-responsive">
+    <div class="">
+      
+        <div class="">
             <table class="table table-bordered table-striped ajaxTable @can('employees_other_delete') dt-select @endcan">
                 <thead>
                     <tr>

@@ -3,8 +3,8 @@
 @section('content')
     <h3 class="page-title">@lang('quickadmin.forms.title')</h3>
 
-    <div class="panel panel-default">
-        <div class="panel-heading">
+    <div class="card">
+        <div class="card-title">
             @lang('quickadmin.qa_view')
         </div>
 
@@ -104,10 +104,10 @@
                     <td field-key='worknature'>{{ $overtime->worknature }}</td>
                                                     <td>
                         @can('overtime_view')
-                        <a href="{{ route('admin.overtimes.show',[$overtime->id]) }}" class="btn btn-xs btn-primary">@lang('quickadmin.qa_view')</a>
+                        <a href="{{ route('admin.overtimes.show',[$overtime->id]) }}" class="btn btn-sm btn-primary">@lang('quickadmin.qa_view')</a>
                         @endcan
                         @can('overtime_edit')
-                        <a href="{{ route('admin.overtimes.edit',[$overtime->id]) }}" class="btn btn-xs btn-info">@lang('quickadmin.qa_edit')</a>
+                        <a href="{{ route('admin.overtimes.edit',[$overtime->id]) }}" class="btn btn-sm btn-info">@lang('quickadmin.qa_edit')</a>
                         @endcan
                         @can('overtime_delete')
                         {!! Form::open(array(
@@ -115,7 +115,7 @@
                             'method' => 'DELETE',
                             'onsubmit' => "return confirm('".trans("quickadmin.qa_are_you_sure")."');",
                             'route' => ['admin.overtimes.destroy', $overtime->id])) !!}
-                        {!! Form::submit(trans('quickadmin.qa_delete'), array('class' => 'btn btn-xs btn-danger')) !!}
+                        {!! Form::submit(trans('quickadmin.qa_delete'), array('class' => 'btn btn-sm btn-danger')) !!}
                         {!! Form::close() !!}
                         @endcan
                     </td>

@@ -90,7 +90,7 @@ class EmployeesController extends Controller
             //     $url = route('admin.searches.index', ['namefilter' => $row->pen, 'session' => $session_latest, 
             //       'created_by' => '', 'status' => '']);
 
-            //     return '<a href=' . $url . '><span class="glyphicon glyphicon-search"></span></a>' ;
+            //     return '<a href=' . $url . '><i class="fas fa-fw  fa-search"></i></a>' ;
 
                
             // });

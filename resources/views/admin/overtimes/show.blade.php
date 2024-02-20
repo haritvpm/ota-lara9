@@ -3,8 +3,8 @@
 @section('content')
     <h3 class="page-title">@lang('quickadmin.overtimes.title')</h3>
 
-    <div class="panel panel-default">
-        <div class="panel-heading">
+    <div class="card">
+        <div class="card-title">
             @lang('quickadmin.qa_view')
         </div>
 

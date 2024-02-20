@@ -129,8 +129,8 @@ th{
   
 
 
-<div class="panel panel-default">
-  <div class="panel-heading">
+<div class="card">
+  <div class="card-title">
     <small>OT Duty Form </small>
 
 

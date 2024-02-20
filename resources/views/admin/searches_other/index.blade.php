@@ -3,28 +3,16 @@
 
 @section('content')
 
-<style>
-.nav-pills>li.active>a,
-.nav-pills>li.active>a:focus,
-.nav-pills>li.active>a:hover {
-   background-color: orange;
-   
-}
-.nav>li>a {
-    padding-top: 3px;
-    padding-bottom: 3px;
-}
 
-</style>
 
     <!-- <h3 class="page-title">Search</h3> -->
     
-    <div class="panel panel-default" id="app">
-        <div class="panel-heading">
+    <div class="card p-2" id="app">
+        <div class="card-title">
             Search Other Dept
         </div>
 
-        <div class="panel-body">
+        <div class="card-body">
 
 
 	<form action="" method="get" id="filter" class="form-inline">
@@ -93,7 +81,7 @@
         </select>
           
         <!-- <input class="form-control" type="submit" value="Filter" rel="filter"> -->
-        <button type="submit" class="btn btn-danger" rel="filter"><span class="glyphicon glyphicon-search"></span></button>
+        <button type="submit" class="btn btn-danger" rel="filter"><i class="fas fa-fw  fa-search"></i></button>
         <!-- <a href="{{url('admin/searches/')}}" data-toggle="tooltip" title="reset" class="btn btn-default pull-right"><span class="glyphicon glyphicon-remove-circle"></span></a> -->
         </div>
     </form>
@@ -257,12 +245,12 @@ cannot trust form no, as a user might have started a form, but waited long to su
 
 @if( \Auth::user()->isAdmin() )
 
-<div class="panel panel-default" id="app1">
-    <div class="panel-heading">
-        Download Overtime Data - Others
+<div class="card p-2" id="app1">
+    <div class="card-title">
+        Overtime Data - Others
     </div>
 
-    <div class="panel-body">
+    <div class="card-body">
 
 
 
@@ -318,7 +306,7 @@ cannot trust form no, as a user might have started a form, but waited long to su
 
         
     <!-- <input class="form-control" type="submit" value="Filter" rel="filter"> -->
-    <button type="submit" class="btn btn-success" rel="filter"><span class="glyphicon glyphicon-save"></span> </button>
+    <button type="submit" class="btn btn-success" rel="filter"><i class="fas fa-fw  fa-download"></i>Download </button>
 
 </form>
 
@@ -329,46 +317,48 @@ cannot trust form no, as a user might have started a form, but waited long to su
 
 <!-- Designations -->
 
-
-<div class="panel panel-default" id="app2">
-    <div class="panel-heading">
-        Download Designation and Rates - Others
+<div class="row">
+<div class="col">
+<div class="card p-2" id="app2">
+    <div class="card-title">
+        Designation and Rates - Others
     </div>
 
-    <div class="panel-body">
+    <div class="card-body">
 
         <form action="{{url('admin/searches_other/download_desig')}}" method="get" class="form-inline">
             
 
             <!-- <input class="form-control" type="submit" value="Filter" rel="filter"> -->
-            <button type="submit" class="btn btn-warning" rel="filter"><span class="glyphicon glyphicon-save"></span> </button>
+            <button type="submit" class="btn btn-warning" rel="filter"><i class="fas fa-fw  fa-download"></i>Download </button>
 
         </form>
 
     </div>
 </div>
-
+</div>
 
 <!-- Employees -->
 
-
-<div class="panel panel-default" id="app3">
-    <div class="panel-heading">
-        Download Employee Data Others
+<div class="col">
+<div class="card p-2" id="app3">
+    <div class="card-title">
+        Employee Data Others
     </div>
 
-    <div class="panel-body">
+    <div class="card-body">
 
         <form action="{{url('admin/searches_other/download_emp')}}" method="get" class="form-inline">
            
             <!-- <input class="form-control" type="submit" value="Filter" rel="filter"> -->
-            <button type="submit" class="btn btn-primary" rel="filter"><span class="glyphicon glyphicon-save"></span> </button>
+            <button type="submit" class="btn btn-primary" rel="filter"><i class="fas fa-fw  fa-download"></i>Download </button>
 
         </form>
 
     </div>
+    </div>
 </div>
-
+</div>
 @endif 
 
 

@@ -33,8 +33,8 @@ th{
     
 </h5>
 
-<div class="panel panel-default" >
-    <div class="panel-heading">
+<div class="card" >
+    <div class="card-title">
     @if($form->overtime_slot == 'Sittings')
     Sitting-days Form
     @else

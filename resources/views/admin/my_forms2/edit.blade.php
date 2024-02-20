@@ -7,17 +7,16 @@
 @section('content')
 
 
-    <h4 class="page-title">OT Form</h4>
+    <h4 class="page-title">Edit OT Form</h4>
     
     @if(count($sessions) > 0)
 
     <input type="hidden" name="_token" value="{{ csrf_token() }}">
 
 
-    <div class="panel panel-default" id="app">
-        <div class="panel-heading">
-            Edit
-
+    <div class="" id="app">
+        <div class="">
+          
              <div class = "pull-right">
              <small> Created, Updated : 
             {{ date('d-m-Y', strtotime($form->created_at)) }}, {{ date('d-m-Y', strtotime($form->updated_at)) }}, No.{{ $form->id }}
@@ -26,7 +25,7 @@
         </div>
                 
 
-        <div class="panel-body">
+        <div class="">
         
 
             <div class="row">
@@ -47,7 +46,7 @@
  
         </div>
 
-        <div class="panel-footer">
+        <div class="card-footer">
             <a href="{{ URL::previous() }}" class="btn btn-default">Cancel</a>
             <button class="btn btn-primary" @click.prevent="update" :disabled="isProcessing"><i class="fa fa-save"></i> Save <i  v-show="isProcessing" class="fa fa-spinner fa-spin"></i></button>
             <small>&nbsp; (click Cancel if you have not made any changes)</small>

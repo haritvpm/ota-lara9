@@ -4298,7 +4298,7 @@ Customized Bootstrap Panels
 .panel .panel-title > a:hover {
   text-decoration: none;
 }
-.accordion .panel .panel-heading {
+.accordion .panel .card-title {
   padding: 0;
 }
 .accordion .panel .panel-title {
@@ -4320,12 +4320,12 @@ Customized Bootstrap Panels
 .panel-default {
   border-color: #e0e0e0;
 }
-.panel-default > .panel-heading {
+.panel-default > .card-title {
   color: #333333;
   background-color: #f9f9f9;
   border-color: #e0e0e0;
 }
-.panel-default > .panel-heading + .panel-collapse .panel-body {
+.panel-default > .card-title + .panel-collapse .panel-body {
   border-top-color: #e0e0e0;
 }
 .panel-default > .panel-footer + .panel-collapse .panel-body {
@@ -4335,12 +4335,12 @@ Customized Bootstrap Panels
 .panel-primary {
   border-color: #3595bd;
 }
-.panel-primary > .panel-heading {
+.panel-primary > .card-title {
   color: #D8E3F2;
   background-color: #428bca;
   border-color: #3595bd;
 }
-.panel-primary > .panel-heading + .panel-collapse .panel-body {
+.panel-primary > .card-title + .panel-collapse .panel-body {
   border-top-color: #3595bd;
 }
 .panel-primary > .panel-footer + .panel-collapse .panel-body {
@@ -4350,12 +4350,12 @@ Customized Bootstrap Panels
 .panel-success {
   border-color: #d6e9c6;
 }
-.panel-success > .panel-heading {
+.panel-success > .card-title {
   color: #3c763d;
   background-color: #dff0d8;
   border-color: #d6e9c6;
 }
-.panel-success > .panel-heading + .panel-collapse .panel-body {
+.panel-success > .card-title + .panel-collapse .panel-body {
   border-top-color: #d6e9c6;
 }
 .panel-success > .panel-footer + .panel-collapse .panel-body {
@@ -4365,12 +4365,12 @@ Customized Bootstrap Panels
 .panel-info {
   border-color: #bce8f1;
 }
-.panel-info > .panel-heading {
+.panel-info > .card-title {
   color: #31708f;
   background-color: #d9edf7;
   border-color: #bce8f1;
 }
-.panel-info > .panel-heading + .panel-collapse .panel-body {
+.panel-info > .card-title + .panel-collapse .panel-body {
   border-top-color: #bce8f1;
 }
 .panel-info > .panel-footer + .panel-collapse .panel-body {
@@ -4380,12 +4380,12 @@ Customized Bootstrap Panels
 .panel-warning {
   border-color: #faebcc;
 }
-.panel-warning > .panel-heading {
+.panel-warning > .card-title {
   color: #8a6d3b;
   background-color: #fcf8e3;
   border-color: #faebcc;
 }
-.panel-warning > .panel-heading + .panel-collapse .panel-body {
+.panel-warning > .card-title + .panel-collapse .panel-body {
   border-top-color: #faebcc;
 }
 .panel-warning > .panel-footer + .panel-collapse .panel-body {
@@ -4395,12 +4395,12 @@ Customized Bootstrap Panels
 .panel-danger {
   border-color: #ebccd1;
 }
-.panel-danger > .panel-heading {
+.panel-danger > .card-title {
   color: #a94442;
   background-color: #f2dede;
   border-color: #ebccd1;
 }
-.panel-danger > .panel-heading + .panel-collapse .panel-body {
+.panel-danger > .card-title + .panel-collapse .panel-body {
   border-top-color: #ebccd1;
 }
 .panel-danger > .panel-footer + .panel-collapse .panel-body {

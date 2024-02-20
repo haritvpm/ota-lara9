@@ -33,12 +33,12 @@
 
     <h3 class="page-title hidden-print">Reports</h3>
     
-    <div class="panel panel-default hidden-print" id="app">
-        <div class="panel-heading">
+    <div class="card hidden-print" id="app">
+        <div class="card-title">
             Make reports of <i>submitted</i> overtime forms
         </div>
 
-    <div class="panel-body">
+    <div class="card-body">
 
 	<form action="" method="get" id="filter" class="form-inline">
 		<div class="form-group">
@@ -95,7 +95,7 @@
         @endif
 
         <!-- <input class="form-control" type="submit" value="Filter" rel="filter"> -->
-        <button type="submit" class="btn btn-danger" rel="filter"><span class="glyphicon glyphicon-search"></span></button>
+        <button type="submit" class="btn btn-danger" rel="filter"><i class="fas fa-fw  fa-search"></i></button>
        
     </form>
 

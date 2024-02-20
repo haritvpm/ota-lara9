@@ -3,35 +3,20 @@
 
 @section('content')
 
-<style>
-
-.nav>li>a {
-    padding-top: 3px;
-    padding-bottom: 3px;
-}
-</style>
-
     <h3 class="page-title">PA to MLA @lang('quickadmin.forms.title')</h3>
     
     <div  id="app">
-
     
     <p>
         <a href="{{ route('admin.pa2mlaforms.create') }}" class="btn btn-success"><i class="fa fa-file-text-o"></i> New Form</a>
        
     </p>
       
+     
 
-    <hr>
-   
-
-    <div class="panel panel-default">
-    <div class="panel-heading">
-        @lang('quickadmin.qa_list')
-    </div>
-
-    <div class="panel-body table-responsive">
-        <table class="table table-bordered table-striped table-condensed }}">
+    <div class="">
+     <div class="">
+        <table class="table table-bordered table-striped table-sm }}">
             <thead>
                 <tr>
                   
@@ -70,10 +55,10 @@
                             <td >{{ date('d-m-Y', strtotime($form->updated_at)) }}</td>
 
                             <td>
-                                <a href="{{ route('admin.pa2mlaforms.show',[$form->id]) }}" class="btn btn-xs btn-primary">@lang('quickadmin.qa_view')</a> <small>({{$form->overtimes()->count()}}) </small>
+                                <a href="{{ route('admin.pa2mlaforms.show',[$form->id]) }}" class="btn btn-sm btn-primary">@lang('quickadmin.qa_view')</a> <small>({{$form->overtimes()->count()}}) </small>
                                                                 
                               <!--   @if( Auth::user()->username == $form->owner)
-                                <a href="{{ route('admin.pa2mlaforms.edit',[$form->id]) }}" class="btn btn-xs btn-info">@lang('quickadmin.qa_edit')</a> -->
+                                <a href="{{ route('admin.pa2mlaforms.edit',[$form->id]) }}" class="btn btn-sm btn-info">@lang('quickadmin.qa_edit')</a> -->
                                                                
                                <!--  {!! Form::open(array(
                                   
@@ -81,7 +66,7 @@
                                     'method' => 'DELETE',
                                     'onsubmit' => "return confirm('".trans("quickadmin.qa_are_you_sure")."');",
                                     'route' => ['admin.pa2mlaforms.destroy', $form->id])) !!}
-                                {!! Form::submit(trans('quickadmin.qa_delete'), array('class' => 'btn btn-xs btn-danger')) !!}
+                                {!! Form::submit(trans('quickadmin.qa_delete'), array('class' => 'btn btn-sm btn-danger')) !!}
                                 {!! Form::close() !!}
                                 @endif -->
                                

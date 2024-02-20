@@ -9,15 +9,15 @@ function humanFilesize($bytes, $decimals = 2) {
 ?>
 
 @section('content')
-    <h3>Administer Database Backups</h3>
+    <h3>Database Backups</h3>
     <div class="row">
-        <div class="col-xs-12 clearfix">
+        <div class="col-12 clearfix">
             <a id="create-new-backup-button" href="{{ url('admin/backup/create') }}" class="btn btn-primary pull-right"
                style="margin-bottom:2em;"><i
                     class="fa fa-plus"></i> Create New Backup
             </a>
         </div>
-        <div class="col-xs-12">
+        <div class="col-12">
             @if (count($backups))
 
                 <table class="table table-striped table-bordered">
@@ -42,10 +42,10 @@ function humanFilesize($bytes, $decimals = 2) {
                                 {{ $backup['age'] }}
                             </td>
                             <td class="text-right">
-                                <a class="btn btn-xs btn-default"
+                                <a class="btn btn-sm btn-default"
                                    href="{{ url('admin/backup/download/'.$backup['file_name']) }}"><i
                                         class="fa fa-cloud-download"></i> Download</a>
-                                <a class="btn btn-xs btn-danger" data-button-type="delete"
+                                <a class="btn btn-sm btn-danger" data-button-type="delete"
                                    href="{{ url('admin/backup/delete/'.$backup['file_name']) }}"><i class="fa fa-trash-o"></i>
                                     Delete</a>
                             </td>

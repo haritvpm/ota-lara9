@@ -117,7 +117,7 @@
 					<td class="text-center">
 					
 					
-					<input v-if="slotoptions.includes('First')" type="checkbox"   :id="'Firstslot[' + index + ']'" value="First" v-model="row.slots">
+					<input  v-if="slotoptions.includes('First')" type="checkbox"   :id="'Firstslot[' + index + ']'" value="First" v-model="row.slots">
 					<label v-if="slotoptions.includes('First')" :for="'Firstslot[' + index + ']'" >
 					<div v-html="firstOTLabel"></div>
 					</label>

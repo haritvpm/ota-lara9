@@ -5,12 +5,12 @@
     
     {!! Form::model($employees_other, ['method' => 'PUT', 'route' => ['admin.employees_others.update', $employees_other->id]]) !!}
 
-    <div class="panel panel-default">
-        <div class="panel-heading">
+    <div class="card">
+        <div class="card-title">
             @lang('quickadmin.qa_edit')
         </div>
 
-        <div class="panel-body">
+        <div class="card-body">
             <div class="row">
                 <div class="col-xs-2 form-group">
                     {!! Form::label('srismt', trans('quickadmin.employees-other.fields.srismt').'', ['class' => 'control-label']) !!}

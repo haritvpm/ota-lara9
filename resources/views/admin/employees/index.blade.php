@@ -96,13 +96,10 @@
  <!-- prevent user changing employee details -->
   @if(\Auth::user()->isAdmin())
 
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            List of employees
-        </div>
-
-        <div class="panel-body table-responsive">
-            <table class="table table-bordered table-striped ajaxTable"> 
+    <div class="">
+       
+        <div class="">
+            <table class="table table-borderless table-striped ajaxTable"> 
              
                 <thead>
                     <tr>
@@ -111,7 +108,7 @@
    
                         <th>@lang('quickadmin.employees.fields.pen')</th>
                         <th>@lang('quickadmin.employees.fields.aadhaarid')</th>
-                        <!-- <th style="text-align:center;"><span class="glyphicon glyphicon-search"></span></th> -->
+                        <!-- <th style="text-align:center;"><i class="fas fa-fw  fa-search"></i></th> -->
                         <th>@lang('quickadmin.employees.fields.designation')</th>
                         <th>Type</th>
                         @if(\Auth::user()->isAdmin())
@@ -143,9 +140,9 @@
     <br>
 
         <form action="{{url('admin/employees/download_emp')}}" method="get" class="form-inline">
-            Download Employee Data 
+            Employee Data 
             <!-- <input class="form-control" type="submit" value="Filter" rel="filter"> -->
-            <button type="submit" class="btn btn-primary" rel="filter"><span class="glyphicon glyphicon-save"></span> </button>
+            <button type="submit" class="btn btn-primary" rel="filter"><i class="fas fa-fw  fa-download"></i>Download </button>
 
         </form>
 

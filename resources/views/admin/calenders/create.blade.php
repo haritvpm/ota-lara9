@@ -4,12 +4,12 @@
     <h3 class="page-title">@lang('quickadmin.calenders.title')</h3>
     {!! Form::open(['method' => 'POST', 'route' => ['admin.calenders.store']]) !!}
 
-    <div class="panel panel-default"  id="app">
-        <div class="panel-heading">
+    <div class="card"  id="app">
+        <div class="card-title">
             @lang('quickadmin.qa_create')
         </div>
 
-        <div class="panel-body">
+        <div class="card-body">
             <div class="row">
                 <div class="col-xs-12 form-group">
                     {!! Form::label('session_id', trans('quickadmin.calenders.fields.session').'*', ['class' => 'control-label']) !!}

@@ -4,129 +4,33 @@
 
 @if(!auth()->user()->isAudit() && !auth()->user()->isServices())
 
-<style type="text/css">
-  
 
-.info-box {
-    min-height: 45px;
-    small {
-        font-size: 8px;
-    }
-        margin-bottom: 8px;
-  
-}
-
-
-
-.info-box-icon {
-
-        height: 45px;
-        width: 45px;
-        font-size: 32px;
-        line-height: 45px;        
-    }
-.info-box-content {
-    margin-left: 45px;
-}
-.info-box-text {
-    
-    font-size: 12px;
-}
-
-.info-box-number {
-   
-    font-size: 12px;
-}
-</style>
-
-<div id="app" class="text-right">
-       <!--  <i class="fa fa-phone-square"></i> 2422 &nbsp;&nbsp; -->
-       
-        {{date("l, F j (d-m-y)")}} 
-  </div>
-
-  <p>
-    Welcome !<br> For help, call Accounts D - <i class="fa fa-phone-square"></i> 2422 &nbsp;&nbsp; {!!$welcometext!!}
-    @if(auth()->user()->isAdmin())
-    Loaded in {{$timetaken}}
-    @endif
-  </p>
-
-
-   <div class="box box-warning">
-    <div class="box-header with-border">
-      <div class="box-title">Session: <strong>{{  implode(",",$session_array) }} </strong>
-      </div>
-     <div class="box-body">
+<div id="app">
                   
-        <div class="row">
-         <div class="col-md-6">
-
-          @if( \Config::get('custom.show_legsectt'))
+  </div>
+  <blockquote class="blockquote">
+  <p>
+  Session: <strong>{{  implode(",",$session_array) }} </strong>  @if( \Config::get('custom.show_legsectt'))
           @if(auth()->user()->isAdmin() || !auth()->user()->isOD())
-          Total Forms : {{ $total }} <br>
+          Total Forms : <strong> {{ $total }} </strong> 
           @endif
           @endif
 
 
           @if(auth()->user()->isAdmin() || auth()->user()->isOD())
-          Total Forms (Other Dept): {{ $total_other }} 
+          Total Forms (Other Dept):  <strong>{{ $total_other }} </strong> 
           @endif
 
-         </div>
-       <!--  <div class="col-md-4">
-          @if(auth()->user()->isAdmin())
-          @if( \Config::get('custom.show_legsectt'))
-          <table class='table .table-condensed   table-striped' style="border-top: none;">
-          <tr>
-            <td >Amount for {{$session_latest}}</td>
-            <td>Submitted</td>
-            <td>Total</td>
-              
-          </tr>
-          <tr>
-             <td >Sectt (approx)</td>
-             <td>{{$amount_approved_sectt }}</td>
-             <td>{{$amount_all_sectt }}</td>
-           
-          </tr>
-          <tr>
-             <td >Sectt + Hostel</td>
-             <td>{{ $amount_approved }}</td>
-             <td>{{ $amount_all }}</td>
-          </tr>
-        </table>
-         @endif
-         @endif
-    
-      </div> -->
-      </div>
+  </p>
 
-     </div>
-         
-    </div>
-  </div>
-
-
+</blockquote>
 
 @if( \Config::get('custom.show_legsectt'))
 @if(auth()->user()->isAdmin() || !auth()->user()->isOD())
  <div class="row">
-    <!-- <div class="col-md-2">
-         <a href="<?=URL::to('admin/my_forms2')?>">
-         <div class="info-box">
-                    
-          <span class="info-box-icon bg-yellow"><i class="fa fa-star-o"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text">Total</span>
-            <span class="info-box-number">{{ $total }}</span>
-          </div>
-         
-        </div>
-        </a>
-    </div> -->
-    <div class="col-md-3">
-         <!-- a href="<?=URL::to('admin/my_forms2?status=Draft')?>"-->
+   
+    <div class="col">
+        <!-- a href="<?=URL::to('admin/my_forms2?status=Draft')?>"-->
          <a href="<?=URL::to('admin/my_forms2')?>">
          <div class="info-box bg-gray">
           <!-- Apply any bg-* class to to the icon to color it -->
@@ -138,13 +42,14 @@
           <!-- /.info-box-content -->
         </div>
          </a>
+         
     </div>
 
     @if($to_approve != -1)
-    <div class="col-md-3">
+    <div class="col">
           <!-- <a href="<?=URL::to('admin/my_forms2?status=To_approve')?>"> -->
           <a href="<?=URL::to('admin/my_forms2')?>">
-         <div class="info-box  bg-red">
+         <div class="info-box  bg-warning">
           <!-- Apply any bg-* class to to the icon to color it -->
           <span class="info-box-icon"><i class="fa fa-eye"></i></span>
           <div class="info-box-content">
@@ -158,9 +63,9 @@
     @endif
 
     @if($pending_approval != -1)
-    <div class="col-md-3">
+    <div class="col">
          <a href="<?=URL::to('admin/my_forms2?status=Pending')?>">
-         <div class="info-box  bg-blue">
+         <div class="info-box  bg-warning">
           <!-- Apply any bg-* class to to the icon to color it -->
           <span class="info-box-icon"><i class="fa fa-mail-forward"></i></span>
           <div class="info-box-content">
@@ -173,9 +78,9 @@
     </div>
      @endif
 
-    <div class="col-md-3">
+    <div class="col">
          <a href="<?=URL::to('admin/my_forms2?status=Submitted')?>">
-         <div class="info-box  bg-green">
+         <div class="info-box  bg-success">
           <!-- Apply any bg-* class to to the icon to color it -->
           <span class="info-box-icon"><i class="fa fa-thumbs-up"></i></span>
           <div class="info-box-content">
@@ -188,13 +93,13 @@
     </div>
 
     @if(auth()->user()->isAdmin())
-    <div class="col-md-3">
+    <div class="col">
                     
-         <div class="info-box  bg-red">
+         <div class="info-box  bg-danger">
            <span class="info-box-icon"><i class="fa fa-inr "></i></span>
           <div class="info-box-content">
             <span class="info-box-text">Total for {{$session_latest}}</span>
-            <span class="info-box-number"> Sect <span>&#8776; </span>{{$amount_all_sectt }},  All = {{ $amount_all }}</span>
+            <span > Sect <span>&#8776; </span>{{$amount_all_sectt }},  All: {{ $amount_all }}</span>
           </div>
           <!-- /.info-box-content -->
      
@@ -216,23 +121,9 @@
 
 @if(auth()->user()->isAdmin() || auth()->user()->isOD())
  <div class="row">
-
-   <!--  <div class="col-md-2">
+    <div class="col">
          <a href="<?=URL::to('admin/my_forms_others')?>">
-         <div class="info-box">
-                   
-          <span class="info-box-icon bg-yellow"><i class="fa fa-star-o"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text">Total (OD)</span>
-            <span class="info-box-number">{{ $total_other }}</span>
-          </div>
-         
-        </div>
-        </a>
-    </div> -->
-    <div class="col-md-3">
-         <a href="<?=URL::to('admin/my_forms_others')?>">
-         <div class="info-box">
+         <div class="info-box bg-gray">
           <!-- Apply any bg-* class to to the icon to color it -->
           <span class="info-box-icon bg-gray"><i class="fa fa-edit"></i></span>
           <div class="info-box-content">
@@ -245,7 +136,7 @@
     </div>
 
     @if($to_approve_other != -1)
-    <div class="col-md-3">
+    <div class="col">
           <a href="<?=URL::to('admin/my_forms_others')?>">
          <div class="info-box">
           <!-- Apply any bg-* class to to the icon to color it -->
@@ -261,7 +152,7 @@
     @endif
 
 
-    <div class="col-md-3">
+    <div class="col">
          <a href="<?=URL::to('admin/my_forms_others?status=Pending')?>">
          <div class="info-box">
           <!-- Apply any bg-* class to to the icon to color it -->
@@ -274,7 +165,7 @@
         </div>
          </a>
     </div>
-    <div class="col-md-3">
+    <div class="col">
          <a href="<?=URL::to('admin/my_forms_others?status=Submitted')?>">
          <div class="info-box">
           <!-- Apply any bg-* class to to the icon to color it -->
@@ -288,14 +179,14 @@
          </a>
     </div>
     @if(auth()->user()->isAdmin())
-    <div class="col-md-3">
+    <div class="col">
                     
          <div class="info-box">
         
           <span class="info-box-icon bg-green"><i class="fa fa-inr "></i></span>
           <div class="info-box-content">
             <span class="info-box-text">Aproved for {{$session_latest}}</span>
-            <span class="info-box-number">Sect <span>&#8776;</span> {{ $amount_approved_sectt }}, All = {{ $amount_approved}}</span>
+            <span class="">Sect <span>&#8776;</span> {{ $amount_approved_sectt }}, All: {{ $amount_approved}}</span>
           </div>
           <!-- /.info-box-content -->
         </div>
@@ -328,8 +219,7 @@
   @endif
     </div>
 
-
-    <div >Click <strong><a href="<?=URL::to('admin/my_forms2')?>">My Forms</strong></a> to prepare or approve OTA Claim forms
+    <div >Click <strong><a href="<?=URL::to('admin/my_forms2')?>">My Forms</strong></a> to prepare or approve OTA forms
       </div>
     
   @endif
@@ -341,10 +231,10 @@
  @if(auth()->user()->isAdmin())
 
   @if( \Config::get('custom.show_legsectt'))
-  <div class="box box-primary">
-  <div class="box-header with-border">
-  <div class="box-title">Pending Forms</div>
-  <div class="box-body">
+  <div class="card p-2">
+
+  <div class="card-title">Pending Forms</div>
+  <div class="card-body">
 
      <div class="tabpanel">
        <!-- Nav tabs -->
@@ -353,8 +243,8 @@
           @php
           $idwithnodot = str_replace(".","",$session);
           @endphp
-           <li role="presentation" @if($loop->last) class="active" @endif>
-              <a href="#tab-{{$idwithnodot}}" aria-controls="#tab-{{$idwithnodot}}" role="tab" data-toggle="tab">{{ $session }}</a>
+           <li class="nav-item" role="presentation" >
+              <a class="nav-link" @if($loop->last) class="active" @endif href="#tab-{{$idwithnodot}}" aria-controls="#tab-{{$idwithnodot}}" role="tab" data-toggle="tab">{{ $session }}</a>
            </li>
 
         @endforeach
@@ -392,64 +282,15 @@
             @endforeach
        </div>
      </div>
- </div> 
+
  </div>
  </div>
 
-  <!-- <div class="box box-primary">
-  <div class="box-header with-border">
-  <div class="box-title">Form created status. ('Pending' includes forwarded forms)</div>
 
-  <div class="box-body">
-    <div class="tabpanel">
-       <!- - Nav tabs - ->
-        <ul class="nav nav-tabs" role="tablist">
-        @foreach($info_submitted as $session => $sessinfo)
-          @php
-          $idwithnodot = str_replace(".","",$session);
-          @endphp
-           <li role="presentation" @if($loop->last) class="active" @endif>
-              <a href="#tab2-{{$idwithnodot}}" aria-controls="#tab2-{{$idwithnodot}}" role="tab" data-toggle="tab">{{ $session }}</a>
-           </li>
+  <div class="card p-2">
 
-        @endforeach
-        </ul>
-
-        <!- - Tab panes - ->
-        <div class="tab-content">
-        <br>
-        @foreach($info_submitted as $session => $sessinfo)
-         @php
-         $idwithnodot = str_replace(".","",$session);
-         @endphp
-         <div  role="tabpanel"   @if($loop->last) class="tab-pane active" @else class="tab-pane" @endif id="tab2-{{$idwithnodot}}">
-                
-
-        <ol class="row">
-         @foreach($sessinfo as $k => $v)
-                        
-            <li class="col-sm-6 small">
-            {{ $k }} :  Pending-<span class="text-primary">{{$v['created']}}</span>, Submitted- <span class="text-success">@if($v['submitted'] > 0) {{$v['submitted']}} @else {{$v['submitted']}}@endif </span>
-
-            <!- - @if(!$loop->last), @endif - ->
-              </li>
-        @endforeach
-         </ol>
-        </div> 
-        @endforeach
-        </div>
-    </div> 
-  </div> 
-  </div>
-  </div>
- -->
-
-
-
-  <div class="box box-info">
-  <div class="box-header with-border">
-  <div class="box-title">PA to MLA, PA and OA to Chairman Pending Forms</div>
-  <div class="box-body">
+  <div class="card-title">PA to MLA, PA and OA to Chairman Pending Forms</div>
+  <div class="card-body">
 
      <div class="tabpanel">
        <!-- Nav tabs -->
@@ -458,8 +299,8 @@
           @php
           $idwithnodot = str_replace(".","",$session);
           @endphp
-           <li role="presentation" @if($loop->last) class="active" @endif>
-              <a href="#tab2-{{$idwithnodot}}" aria-controls="#tab2-{{$idwithnodot}}" role="tab" data-toggle="tab">{{ $session }}</a>
+           <li class="nav-item" role="presentation">
+              <a class="nav-link"  @if($loop->last) class="active" @endif href="#tab2-{{$idwithnodot}}" aria-controls="#tab2-{{$idwithnodot}}" role="tab" data-toggle="tab">{{ $session }}</a>
            </li>
 
         @endforeach
@@ -473,63 +314,43 @@
              $totalpending = 0;
              @endphp
              <div  role="tabpanel"   @if($loop->last) class="tab-pane active" @else class="tab-pane" @endif id="tab2-{{$idwithnodot}}">
-                               
-             
              <ol class="row">
-            
              @foreach($sessinfo as $k => $pa)
-             
-                
-               <li class="col-sm-3 small">
-
+              <li class="col-sm-3 small">
                     {{ $pa }} 
-            
               </li>
-              
-              
-             
              @endforeach
-            
              </ol> 
-              
-            
-
             </div>
             @endforeach
        </div>
      </div>
- </div> 
+
  </div>
  </div>
 
 
     @if(count($relievedempwhosubmitted))
-    <div class="box box-warning">
-    <div class="box-header with-border">
-    <div class="box-title">Emp relieved, but present in  {{$session_latest}} session forms</div>
-      <div class="box-body">
+    <div class="card p-2">
+     <div class="card-title"><span class="badge badge-danger"> i class="fas fa-radiation"></i></span>
+Emp relieved, but present in  {{$session_latest}} session forms</div>
+      <div class="card-body">
         <ol class="row">
         @foreach($relievedempwhosubmitted as $k => $v)
-          
            <li class="col-sm-3 small">
-
              <span class="text-danger"> {{$v->name}} </span>{{$v->pen}} {{$v->designation}}
-            
-              </li>
-
-           
+           </li>
         @endforeach
        </ol>
       </div>
-    </div>
+    
     </div> 
     @endif
 
  
-    <div class="box box-success">
-    <div class="box-header with-border">
-    <div class="box-title">Submitted Forms in Session (incl PA2MLA)</div>
-     <div class="box-body">
+    <div class="card p-2">
+     <div class="card-title">Submitted Forms in Session (incl PA2MLA)</div>
+     <div class="card-body">
       @foreach($session_array as $session)
       
       {{$session}} ->  Total :  <strong>{{$formcount[$session] }}</strong>
@@ -540,22 +361,21 @@
       <br>
       @endforeach
     </div> 
-    </div> 
     </div>
   
 
     @if(count($users_not_submitted_yet))
-    <div class="box box-warning">
-    <div class="box-header with-border">
-    <div class="box-title">Users Not Created Any Forms Yet</div>
-      <div class="box-body">
+    <div class="card p-2">
+    <div class="card-title">Users Not Created Any Forms Yet
+    <span class="badge badge-warning"><i class="fas fa-radiation"></i></span>
+    </div>
+      <div class="card-body">
       @foreach($users_not_submitted_yet as $k => $v)
           {{ $k }} <span class="text-danger"> {{$v}} </span>
            @if(!$loop->last), @endif
       @endforeach
       </div>
     </div>
-    </div> 
     @endif
 
 
@@ -568,10 +388,10 @@
     <hr>
     @endif <!-- if( \Config::get('custom.show_legsectt')) -->
 
-    <div class="box box-info">
-    <div class="box-header with-border">
-    <div class="box-title">Submitted Forms in Session (Other Dept)</div>
-     <div class="box-body">
+    <div class="card p-2">
+    <div class="card-title">Submitted Forms in Session (Other Dept)
+    </div>
+     <div class="card-body">
       @foreach($session_array as $session)
       
       {{$session}} ->  Total :  <strong>{{$formcountother[$session] }}</strong>
@@ -583,7 +403,6 @@
       @endforeach
     </div> 
     </div> 
-    </div>
 
 
   @endif
@@ -592,7 +411,6 @@
 @stop
 
 
-<script type="text/javascript" src="{{ URL::asset('js/vue-sweetalert.js') }}"></script>
 
 @section('javascript') 
 @parent
@@ -606,5 +424,5 @@
 
 <script type="text/javascript" src="{{ URL::asset('js/home.1.js') }}"></script>
 
+@stop
 
-@endsection

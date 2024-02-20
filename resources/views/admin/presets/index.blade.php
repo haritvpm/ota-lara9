@@ -17,13 +17,11 @@
        
     </p>
 
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            @lang('quickadmin.qa_list')
-        </div>
+    <div class="">
+           
 
-        <div class="panel-body table-responsive">
-            <table class="table table-bordered table-striped {{ count($presets) > 0 ? 'datatable' : '' }} ">
+        <div class="">
+            <table class="table table-striped {{ count($presets) > 0 ? 'datatable' : '' }} ">
                 <thead>
                     <tr>
                       
@@ -61,16 +59,16 @@
                                 </td>
                                 <td class="text-nowrap">
                                   
-                                    <a href="{{ route('admin.presets.show',[$preset->id]) }}" class="btn btn-xs btn-primary">@lang('quickadmin.qa_view')</a>
+                                    <a href="{{ route('admin.presets.show',[$preset->id]) }}" class="btn btn-sm btn-primary">@lang('quickadmin.qa_view')</a>
                                   
-                                    <a href="{{ route('admin.presets.edit',[$preset->id]) }}" class="btn btn-xs btn-info">@lang('quickadmin.qa_edit')</a>
+                                    <a href="{{ route('admin.presets.edit',[$preset->id]) }}" class="btn btn-sm btn-info">@lang('quickadmin.qa_edit')</a>
                                    
 {!! Form::open(array(
                                         'style' => 'display: inline-block;',
                                         'method' => 'DELETE',
                                         'onsubmit' => "return confirm('".trans("quickadmin.qa_are_you_sure")."');",
                                         'route' => ['admin.presets.destroy', $preset->id])) !!}
-                                    {!! Form::submit(trans('quickadmin.qa_delete'), array('class' => 'btn btn-xs btn-danger')) !!}
+                                    {!! Form::submit(trans('quickadmin.qa_delete'), array('class' => 'btn btn-sm btn-danger')) !!}
                                     {!! Form::close() !!}
                                    
                                 </td>

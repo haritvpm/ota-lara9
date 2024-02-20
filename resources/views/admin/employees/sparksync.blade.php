@@ -5,10 +5,10 @@
 
     @if( $inputview == 0)
 
-    <div class="panel panel-default">
+    <div class="card">
         {!! Form::open(['method' => 'POST', 'route' => ['admin.employees.sparksync']]) !!}
 
-           <div class="panel-body">
+           <div class="card-body">
             
             <div class="row">
 
@@ -36,7 +36,7 @@
             </div>
             
         </div>
-         <div class="panel-footer">
+         <div class="card-footer">
             <a href="{{route('admin.employees.index')}}" class="btn btn-default">Cancel</a>
               {!! Form::submit('Sync', ['class' => 'btn btn-danger']) !!}
               {!! Form::close() !!}

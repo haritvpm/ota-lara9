@@ -12,10 +12,8 @@
 
     
 
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            @lang('quickadmin.qa_list')
-        </div>
+    <div class="card">
+        
 
         <div class="panel-body table-responsive">
             <table class="table table-bordered table-striped ajaxTable @can('overtimes_other_delete') dt-select @endcan">

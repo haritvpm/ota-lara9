@@ -5,12 +5,12 @@
     
     {!! Form::model($overtimes_other, ['method' => 'PUT', 'route' => ['admin.overtimes_others.update', $overtimes_other->id]]) !!}
 
-    <div class="panel panel-default">
-        <div class="panel-heading">
+    <div class="card">
+        <div class="card-title">
             @lang('quickadmin.qa_edit')
         </div>
 
-        <div class="panel-body">
+        <div class="card-body">
             <div class="row">
                 <div class="col-xs-12 form-group">
                     {!! Form::label('pen', trans('quickadmin.overtimes-others.fields.pen').'*', ['class' => 'control-label']) !!}

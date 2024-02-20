@@ -7,17 +7,17 @@
 
 @section('content')
 
-    <h4 class="page-title">OT Form</h4>
+    <h4 class="page-title">   @lang('quickadmin.qa_create') OT Form</h4>
         
 
     @if(count($sessions) > 0)
 
-    <div class="panel panel-default" id="app">
-        <div class="panel-heading">
-            @lang('quickadmin.qa_create')
+    <div id="app">
+        <div >
+          
         </div>
 
-        <div class="panel-body">
+        <div >
         
 
             <?php
@@ -28,7 +28,7 @@
  
          </div>
 
-        <div class="panel-footer">
+        <div >
             <a href="{{route('admin.my_forms2.index')}}" class="btn btn-default">Cancel</a>
             <button class="btn btn-primary" @click.prevent="create" :disabled="isProcessing"><i class="fa fa-save"></i> Save <i  v-show="isProcessing" class="fa fa-spinner fa-spin"></i></button>
 
@@ -48,7 +48,10 @@
          
     @endif  
 
+ 
 @stop
+
+@section('javascript')
 
 
 <!-- <script type="text/javascript" src="{{ URL::asset('js/flatpickr.min.js') }}"></script> -->
@@ -56,8 +59,7 @@
 <script type="text/javascript" src="{{ URL::asset('js/vue-sweetalert.js') }}"></script>
 
 
-@section('javascript')
-    @parent
+
 
     <!-- <script>
             $('.date').datepicker({
@@ -99,8 +101,7 @@
 
     var calenderdays2 = {!! $data['calenderdays2'] !!};
 
-    
-   
+      
 
     window._form = {
             session: latest_session,
@@ -117,11 +118,12 @@
             } */]
         };
     </script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2.7.16"></script> -->
 
+
+  
   <script type="text/javascript" src="{{ URL::asset('js/form2.js') }}"></script>
 
 
+  @stop
 
-
-
-@stop

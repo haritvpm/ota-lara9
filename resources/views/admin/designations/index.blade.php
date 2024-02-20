@@ -17,13 +17,11 @@
 
     
 
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            @lang('quickadmin.qa_list')
-        </div>
+    <div class="">
+      
 
-        <div class="panel-body table-responsive">
-            <table class="table table-bordered table-striped {{ count($designations) > 0 ? 'datatable' : '' }}">
+        <div class="">
+            <table class="table table-borderless table-striped {{ count($designations) > 0 ? 'datatable' : '' }}">
                 <thead>
                     <tr>
                        
@@ -58,10 +56,10 @@
                                 </td>
                                 <td>
                                     @can('designation_view')
-                                    <a href="{{ route('admin.designations.show',[$designation->id]) }}" class="btn btn-xs btn-primary">@lang('quickadmin.qa_view')</a>
+                                    <a href="{{ route('admin.designations.show',[$designation->id]) }}" class="btn btn-sm btn-primary">@lang('quickadmin.qa_view')</a>
                                     @endcan
                                     @can('designation_edit')
-                                    <a href="{{ route('admin.designations.edit',[$designation->id]) }}" class="btn btn-xs btn-info">@lang('quickadmin.qa_edit')</a>
+                                    <a href="{{ route('admin.designations.edit',[$designation->id]) }}" class="btn btn-sm btn-info">@lang('quickadmin.qa_edit')</a>
                                     @endcan
                                     @can('designation_delete')
 {!! Form::open(array(
@@ -69,7 +67,7 @@
                                         'method' => 'DELETE',
                                         'onsubmit' => "return confirm('".trans("quickadmin.qa_are_you_sure")."');",
                                         'route' => ['admin.designations.destroy', $designation->id])) !!}
-                                    {!! Form::submit(trans('quickadmin.qa_delete'), array('class' => 'btn btn-xs btn-danger')) !!}
+                                    {!! Form::submit(trans('quickadmin.qa_delete'), array('class' => 'btn btn-sm btn-danger')) !!}
                                     {!! Form::close() !!}
                                     @endcan
                                 </td>
@@ -94,7 +92,7 @@
         <form action="{{url('admin/designations/download_desig')}}" method="get" class="form-inline">
             Download Designations 
             <!-- <input class="form-control" type="submit" value="Filter" rel="filter"> -->
-            <button type="submit" class="btn btn-primary" rel="filter"><span class="glyphicon glyphicon-save"></span> </button>
+            <button type="submit" class="btn btn-primary" rel="filter"><i class="fas fa-fw  fa-download"></i> </button>
 
         </form>
 

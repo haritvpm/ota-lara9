@@ -4,12 +4,12 @@
     <h3 class="page-title">@lang('quickadmin.employees.title')</h3>
     {!! Form::open(['method' => 'POST', 'route' => ['admin.employees.store']]) !!}
 
-    <div class="panel panel-default">
-        <div class="panel-heading">
+    <div class="card">
+        <div class="card-title">
             @lang('quickadmin.qa_create')
         </div>
         
-        <div class="panel-body">
+        <div class="card-body">
              <div class="row">
                 <div class="col-xs-2 form-group">
                     {!! Form::label('srismt', trans('quickadmin.employees.fields.srismt').'', ['class' => 'control-label']) !!}

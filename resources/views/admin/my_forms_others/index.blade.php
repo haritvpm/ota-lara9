@@ -3,13 +3,6 @@
 
 @section('content')
 
-<style>
-
-.nav>li>a {
-    padding-top: 3px;
-    padding-bottom: 3px;
-}
-</style>
 
     <h3 class="page-title">Forms <small>(Other Dept)</small></h3> 
 
@@ -25,29 +18,25 @@
    
     @endif
 
-    <hr>
-
+  
     <p>
     
         
        <ul class="nav nav-pills ">
         <!-- <li @click="setActive('all')" :class="{ active: isActive('all') }"><a href="#">All</a></li> -->
-        <li @click="setActive('Draft')" :class="{ active: isActive('Draft') }"><a href="#">Draft</a></li>
+        <li class="nav-item" @click="setActive('Draft')" ><a class="nav-link"  :class="{ active: isActive('Draft') }" href="#">Draft</a></li>
         <!-- <li @click="setActive('Pending')" :class="{ active: isActive('Pending') }"><a href="#">Pending Approval</a></li> -->
         @if($to_approve != -1)
-        <li @click="setActive('To_approve')" :class="{ active: isActive('To_approve') }"><a href="#">To Approve</a></li>
+        <li class="nav-item" @click="setActive('To_approve')" ><a class="nav-link"  :class="{ active: isActive('To_approve') }" href="#">To Approve</a></li>
         @endif
-        <li @click="setActive('Submitted')" :class="{ active: isActive('Submitted') }"><a href="#">Submitted to Accounts</a></li>
+        <li class="nav-item" @click="setActive('Submitted')"><a  class="nav-link"  :class="{ active: isActive('Submitted') }" href="#">Submitted to Accounts</a></li>
         </ul>
     </p>
 
-    <div class="panel panel-default">
-    <div class="panel-heading">
-        @lang('quickadmin.qa_list')
-    </div>
-
-    <div class="panel-body table-responsive">
-        <table class="table table-bordered table-striped table-condensed }}">
+    <div class="">
+ 
+    <div class="">
+        <table class="table table-striped table-sm }}">
             <thead>
                 <tr>
                   
@@ -138,7 +127,7 @@
                             <!-- <td>{{$form->updated_at}}</td> -->
 
                             <td>
-                                <a href="{{ route('admin.my_forms_others.show',[$form->id]) }}" class="btn btn-xs btn-primary">@lang('quickadmin.qa_view')</a> <small>({{$form->overtimes()->count()}}) </small>
+                                <a href="{{ route('admin.my_forms_others.show',[$form->id]) }}" class="btn btn-sm btn-primary">@lang('quickadmin.qa_view')</a> <small>({{$form->overtimes()->count()}}) </small>
                                                                 
                                 
                                
@@ -253,7 +242,7 @@
         </select>
         </div>
                      
-        <button type="submit" class="btn btn-xs btn-danger">Delete All Forms</button>
+        <button type="submit" class="btn btn-sm btn-danger">Delete All Forms</button>
          
         
     </form>

@@ -13,12 +13,10 @@
     
     <p>These categories are hard-coded in OT Processor exe.</p>
 
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            @lang('quickadmin.qa_list')
-        </div>
+    <div class="">
+        
 
-        <div class="panel-body table-responsive">
+        <div >
             <table class="table table-bordered table-striped ">
                 <thead>
                     <tr>
@@ -55,13 +53,13 @@
                             </td>
                             <td>
                                 <!-- @can('category_show')
-                                    <a class="btn btn-xs btn-primary" href="{{ route('admin.categories.show', $category->id) }}">
+                                    <a class="btn btn-sm btn-primary" href="{{ route('admin.categories.show', $category->id) }}">
                                         {{ trans('global.view') }}
                                     </a>
                                 @endcan -->
 
                                 @can('category_edit')
-                                    <a class="btn btn-xs btn-info" href="{{ route('admin.categories.edit', $category->id) }}">
+                                    <a class="btn btn-sm btn-info" href="{{ route('admin.categories.edit', $category->id) }}">
                                         {{ trans('global.edit') }}
                                     </a>
                                 @endcan
@@ -70,7 +68,7 @@
                                     <form action="{{ route('admin.categories.destroy', $category->id) }}" method="POST" onsubmit="return confirm('{{ trans('global.areYouSure') }}');" style="display: inline-block;">
                                         <input type="hidden" name="_method" value="DELETE">
                                         <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                        <input type="submit" class="btn btn-xs btn-danger" value="{{ trans('global.delete') }}">
+                                        <input type="submit" class="btn btn-sm btn-danger" value="{{ trans('global.delete') }}">
                                     </form>
                                 @endcan -->
 

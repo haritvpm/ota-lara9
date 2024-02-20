@@ -40,7 +40,7 @@
             </select>
         </div>
              
-        <button type="submit" name="action" value="view" class="btn btn-success" rel="filter"><span class="glyphicon glyphicon-search"></span> View</button>
+        <button type="submit" name="action" value="view" class="btn btn-success" rel="filter"><i class="fas fa-fw  fa-search"></i> View</button>
 
       
     </form>
@@ -111,13 +111,13 @@
                             </td>
                             <td>
                                 @can('attendance_show')
-                                    <a class="btn btn-xs btn-primary" href="{{ route('admin.attendances.show', $attendance->id) }}">
+                                    <a class="btn btn-sm btn-primary" href="{{ route('admin.attendances.show', $attendance->id) }}">
                                         {{ trans('global.view') }}
                                     </a>
                                 @endcan
 
                                 @can('attendance_edit')
-                                    <a class="btn btn-xs btn-info" href="{{ route('admin.attendances.edit', $attendance->id) }}">
+                                    <a class="btn btn-sm btn-info" href="{{ route('admin.attendances.edit', $attendance->id) }}">
                                         {{ trans('global.edit') }}
                                     </a>
                                 @endcan
@@ -126,7 +126,7 @@
                                     <form action="{{ route('admin.attendances.destroy', $attendance->id) }}" method="POST" onsubmit="return confirm('{{ trans('global.areYouSure') }}');" style="display: inline-block;">
                                         <input type="hidden" name="_method" value="DELETE">
                                         <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                        <input type="submit" class="btn btn-xs btn-danger" value="{{ trans('global.delete') }}">
+                                        <input type="submit" class="btn btn-sm btn-danger" value="{{ trans('global.delete') }}">
                                     </form>
                                 @endcan
 
@@ -155,7 +155,7 @@
         </div>
       
        
-        <!-- <button type="submit" name="action" value="view" class="btn btn-success" rel="filter"><span class="glyphicon glyphicon-search"></span> View</button> -->
+        <!-- <button type="submit" name="action" value="view" class="btn btn-success" rel="filter"><i class="fas fa-fw  fa-search"></i> View</button> -->
         <button type="submit" name="action" value="deleteall" class="btn btn-danger">Delete All</button>
       
         </form>

@@ -3,26 +3,14 @@
 
 @section('content')
 
-<style>
-.nav-pills>li.active>a,
-.nav-pills>li.active>a:focus,
-.nav-pills>li.active>a:hover {
-   background-color: orange;
-   
-}
-.nav>li>a {
-    padding-top: 3px;
-    padding-bottom: 3px;
-}
 
-</style>
 
-  <div class="panel panel-default" id="app">
-        <div class="panel-heading">
+  <div class="card p-2" id="app">
+        <div class="card-title">
             Fetch Punching API
         </div>
 
-        <div class="panel-body">
+        <div class="card-body">
 
 	<form action="{{url('admin/punchings/fetchApi')}}" method="get" id="filter" class="form-inline">
         
@@ -44,14 +32,14 @@
   </div>
   </div>
   
-  <div class="panel panel-default" id="app">
+  <div class="card p-2" id="app">
     <!-- <h3 class="page-title">Search</h3> -->
      
-        <div class="panel-heading">
+        <div class="card-title">
             Search Punching
         </div>
 
-        <div class="panel-body">
+        <div class="card-body">
 
 
 	<form action="" method="get" id="filter" class="form-inline">
@@ -76,7 +64,7 @@
          <div class="form-group">                                
                   
         <!-- <input class="form-control" type="submit" value="Filter" rel="filter"> -->
-        <button type="submit" class="btn btn-primary" rel="filter"><span class="glyphicon glyphicon-search"></span></button>
+        <button type="submit" class="btn btn-primary" rel="filter"><i class="fas fa-fw  fa-search"></i></button>
         <!-- <a href="{{url('admin/searches/')}}" data-toggle="tooltip" title="reset" class="btn btn-default pull-right"><span class="glyphicon glyphicon-remove-circle"></span></a> -->
         </div>
     </form>
@@ -128,7 +116,7 @@
                             <td>
                                            
                                             
-                                                <a class="btn btn-xs btn-info" href="{{ route('admin.punchings.edit', $punching->id) }}">
+                                                <a class="btn btn-sm btn-info" href="{{ route('admin.punchings.edit', $punching->id) }}">
                                                     {{ trans('global.edit') }}
                                                 </a>
                                            
@@ -137,7 +125,7 @@
                                                 <form action="{{ route('admin.punchings.destroy', $punching->id) }}" method="POST" onsubmit="return confirm('{{ trans('global.areYouSure') }}');" style="display: inline-block;">
                                                     <input type="hidden" name="_method" value="DELETE">
                                                     <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                                    <input type="submit" class="btn btn-xs btn-danger" value="{{ trans('global.delete') }}">
+                                                    <input type="submit" class="btn btn-sm btn-danger" value="{{ trans('global.delete') }}">
                                                 </form>
                                           
 
