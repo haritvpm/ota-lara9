@@ -64,7 +64,7 @@ class MyForms2Controller extends Controller
         // FILTERS
         $str_session = null;                 
         $str_status = null;
-      
+        $str_overtime_slot = null;
         $str_datefilter = null;
         $str_namefilter = null;
         $str_desigfilter = null;
@@ -74,7 +74,7 @@ class MyForms2Controller extends Controller
         $str_submittedbyfilter=null;
 
         $session = $request->query('session');
-       
+        $overtime_slot = $request->query('overtime_slot');
         $status =  $request->query('status');
         $datefilter =  $request->query('datefilter');
         $namefilter =  $request->query('namefilter');
@@ -157,13 +157,22 @@ class MyForms2Controller extends Controller
             
         }
 
-        // if ($request->filled('overtime_slot')){
-        //     if($overtime_slot == 'Withheld'){
-        //         $forms->where( 'form_no' , '<=', 0 );    
-        //     }
-            
-        //     $str_overtime_slot = '&overtime_slot='.$overtime_slot;
-        // }
+
+        if ($request->filled('overtime_slot')){
+            if($overtime_slot == 'Non-Sittings'){
+                $forms->where( 'overtime_slot' , '!=', 'Sittings' );    
+            }
+            else
+            if($overtime_slot == 'Withheld'){
+                $forms->where( 'form_no' , '<=', 0 );    
+            }
+            else
+            {
+                $forms->whereOvertimeSlot('Multi');
+            }
+
+            $str_overtime_slot = '&overtime_slot='.$overtime_slot;
+        }
 
         
         if ($request->filled('datefilter')){
@@ -278,7 +287,7 @@ class MyForms2Controller extends Controller
         
 
         //this inverts sorting order for next click                                       
-        $querystr = '&order='.($request->query('order') == 'asc' || null ? 'desc' : 'asc').$str_session.$str_status.$str_datefilter.$str_namefilter.$str_desigfilter.$str_idfilter.$str_created_by.$str_submittedbyfilter;
+        $querystr = '&order='.($request->query('order') == 'asc' || null ? 'desc' : 'asc').$str_session.$str_status.$str_overtime_slot.$str_datefilter.$str_namefilter.$str_desigfilter.$str_idfilter.$str_created_by.$str_submittedbyfilter;
 
         $added_bies = \App\User::SimpleUsers()
                                  ->where('username','not like','de.%')
@@ -300,15 +309,27 @@ class MyForms2Controller extends Controller
 
 
 
-    public function preparevariablesandGotoView( $id=null, $id_to_copy = null )
+    public function preparevariablesandGotoView( $issitting, $id=null, $id_to_copy = null )
     {
+        $enum_overtime_slot = Form::$enum_overtime_slot;
+
         $q = \App\Session::with('calender')->whereDataentryAllowed('Yes'); 
             
       
         $q = $q->latest();
 
         $session_array = $q->get();
-       
+
+        //if sitting, prevent ongoing sessions
+        if($issitting){
+            $session_array = $session_array->filter(function ($value) {
+                $maxdate = \App\Calender::where('session_id',$value->id)->max('date');
+                
+                return $maxdate <= Carbon::now();
+            });
+           
+        }
+
         $sessions = $session_array->pluck('name');
 
         $latest_session = $sessions->first();
@@ -322,14 +343,18 @@ class MyForms2Controller extends Controller
     
             $daysall = $session->calender()->orderby('date','asc');
                        
-        
-            $daysall->where( function ($query) {
-                $query->wherenot('punching','AEBAS_FETCH_PENDING') 
-                    ->orwherenull('punching') ;
-            })->where('date', '<=', date('Y-m-d'));
-            
-            $days = $daysall->get();
-                  
+            if(!$issitting)
+            {
+                $daysall->where( function ($query) {
+                    $query->wherenot('punching','AEBAS_FETCH_PENDING') 
+                        ->orwherenull('punching') ;
+                })->where('date', '<=', date('Y-m-d'));
+                
+                $days = $daysall->get();
+            }
+            else{
+                $days = $daysall->where( 'day_type','Sitting day')->get();
+            }
 
             
             foreach ($days as $day) {
@@ -349,7 +374,7 @@ class MyForms2Controller extends Controller
       //  $isspeakeroffice = 0;
 
 
-        if($id)
+        if(!$issitting && $id)
         {
            $form = Form::findOrFail($id);
            
@@ -437,6 +462,7 @@ class MyForms2Controller extends Controller
        
         JavaScript::put([
             'latest_session' => $latest_session,
+            'old_slotselected' => old('overtime_slot') ? old('overtime_slot') : '',
             'old_calenderdayselected' => old('duty_date') ? old('duty_date') : '',
             'presets' => $presets,
             'ispartimefulltime' => $ispartimefulltime,
@@ -448,32 +474,55 @@ class MyForms2Controller extends Controller
         ]);
     
         $collapse_sidebar = true;
-     
-        if($id)
-        {
-            $form = Form::with(['created_by','overtimes','overtimes.employee.categories','overtimes.employee.designation'])->findOrFail($id);
+        if(!$issitting){
+            if($id)
+            {
+                $form = Form::with(['created_by','overtimes','overtimes.employee.categories','overtimes.employee.designation'])->findOrFail($id);
 
-            $form->overtimes->transform(function ($item) use ($form) {
-                if($item['name'] != null){
-                    $item['pen'] = $item['pen'] . '-' . $item['name'];
-                    // $item['allowpunch_edit'] = $item['punching_id'] == null; //otherwise it will be disabled on edit
+                $form->overtimes->transform(function ($item) use ($form) {
+                    if($item['name'] != null){
+                        $item['pen'] = $item['pen'] . '-' . $item['name'];
+                        // $item['allowpunch_edit'] = $item['punching_id'] == null; //otherwise it will be disabled on edit
 
-                }
-                $item['category'] = $item?->employee?->categories?->category;
-                $item['normal_office_hours'] = $item?->employee?->designation?->normal_office_hours;
-                $item['slots'] =  explode(';',  $item->slots);
-                return $item;
-                                
-            });
+                    }
+                    $item['category'] = $item?->employee?->categories?->category;
+                    $item['normal_office_hours'] = $item?->employee?->designation?->normal_office_hours;
+                    $item['slots'] =  explode(';',  $item->slots);
+                    return $item;
+                                    
+                });
 
-                                
-            return view('admin.my_forms2.edit', compact('form', 'data','sessions', 'collapse_sidebar' ));
-        }
-        else
-        {
-            return view('admin.my_forms2.create', compact('data','sessions', 'collapse_sidebar' ) );
-        }
-        
+                                    
+                return view('admin.my_forms2.edit', compact('form', 'data','sessions', 'collapse_sidebar' ));
+            }
+            else
+            {
+                return view('admin.my_forms2.create', compact('data','sessions', 'collapse_sidebar' ) );
+            }
+       }
+       else{ //sitting forms
+            if($id)
+            {
+                $form = Form::with(['created_by','overtimes'])->findOrFail($id);
+
+                $form->overtimes->transform(function ($item) {
+                    if($item['name'] != null){
+                        $item['pen'] = $item['pen'] . '-' . $item['name'];
+                        
+
+                    }
+                    return $item;
+                                   
+                });
+
+                                    
+                return view('admin.my_forms.edit_sitting', compact('form', 'data','sessions', 'collapse_sidebar' ));
+            }
+            else
+            {
+                return view('admin.my_forms2.create_sitting', compact('data','sessions', 'collapse_sidebar') );
+            }
+        }   
        
                 
     }
@@ -489,7 +538,7 @@ class MyForms2Controller extends Controller
             return abort(401);
         } 
     
-        return $this->preparevariablesandGotoView(null);
+        return $this->preparevariablesandGotoView( false, null);
        
     }
     public function create_copy($id)
@@ -500,7 +549,7 @@ class MyForms2Controller extends Controller
         
         //$form = Form::findOrFail($id);
       
-        return $this->preparevariablesandGotoView(null, $id ) ;
+        return $this->preparevariablesandGotoView(false, null, $id ) ;
         
     }
 
@@ -745,7 +794,7 @@ class MyForms2Controller extends Controller
                 'creator' => \Auth::user()->username,
                 'owner'=> \Auth::user()->username,
                 'duty_date'  => $request['duty_date'],
-                'overtime_slot' => 'Multi',
+                'overtime_slot' => $request['overtime_slot'],
                 'remarks' => $request['remarks'],
                 'worknature'    => $request['worknature'],
             ]);
@@ -775,7 +824,7 @@ class MyForms2Controller extends Controller
                         'date'  => $date,
                         'pen'  => $overtime['pen'],
                         'aadhaarid'  => '-', //composite keys wont work if we give null. so something else
-                     //   'name'  => $overtime['name'],
+                        'name'  => $overtime['name'],
                         'punch_in'  => $overtime['punchin'],
                         'punch_out' => $overtime['punchout'],
                         
@@ -815,7 +864,9 @@ class MyForms2Controller extends Controller
         
         $form = Form::findOrFail($id);
 
-        return $this->preparevariablesandGotoView($id ) ;
+        $issittingday = ($form->overtime_slot == 'Sittings');
+
+        return $this->preparevariablesandGotoView($issittingday, $id ) ;
         
     }
 
@@ -865,6 +916,7 @@ class MyForms2Controller extends Controller
             $form->update( [
                 'session' => $request['session'],
                 'duty_date'  => $request['duty_date'],
+                'overtime_slot' => $request['overtime_slot'],
                 'remarks' => $request['remarks'],
                 'updated_at' => Carbon::now(),
                 'worknature'    => $request['worknature'],
@@ -933,7 +985,7 @@ class MyForms2Controller extends Controller
                         'creator' => \Auth::user()->username,
                         'date'  => $date,
                         'pen'  => $overtime['pen'],
-                     //   'name'  => $overtime['name'],
+                        'name'  => $overtime['name'],
                         'aadhaarid'  => '-', //date-aadhaarid-pen composite keys wont work if we give null. so something else
                         'punch_in'  => $overtime['punchin'],
                         'punch_out' => $overtime['punchout'],
@@ -995,6 +1047,7 @@ class MyForms2Controller extends Controller
                 $overtime['pen'] .=   '-' . $overtime['name'];
             }
 
+	    if($form->overtime_slot == 'Multi'){ 
             //this is for display only
             //make ot slots in the correct order
             $slots = [];
@@ -1016,6 +1069,7 @@ class MyForms2Controller extends Controller
             if( str_contains($overtime->slots,'Additional')) $slots[] = 'Addl';
     
             $overtime['slots'] = implode(', ',$slots);
+	    }
             return $overtime;
         });
 
@@ -1098,7 +1152,7 @@ class MyForms2Controller extends Controller
         $daytype = $calender->day_type;
         $descriptionofday = $calender->description;
 
-        if($form->owner == $loggedinusername && $form->owner != 'admin'){
+        if($form->overtime_slot != 'Sittings' && $form->owner == $loggedinusername && $form->owner != 'admin'){
             $needsposting = \App\User::needsPostingOrder($form->creator); 
         }
        
@@ -1177,6 +1231,404 @@ class MyForms2Controller extends Controller
 
         return redirect()->route('admin.my_forms2.index');
     }
+
+
+    public function create_sitting()
+    {
+        if (! Gate::allows('my_form_create')) {
+            return abort(401);
+        } 
+          
+        return $this->preparevariablesandGotoView(true, null);
+       
+    }
+
+    public function createovertimes_sitting( Request $request, &$myerrors, $formid=null)
+    {
+       // $date = Carbon::createFromFormat(config('app.date_format'), $request['duty_date'])->format('Y-m-d');
+                
+        $maxsittingdates = \App\Calender::with('session')
+                                ->whereHas('session', function($query)  use ($request) { 
+                                    $query->where('name', $request['session']);
+                                  })                              
+                                ->where('day_type','Sitting day')->orderby('date','asc')->get();
+
+        $maxsittings = $maxsittingdates->count();
+        $maxsittingdates = $maxsittingdates->pluck('date');
+        
+        $collection = collect($request->overtimes);
+        $collection->transform(function($overtime) 
+        {
+            $tmp = strpos($overtime['pen'], '-');
+            if(false !== $tmp){
+                //note change name first before changing pen itself
+                $overtime['name'] =  substr($overtime['pen'], $tmp+1 );
+                $overtime['pen'] =   substr($overtime['pen'], 0, $tmp );
+            }
+
+            return $overtime;
+        });
+
+        
+        $designations = $collection->pluck('designation');
+        $rates = \App\Designation::wherein ('designation', $designations )->pluck('rate','designation');
+
+        ////////////////////////////////////
+
+        $pens = $collection->pluck('pen');
+        
+        $checksecretaryattendance = false;
+        if( \Config::get('custom.check_attendance')) {
+            $form = $formid ? Form::find($formid) : null; //if updating a form, get creator field
+            if( \App\User::needsPostingOrder( $form ? $form->creator : \Auth::user()->username) ){
+                $checksecretaryattendance = true;
+            }
+        }
+        
+        $pentoattendace = null;
+        $pentodays = null;
+        $attendance = null;
+
+        if($checksecretaryattendance){
+            
+            $employee_ids = \App\Employee::wherein('pen', $pens->toArray())->pluck('id');
+            
+            $attendance = \App\Attendance::with('session', 'employee')
+                                ->whereHas('session', function($query)  use ($request) { 
+                                    $query->where('name', $request['session']);})
+                                ->wherein('employee_id', $employee_ids->toArray() )
+                                ->get();
+
+            //$pensinattendance = $attendance->pluck( 'employee.pen' );
+            /*$pensnotinattendance = $pens->diff($pensinattendance);
+            if($pensnotinattendance->count())
+            {
+                array_push($myerrors,  'Attendance not found for:' . $pensnotinattendance->implode(',') );
+                return null;
+            }*/
+        }
+
+
+
+       //when we passed in a pen of 'E11956', it was shown as error, probably because it was interpreted as a number.
+      //so enclose every pen in quotes.
+       
+       // $placeholder = implode(', ', array_fill(0, count($pens), '?')); //this returns like  '?, ?'
+
+        $query = \App\Overtime::with('form')
+                              //->whereRaw("SUBSTRING_INDEX(`pen`, '-' ,1) in ($placeholder)",$pens )
+                              ->wherein('pen',$pens )
+                              ->whereHas('form', function($q)  use ($request,$formid) { 
+                                $q->where('overtime_slot', 'Sittings')
+                                      ->where('session', $request['session'])
+                                      ->where('id', '!=', $formid); //skip this item if on update
+                            });
+
+
+        //we cannot use pluck, pluck seems to return only distinct 'count'
+        $res = $query->get();
+        /*foreach ($res as $e) {
+         array_push($myerrors,  $e['pen'] . $e['from']);
+}*/
+  
+
+        ////////////////////////////////
+
+        //\Log::info(print_r($res, true));
+
+        //Be warned that DateTime object created without explicitely providing the time portion will have the current time set instead of 00:00:00.
+        //If you want to safely compare equality of a DateTime object without explicitly providing the time portion make use of the ! format character.
+
+        $dateformatwithoutime = '!'.config('app.date_format');
+       
+         //check date overlap
+        $sitting_start = Carbon::createFromFormat( $dateformatwithoutime, $maxsittingdates->first());
+        $sitting_end = Carbon::createFromFormat($dateformatwithoutime, $maxsittingdates->last());
+
+       
+        $overtimes =$collection->transform(function($overtime) 
+                                           use ($res, $request,$formid, &$myerrors,$maxsittings,
+                                            $rates,$sitting_start, $sitting_end,$dateformatwithoutime,$maxsittingdates, 
+                                            $checksecretaryattendance, $attendance) 
+        {
+             
+             $pen = $overtime['pen'];
+             $tmp = strpos($pen, '-');
+             if(false !== $tmp){
+                $pen = substr($pen, 0, $tmp);
+             }
+
+            
+            $res_for_pen = $res->reject(function($element) use ($pen) {
+                return strncasecmp($element['pen'], $pen, strlen($pen)) != 0;
+            });
+                               
+            //note, res is a collection. not a query 
+            $totalsittingexisting = $res_for_pen->sum('count');
+            //$totalsittingexisting = $res->sum('count');
+
+            // $days_already_entered = $q->all()->pluck(['from','to']);
+
+            $totalwouldbe =  $totalsittingexisting + $overtime['count'];
+
+             
+            
+            if($checksecretaryattendance){
+
+
+                if( ! $attendance->contains('employee.pen', $overtime['pen'] ) ){
+                    array_push($myerrors,  $overtime['pen'] . '-' .$overtime['name'] . ' : Attendance not found.' );
+
+                }
+                else {
+                    //there can be multiple entries for a pen in attendace due to section changes during session
+                    $total_ot_asper_secretary = $attendance->where( 'employee.pen', $overtime['pen']  )->sum('total');
+                    
+                    if($totalwouldbe > $total_ot_asper_secretary)
+                    {      
+                        
+                        if($totalsittingexisting){
+                            array_push($myerrors,  $overtime['pen'] . '-' .$overtime['name'] . ' : Exceeds attendance as per O/S. Already saved ' . $totalsittingexisting . '. + this (' .$overtime['count'] .') = ' . $totalwouldbe. '. (max possible: ' . $total_ot_asper_secretary .')' );
+                        } else {
+                            array_push($myerrors,  $overtime['pen'] . '-' .$overtime['name'] . ' : Exceeds attendance as per O/S - ' .$overtime['count'] . '. (max possible: ' . $total_ot_asper_secretary .')' );
+                        }
+                                    
+                        return null;   
+                    }
+                }
+            }
+
+            if($totalwouldbe > $maxsittings)
+            {      
+               if($totalsittingexisting){
+                array_push($myerrors,  $overtime['pen'] . '-' .$overtime['name'] . ' : Already saved ' . $totalsittingexisting . '. + this (' .$overtime['count'] .') = ' . $totalwouldbe. '. (maximum possible: ' . $maxsittings .')' );
+               } else {
+                array_push($myerrors,  $overtime['pen'] . '-' .$overtime['name'] . ' : This = ' . $overtime['count'] . '. (maximum possible: ' . $maxsittings .')' );
+               }
+            
+               return null;   
+            }
+          
+            
+                   
+            //check date overlap
+            $start_one = Carbon::createFromFormat($dateformatwithoutime, $overtime['from']);
+            $end_one = Carbon::createFromFormat($dateformatwithoutime, $overtime['to']);
+
+            $start_one_string = $start_one->format('d-m-Y');
+            $end_one_string = $end_one->format('d-m-Y');
+            $pos1 = $maxsittingdates->search($start_one_string);
+            $pos2 = $maxsittingdates->search($end_one_string);
+
+            //see if user has entered more days than date range
+            
+            $sittingsinrange =  abs($pos2-$pos1)+1;
+            if($pos1 === false ||  $pos2 === false){
+              //  $sittingsinrange =  $start_one->diffInDays($end_one)+1;
+
+                //user has entered a date that is not a sitting day, manually
+
+                $sittingsinrange = \App\Calender::with('session')
+                                ->whereHas('session', function($query)  use ($request) { 
+                                    $query->where('name', $request['session']);
+                                  })                         
+                                  ->where('date', '>=', $start_one)
+                                  ->where('date', '<=', $end_one)
+                                ->where('day_type','Sitting day')->count();
+
+
+            }
+            
+            if( $overtime['count'] >  $sittingsinrange ){
+
+              array_push($myerrors, $overtime['pen'] . '-' .$overtime['name'] . ' : From ' . $overtime['from'] . ' to ' . $overtime['to'] . ' there are only ' . $sittingsinrange .' sitting days.');
+              return null;
+            
+            }
+
+            //if the user has not entered all the sittings days within the period, make sure he enter leaves.
+
+            if( !$checksecretaryattendance && $overtime['count'] < $sittingsinrange  ){
+
+                $leaves = $sittingsinrange-$overtime['count'];
+                $allleavesentered = true;
+                $colleave = trim($overtime['worknature']);
+
+                if(false !== stripos($colleave,'SUPPL') || 
+                   \Auth::user()->username == 'sn.watchnward' || 
+                    false !== stripos(\Auth::user()->username,'oo.sec') || 
+                    false !== stripos(\Auth::user()->username,'oo.dyspkr') || 
+                    false !== stripos(\Auth::user()->username,'oo.spkr') ){ 
+                    //if supply, disregard leaves
+                    $allleavesentered = true;
+                }
+                else if( $colleave == ''){
+                    $allleavesentered = false;
+                } 
+                else {
+
+                   $coma_items = count(explode(',', $colleave));
+
+                   //$numextracted = preg_replace('/[^0-9]/', '', $colleave);
+                   $hasnums = preg_match('/\d/', $colleave) > 0;
+
+                   if( $coma_items == 1 && $leaves == 1){ //one leave and user might have entered '1'
+                        if( $colleave == '1' || //comparing to string '1', not number 1. number cast converts '1/12' to 1
+                        !$hasnums ){
+                            $allleavesentered = false;       
+                        }
+
+                        $hasdatestring = preg_match('/\d{1,2}[-\/\\.]+\d{1,2}/', $colleave) > 0;
+
+                        if(!$hasdatestring){
+                         $allleavesentered = false;          
+                        }
+                   }
+
+                   if($coma_items < $leaves){
+                     $allleavesentered = false;
+                   }
+
+                   /*
+                   //but if user has entered a range, it is ok
+                   if($hasnums && $leaves > 9){ //should have digits. 
+                    if(FALSE !== stripos($colleave, "to") ||
+                       //FALSE !== stripos($colleave, "-") || // this can occur in dates itself.
+                       FALSE !== stripos($colleave, "and") ||
+                      // FALSE !== stripos($colleave, "&") ||
+                       FALSE !== stripos($colleave, "from") ){
+                    
+                        $allleavesentered = true;
+                    }
+                   }*/ 
+
+                }
+
+                if(!$allleavesentered){
+
+                  array_push($myerrors, $overtime['pen'] . '-' .$overtime['name'] . ' : Enter the '. $leaves . ' leave/late coming date(s) (See Note below).');
+                  return null;
+                
+                }
+            }
+
+           
+ 
+            if( $start_one < $sitting_start || $end_one > $sitting_end ) 
+            {
+
+                array_push($myerrors, $overtime['pen'] . '-' .$overtime['name'] . ' : Select date range between ' . $sitting_start->format('d-m-Y') . ' and ' . $sitting_end->format('d-m-Y') . ' (' . $start_one->format('d-m-Y') . ',' . $end_one->format('d-m-Y') . ')' );
+                    return null;
+            }
+
+            
+            //if this is a supply, allow user to enter any date range. person might have incorrectly submitted the first time.
+           
+            {
+                $emp = $res_for_pen->all();
+                //$emp =  $res->all();
+                foreach ($emp as $e) {
+
+                    //if supply, disregard dateoverlap with previous entry made by this section
+                    if(false !== stripos( $overtime['worknature'],'SUPPL') /*&& $e->form->isSameSectionCreator*/ ){
+                        continue;
+                    }
+
+                    $start_two = Carbon::createFromFormat($dateformatwithoutime, $e['from']);
+                    $end_two = Carbon::createFromFormat($dateformatwithoutime, $e['to']);
+
+                    $isoverlap = ($start_one <= $end_two) && ($end_one >= $start_two);
+
+                    if($isoverlap){
+                       
+                        array_push($myerrors, $overtime['pen'] . '-' .$overtime['name'] . ' : Dates overlap with another OT from ' . $e['from'] . ' - ' . $e['to'] . ' for '.$e['count'] . ' day(s) (' . $e->form->creator . ' )' );
+                        return null;
+                    }
+
+                } //foreach
+            }
+
+
+            {                
+                
+                return new Overtime([
+                    'pen'           => $overtime['pen'],
+                    'name'          => $overtime['name'],
+                    'designation'   => $overtime['designation'],
+                    'from'          => $overtime['from'],
+                    'to'            => $overtime['to'], 
+                    'worknature'    => $overtime['worknature'],
+                    'count'         => $overtime['count'],
+                    'rate'          => $rates[$overtime['designation']],
+                    
+                    ]);
+            }
+
+        });
+    
+        return $overtimes;
+           
+    }
+   
+    public function store_sitting(Request $request)
+    {
+         if (! Gate::allows('my_form_create')) {
+           // return abort(401);
+           return response('Unauthorized.', 401);
+        } 
+                
+        $myerrors = [];
+
+        $overtimes = $this->createovertimes_sitting( $request, $myerrors );
+       
+        
+        if( count($myerrors) > 0) 
+        {
+            return response()
+            ->json(['products_empty' => $myerrors], 422);
+        }
+
+
+        if($overtimes->isEmpty()) 
+        {
+            return response()->json(['products_empty' => ['An unknown error in row creation.']
+                    ], 422);
+        }
+                
+         
+        $formid = \DB::transaction(function() use ( $request, $overtimes) 
+        {
+
+            $form = Form::create( [
+                'session' => $request['session'],
+                'creator' => \Auth::user()->username,
+                'owner'=> \Auth::user()->username,
+                'date_from' => $request['date_from'],
+                'date_to' => $request['date_to'],
+                'overtime_slot' => 'Sittings',
+                'remarks' => $request['remarks'],
+            ]);
+   
+
+            $form->overtimes()->saveMany($overtimes);
+
+            return $form->id;
+
+        });
+
+        $request->session()->flash('message-success', 'Created form-no: ' . $formid ); 
+           
+   
+
+        return response()->json([
+           'created' => true,
+           'id' => $formid
+        ]);
+
+
+
+    }
+
     public function forward(Request $request, $id)
     {
 
@@ -1532,7 +1984,7 @@ class MyForms2Controller extends Controller
 
         $str_session = null;                 
         $str_status = null;
-     
+        $str_overtime_slot = null;
         $str_datefilter = null;
         $str_namefilter = null;
         $str_desigfilter = null;
@@ -1540,7 +1992,7 @@ class MyForms2Controller extends Controller
         $str_created_by = null;
         
         $session = $request->query('session');
-    
+        $overtime_slot = $request->query('overtime_slot');
         $status =  $request->query('status');
         $datefilter =  $request->query('datefilter');
         $namefilter =  $request->query('namefilter');
@@ -1584,7 +2036,16 @@ class MyForms2Controller extends Controller
         }
 
 
-     
+        if ($request->filled('overtime_slot')){
+            if($overtime_slot == 'Non-Sittings'){
+                $forms = $forms->where( 'overtime_slot' , 'Multi' );    
+            }
+            else{
+                $forms = $forms->whereOvertimeSlot($overtime_slot);
+            }
+
+            $str_overtime_slot = '&overtime_slot='.$overtime_slot;
+        }
 
         if ($request->filled('datefilter')){
             
@@ -1665,15 +2126,16 @@ class MyForms2Controller extends Controller
                 
             $cansubmittoaccounts = false;
             $descriptionofday = '';
-                               
-            $date = Carbon::createFromFormat(config('app.date_format'), $form->duty_date)->format('Y-m-d');
-    
-            $calender = Calender::where('date', $date )->first();
-            $daytype = $calender->day_type;
+                       
+            if($form->overtime_slot != 'Sittings'){
+                $date = Carbon::createFromFormat(config('app.date_format'), $form->duty_date)->format('Y-m-d');
+     
+                 $calender = Calender::where('date', $date )->first();
+                $daytype = $calender->day_type;
 
             $descriptionofday = $calender->description;
 
-            
+            }
             
             $submmittedby = $form->SubmitedbyNames;
             $createdby = $form->FirstSubmitedbyName;

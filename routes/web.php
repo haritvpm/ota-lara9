@@ -97,7 +97,11 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
     Route::post('overtimes_mass_destroy', ['uses' => 'Admin\OvertimesController@massDestroy', 'as' => 'overtimes.mass_destroy']);
     
 
+    Route::post('my_forms2/store_sitting', 'Admin\MyForms2Controller@store_sitting');
+    Route::get('my_forms2/create_sitting', ['uses' => 'Admin\MyForms2Controller@create_sitting', 'as' => 'my_forms2.create_sitting'] );
     Route::get('my_forms2/create_copy/{id}', ['uses' => 'Admin\MyForms2Controller@create_copy', 'as' => 'my_forms2.create_copy'] );
+    Route::put('my_forms2/update_sitting/{id}', 'Admin\MyForms2Controller@update_sitting');
+
     Route::get('my_forms2/getpdf', 'Admin\MyForms2Controller@getpdf' , ['uses' => 'Admin\MyForms2Controller@getpdf', 'as' => 'my_forms2.getpdf']);
     Route::put('my_forms2/forward/{id}', 'Admin\MyForms2Controller@forward');
     Route::put('my_forms2/submittoaccounts/{id}', 'Admin\MyForms2Controller@submittoaccounts');

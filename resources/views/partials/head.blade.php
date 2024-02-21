@@ -29,9 +29,10 @@
 <link href="{{ asset('css/select.dataTables.min.css') }}" rel="stylesheet" />
 <link href="{{ asset('css/buttons.dataTables.min.css') }}" rel="stylesheet" />
 <link href="{{ URL::asset('css/jquery-ui.min.css') }}" rel="stylesheet">
-<link rel="stylesheet" href="{{ asset('css/vue-multiselect.min.css') }}">
+
 <!-- <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.3/themes/smoothness/jquery-ui.css"> -->
-<!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"> -->
+<!-- <link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.8/dist/vue-multiselect.min.css" >  -->
+<link rel="stylesheet" href="{{ asset('css/vue-multiselect.min.css') }}">
 <link href="{{ asset('css/font-awesome.min.css') }}" rel="stylesheet" />
 
 <link href="{{ URL::asset('css/custom.css') }}" rel="stylesheet"><!-- for data table  -->

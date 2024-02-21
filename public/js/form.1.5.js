@@ -84,23 +84,29 @@ var vm = new Vue({
     },
     isActive: function isActive() {},
     slotoptions: function slotoptions() {
-      if (this.form.duty_date.length == 0) return "";
-      if (!ispartimefulltime && !iswatchnward) {
+      if (this.form.duty_date.length == 0) return '';
+      if (!ispartimefulltime) {
         switch (calenderdaysmap[this.form.duty_date]) {
-          case "Sitting day":
-            return ["First", "Second", "Third"];
-          case "Prior holiday":
-          case "Holiday":
-            return ["First", "Second", "Third", "Additional"];
+          case 'Sitting day':
+            return ['Second', 'Third'];
+          case 'Prior holiday':
+          case 'Holiday':
+            return ['First', 'Second', 'Third', 'Additional'];
           case undefined:
-            return "";
+            return '';
           default:
-            return ["First", "Second", "Third"];
+            return ['First', 'Second', 'Third'];
         }
       } else {
-        return ["First", "Second"];
+        switch (calenderdaysmap[this.form.duty_date]) {
+          case 'Sitting day':
+            return ['Second'];
+          default:
+            return ['First', 'Second'];
+        } //switch
       }
     },
+
     _daylenmultiplier: function _daylenmultiplier() {
       var _daylenmultiplier$thi;
       return this.form.duty_date ? (_daylenmultiplier$thi = daylenmultiplier[this.form.duty_date]) !== null && _daylenmultiplier$thi !== void 0 ? _daylenmultiplier$thi : 1.0 : 1.0;

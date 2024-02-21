@@ -90,25 +90,35 @@ var vm = new Vue({
 
 		isActive: function () {},
 		slotoptions: function () {
-			if (this.form.duty_date.length == 0) return "";
 
-			if (!ispartimefulltime && !iswatchnward) {
-				switch (calenderdaysmap[this.form.duty_date]) {
-					case "Sitting day":
-						return ["First", "Second", "Third"];
-
-					case "Prior holiday":
-					case "Holiday":
-						return ["First", "Second", "Third", "Additional"];
-					case undefined:
-						return "";
-					default:
-						return ["First", "Second", "Third"];
-				}
+			if (this.form.duty_date.length == 0)
+			  return '';
+	  
+			if (!ispartimefulltime) {
+			  switch (calenderdaysmap[this.form.duty_date]) {
+	  
+				case 'Sitting day':
+				  return ['Second', 'Third'];
+	  
+				case 'Prior holiday':
+				case 'Holiday':
+				  return ['First', 'Second', 'Third', 'Additional'];
+				case undefined:
+				  return '';
+				default:
+				  return ['First', 'Second', 'Third'];
+			  }
 			} else {
-				return ["First", "Second"];
+			  switch (calenderdaysmap[this.form.duty_date]) {
+	  
+				case 'Sitting day':
+				  return ['Second'];
+	  
+				default:
+				  return ['First', 'Second'];
+			  } //switch
 			}
-		},
+	    },
 		_daylenmultiplier: function () {
 			return this.form.duty_date ? daylenmultiplier[this.form.duty_date] ?? 1.0 : 1.0
 		},

@@ -12,7 +12,7 @@
 
     <p>
         <a href="{{ route('admin.my_forms2.create') }}" class="btn btn-success"  data-toggle="tooltip" title="Prepare a form for 1st, 2nd or 3rd OT. Form to be submitted on the next working day itself."  >@lang('quickadmin.qa_new_daily_form')</a>
-        <!-- <a href="{{ route('admin.my_forms.create_sitting') }}" class="btn btn-warning" data-toggle="tooltip" title="Prepare a form for total sitting days attended. Form to be submitted only after an assembly session is over."  > New Sitting-days Form</a> -->
+        <a href="{{ route('admin.my_forms2.create_sitting') }}" class="btn btn-warning" data-toggle="tooltip" title="Prepare a form for total sitting days attended. Form to be submitted only after an assembly session is over."  > New Sitting-days Form</a>
     </p>
    
     @endif
@@ -65,6 +65,7 @@
 
                     <th><a href="<?=URL::to('admin/my_forms2?sort=session'.$querystr)?>">Session</a></th>
                     <th><a href="<?=URL::to('admin/my_forms2?sort=creator'.$querystr)?>">Created by</a></th>
+                    <th><a href="<?=URL::to('admin/my_forms?sort=overtime_slot'.$querystr)?>">OT</a></th>
                     <th><a href="<?=URL::to('admin/my_forms2?sort=duty_date'.$querystr)?>">Duty Date</a></th>
                     <th><a href="<?=URL::to('admin/my_forms2?sort=owner'.$querystr)?>">Status</a></th>
 
@@ -105,11 +106,46 @@
                                 @endif
                             @endif
                             </td>
+                            <td > 
+                            @if( $form->overtime_slot == 'Multi')
+                                1<sup>st</sup>/
                            
+                                2<sup>nd</sup>/
+                            
+                                3<sup>rd</sup>
+                           
+                            @else
+                                Sitting 
+                            @endif
+
+                            </td>
                             <td>
-                         
+                            @if($form->overtime_slot == 'Sittings')
+                            
+                               <!--  @php
+                                $session_no = substr($form->session,strpos($form->session,'.')+1);
+                                @endphp -->
+                                <!-- <small>Session:</small> {{ $session_no }} -->
+                                <!-- {{ $form->date_from }} to {{ $form->date_to }} -->      
+                            
+                            @else
+                            
                                 {{ $form->duty_date }}
-             
+                                @php
+                                $daytype = $form->day_type() ;   
+                                @endphp
+                                @if($daytype == 'S')
+                                <small><i class="fa fa-calendar-o" style="color:green"></i></small>
+                                @elseif($daytype == 'H')
+                                <small><i class="fa fa-calendar-o" style="color:red"></i></small>
+                                @else
+                                <small><i class="fa fa-calendar-o" style="color:black"></i></small>
+                                @endif    
+                                
+                                
+
+                            
+                            @endif
                             </td>
 
                                                        
@@ -230,7 +266,17 @@
         </div>
         @endif
 
-       
+        <div class="form-group">                                
+        OT <select class="form-control" name="overtime_slot">
+                <option value="">All</option>
+                 <option value="Sittings"  {{ \Request('overtime_slot') == 'Sittings' ? 'selected' : '' }}>Sittings</option>
+
+                 <option value="Non-Sittings"  {{ \Request('overtime_slot') == 'Non-Sittings' ? 'selected' : '' }}>Non-Sittings</option>
+                 <option value="Withheld"  {{ \Request('overtime_slot') == 'Withheld' ? 'selected' : '' }}>Withheld</option>
+                
+        
+        </select>
+        </div>
         Date <input  class="form-control" placeholder="dd-mm-yyyy|S|W|H|NS" type="text" name = "datefilter" value="{{ \Request('datefilter')  }}" rel="filter">
         <input  class="form-control" placeholder="Name/Pen" type="text" name = "namefilter" value="{{\Request('namefilter')}}" rel="filter">
         <input  class="form-control" placeholder="Designation" type="text" name = "desigfilter" value="{{ \Request('desigfilter')  }}" rel="filter">

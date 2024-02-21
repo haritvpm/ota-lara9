@@ -33,14 +33,17 @@ class PunchingsController extends Controller
 
     $date = Carbon::createFromFormat(config('app.date_format'), $date)->format('Y-m-d');
        
-    $temp =  Punching::where('date',$date)  
-            ->where( function ($query) use ($pen, $aadhaarid) {
-                $query->where('pen',$pen) 
-                    ->orwhere('aadhaarid',$aadhaarid) ;
-            })
+    $query =  Punching::where('date',$date);
+    $query->when( $pen != '' && strlen($pen) >= 5, function ($q)  use ($pen) {
+        return $q->where('pen',$pen);
+    });
+    $query->when( strlen($aadhaarid) >= 8, function ($q)  use ($aadhaarid){
+        return $q->where('aadhaarid',$aadhaarid);
+    });
+    
            // ->wherenotnull('punch_in') //prevent if only one column is available
            //  ->wherenotnull('punch_out') 
-             ->first(); 
+    $temp = $query->first(); 
     
     if($temp){
         Log::info($temp);

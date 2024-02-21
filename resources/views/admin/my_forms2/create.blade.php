@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
     <style>
-        [v-cloak] { display:none; }
+        [v-cloak] { display:none;  opacity: 0.0;}
 
     </style>
 
@@ -56,7 +56,7 @@
 
 <!-- <script type="text/javascript" src="{{ URL::asset('js/flatpickr.min.js') }}"></script> -->
 <!-- <script type="text/javascript" src="{{ URL::asset('js/vue-flatpickr.min.js') }}"></script> -->
-<script type="text/javascript" src="{{ URL::asset('js/vue-sweetalert.js') }}"></script>
+<!-- <script type="text/javascript" src="{{ URL::asset('js/vue-sweetalert.js') }}"></script> -->
 
 
 
