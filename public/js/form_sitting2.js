@@ -51,7 +51,7 @@ var vm = new Vue({
         format: 'DD-MM-YYYY',
         useCurrent: false,
         // useStrict : true,
-
+        //inline: true,
         enabledDates: Object.keys(calenderdaysmap).map(function (x) {
           return moment(x, "DD-MM-YYYY").format('YYYY-MM-DD');
         })
@@ -62,6 +62,7 @@ var vm = new Vue({
   watch: {},
   methods: (_methods = {
     sessionchanged: function sessionchanged() {
+      this.myerrors = [];
       //this.configdate.enable =  calenderdays2[this.form.session]
       if (calenderdays2[this.form.session] != undefined) {
         this.form.date_from = calenderdays2[this.form.session][0];
@@ -93,7 +94,9 @@ var vm = new Vue({
         from: self.form.date_from,
         to: self.form.date_to,
         count: "",
-        worknature: ""
+        worknature: "",
+        slots: [],
+        punching: true
       });
       this.pen_names = []; //clear previos selection from dropdown
       this.pen_names_to_desig = [];
@@ -130,6 +133,41 @@ var vm = new Vue({
         })["catch"](function (response) {
           // alert (JSON.stringify(response.data))    // alerts {"myProp":"Hello"};
         });
+      }
+    },
+    getSittingOTs: function getSittingOTs(index) {
+      var _this = this;
+      var self = this;
+      var row = self.form.overtimes[index];
+      if (row.pen == "" || !self.form.session || !row.from || !row.to) {
+        console.log(self.form.session | row.from | row.to);
+        return;
+      }
+      ;
+      //set punchtime if not set and available
+      //reset for example if user selects another person after selecting a person with punchtime
+      // self.form.overtimes[id].allowpunch_edit=true;
+      row.count = 0;
+      // row.punchout = "";
+      // row.punching_id = null;
+
+      if (row.punching) {
+        axios.get("".concat(urlajaxgetpunchsittings, "/").concat(self.form.session, "/").concat(row.from, "/").concat(row.to, "/").concat(row.pen, "/").concat(row.aadhaarid)).then(function (response) {
+          //console.log("got punch data");
+          console.log(response);
+          if (response.data) {
+            //todo ask if unpresent dates where present
+            //console.log("set punch data");
+            row.count = response.data.sittingsWithPunchok;
+            ;
+            // row.punchout = response.data.punchout;
+            // row.aadhaarid = response.data.aadhaarid;
+            //row.punching_id = response.data.id;
+            //vue does not update time if we change date as it does not watch for array changes
+            //https://v2.vuejs.org/v2/guide/reactivity#Change-Detection-Caveats
+            Vue.set(_this.form.overtimes, index, row);
+          }
+        })["catch"](function (err) {});
       }
     },
     clearAll: function clearAll() {

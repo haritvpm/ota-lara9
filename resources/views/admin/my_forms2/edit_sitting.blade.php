@@ -105,6 +105,7 @@
     var urlajaxpen = "{{url('admin/employees/ajaxfind')}}"
     var urlformsubmit = "{{url('admin/my_forms2/update_sitting')}}"
     var urlformsucessredirect = "{{url('admin/my_forms2/')}}"
+    var urlajaxgetpunchsittings = "{{url('admin/punchings/ajaxgetpunchsittings')}}"
         
     var calenderdaysmap = {!! $data['calenderdaysmap'] !!};
    

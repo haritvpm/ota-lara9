@@ -214,6 +214,7 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
 
     Route::get('punchings/ajaxgetpunchtimes/{date}/{pen}/{aadhaarid}',array('as'=>'punchings.ajax','uses'=>'Admin\PunchingsController@ajaxgetpunchtimes'));
 
+    Route::get('punchings/ajaxgetpunchsittings/{session}/{datefrom}/{dateto}/{pen}/{aadhaarid}',array('as'=>'punchings.ajaxsittings','uses'=>'Admin\PunchingsController@ajaxgetpunchsittings'));
     // Route::get('punchings/fetchEmployees','Admin\PunchingsController@fetchEmployees')->name('punchings.fetchEmployees');;
     Route::get('punchings/fetchApi','Admin\PunchingsController@fetchApi')->name('punchings.fetchApi');;
     Route::get('punchings/fetch/{reportdate}','Admin\PunchingsController@fetch')->name('punchings.fetch');;

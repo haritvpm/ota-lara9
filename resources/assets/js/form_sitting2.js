@@ -52,7 +52,7 @@ var vm = new Vue({
         format: 'DD-MM-YYYY',
         useCurrent: false,
         // useStrict : true,
-
+        //inline: true,
         enabledDates: Object.keys(calenderdaysmap).map(x => moment(x, "DD-MM-YYYY").format('YYYY-MM-DD')),
       }
     },
@@ -70,6 +70,7 @@ var vm = new Vue({
   methods: {
 
     sessionchanged: function () {
+      this.myerrors = [];
       //this.configdate.enable =  calenderdays2[this.form.session]
       if (calenderdays2[this.form.session] != undefined) {
         this.form.date_from = calenderdays2[this.form.session][0]
@@ -109,6 +110,8 @@ var vm = new Vue({
         to: self.form.date_to,
         count: "",
         worknature: "",
+        slots: [],
+        punching : true,
 
       });
 
@@ -162,6 +165,45 @@ var vm = new Vue({
 
           });
       }
+
+    },
+    getSittingOTs: function (index) {
+   
+      var self = this;
+			let row = self.form.overtimes[index];
+   
+			if(row.pen == "" || !self.form.session || !row.from || !row.to){ 
+      
+        console.log(self.form.session | row.from | row.to)  
+        return
+      };
+			//set punchtime if not set and available
+			//reset for example if user selects another person after selecting a person with punchtime
+			// self.form.overtimes[id].allowpunch_edit=true;
+			  row.count = 0;
+			// row.punchout = "";
+			// row.punching_id = null;
+			
+			if ( row.punching ) {
+				axios
+					.get(`${urlajaxgetpunchsittings}/${self.form.session}/${row.from}/${row.to}/${row.pen}/${row.aadhaarid}`)
+					.then((response) => {
+						//console.log("got punch data");
+						console.log(response);
+						if (response.data) {
+              //todo ask if unpresent dates where present
+							//console.log("set punch data");
+              row.count =  response.data.sittingsWithPunchok;;
+							// row.punchout = response.data.punchout;
+							// row.aadhaarid = response.data.aadhaarid;
+							 //row.punching_id = response.data.id;
+							//vue does not update time if we change date as it does not watch for array changes
+							 //https://v2.vuejs.org/v2/guide/reactivity#Change-Detection-Caveats
+							 Vue.set(this.form.overtimes,index, row)
+						}
+					})
+					.catch((err) => {});
+			}
 
     },
 

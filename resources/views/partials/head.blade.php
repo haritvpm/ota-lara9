@@ -34,6 +34,7 @@
 <!-- <link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.8/dist/vue-multiselect.min.css" >  -->
 <link rel="stylesheet" href="{{ asset('css/vue-multiselect.min.css') }}">
 <link href="{{ asset('css/font-awesome.min.css') }}" rel="stylesheet" />
+<!-- <link href="https://cdn.jsdelivr.net/npm/pc-bootstrap4-datetimepicker@4.17/build/css/bootstrap-datetimepicker.min.css" rel="stylesheet"> -->
 
 <link href="{{ URL::asset('css/custom.css') }}" rel="stylesheet"><!-- for data table  -->
 

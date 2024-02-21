@@ -96,7 +96,8 @@
     var urlformsubmit = "{{url('admin/my_forms2/store_sitting')}}"
     var urlformsucessredirect = "{{url('admin/my_forms2/')}}"
     var urlajaxpresets = "{{url('admin/presets/ajaxfind')}}"
-
+    
+    var urlajaxgetpunchsittings = "{{url('admin/punchings/ajaxgetpunchsittings')}}"
     var calenderdaysmap = {!! $data['calenderdaysmap'] !!};
    
     Vue.component('Multiselect', VueMultiselect.default);

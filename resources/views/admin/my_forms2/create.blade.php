@@ -52,7 +52,7 @@
 @stop
 
 @section('javascript')
-
+@parent
 
 <!-- <script type="text/javascript" src="{{ URL::asset('js/flatpickr.min.js') }}"></script> -->
 <!-- <script type="text/javascript" src="{{ URL::asset('js/vue-flatpickr.min.js') }}"></script> -->

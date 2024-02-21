@@ -22,23 +22,26 @@
 	</div>
 	<div class="col-md-4 form-group">  
 		<label for="duty_date">Date From</label>
+		<input class="form-control" :value="form.date_from" readonly required>
 					
-		<date-picker readonly v-model="form.date_from" @dp-change="onChange"
+		<!-- <date-picker readonly v-model="form.date_from" @dp-change="onChange"
 				:config="configdate"
 				placeholder="Select date"
 				:required="true"                
 				class="form-control">
-		</date-picker> 
+		</date-picker>  -->
 	</div>
 	<div class="col-md-4 form-group">  	
 		<label for="duty_date">Date To</label>
-				
+<!-- 				
 		<date-picker readonly v-model="form.date_to" @dp-change="onChange"
 				:config="configdate"
 				placeholder="Select date"
 				:required="true"                
 				class="form-control">
-		</date-picker> 
+		</date-picker>  -->
+		<input class="form-control" :value="form.date_to" readonly required>
+
 		</select>
 	</div>		
 	
@@ -46,17 +49,15 @@
 
 <div class="row" v-cloak>
 	
-	<div class="col-md-12 form-group ">
+	<div class="col-md-12">
 		<table class="table  table-condensed">
 			<thead v-show="form.overtimes.length" >
-				<tr style="font-size: 12px; font-weight: bold">
+				<tr class="text-center" style="font-size: 12px; font-weight: bold">
 					<th>No</th>
 					<th>PEN - Name</th>
 					<th>Designation</th>
-					<th style="width: 11%">Period-From</th>
-					<th style="width: 11%">Period-To</th>
+					<th>Period-From, Period-To</th>
 					<th>Sitting days attended</th>
-
 					
 					<!-- <th>Remarks if any</th> -->
 				
@@ -68,7 +69,7 @@
 				<tr v-for="(row, index) in form.overtimes" :class="{ info: index%2 }">
 					<td class="text-center align-middle" style="width:1px;"> <small><span v-text="index+1"></span></small></td>
 
-					<td > 
+					<td class="col-sm-3"> 
 					<multiselect :name="'name[' + index + ']'"  :ref="'field-'+index"  v-model= "row.pen" 
 					placeholder= "Type to search" 
 					:options="pen_names" 
@@ -85,33 +86,44 @@
 					<span slot="noResult"></span>
 					</multiselect></td>
 
-					<td class="align-middle">
-					<div class="small"> @{{ row.designation.desig }} </div> 
+					<td class="col-sm-3" >
+			
+					<input class="form-control" style="font-size: 12px;" :value="row.designation.desig" readonly >
 					</td>
 
 					
-					<td>
-					
+					<td class="col-sm-3">
+					<div class="input-group" >
 					<date-picker v-model="row.from" :config="configdate"
 						:required="true"
 						placeholder="Period from which statement is related"
 						class="form-control" >
 					</date-picker> 
-					</td>
-					
-					<td >
+				
 					<date-picker v-model="row.to" :config="configdate"
 						:required="true"
 						placeholder="Period to which statement is related"                
 						class="form-control">
 					</date-picker> 
+					</div>
 					</td>
+			
 					
-					<td class="col-md-1"> <input type="number"  :name="'count[' + index + ']'" class="form-control"  min=1 oninput="validity.valid||(value='');" v-model="row.count"></td>
+					<td  class="col-sm-2" > 
+					
+					<div class="input-group">
+						<input  type="number"  :name="'count[' + index + ']'" class="form-control"  min=1 oninput="validity.valid||(value='');" v-model="row.count" :readonly = "row.punching" >
+						<div class="input-group-append">
+						<button :disabled='!row.from || !row.to' class="btn btn-sm btn-primary" @click.prevent="getSittingOTs(index);"><i class="fa fa-refresh"></i></button>
+						</div>
+					</div>
+							
+
+					</td>
 					
 					<!-- <td class="col-md-2"> <input :name="'worknature[' + index + ']'" class="form-control" type="text" v-model="row.worknature" maxlength="180"></td> -->
 
-					<td class="text-center align-middle" style="width:1px;"><button class="btn  btn-danger" @click.prevent="removeElement(index);"><i class="fa fa-times"></i></button></td>
+					<td class="text-center  align-middle" style="width:1px;"><button class="btn  btn-danger" @click.prevent="removeElement(index);"><i class="fa fa-times"></i></button></td>
 
 
 				</tr>

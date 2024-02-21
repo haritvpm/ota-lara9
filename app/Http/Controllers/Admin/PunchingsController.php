@@ -20,6 +20,74 @@ use Illuminate\Support\Facades\Log;
 
 class PunchingsController extends Controller
 {
+    
+    //the args are set in route file web.php
+    public function ajaxgetpunchsittings($session, $datefrom, $dateto, $pen, $aadhaarid)
+    {
+
+    $dateformatwithoutime = '!'.config('app.date_format'); //! to set time to zero
+    $datefrom = Carbon::createFromFormat($dateformatwithoutime, $datefrom)->format('Y-m-d');
+    $dateto = Carbon::createFromFormat($dateformatwithoutime, $dateto)->format('Y-m-d');
+
+   // Log::info($session);
+    // Calender::where('session_id', $session->id)
+     //get all sitting days between these two days
+    $sittingsInRange = \App\Calender::with('session')
+                            ->whereHas('session', function($query)  use ($session) { 
+                                    $query->where('name', $session);
+                            })                         
+                            ->where('date', '>=', $datefrom)
+                            ->where('date', '<=', $dateto)
+                            ->where('day_type','Sitting day')->get(['date','day_type',"punching"]);
+
+//     Log::info($sittingsInRange);
+    
+    
+    $tmp = strpos($pen, '-');
+    if(false !== $tmp){
+        $pen = substr($pen, 0, $tmp);
+    }
+    $sittingsWithPunchok = 0; 
+    $sittingsWithNoPunching = 0; 
+    foreach ($sittingsInRange as $day) {
+
+        if( $day->punching == 'MANUALENTRY' ){
+            $sittingsWithNoPunching++; 
+            continue;
+        }
+
+        $date = Carbon::createFromFormat($dateformatwithoutime, $day->date)->format('Y-m-d');
+        $query =  Punching::where('date',$date);
+        $query->when( $pen != '' && strlen($pen) >= 5, function ($q)  use ($pen) {
+            return $q->where('pen',$pen);
+        });
+        $query->when( strlen($aadhaarid) >= 8, function ($q)  use ($aadhaarid){
+            return $q->where('aadhaarid',$aadhaarid);
+        });
+        
+               // ->wherenotnull('punch_in') //prevent if only one column is available
+               //  ->wherenotnull('punch_out') 
+        $temp = $query->first(); 
+       
+        $sittingsWithPunchok++; 
+
+      
+    }
+    
+    
+   
+    Log::info($sittingsWithPunchok);
+       
+   
+    return [
+            'sittingsWithPunchok' => $sittingsWithPunchok,
+            'sittingsWithNoPunching' => $sittingsWithNoPunching,
+            'sittingsInRange' => $sittingsInRange->count(),
+           ];
+  
+        
+    }
+
 
     //the args are set in route file web.php
     public function ajaxgetpunchtimes($date, $pen, $aadhaarid)
@@ -46,7 +114,7 @@ class PunchingsController extends Controller
     $temp = $query->first(); 
     
     if($temp){
-        Log::info($temp);
+      //  Log::info($temp);
        
    
       return [
