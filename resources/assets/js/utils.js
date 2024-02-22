@@ -26,3 +26,49 @@ export function timePeriodIncludesPeriod (from, to, fromReq, toReq)  {
     return time800am >= datefrom && time530pm <= dateto;
  
 }
+export function  checkDatesAndOT(row, data){
+    //we need to give some leeway. so commenting
+  let count = 0;
+
+  for (let i = 0; i < data.dates.length; i++) {
+    // console.log(data.dates[i])
+    const punchin = data.dates[i].punchin;
+    const punchout = data.dates[i].punchout;
+
+    if( "N/A" == punchin ){ //no punching day. NIC server down
+      data.dates[i].ot = '*'
+      continue;
+    }
+
+    data.dates[i].ot = 'NO'
+
+    if (row.isPartime) {
+      if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "11:25")) {
+        data.dates[i].ot = 'YES'
+        count++;
+      }
+    }
+    else if (row.isFulltime) {
+       if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "16:25")) { 
+          count++;
+          data.dates[i].ot = 'YES'
+        }
+    }    
+    else if (row.isWatchnward) {
+      //no punching
+    } //all other employees for sitting days
+    else {
+        if (timePeriodIncludesPeriod(punchin, punchout, "08:05", "17:25")) {
+          count++;
+          data.dates[i].ot = 'YES'
+        }
+    }
+  
+  }
+ 
+ return {
+  count : row.count ,
+  modaldata : data.dates
+ }
+
+}

@@ -1,6 +1,14 @@
 @inject('request', 'Illuminate\Http\Request')
 @extends('layouts.app')
 
+<!-- <style>table.ajaxTable td {
+  font-size: 12px;
+}
+table.ajaxTable tr.dtrg-level-0 td {
+  font-size: 12px;
+}
+</style> -->
+
 @section('content')
 
     <h3 class="page-title">@lang('quickadmin.employees.title')</h3>
@@ -98,8 +106,8 @@
 
     <div class="">
        
-        <div class="table-responsive">
-            <table class="table table-borderless table-striped ajaxTable "> 
+        <div class="">
+            <table class="table table-borderless table-sm table-striped ajaxTable"> 
              
                 <thead>
                     <tr>
@@ -114,10 +122,10 @@
                         @if(\Auth::user()->isAdmin())
                         <th>ID</th>
                         
-                        <th>@lang('quickadmin.employees.fields.added-by')</th>
+                        <!-- <th>@lang('quickadmin.employees.fields.added-by')</th> -->
                         <th>Excel Category</th>
                         <th>
-                                    {{ trans('cruds.employee.fields.punching') }}
+                        <i class="fas fa-fingerprint"></i>      <!-- {{ trans('cruds.employee.fields.punching') }} -->
                            </th>
                         <th>@lang('quickadmin.employees.fields.desig-display')</th>
                    
@@ -193,7 +201,7 @@
                 {data: 'category', name: 'category'},
                 @if(\Auth::user()->isAdmin())
                 {data: 'id', name: 'id'},
-                {data: 'added_by', name: 'added_by'},
+                // {data: 'added_by', name: 'added_by'},
                 {data: 'categories.category', name: 'categories.category'},
                 { data: 'punching', name: 'punching' },
                 {data: 'desig_display', name: 'desig_display'},

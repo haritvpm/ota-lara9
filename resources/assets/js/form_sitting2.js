@@ -1,6 +1,6 @@
 
 "use strict";
-import { timePeriodIncludesPeriod, setEmployeeTypes } from './utils.js';
+import { checkDatesAndOT, setEmployeeTypes } from './utils.js';
 
 
 var vm = new Vue({
@@ -177,51 +177,7 @@ var vm = new Vue({
       }
 
     },
-    checkDatesAndOT: function(row, data){
-        //we need to give some leeway. so commenting
-      let count = 0;
-
     
-
-      for (let i = 0; i < data.dates.length; i++) {
-        // console.log(data.dates[i])
-        const punchin = data.dates[i].punchin;
-        const punchout = data.dates[i].punchout;
-
-        if( "N/A" == punchin ){ //no punching day. NIC server down
-          data.dates[i].ot = '*'
-          continue;
-        }
-
-        data.dates[i].ot = 'NO'
-
-        if (row.isPartime) {
-          if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "11:25")) {
-            data.dates[i].ot = 'YES'
-            count++;
-          }
-        }
-        else if (row.isFulltime) {
-           if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "16:25")) { 
-              count++;
-              data.dates[i].ot = 'YES'
-            }
-        }    
-        else if (row.isWatchnward) {
-          //no punching
-        } //all other employees for sitting days
-        else {
-            if (timePeriodIncludesPeriod(punchin, punchout, "08:05", "17:25")) {
-              count++;
-              data.dates[i].ot = 'YES'
-            }
-        }
-      
-      }
-     row.count =  count
-     this.modaldata = data.dates
-     this.modaldata_totalOT = count
-    },
     showSittingOTs: function(index){
 
       this.getSittingOTs(index,true)
@@ -249,14 +205,18 @@ var vm = new Vue({
 						console.log(response);
 						if (response.data) {
               //todo ask if unpresent dates where present
-							self.checkDatesAndOT(row, response.data);
-   			
+              //warning this func modifies response.data
+             let  {count, modaldata} = checkDatesAndOT(row, response.data);
+              row.count = count
+
 							//vue does not update time if we change date as it does not watch for array changes
 							 //https://v2.vuejs.org/v2/guide/reactivity#Change-Detection-Caveats
 							 Vue.set(this.form.overtimes,index, row)
 
                if(show){
+                this.modaldata = modaldata
                 this.showModal = true
+
                }
 						}
 					})

@@ -10,6 +10,7 @@
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "checkDatesAndOT": () => (/* binding */ checkDatesAndOT),
 /* harmony export */   "setEmployeeTypes": () => (/* binding */ setEmployeeTypes),
 /* harmony export */   "stringTimeToDate": () => (/* binding */ stringTimeToDate),
 /* harmony export */   "timePeriodIncludesPeriod": () => (/* binding */ timePeriodIncludesPeriod)
@@ -35,6 +36,44 @@ function timePeriodIncludesPeriod(from, to, fromReq, toReq) {
   var time800am = stringTimeToDate(fromReq);
   var time530pm = stringTimeToDate(toReq);
   return time800am >= datefrom && time530pm <= dateto;
+}
+function checkDatesAndOT(row, data) {
+  //we need to give some leeway. so commenting
+  var count = 0;
+  for (var i = 0; i < data.dates.length; i++) {
+    // console.log(data.dates[i])
+    var punchin = data.dates[i].punchin;
+    var punchout = data.dates[i].punchout;
+    if ("N/A" == punchin) {
+      //no punching day. NIC server down
+      data.dates[i].ot = '*';
+      continue;
+    }
+    data.dates[i].ot = 'NO';
+    if (row.isPartime) {
+      if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "11:25")) {
+        data.dates[i].ot = 'YES';
+        count++;
+      }
+    } else if (row.isFulltime) {
+      if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "16:25")) {
+        count++;
+        data.dates[i].ot = 'YES';
+      }
+    } else if (row.isWatchnward) {
+      //no punching
+    } //all other employees for sitting days
+    else {
+      if (timePeriodIncludesPeriod(punchin, punchout, "08:05", "17:25")) {
+        count++;
+        data.dates[i].ot = 'YES';
+      }
+    }
+  }
+  return {
+    count: row.count,
+    modaldata: data.dates
+  };
 }
 
 /***/ })
@@ -245,43 +284,6 @@ var vm = new Vue({
         });
       }
     },
-    checkDatesAndOT: function checkDatesAndOT(row, data) {
-      //we need to give some leeway. so commenting
-      var count = 0;
-      for (var i = 0; i < data.dates.length; i++) {
-        // console.log(data.dates[i])
-        var punchin = data.dates[i].punchin;
-        var punchout = data.dates[i].punchout;
-        if ("N/A" == punchin) {
-          //no punching day. NIC server down
-          data.dates[i].ot = '*';
-          continue;
-        }
-        data.dates[i].ot = 'NO';
-        if (row.isPartime) {
-          if ((0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(punchin, punchout, "06:05", "11:25")) {
-            data.dates[i].ot = 'YES';
-            count++;
-          }
-        } else if (row.isFulltime) {
-          if ((0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(punchin, punchout, "06:05", "16:25")) {
-            count++;
-            data.dates[i].ot = 'YES';
-          }
-        } else if (row.isWatchnward) {
-          //no punching
-        } //all other employees for sitting days
-        else {
-          if ((0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(punchin, punchout, "08:05", "17:25")) {
-            count++;
-            data.dates[i].ot = 'YES';
-          }
-        }
-      }
-      row.count = count;
-      this.modaldata = data.dates;
-      this.modaldata_totalOT = count;
-    },
     showSittingOTs: function showSittingOTs(index) {
       this.getSittingOTs(index, true);
     },
@@ -303,12 +305,17 @@ var vm = new Vue({
         console.log(response);
         if (response.data) {
           //todo ask if unpresent dates where present
-          self.checkDatesAndOT(row, response.data);
+          //warning this func modifies response.data
+          var _checkDatesAndOT = (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.checkDatesAndOT)(row, response.data),
+            count = _checkDatesAndOT.count,
+            modaldata = _checkDatesAndOT.modaldata;
+          row.count = count;
 
           //vue does not update time if we change date as it does not watch for array changes
           //https://v2.vuejs.org/v2/guide/reactivity#Change-Detection-Caveats
           Vue.set(_this.form.overtimes, index, row);
           if (show) {
+            _this.modaldata = modaldata;
             _this.showModal = true;
           }
         }

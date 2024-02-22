@@ -55,7 +55,7 @@ background: url("images/bg/pexels-jakub-novacek-924824.jpg") no-repeat center ce
                                value="{{ csrf_token() }}">
 
                         <div class="form-group">
-                            <label class="col-md-3 control-label">User ID</label>
+                            <label class="col-md-8 control-label">User ID</label>
 
                             <div class="col-md-12">
                                 <input type="text"
@@ -66,7 +66,7 @@ background: url("images/bg/pexels-jakub-novacek-924824.jpg") no-repeat center ce
                         </div>
 
                         <div class="form-group">
-                            <label class="col-md-3 control-label">@lang('quickadmin.qa_password')</label>
+                            <label class="col-md-8 control-label">@lang('quickadmin.qa_password')</label>
 
                             <div class="col-md-12">
                                 <input type="password"

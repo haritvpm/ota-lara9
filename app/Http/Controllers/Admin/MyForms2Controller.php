@@ -1038,7 +1038,7 @@ class MyForms2Controller extends Controller
 
         //$overtimes = \App\Overtime::where('form_id', $id)->get();
 
-        $form = Form::with(['created_by','owned_by', 'overtimes'])->findOrFail($id);
+        $form = Form::with(['created_by','owned_by', 'overtimes','overtimes.employee.categories','overtimes.employee.designation'])->findOrFail($id);
         $overtimes = $form->overtimes;
         $hasOnlySittings = true;
         $overtimes->transform(function($overtime) use ( $form, &$hasOnlySittings )
@@ -1048,29 +1048,35 @@ class MyForms2Controller extends Controller
                 $overtime['pen'] .=   '-' . $overtime['name'];
             }
 
-	    if($form->overtime_slot == 'Multi'){ 
-            //this is for display only
-            //make ot slots in the correct order
-            $slots = [];
-            if( str_contains($overtime->slots,'First')){
-                if( str_contains($form->day_type(),'S') ){
-                    $slots[] =  'Sitting';
-                    
-                } else {
-                    $slots[] =  'First';
-                    $hasOnlySittings = false;
-                }
-            }
-            else {
-                $hasOnlySittings = false; //something else. minimum one is ensured
-            }
+            $overtime['category'] = $overtime?->employee?->categories?->category;
+            $overtime['aadhaarid'] = $overtime?->employee?->aadhaarid;
+            $overtime['punching'] = $overtime?->employee->categories?->punching &&
+                                    $overtime?->employee->designation->punching && $overtime?->employee->punching;
+            $overtime['normal_office_hours'] = $overtime?->employee?->designation?->normal_office_hours;
 
-            if( str_contains($overtime->slots,'Second')) $slots[] = 'Second';
-            if( str_contains($overtime->slots,'Third')) $slots[] = 'Third';
-            if( str_contains($overtime->slots,'Additional')) $slots[] = 'Addl';
-    
-            $overtime['slots'] = implode(', ',$slots);
-	    }
+	        if($form->overtime_slot == 'Multi'){ 
+                //this is for display only
+                //make ot slots in the correct order
+                $slots = [];
+                if( str_contains($overtime->slots,'First')){
+                    if( str_contains($form->day_type(),'S') ){
+                        $slots[] =  'Sitting';
+                        
+                    } else {
+                        $slots[] =  'First';
+                        $hasOnlySittings = false;
+                    }
+                }
+                else {
+                    $hasOnlySittings = false; //something else. minimum one is ensured
+                }
+
+                if( str_contains($overtime->slots,'Second')) $slots[] = 'Second';
+                if( str_contains($overtime->slots,'Third')) $slots[] = 'Third';
+                if( str_contains($overtime->slots,'Additional')) $slots[] = 'Addl';
+        
+                $overtime['slots'] = implode(', ',$slots);
+	        }
             return $overtime;
         });
 
@@ -1193,7 +1199,7 @@ class MyForms2Controller extends Controller
             'klasession_for_JS' => $klasession_for_JS,
             'dataentry_allowed' => $session->dataentry_allowed != 'No',
             'needsposting' => $needsposting,
-
+            'session' => $session->name,
         ]);
 
         $prev=null;

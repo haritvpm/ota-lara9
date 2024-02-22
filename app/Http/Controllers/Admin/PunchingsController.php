@@ -24,6 +24,7 @@ class PunchingsController extends Controller
     //the args are set in route file web.php
     public function ajaxgetpunchsittings($session, $datefrom, $dateto, $pen, $aadhaarid)
     {
+        Log::info($datefrom);
 
     $dateformatwithoutime = '!'.config('app.date_format'); //! to set time to zero
     $datefrom = Carbon::createFromFormat($dateformatwithoutime, $datefrom)->format('Y-m-d');

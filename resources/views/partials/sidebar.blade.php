@@ -403,7 +403,9 @@
             <li class="nav-item">
             <a  class="nav-link href="#logout" onclick="$('#logout').submit();">
                     <i class="fas fa-fw  fa-arrow-left nav-icon"></i>
-                    <span class="title">@lang('quickadmin.qa_logout')</span>
+                    <p>
+                    @lang('quickadmin.qa_logout')
+                    </p> 
                 </a>
                 </li>
            

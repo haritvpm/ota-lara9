@@ -7,10 +7,10 @@
 	<template v-slot:body>
 
 	<div class="">
-	<table class="table table-sm w-auto text-xsmall" style="font-weight:normal">
+	<table class="table table-sm " style="font-size: 10px;font-weight:normal">
 		<thead>
 			<tr>
-			<th scope="col">#</th>
+			<th scope="col"></th>
 			<th scope="col">Date</th>
 			<th scope="col">Punchin</th>
 			<th scope="col">Punchout</th>
