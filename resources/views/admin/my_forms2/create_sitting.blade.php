@@ -31,7 +31,8 @@
             <a href="{{route('admin.my_forms2.index')}}" class="btn btn-default">Cancel</a>
             <button class="btn btn-primary" @click.prevent="create" :disabled="isProcessing"><i class="fa fa-save"></i> Save<i  v-show="isProcessing" class="fa fa-spinner fa-spin"></i></button>
 
-            <a href="#" class="pull-right" v-show ="presets.length" @click.prevent="loadpreset" >Load Preset</a>
+            <!-- loading with desig and ot has to be implemented. -->
+            <!-- <a href="#" class="pull-right" v-show ="presets.length" @click.prevent="loadpreset" >Load Preset</a> -->
 
         </div>
 
@@ -73,22 +74,7 @@
 @section('javascript')
     @parent
 
-    <!-- <script>
-            $('.date').datepicker({
-                autoclose: true,
-                dateFormat: "{{ config('app.date_format_js') }}"
-            });
-        </script> -->
-    <!--   
-    <script>
-        var oldFormData = {
-        old: "{{ json_encode(Session::getOldInput()) }}",
-        oldname: "{{ json_encode( old('name') ) }}",
-        
-        //...
-        }
-    </script>
-    -->
+    @include('admin.my_forms2.punchingModalold')
 
     <script type="text/javascript">
 
@@ -99,13 +85,18 @@
     
     var urlajaxgetpunchsittings = "{{url('admin/punchings/ajaxgetpunchsittings')}}"
     var calenderdaysmap = {!! $data['calenderdaysmap'] !!};
+    var calenderdays2 = {!! $data['calenderdays2'] !!};
    
     Vue.component('Multiselect', VueMultiselect.default);
     // Vue.component('flat-pickr', VueFlatpickr.default);
     Vue.use(VueSweetAlert.default)
     Vue.component('date-picker', VueBootstrapDatetimePicker.default);
 
-    var calenderdays2 = {!! $data['calenderdays2'] !!};
+    // register modal component
+    Vue.component("modal", {
+        template: "#modal-template"
+      });
+
 
 
     window._form = {

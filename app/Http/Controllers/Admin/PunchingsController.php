@@ -49,29 +49,57 @@ class PunchingsController extends Controller
     }
     $sittingsWithPunchok = 0; 
     $sittingsWithNoPunching = 0; 
+    $dates = [];
     foreach ($sittingsInRange as $day) {
-
-        if( $day->punching == 'MANUALENTRY' ){
+// $date = Carbon::createFromFormat($dateformatwithoutime, $day->date)->format('Y-m-d');
+        if( $day->punching == 'NOPUNCHING' ){
             $sittingsWithNoPunching++; 
+            $dates[] = [
+                'date' =>  $day->date, 
+                'ot'   => "*",//'Punching excused for all. Use DutyForm to enter for the day',
+                'punchin' => "N/A",
+                'punchout' => "N/A",
+            ];
             continue;
         }
+        Log::info($pen);
 
         $date = Carbon::createFromFormat($dateformatwithoutime, $day->date)->format('Y-m-d');
+        Log::info($date);
+
         $query =  Punching::where('date',$date);
-        $query->when( $pen != '' && strlen($pen) >= 5, function ($q)  use ($pen) {
+        $query->when( $pen  && strlen($pen) >= 5, function ($q)  use ($pen) {
             return $q->where('pen',$pen);
         });
-        $query->when( strlen($aadhaarid) >= 8, function ($q)  use ($aadhaarid){
+        $query->when( $aadhaarid   && strlen($aadhaarid) >= 8, function ($q)  use ($aadhaarid){
             return $q->where('aadhaarid',$aadhaarid);
         });
         
-               // ->wherenotnull('punch_in') //prevent if only one column is available
-               //  ->wherenotnull('punch_out') 
+        //->wherenotnull('punch_in') //prevent if only one column is available
+        //->wherenotnull('punch_out') 
+
         $temp = $query->first(); 
        
-        $sittingsWithPunchok++; 
+        if($temp ){
 
-      
+            //check punching times
+
+
+            $sittingsWithPunchok++; 
+            $dates[] = [
+                'date' =>  $day->date, 
+           //     'OT'   => 'yes',
+                'punchin' => $temp['punch_in'],
+                'punchout' => $temp['punch_out'],
+            ];
+        } else{
+            $dates[] = [
+                'date' =>  $day->date, 
+                'ot'   => 'no',
+                'punchin' => "",
+                'punchout' => "",
+            ];
+        }
     }
     
     
@@ -81,8 +109,9 @@ class PunchingsController extends Controller
    
     return [
             'sittingsWithPunchok' => $sittingsWithPunchok,
-            'sittingsWithNoPunching' => $sittingsWithNoPunching,
+          //  'sittingsWithNoPunching' => $sittingsWithNoPunching,
             'sittingsInRange' => $sittingsInRange->count(),
+            'dates' =>  $dates,
            ];
   
         

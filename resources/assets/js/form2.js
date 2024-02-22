@@ -1,4 +1,5 @@
 "use strict";
+import { timePeriodIncludesPeriod, stringTimeToDate, setEmployeeTypes } from './utils.js';
 
 const dateofdutyprefix = "Date of Duty";
 
@@ -93,12 +94,18 @@ var vm = new Vue({
 
 			if (this.form.duty_date.length == 0)
 			  return '';
+			//allow users to enter sitting with other OT if the NIC server was down for that day
+			//the normal sitting form shows only punched days
+			//we can in the future add an option for users to check days they were present in sitting form
+			//for now, this is a workaround
+
+			let isNoPunchingDay = this.form.duty_date && calenderdaypunching[this.form.duty_date] === 'NOPUNCHING'
 	  
 			if (!ispartimefulltime) {
 			  switch (calenderdaysmap[this.form.duty_date]) {
 	  
 				case 'Sitting day':
-				  return ['Second', 'Third'];
+				  return isNoPunchingDay ? ['First', 'Second', 'Third'] : ['Second', 'Third'];
 	  
 				case 'Prior holiday':
 				case 'Holiday':
@@ -112,7 +119,7 @@ var vm = new Vue({
 			  switch (calenderdaysmap[this.form.duty_date]) {
 	  
 				case 'Sitting day':
-				  return ['Second'];
+				  return isNoPunchingDay ? ['First', 'Second'] : ['Second'];
 	  
 				default:
 				  return ['First', 'Second'];
@@ -315,12 +322,7 @@ var vm = new Vue({
 		limitText(count) {
 			return `and ${count} other `;
 		},
-		setEmployeeTypes(row) {
-			row.isPartime = row.designation.toLowerCase().indexOf("part time") != -1;
-			row.isFulltime = row.category.toLowerCase().indexOf("fulltime") != -1;
-			row.isWatchnward = row.category.toLowerCase().indexOf("watch") != -1;
-		},
-
+	
 		//here, id is the ref property of multiselect which we have set as the index.
 		changeSelect(selectedOption, id) {
 		//	console.log(this.form.overtimes)
@@ -342,7 +344,7 @@ var vm = new Vue({
 					//if you add any new prop here, check to update in EmployeesController:ajaxfind,
 					//MyFormsController:preparevariablesandGotoView in two locations for edit and copytonewform since we need these variables when we try to edit this
 					//and also in loadpresetdata in this file itself
-					this.setEmployeeTypes(row);
+					setEmployeeTypes(row);
 				//	console.log(row);
 					if (0 == id) {
 						//const { def_time_start, def_time_end } = this.getDefaultTimes(this.form.overtime_slot, row);
@@ -372,7 +374,6 @@ var vm = new Vue({
 			if(row.pen == "" || !self.form.duty_date) return;
 			//set punchtime if not set and available
 			//reset for example if user selects another person after selecting a person with punchtime
-			// self.form.overtimes[id].allowpunch_edit=true;
 			 row.punchin = "";
 			 row.punchout = "";
 			 row.punching_id = null;
@@ -381,7 +382,6 @@ var vm = new Vue({
 				axios
 					.get(urlajaxgetpunchtimes + "/" + self.form.duty_date + "/" +  row.pen + "/" +  row.aadhaarid)
 					.then((response) => {
-						//console.log("got punch data");
 						//console.log(response);
 						if (response.data && response.data.hasOwnProperty("punchin") && response.data.hasOwnProperty("punchout")) {
 							//console.log("set punch data");
@@ -389,14 +389,14 @@ var vm = new Vue({
 							 row.punchout = response.data.punchout;
 							 row.aadhaarid = response.data.aadhaarid;
 							 row.punching_id = response.data.id;
-																			
-
 							 //vue does not update time if we change date as it does not watch for array changes
 							 //https://v2.vuejs.org/v2/guide/reactivity#Change-Detection-Caveats
 							 Vue.set(this.form.overtimes,index, row)
 						}
 					})
-					.catch((err) => {});
+					.catch((err) => {
+						Vue.set(this.form.overtimes,index, row)
+					});
 			}
 
 			
@@ -417,14 +417,10 @@ var vm = new Vue({
 			return true;
 		},
 
-		stringTimeToDate(sTimeWithSemicolonSeperator) {
-			var time = sTimeWithSemicolonSeperator.split(":").map(Number);
-			//warning: months in JS starts from 0
-			return Date.UTC(2000, 1, 1, time[0], time[1]);
-		},
+	
 		strTimesToDatesNormalized( from, to ){
-			const datefrom = this.stringTimeToDate(from);
-			let dateto = this.stringTimeToDate(to);
+			const datefrom = stringTimeToDate(from);
+			let dateto = stringTimeToDate(to);
 
 			//time after 12 am ?
 			if (dateto <= datefrom) {
@@ -447,16 +443,7 @@ var vm = new Vue({
 		},
 
 		checkSittingDayTimeIsAsPerGO(row, i) {
-			//we need to give some leeway. so commenting
-			const timePeriodIncludesPeriod = (from, to, fromReq, toReq) => {
-				var datefrom = this.stringTimeToDate(from)
-				var dateto = this.stringTimeToDate(to) 	
-				var time800am = this.stringTimeToDate(fromReq) 	// a flexy time of 5 mins eitherway
-				var time530pm = this.stringTimeToDate(toReq)
-				return time800am >= datefrom && time530pm <= dateto;
-				
-			}
-
+		
       		if (row.isPartime) {
 				//parttime emp
         
@@ -509,16 +496,16 @@ var vm = new Vue({
 
 		checkIf2ndOTOverlapsWithOfficeHours(datefrom, dateto, sNormalStart, sNormalEnd) {
 			
-			var time800am = this.stringTimeToDate(sNormalStart)
-			var time530pm = this.stringTimeToDate(sNormalEnd)
+			var time800am = stringTimeToDate(sNormalStart)
+			var time530pm = stringTimeToDate(sNormalEnd)
 
-			var isoverlap = (time800am < dateto && time530pm > datefrom) || time800am == datefrom || time530pm == dateto;
+			var isoverlap = (time800am < dateto && time530pm > datefrom) /*|| time800am == datefrom || time530pm == dateto*/;
 
 			if (isoverlap) {
-				return false;
+				return true;
 			}
 
-			return true;
+			return false;
 		},
 		getDayTypes() {
 
@@ -606,7 +593,7 @@ var vm = new Vue({
 			for (var i = 0; i < self.form.overtimes.length; i++) {
 				var row = self.form.overtimes[i];
 				//console.log(row);
-				this.setEmployeeTypes(row);
+				setEmployeeTypes(row);
 				if (row.punching) {
 					row.punchin = validateHhMm(row.punchin.trim());
 					row.punchout = validateHhMm(row.punchout.trim());
@@ -696,7 +683,7 @@ var vm = new Vue({
 							}
 							//if this slot does not contain sitting ot on a sitting day and first ot on a working day show error
 							if (
-								!this.checkIf2ndOTOverlapsWithOfficeHours(datefrom, dateto, sNormalStartWithGrace, sNormalEndWithGrace)) {
+								this.checkIf2ndOTOverlapsWithOfficeHours(datefrom, dateto, sNormalStartWithGrace, sNormalEndWithGrace)) {
 								this.myerrors.push(`Row ${i + 1} : 2nd/3rd OT cannot be between ${sNormalStart} and ${sNormalEnd} am on a ${daytypedesc}`);
 								return false;
 							} 
@@ -707,6 +694,20 @@ var vm = new Vue({
 						//this.myerrors.push(`Row ${i + 1} :Time left for another OT. If number of OT is correct, adjust from/to times accordingly`);
 						//return false;
 					}
+				} else if(row.isPartime && isSittingDay){
+						//if there is second, third, but no first
+						if ( !this.hasFirst(row.slots) &&  row.slots.length) {
+							let sNormalStart = "06:00";
+							let sNormalEnd = "11:30";
+							//if this slot does not contain sitting ot on a sitting day 
+							if (
+								this.checkIf2ndOTOverlapsWithOfficeHours(datefrom, dateto, sNormalStart, sNormalEnd)) {
+								this.myerrors.push(`Row ${i + 1} : 2nd OT cannot be between ${sNormalStart} and ${sNormalEnd} am on a ${daytypedesc}`);
+								return false;
+							} 
+						}
+					
+
 				}
 			}
 

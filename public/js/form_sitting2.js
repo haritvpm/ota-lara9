@@ -1,13 +1,116 @@
 /******/ (() => { // webpackBootstrap
+/******/ 	"use strict";
+/******/ 	var __webpack_modules__ = ({
+
+/***/ "./resources/assets/js/utils.js":
+/*!**************************************!*\
+  !*** ./resources/assets/js/utils.js ***!
+  \**************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "setEmployeeTypes": () => (/* binding */ setEmployeeTypes),
+/* harmony export */   "stringTimeToDate": () => (/* binding */ stringTimeToDate),
+/* harmony export */   "timePeriodIncludesPeriod": () => (/* binding */ timePeriodIncludesPeriod)
+/* harmony export */ });
+function setEmployeeTypes(row) {
+  if (!row.hasOwnProperty("designation") || !row.hasOwnProperty("category") || !row.hasOwnProperty("normal_office_hours")) {
+    console.error("setEmployeeTypes - not all Property set");
+  }
+  console.log("setEmployeeTypes");
+  row.isPartime = row.designation.toLowerCase().indexOf("part time") != -1 || row.category.toLowerCase().indexOf("PartTime") != -1 || row.designation.toLowerCase().indexOf("parttime") != -1 || row.normal_office_hours == 3; //ugly
+  row.isFulltime = row.category.toLowerCase().indexOf("fulltime") != -1 || row.normal_office_hours == 6;
+  row.isWatchnward = row.category.toLowerCase().indexOf("watch") != -1;
+}
+function stringTimeToDate(sTimeWithSemicolonSeperator) {
+  var time = sTimeWithSemicolonSeperator.split(":").map(Number);
+  //warning: months in JS starts from 0
+  return Date.UTC(2000, 1, 1, time[0], time[1]);
+}
+;
+function timePeriodIncludesPeriod(from, to, fromReq, toReq) {
+  var datefrom = stringTimeToDate(from);
+  var dateto = stringTimeToDate(to);
+  var time800am = stringTimeToDate(fromReq);
+  var time530pm = stringTimeToDate(toReq);
+  return time800am >= datefrom && time530pm <= dateto;
+}
+
+/***/ })
+
+/******/ 	});
+/************************************************************************/
+/******/ 	// The module cache
+/******/ 	var __webpack_module_cache__ = {};
+/******/ 	
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/ 		// Check if module is in cache
+/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 		if (cachedModule !== undefined) {
+/******/ 			return cachedModule.exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = __webpack_module_cache__[moduleId] = {
+/******/ 			// no module.id needed
+/******/ 			// no module.loaded needed
+/******/ 			exports: {}
+/******/ 		};
+/******/ 	
+/******/ 		// Execute the module function
+/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
+/******/ 	
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/ 	
+/************************************************************************/
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__webpack_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__webpack_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/************************************************************************/
 var __webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
+(() => {
 /*!**********************************************!*\
   !*** ./resources/assets/js/form_sitting2.js ***!
   \**********************************************/
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _utils_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./utils.js */ "./resources/assets/js/utils.js");
+
+
 var _methods;
 function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return _typeof(key) === "symbol" ? key : String(key); }
 function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (_typeof(res) !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
+
 var vm = new Vue({
   el: '#app',
   data: {
@@ -19,7 +122,11 @@ var vm = new Vue({
     pen_names: [],
     pen_names_to_desig: [],
     presets: presets,
-    calenderdays2: calenderdays2
+    calenderdays2: calenderdays2,
+    showModal: false,
+    modaldata: [],
+    modaldata_totalOT: 0,
+    modaldata_empl: ""
   },
   created: function created() {
     Vue.set(this.$data, 'form', _form);
@@ -87,7 +194,7 @@ var vm = new Vue({
       }
 
       //var prevrow = self.form.overtimes.length > 0 ? self.form.overtimes[self.form.overtimes.length - 1] : null;
-
+      //do the changes in preset loading too
       self.form.overtimes.push({
         pen: "",
         designation: "",
@@ -96,8 +203,10 @@ var vm = new Vue({
         count: "",
         worknature: "",
         slots: [],
-        punching: true
+        aadhaarid: null,
+        punching: true //by default everyone ha punching
       });
+
       this.pen_names = []; //clear previos selection from dropdown
       this.pen_names_to_desig = [];
       this.$nextTick(function () {
@@ -109,6 +218,7 @@ var vm = new Vue({
         //this.myerrors = [];
         this.form.overtimes.splice(index, 1);
         this.myerrors = [];
+        this.errors = {};
       }
     },
     limitText: function limitText(count) {
@@ -135,8 +245,49 @@ var vm = new Vue({
         });
       }
     },
+    checkDatesAndOT: function checkDatesAndOT(row, data) {
+      //we need to give some leeway. so commenting
+      var count = 0;
+      for (var i = 0; i < data.dates.length; i++) {
+        // console.log(data.dates[i])
+        var punchin = data.dates[i].punchin;
+        var punchout = data.dates[i].punchout;
+        if ("N/A" == punchin) {
+          //no punching day. NIC server down
+          data.dates[i].ot = '*';
+          continue;
+        }
+        data.dates[i].ot = 'NO';
+        if (row.isPartime) {
+          if ((0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(punchin, punchout, "06:05", "11:25")) {
+            data.dates[i].ot = 'YES';
+            count++;
+          }
+        } else if (row.isFulltime) {
+          if ((0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(punchin, punchout, "06:05", "16:25")) {
+            count++;
+            data.dates[i].ot = 'YES';
+          }
+        } else if (row.isWatchnward) {
+          //no punching
+        } //all other employees for sitting days
+        else {
+          if ((0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(punchin, punchout, "08:05", "17:25")) {
+            count++;
+            data.dates[i].ot = 'YES';
+          }
+        }
+      }
+      row.count = count;
+      this.modaldata = data.dates;
+      this.modaldata_totalOT = count;
+    },
+    showSittingOTs: function showSittingOTs(index) {
+      this.getSittingOTs(index, true);
+    },
     getSittingOTs: function getSittingOTs(index) {
       var _this = this;
+      var show = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
       var self = this;
       var row = self.form.overtimes[index];
       if (row.pen == "" || !self.form.session || !row.from || !row.to) {
@@ -144,31 +295,26 @@ var vm = new Vue({
         return;
       }
       ;
-      //set punchtime if not set and available
-      //reset for example if user selects another person after selecting a person with punchtime
-      // self.form.overtimes[id].allowpunch_edit=true;
       row.count = 0;
-      // row.punchout = "";
-      // row.punching_id = null;
+      self.modaldata = [];
+      self.modaldata_totalOT = 0;
+      self.modaldata_empl = row.pen;
+      axios.get("".concat(urlajaxgetpunchsittings, "/").concat(self.form.session, "/").concat(row.from, "/").concat(row.to, "/").concat(row.pen, "/").concat(row.aadhaarid)).then(function (response) {
+        console.log(response);
+        if (response.data) {
+          //todo ask if unpresent dates where present
+          self.checkDatesAndOT(row, response.data);
 
-      if (row.punching) {
-        axios.get("".concat(urlajaxgetpunchsittings, "/").concat(self.form.session, "/").concat(row.from, "/").concat(row.to, "/").concat(row.pen, "/").concat(row.aadhaarid)).then(function (response) {
-          //console.log("got punch data");
-          console.log(response);
-          if (response.data) {
-            //todo ask if unpresent dates where present
-            //console.log("set punch data");
-            row.count = response.data.sittingsWithPunchok;
-            ;
-            // row.punchout = response.data.punchout;
-            // row.aadhaarid = response.data.aadhaarid;
-            //row.punching_id = response.data.id;
-            //vue does not update time if we change date as it does not watch for array changes
-            //https://v2.vuejs.org/v2/guide/reactivity#Change-Detection-Caveats
-            Vue.set(_this.form.overtimes, index, row);
+          //vue does not update time if we change date as it does not watch for array changes
+          //https://v2.vuejs.org/v2/guide/reactivity#Change-Detection-Caveats
+          Vue.set(_this.form.overtimes, index, row);
+          if (show) {
+            _this.showModal = true;
           }
-        })["catch"](function (err) {});
-      }
+        }
+      })["catch"](function (err) {
+        Vue.set(_this.form.overtimes, index, row);
+      });
     },
     clearAll: function clearAll() {
       this.pen_names = [];
@@ -176,26 +322,28 @@ var vm = new Vue({
     }
   }, _defineProperty(_methods, "limitText", function limitText(count) {
     return "and ".concat(count, " other countries");
-  }), _defineProperty(_methods, "changeSelect", function changeSelect(selectedOption) {
+  }), _defineProperty(_methods, "changeSelect", function changeSelect(selectedOption, id) {
     this.myerrors = [];
     var self = this;
+    var desig = self.pen_names_to_desig[selectedOption];
     self.$nextTick(function () {
-      //for(var i=0; i < self.form.overtimes.length; i++)
-      for (var i = self.form.overtimes.length - 1; i >= 0; i--) {
-        if (self.form.overtimes[i].pen == selectedOption) {
-          var desig = self.pen_names_to_desig[selectedOption];
-          //added no change if a desig already exists
-          //to prevent an issue where designation is changeed was wrong
-          //try with vince - vincent prasad and dr vincent
-          if (desig !== undefined
-          /*&& self.form.overtimes[i].designation == null*/) {
-            self.form.overtimes[i].designation = desig;
+      var row = self.form.overtimes[id];
+      row.category = "";
+      row.normal_office_hours = 0;
+      row.employee_id = null;
 
-            //self.$forceUpdate()
-          }
-
-          break;
-        }
+      //added no change if a desig already exists
+      //to prevent an issue where designation is changeed was wrong
+      //try with vince - vincent prasad and dr vincent
+      if (desig !== undefined) {
+        row.designation = desig.desig;
+        row.aadhaarid = desig.aadhaarid;
+        row.punching = desig.punching;
+        row.normal_office_hours = desig.desig_normal_office_hours;
+        row.category = desig.category;
+        row.employee_id = desig.employee_id;
+        (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.setEmployeeTypes)(row);
+        self.getSittingOTs(id);
       }
     });
   }), _defineProperty(_methods, "checkDuplicates", function checkDuplicates() {
@@ -361,64 +509,9 @@ var vm = new Vue({
       // Vue.set(self.$data, 'errors', response.data);
       self.errors = response.data;
     });
-  }), _defineProperty(_methods, "loadpreset", function loadpreset() {
-    var self = this;
-    if (presets.length == 0) {
-      self.$swal('Sorry, no presets to load.');
-      return;
-    }
-    self.$swal({
-      text: 'Load Preset',
-      input: 'select',
-      inputOptions: presets,
-      inputPlaceholder: 'Select preset',
-      showCancelButton: true,
-      useRejections: false,
-      inputValidator: function inputValidator(value) {
-        return new Promise(function (resolve, reject) {
-          if (value) {
-            resolve();
-          } else {
-            reject('You need to select something)');
-          }
-        });
-      },
-      showLoaderOnConfirm: true,
-      preConfirm: function preConfirm(index) {
-        return new Promise(function (resolve, reject) {
-          axios.get(urlajaxpresets + '/' + presets[index]).then(function (response) {
-            var obj = response.data;
-            for (var key in obj) {
-              if (obj.hasOwnProperty(key)) {
-                //we can either clear items or we check for duplicates
-                var entryfound = false;
-                for (var i = 0; i < self.form.overtimes.length; i++) {
-                  var pen_name = self.form.overtimes[i].pen;
-                  if (pen_name == key) {
-                    entryfound = true;
-                    break;
-                  }
-                }
-                if (!entryfound) {
-                  self.form.overtimes.push({
-                    pen: key,
-                    designation: obj[key],
-                    from: self.form.date_from,
-                    to: self.form.date_to,
-                    count: "",
-                    worknature: ""
-                  });
-                }
-              }
-            }
-            resolve();
-          })["catch"](function (error) {
-            reject(error.response.data);
-          });
-        });
-      }
-    }).then(function (result) {}); //success 
   }), _methods)
 });
+})();
+
 /******/ })()
 ;

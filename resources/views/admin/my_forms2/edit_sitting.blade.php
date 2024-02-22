@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
     <style>
-        [v-cloak] { display:none; }
+         [v-cloak] { display:none;  opacity: 0.1;}
     </style>
 
 @section('content')
@@ -83,22 +83,8 @@
 @section('javascript')
     @parent
 
-    <!-- <script>
-            $('.date').datepicker({
-                autoclose: true,
-                dateFormat: "{{ config('app.date_format_js') }}"
-            });
-        </script> -->
-    <!--   
-    <script>
-        var oldFormData = {
-        old: "{{ json_encode(Session::getOldInput()) }}",
-        oldname: "{{ json_encode( old('name') ) }}",
-        
-        //...
-        }
-    </script>
-    -->
+    @include('admin.my_forms2.punchingModalold')
+
 
     <script type="text/javascript">
 
@@ -114,7 +100,10 @@
     Vue.component('date-picker', VueBootstrapDatetimePicker.default);
     Vue.use(VueSweetAlert.default)
     var calenderdays2 = {!! $data['calenderdays2'] !!};
-    
+     // register modal component
+     Vue.component("modal", {
+        template: "#modal-template"
+      });
   
 
     window._form = {!! $form->toJson() !!};

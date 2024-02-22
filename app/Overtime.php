@@ -22,7 +22,8 @@ class Overtime extends Model
     
     'punching', //whether punching is applicable to this employee
     'punchin', 'punchout', 'punching_id', 'employee_id','slots',
-    'normal_office_hours' //this is not saved. just for backend validation
+    'normal_office_hours', //this is not saved. just for backend validation
+    'aadhaarid'//this is not saved. just for backend validation
 ];
     
 

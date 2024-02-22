@@ -1,7 +1,45 @@
 
 
+<!-- use the modal component, pass in the prop -->
+<modal v-if="showModal" @close="showModal = false">
+ 	<h5 slot="header" class="modal-title" >SittingDay OT - @{{modaldata_empl}} </h5>
+	 
+	<template v-slot:body>
+
+	<div class="">
+	<table class="table table-sm w-auto text-xsmall" style="font-weight:normal">
+		<thead>
+			<tr>
+			<th scope="col">#</th>
+			<th scope="col">Date</th>
+			<th scope="col">Punchin</th>
+			<th scope="col">Punchout</th>
+			<th scope="col">OT</th>
+			</tr>
+		</thead>
+		<tbody>
+		<tr v-for="(item, index) in modaldata" :key="item.date">
+			<td>@{{ index+1}}</td>
+			<td>@{{ item.date }}</td>
+			<td>@{{ item.punchin }}</td>
+			<td>@{{ item.punchout }}</td>
+			<td>@{{ item.ot }}</td>
+		</tr>
+		
+		</tbody>
+	</table>
+	</div>
+  	</template>
+
+	<div slot="footer" class="modal-footer" >Total OT: @{{modaldata_totalOT}} </div>
+
+</modal>
+
+
 <div class="row" v-cloak >
-	
+
+
+
 	<div class="col-md-4 form-group">           
 			<label for="session">Session </label> 
 			<select {{$readonly}} tabindex="0" class ="form-control" name="session" v-model= "form.session" required v-on:change="sessionchanged">
@@ -70,7 +108,7 @@
 					<td class="text-center align-middle" style="width:1px;"> <small><span v-text="index+1"></span></small></td>
 
 					<td class="col-sm-3"> 
-					<multiselect :name="'name[' + index + ']'"  :ref="'field-'+index"  v-model= "row.pen" 
+					<multiselect :name="'name[' + index + ']'" :id=index  :ref="'field-'+index"  v-model= "row.pen" 
 					placeholder= "Type to search" 
 					:options="pen_names" 
 					:tabindex="1" 
@@ -86,13 +124,13 @@
 					<span slot="noResult"></span>
 					</multiselect></td>
 
-					<td class="col-sm-3" >
+					<td class="col-sm-2" >
 			
-					<input class="form-control" style="font-size: 12px;" :value="row.designation.desig" readonly >
+					<input class="form-control" style="font-size: 12px;" :value="row.designation" readonly >
 					</td>
 
 					
-					<td class="col-sm-3">
+					<td class="col-sm-4">
 					<div class="input-group" >
 					<date-picker v-model="row.from" :config="configdate"
 						:required="true"
@@ -112,9 +150,11 @@
 					<td  class="col-sm-2" > 
 					
 					<div class="input-group">
-						<input  type="number"  :name="'count[' + index + ']'" class="form-control"  min=1 oninput="validity.valid||(value='');" v-model="row.count" :readonly = "row.punching" >
+						<input  type="number"  :name="'count[' + index + ']'" class="form-control"  min=1 oninput="validity.valid||(value='');" v-model="row.count" >
 						<div class="input-group-append">
-						<button :disabled='!row.from || !row.to' class="btn btn-sm btn-primary" @click.prevent="getSittingOTs(index);"><i class="fa fa-refresh"></i></button>
+
+						<button v-if="row.punching && row.pen" :disabled='!row.from || !row.to' class="btn btn-sm btn-primary" id="show-modal" @click.prevent="showSittingOTs(index);"><i class="fa fa-eye"></i> </button>
+
 						</div>
 					</div>
 							

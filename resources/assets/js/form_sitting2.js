@@ -1,4 +1,7 @@
 
+"use strict";
+import { timePeriodIncludesPeriod, setEmployeeTypes } from './utils.js';
+
 
 var vm = new Vue({
 
@@ -15,6 +18,10 @@ var vm = new Vue({
     pen_names_to_desig: [],
     presets: presets,
     calenderdays2: calenderdays2,
+    showModal: false,
+    modaldata: [],
+    modaldata_totalOT: 0,
+    modaldata_empl:"",
   },
 
   created: function () {
@@ -102,7 +109,7 @@ var vm = new Vue({
       }
 
       //var prevrow = self.form.overtimes.length > 0 ? self.form.overtimes[self.form.overtimes.length - 1] : null;
-
+    //do the changes in preset loading too
       self.form.overtimes.push({
         pen: "",
         designation: "",
@@ -111,8 +118,8 @@ var vm = new Vue({
         count: "",
         worknature: "",
         slots: [],
-        punching : true,
-
+        aadhaarid: null,
+        punching: true, //by default everyone ha punching
       });
 
       this.pen_names = []; //clear previos selection from dropdown
@@ -126,11 +133,13 @@ var vm = new Vue({
     },
 
     removeElement: function (index) {
+
       if (this.form.overtimes[index].pen == '' ||
         confirm("Remove this row?")) {
         //this.myerrors = [];
         this.form.overtimes.splice(index, 1);
         this.myerrors = [];
+        this.errors = {};
       }
     },
 
@@ -158,6 +167,7 @@ var vm = new Vue({
           self.pen_names = response.data.pen_names;
           self.pen_names_to_desig = response.data.pen_names_to_desig;
           //this.isLoading = false
+         
 
         })
           .catch(response => {
@@ -167,7 +177,57 @@ var vm = new Vue({
       }
 
     },
-    getSittingOTs: function (index) {
+    checkDatesAndOT: function(row, data){
+        //we need to give some leeway. so commenting
+      let count = 0;
+
+    
+
+      for (let i = 0; i < data.dates.length; i++) {
+        // console.log(data.dates[i])
+        const punchin = data.dates[i].punchin;
+        const punchout = data.dates[i].punchout;
+
+        if( "N/A" == punchin ){ //no punching day. NIC server down
+          data.dates[i].ot = '*'
+          continue;
+        }
+
+        data.dates[i].ot = 'NO'
+
+        if (row.isPartime) {
+          if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "11:25")) {
+            data.dates[i].ot = 'YES'
+            count++;
+          }
+        }
+        else if (row.isFulltime) {
+           if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "16:25")) { 
+              count++;
+              data.dates[i].ot = 'YES'
+            }
+        }    
+        else if (row.isWatchnward) {
+          //no punching
+        } //all other employees for sitting days
+        else {
+            if (timePeriodIncludesPeriod(punchin, punchout, "08:05", "17:25")) {
+              count++;
+              data.dates[i].ot = 'YES'
+            }
+        }
+      
+      }
+     row.count =  count
+     this.modaldata = data.dates
+     this.modaldata_totalOT = count
+    },
+    showSittingOTs: function(index){
+
+      this.getSittingOTs(index,true)
+      
+    },
+    getSittingOTs: function (index, show=false) {
    
       var self = this;
 			let row = self.form.overtimes[index];
@@ -177,34 +237,33 @@ var vm = new Vue({
         console.log(self.form.session | row.from | row.to)  
         return
       };
-			//set punchtime if not set and available
-			//reset for example if user selects another person after selecting a person with punchtime
-			// self.form.overtimes[id].allowpunch_edit=true;
-			  row.count = 0;
-			// row.punchout = "";
-			// row.punching_id = null;
-			
-			if ( row.punching ) {
-				axios
-					.get(`${urlajaxgetpunchsittings}/${self.form.session}/${row.from}/${row.to}/${row.pen}/${row.aadhaarid}`)
+
+		  row.count = 0;
+      self.modaldata = []
+      self.modaldata_totalOT = 0;
+      self.modaldata_empl = row.pen ;
+
+			axios.get(`${urlajaxgetpunchsittings}/${self.form.session}/${row.from}/${row.to}/${row.pen}/${row.aadhaarid}`)
 					.then((response) => {
-						//console.log("got punch data");
+					
 						console.log(response);
 						if (response.data) {
               //todo ask if unpresent dates where present
-							//console.log("set punch data");
-              row.count =  response.data.sittingsWithPunchok;;
-							// row.punchout = response.data.punchout;
-							// row.aadhaarid = response.data.aadhaarid;
-							 //row.punching_id = response.data.id;
+							self.checkDatesAndOT(row, response.data);
+   			
 							//vue does not update time if we change date as it does not watch for array changes
 							 //https://v2.vuejs.org/v2/guide/reactivity#Change-Detection-Caveats
 							 Vue.set(this.form.overtimes,index, row)
+
+               if(show){
+                this.showModal = true
+               }
 						}
 					})
-					.catch((err) => {});
-			}
-
+					.catch((err) => {
+            Vue.set(this.form.overtimes,index, row)
+          });
+			
     },
 
     clearAll() {
@@ -216,38 +275,35 @@ var vm = new Vue({
       return `and ${count} other countries`
     },
 
-    changeSelect(selectedOption) {
+    changeSelect(selectedOption, id) {
 
       this.myerrors = [];
       var self = this
 
-
+      let desig = self.pen_names_to_desig[selectedOption];
 
       self.$nextTick(() => {
+				let row = self.form.overtimes[id];
+				row.category = "";
+				row.normal_office_hours = 0;
+        row.employee_id = null;
 
-        //for(var i=0; i < self.form.overtimes.length; i++)
-        for (var i = self.form.overtimes.length - 1; i >= 0; i--) {
-          if (self.form.overtimes[i].pen == selectedOption) {
-            var desig = self.pen_names_to_desig[selectedOption];
-            //added no change if a desig already exists
-            //to prevent an issue where designation is changeed was wrong
-            //try with vince - vincent prasad and dr vincent
-            if (desig !== undefined
-                         /*&& self.form.overtimes[i].designation == null*/) {
-              self.form.overtimes[i].designation = desig
+        //added no change if a desig already exists
+        //to prevent an issue where designation is changeed was wrong
+        //try with vince - vincent prasad and dr vincent
+        if (desig !== undefined ) {
+          row.designation = desig.desig
+					row.aadhaarid = desig.aadhaarid;
+					row.punching = desig.punching;
+					row.normal_office_hours = desig.desig_normal_office_hours ;
+          row.category = desig.category;
+					row.employee_id = desig.employee_id;
 
-              //self.$forceUpdate()
-
-            }
-            break;
-          }
-
+          setEmployeeTypes(row);
+          self.getSittingOTs(id)
 
         }
-
       })
-
-
     },
 
     checkDuplicates() {
@@ -471,7 +527,7 @@ var vm = new Vue({
 
     },
 
-
+/*
     loadpreset: function () {
 
 
@@ -549,6 +605,7 @@ var vm = new Vue({
       }) //success 
 
     } //loadpreset
+    */
 
 
   }

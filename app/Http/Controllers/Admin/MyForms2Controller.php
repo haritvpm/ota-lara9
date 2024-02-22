@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Form;
 use App\Overtime;
 use App\Calender;
+use App\Punching;
+use App\Employee;
 use Illuminate\Http\Request;
 use Exception;
 
@@ -16,6 +18,7 @@ use JavaScript;
 use Carbon\Carbon;
 use Auth;
 use PDF;
+use Illuminate\Support\Facades\Log;
 
 
 class MyForms2Controller extends Controller
@@ -451,6 +454,7 @@ class MyForms2Controller extends Controller
                     'category' =>  $item?->employee?->categories?->category,
                     'employee_id' => $item?->employee?->id,
                     'punching'   => ($item?->employee?->categories?->punching ?? true) && ($item?->employee?->designation?->punching ?? true),
+                    'aadhaarid' => $item?->employee?->aadhaarid,
                     'normal_office_hours' =>   $item?->employee?->designation?->normal_office_hours,
                     'slots' =>  explode(';',  $item->slots) ,
                 ]
@@ -487,7 +491,11 @@ class MyForms2Controller extends Controller
                     }
                     $item['category'] = $item?->employee?->categories?->category;
                     $item['normal_office_hours'] = $item?->employee?->designation?->normal_office_hours;
+                    $item['aadhaarid'] = $item?->employee?->aadhaarid;
+                    $item['punching'] = $item?->employee->categories?->punching &&
+                                        $item?->employee->designation->punching && $item?->employee->punching;
                     $item['slots'] =  explode(';',  $item->slots);
+                    
                     return $item;
                                     
                 });
@@ -503,20 +511,23 @@ class MyForms2Controller extends Controller
        else{ //sitting forms
             if($id)
             {
-                $form = Form::with(['created_by','overtimes'])->findOrFail($id);
+                $form = Form::with(['created_by','overtimes','overtimes.employee.categories','overtimes.employee.designation'])->findOrFail($id);
 
                 $form->overtimes->transform(function ($item) {
                     if($item['name'] != null){
                         $item['pen'] = $item['pen'] . '-' . $item['name'];
-                        
-
                     }
+                    $item['category'] = $item?->employee?->categories?->category;
+                    $item['aadhaarid'] = $item?->employee?->aadhaarid;
+                    $item['punching'] =  $item?->employee->categories?->punching &&
+                                         $item?->employee->designation->punching && $item?->employee->punching;
+                    $item['normal_office_hours'] = $item?->employee?->designation?->normal_office_hours;
                     return $item;
                                    
                 });
 
                                     
-                return view('admin.my_forms.edit_sitting', compact('form', 'data','sessions', 'collapse_sidebar' ));
+                return view('admin.my_forms2.edit_sitting', compact('form', 'data','sessions', 'collapse_sidebar' ));
             }
             else
             {
@@ -664,22 +675,12 @@ class MyForms2Controller extends Controller
                return [ $timefrom,$timeto ];
             };
 
-            //time of this form
-            //$timefrom_comp = strtotime($overtime['from']);
-           // $timeto_comp = strtotime($overtime['to']);
-
-           // if($timeto_comp <= $timefrom_comp){
-           //         $timeto_comp += 24*60*60;
-           // }
+    
            [$timefrom_comp, $timeto_comp] = $strtimes_totimestamps( $overtime['from'], $overtime['to']);
 
             //check overlap with other OTS of this day for this employee
             foreach ($emp as $e) {
-                //$timefrom = strtotime($e['from']);
-                //$timeto = strtotime(  $e['to']);
-                //if($timeto <= $timefrom){
-                //    $timeto += 24*60*60;
-               // }
+          
                 [$timefrom, $timeto] = $strtimes_totimestamps($e['from'], $e['to']);
 
                 /*
@@ -1144,13 +1145,16 @@ class MyForms2Controller extends Controller
         
         $dayhaspunching = true;
 
-        
-        
-        $date = Carbon::createFromFormat(config('app.date_format'), $form->duty_date)->format('Y-m-d');
-        $calender = Calender::where('date', $date )->first();
-        $dayhaspunching =  $calender->punching !== 'NOPUNCHING';
-        $daytype = $calender->day_type;
-        $descriptionofday = $calender->description;
+        if($form->overtime_slot == 'Multi'){
+            $date = Carbon::createFromFormat(config('app.date_format'), $form->duty_date)->format('Y-m-d');
+            $calender = Calender::where('date', $date )->first();
+            $dayhaspunching =  $calender->punching !== 'NOPUNCHING';
+            $daytype = $calender->day_type;
+            $descriptionofday = $calender->description;
+        } else{
+            $dayhaspunching = false;
+        }
+      
 
         if($form->overtime_slot != 'Sittings' && $form->owner == $loggedinusername && $form->owner != 'admin'){
             $needsposting = \App\User::needsPostingOrder($form->creator); 
@@ -1242,7 +1246,63 @@ class MyForms2Controller extends Controller
         return $this->preparevariablesandGotoView(true, null);
        
     }
+    private function getPunchingDataForEmp($calenderdays_in_range, $pen, $aadhaarid)
+    {
+        $punchings = [];
+        $sittingsWithMinHoursSatisfied = 0; 
+        $sittingsWithPunchok= 0;
+        $emp = Employee::with(['designation','categories'])->where( 'pen', $pen)->first();
+        $dateformatwithoutime = '!'.config('app.date_format');
 
+        foreach ($calenderdays_in_range as $day) {
+            
+          //  Log::info($day);
+
+            if( $day->punching == 'NOPUNCHING' ){
+               // $sittingsWithNoPunching++; 
+                continue;
+            }
+   
+            $date = Carbon::createFromFormat($dateformatwithoutime, $day->date)->format('Y-m-d');
+          
+            $query =  Punching::where('date',$date);
+            $query->when( $pen  && strlen($pen) >= 5, function ($q)  use ($pen) {
+                return $q->where('pen',$pen);
+            });
+            $query->when( $aadhaarid   && strlen($aadhaarid) >= 8, function ($q)  use ($aadhaarid){
+                return $q->where('aadhaarid',$aadhaarid);
+            })
+            ->wherenotnull('punch_in') //prevent if only one column is available
+            ->wherenotnull('punch_out');
+            $temp = $query->first(); 
+           
+            if($temp ){
+                $sittingsWithPunchok++; 
+                $punchings[] = [
+                    'punchin' => $temp['punch_in'],
+                    'punchout' => $temp['punch_out'],
+                ];
+                Log::info($temp);
+
+                $minutesreq = $emp->designation->normal_office_hours*60 + 150 - 10; //leeway 10 min
+
+                $strtimes_totimestamps = function ( $from, $to )  {
+                    $timefrom = strtotime($from);   $timeto = strtotime($to);
+                    return [ $timefrom,$timeto ];
+                  };
+                
+                [$timefrom, $timeto] = $strtimes_totimestamps( $temp['punch_in'],$temp['punch_out']);
+                $othours_worked= ceil(abs($timeto - $timefrom) / 60);
+                //check if time has min hours
+                if($othours_worked >= $minutesreq){
+                   $sittingsWithMinHoursSatisfied++; 
+                }
+            } 
+        }
+
+        return [ $punchings, $sittingsWithPunchok, $sittingsWithMinHoursSatisfied ];
+
+    }
     public function createovertimes_sitting( Request $request, &$myerrors, $formid=null)
     {
        // $date = Carbon::createFromFormat(config('app.date_format'), $request['duty_date'])->format('Y-m-d');
@@ -1277,39 +1337,13 @@ class MyForms2Controller extends Controller
 
         $pens = $collection->pluck('pen');
         
-        $checksecretaryattendance = false;
-        if( \Config::get('custom.check_attendance')) {
-            $form = $formid ? Form::find($formid) : null; //if updating a form, get creator field
-            if( \App\User::needsPostingOrder( $form ? $form->creator : \Auth::user()->username) ){
-                $checksecretaryattendance = true;
-            }
-        }
+      
         
-        $pentoattendace = null;
-        $pentodays = null;
-        $attendance = null;
-
-        if($checksecretaryattendance){
-            
-            $employee_ids = \App\Employee::wherein('pen', $pens->toArray())->pluck('id');
-            
-            $attendance = \App\Attendance::with('session', 'employee')
-                                ->whereHas('session', function($query)  use ($request) { 
-                                    $query->where('name', $request['session']);})
-                                ->wherein('employee_id', $employee_ids->toArray() )
-                                ->get();
-
-            //$pensinattendance = $attendance->pluck( 'employee.pen' );
-            /*$pensnotinattendance = $pens->diff($pensinattendance);
-            if($pensnotinattendance->count())
-            {
-                array_push($myerrors,  'Attendance not found for:' . $pensnotinattendance->implode(',') );
-                return null;
-            }*/
-        }
-
-
-
+       $pentoattendace = null;
+       $pentodays = null;
+       $attendance = null;
+       $checksecretaryattendance = true;
+       
        //when we passed in a pen of 'E11956', it was shown as error, probably because it was interpreted as a number.
       //so enclose every pen in quotes.
        
@@ -1352,11 +1386,11 @@ class MyForms2Controller extends Controller
                                             $checksecretaryattendance, $attendance) 
         {
              
-             $pen = $overtime['pen'];
-             $tmp = strpos($pen, '-');
-             if(false !== $tmp){
-                $pen = substr($pen, 0, $tmp);
-             }
+            $pen = $overtime['pen'];
+            $tmp = strpos($pen, '-');
+            if(false !== $tmp){
+               $pen = substr($pen, 0, $tmp);
+            }
 
             
             $res_for_pen = $res->reject(function($element) use ($pen) {
@@ -1370,33 +1404,7 @@ class MyForms2Controller extends Controller
             // $days_already_entered = $q->all()->pluck(['from','to']);
 
             $totalwouldbe =  $totalsittingexisting + $overtime['count'];
-
-             
-            
-            if($checksecretaryattendance){
-
-
-                if( ! $attendance->contains('employee.pen', $overtime['pen'] ) ){
-                    array_push($myerrors,  $overtime['pen'] . '-' .$overtime['name'] . ' : Attendance not found.' );
-
-                }
-                else {
-                    //there can be multiple entries for a pen in attendace due to section changes during session
-                    $total_ot_asper_secretary = $attendance->where( 'employee.pen', $overtime['pen']  )->sum('total');
-                    
-                    if($totalwouldbe > $total_ot_asper_secretary)
-                    {      
-                        
-                        if($totalsittingexisting){
-                            array_push($myerrors,  $overtime['pen'] . '-' .$overtime['name'] . ' : Exceeds attendance as per O/S. Already saved ' . $totalsittingexisting . '. + this (' .$overtime['count'] .') = ' . $totalwouldbe. '. (max possible: ' . $total_ot_asper_secretary .')' );
-                        } else {
-                            array_push($myerrors,  $overtime['pen'] . '-' .$overtime['name'] . ' : Exceeds attendance as per O/S - ' .$overtime['count'] . '. (max possible: ' . $total_ot_asper_secretary .')' );
-                        }
-                                    
-                        return null;   
-                    }
-                }
-            }
+           
 
             if($totalwouldbe > $maxsittings)
             {      
@@ -1422,21 +1430,19 @@ class MyForms2Controller extends Controller
 
             //see if user has entered more days than date range
             
+            $calenderdays_in_range =  \App\Calender::with('session')
+                                    ->whereHas('session', function($query)  use ($request) { 
+                                        $query->where('name', $request['session']);
+                                    })                         
+                                    ->where('date', '>=', $start_one)
+                                    ->where('date', '<=', $end_one)
+                                    ->where('day_type','Sitting day')->get();
+
+
             $sittingsinrange =  abs($pos2-$pos1)+1;
             if($pos1 === false ||  $pos2 === false){
-              //  $sittingsinrange =  $start_one->diffInDays($end_one)+1;
-
-                //user has entered a date that is not a sitting day, manually
-
-                $sittingsinrange = \App\Calender::with('session')
-                                ->whereHas('session', function($query)  use ($request) { 
-                                    $query->where('name', $request['session']);
-                                  })                         
-                                  ->where('date', '>=', $start_one)
-                                  ->where('date', '<=', $end_one)
-                                ->where('day_type','Sitting day')->count();
-
-
+               //user has entered a date that is not a sitting day, manually
+                $sittingsinrange = $calenderdays_in_range->count();
             }
             
             if( $overtime['count'] >  $sittingsinrange ){
@@ -1445,74 +1451,7 @@ class MyForms2Controller extends Controller
               return null;
             
             }
-
-            //if the user has not entered all the sittings days within the period, make sure he enter leaves.
-
-            if( !$checksecretaryattendance && $overtime['count'] < $sittingsinrange  ){
-
-                $leaves = $sittingsinrange-$overtime['count'];
-                $allleavesentered = true;
-                $colleave = trim($overtime['worknature']);
-
-                if(false !== stripos($colleave,'SUPPL') || 
-                   \Auth::user()->username == 'sn.watchnward' || 
-                    false !== stripos(\Auth::user()->username,'oo.sec') || 
-                    false !== stripos(\Auth::user()->username,'oo.dyspkr') || 
-                    false !== stripos(\Auth::user()->username,'oo.spkr') ){ 
-                    //if supply, disregard leaves
-                    $allleavesentered = true;
-                }
-                else if( $colleave == ''){
-                    $allleavesentered = false;
-                } 
-                else {
-
-                   $coma_items = count(explode(',', $colleave));
-
-                   //$numextracted = preg_replace('/[^0-9]/', '', $colleave);
-                   $hasnums = preg_match('/\d/', $colleave) > 0;
-
-                   if( $coma_items == 1 && $leaves == 1){ //one leave and user might have entered '1'
-                        if( $colleave == '1' || //comparing to string '1', not number 1. number cast converts '1/12' to 1
-                        !$hasnums ){
-                            $allleavesentered = false;       
-                        }
-
-                        $hasdatestring = preg_match('/\d{1,2}[-\/\\.]+\d{1,2}/', $colleave) > 0;
-
-                        if(!$hasdatestring){
-                         $allleavesentered = false;          
-                        }
-                   }
-
-                   if($coma_items < $leaves){
-                     $allleavesentered = false;
-                   }
-
-                   /*
-                   //but if user has entered a range, it is ok
-                   if($hasnums && $leaves > 9){ //should have digits. 
-                    if(FALSE !== stripos($colleave, "to") ||
-                       //FALSE !== stripos($colleave, "-") || // this can occur in dates itself.
-                       FALSE !== stripos($colleave, "and") ||
-                      // FALSE !== stripos($colleave, "&") ||
-                       FALSE !== stripos($colleave, "from") ){
-                    
-                        $allleavesentered = true;
-                    }
-                   }*/ 
-
-                }
-
-                if(!$allleavesentered){
-
-                  array_push($myerrors, $overtime['pen'] . '-' .$overtime['name'] . ' : Enter the '. $leaves . ' leave/late coming date(s) (See Note below).');
-                  return null;
-                
-                }
-            }
-
-           
+       
  
             if( $start_one < $sitting_start || $end_one > $sitting_end ) 
             {
@@ -1522,8 +1461,8 @@ class MyForms2Controller extends Controller
             }
 
             
+            //check date overlap
             //if this is a supply, allow user to enter any date range. person might have incorrectly submitted the first time.
-           
             {
                 $emp = $res_for_pen->all();
                 //$emp =  $res->all();
@@ -1540,12 +1479,30 @@ class MyForms2Controller extends Controller
                     $isoverlap = ($start_one <= $end_two) && ($end_one >= $start_two);
 
                     if($isoverlap){
-                       
                         array_push($myerrors, $overtime['pen'] . '-' .$overtime['name'] . ' : Dates overlap with another OT from ' . $e['from'] . ' - ' . $e['to'] . ' for '.$e['count'] . ' day(s) (' . $e->form->creator . ' )' );
                         return null;
                     }
 
                 } //foreach
+            }
+
+            //new check punching times
+            if( $overtime['punching'] == true ) {
+                [ $punchings, $sittingsWithPunchok, $sittingsWithMinHoursSatisfied ] = $this->getPunchingDataForEmp($calenderdays_in_range, $overtime['pen'], $overtime['aadhaarid']);
+                //we need to also check time within 8 -> 5 but dont know how much luft. partime is ok
+                
+                if( $overtime['count'] > $sittingsWithPunchok ){
+
+                    array_push($myerrors, $overtime['pen'] . '-' .$overtime['name'] . ' : From ' . $overtime['from'] . ' to ' . $overtime['to'] . ' punched only for ' . $sittingsWithPunchok .' sitting days.');
+                    return null;
+                }
+                if( $overtime['count'] > $sittingsWithMinHoursSatisfied ){
+
+                    array_push($myerrors, $overtime['pen'] . '-' .$overtime['name'] . ' : From ' . $overtime['from'] . ' to ' . $overtime['to'] . ' only ' . $sittingsWithMinHoursSatisfied .' sitting days have min req hours.');
+                    return null;
+                }
+            } else{
+                Log::info("No punch for" . $overtime['name']);
             }
 
 
@@ -1560,7 +1517,9 @@ class MyForms2Controller extends Controller
                     'worknature'    => $overtime['worknature'],
                     'count'         => $overtime['count'],
                     'rate'          => $rates[$overtime['designation']],
-                    
+                    'punching'      => $overtime['punching'],
+                    'employee_id'   => $overtime['employee_id'],
+                    'slots'         => "", //not used
                     ]);
             }
 

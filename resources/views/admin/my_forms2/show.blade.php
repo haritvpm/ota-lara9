@@ -269,16 +269,16 @@ th{
                     <th>Sl.</th>
                     <th>PEN-Name</th>
                     <th>@lang('quickadmin.overtimes.fields.designation')</th>
- @if($form->overtime_slot == 'Sittings')
+                    @if($form->overtime_slot == 'Sittings')
                     <th class="text-center">Period from</th>
                     <th class="text-center">Period to</th>
                     <th class="text-center">Sitting days attended</th>
                     
-                      @if( \Config::get('custom.check_attendance')) 
+                      <!-- @if( \Config::get('custom.check_attendance')) 
                       <th>Remarks if any</th>
                       @else
                       <th>Leave/Late</th>
-                      @endif
+                      @endif -->
 
                     @else
                    
@@ -316,6 +316,7 @@ th{
                     </td>
                     <td field-key='designation' class="text-nowrap"><small>{{ $overtime->designation }}</small></td>
                    
+                    
                     @if ($dayhaspunching)
                     <td field-key='punchin' class="small text-center text-nowrap">
                      @if($overtime->punching) {{ date("h:i a", strtotime($overtime->punchin)) }} @endif
