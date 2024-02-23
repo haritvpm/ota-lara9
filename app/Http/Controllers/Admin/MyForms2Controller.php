@@ -482,7 +482,7 @@ class MyForms2Controller extends Controller
             if($id)
             {
                 $form = Form::with(['created_by','overtimes','overtimes.employee.categories','overtimes.employee.designation'])->findOrFail($id);
-
+//Log::info($form);
                 $form->overtimes->transform(function ($item) use ($form) {
                     if($item['name'] != null){
                         $item['pen'] = $item['pen'] . '-' . $item['name'];
@@ -720,6 +720,19 @@ class MyForms2Controller extends Controller
                 });
             }
             */
+            //check if time is within punching time
+            //todo get actual time from db, to prevent fronend tampering
+            if($overtime['punching'] &&  $calender_day->punching == 'AEBAS'){
+                [$punchin, $punchout] = $strtimes_totimestamps( $overtime['punchin'], $overtime['punchout']);
+                if( !$punchin || !$punchout || !$timefrom_comp || !$timeto_comp ){
+                        array_push($myerrors, $overtime['name'] . ' -' . $overtime['pen'] . ' : Invalid times');
+                        return null;
+                }
+                if(  $timefrom_comp <  $punchin || $timeto_comp > $punchout ){
+                        array_push($myerrors, $overtime['name'] . ' -' . $overtime['pen'] . ' : Time not within punching time');
+                        return null;
+                }
+            }
 
 
             {
