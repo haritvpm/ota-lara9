@@ -101,13 +101,13 @@
 <script type="text/javascript" src="{{ URL::asset('js/vue-flatpickr.min.js') }}"></script>
  -->
 @section('javascript')
-    @parent
-    <script>
+    <!-- @parent -->
+    <!-- <script>
         $('.date').datepicker({
             autoclose: true,
             dateFormat: "{{ config('app.date_format_js') }}"
         });
-    </script>
+    </script> -->
 
 
 <!-- <script>

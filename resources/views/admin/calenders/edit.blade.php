@@ -88,6 +88,7 @@
             
         </div>
     </div>
+    <a href="{{route('admin.calenders.index')}}" class="btn btn-default">Cancel</a>
 
     {!! Form::submit(trans('quickadmin.qa_update'), ['class' => 'btn btn-danger']) !!}
     {!! Form::close() !!}
@@ -95,11 +96,11 @@
 
 @section('javascript')
     @parent
-    <script>
+    <!-- <script>
         $('.date').datepicker({
             autoclose: true,
             dateFormat: "{{ config('app.date_format_js') }}"
         });
-    </script>
+    </script> -->
 
 @stop

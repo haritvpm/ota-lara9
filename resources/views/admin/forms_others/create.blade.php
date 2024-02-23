@@ -105,11 +105,11 @@
 
 @section('javascript')
     @parent
-    <script>
+    <!-- <script>
         $('.date').datepicker({
             autoclose: true,
             dateFormat: "{{ config('app.date_format_js') }}"
         });
-    </script>
+    </script> -->
 
 @stop

@@ -86,6 +86,7 @@
             
         </div>
     </div>
+    <a href="{{route('admin.sessions.index')}}" class="btn btn-default">Cancel</a>
 
     {!! Form::submit(trans('quickadmin.qa_save'), ['class' => 'btn btn-danger']) !!}
     {!! Form::close() !!}

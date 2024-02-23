@@ -62,7 +62,8 @@
 
     @yield('scripts')
     @include('partials.javascripts')
-
+    <!-- @yield('javascript') -->
+ 
 </body>
 
 </html>

@@ -108,7 +108,7 @@
             @can('employee_access')
             
             <li class="nav-item">
-                <a href="{{ route("admin.employees.index") }}" class="nav-link {{ request()->is("*admin/employees") ? "active" : "" }}">
+                <a href="{{ route("admin.employees.index") }}" class="nav-link {{ request()->is("*admin/employees*") ? "active" : "" }}">
                     <i class="fa-fw nav-icon fas fa-user">
                     </i>
                     <p>
@@ -123,7 +123,7 @@
             @can('employees_other_access')
 
             <li class="nav-item">
-                <a href="{{ route("admin.employees_others.index") }}" class="nav-link {{ request()->is("*admin/employees_others") ? "active" : "" }}">
+                <a href="{{ route("admin.employees_others.index") }}" class="nav-link {{ request()->is("*admin/employees_others*") ? "active" : "" }}">
                     <i class="fa-fw nav-icon fas fa-user">
                     </i>
                     <p>
@@ -137,7 +137,7 @@
                 @can('designation_access')
                     
                 <li class="nav-item">
-                    <a href="{{ route("admin.designations.index") }}" class="nav-link {{ request()->is("*admin/designations") ? "active" : "" }}">
+                    <a href="{{ route("admin.designations.index") }}" class="nav-link {{ request()->is("*admin/designations*") ? "active" : "" }}">
                         <i class="fa-fw nav-icon fas fa-id-badge">
                         </i>
                         <p>
@@ -151,7 +151,7 @@
 
                  @can('designations_other_access')
                 <li class="nav-item">
-                    <a href="{{ route("admin.designations_others.index") }}" class="nav-link {{ request()->is("*admin/designations_others") ? "active" : "" }}">
+                    <a href="{{ route("admin.designations_others.index") }}" class="nav-link {{ request()->is("*admin/designations_others*") ? "active" : "" }}">
                         <i class="fa-fw nav-icon fas fa-id-badge">
                         </i>
                         <p>
@@ -163,7 +163,7 @@
                 @endcan
                 @can('category_access')
                 <li class="nav-item">
-                    <a href="{{ route("admin.categories.index") }}" class="nav-link {{ request()->is("*admin/categories") ? "active" : "" }}">
+                    <a href="{{ route("admin.categories.index") }}" class="nav-link {{ request()->is("*admin/categories*") ? "active" : "" }}">
                         <i class="fa-fw nav-icon fas fa-th-large">
                         </i>
                         <p>
@@ -215,7 +215,7 @@
                 @can('user_access')
                 
                     <li class="nav-item">
-                        <a href="{{ route("admin.users.index") }}" class="nav-link {{ request()->is("*admin/users") ? "active" : "" }}">
+                        <a href="{{ route("admin.users.index") }}" class="nav-link {{ request()->is("*admin/users*") ? "active" : "" }}">
                             <i class="fa-fw nav-icon fas fa-user">
 
                             </i>
@@ -227,7 +227,7 @@
                 @endcan
                 @can('role_access')
                 <li class="nav-item">
-                        <a href="{{ route("admin.roles.index") }}" class="nav-link {{ request()->is("*admin/roles") ? "active" : "" }}">
+                        <a href="{{ route("admin.roles.index") }}" class="nav-link {{ request()->is("*admin/roles*") ? "active" : "" }}">
                             <i class="fa-fw nav-icon fas fa-briefcase">
 
                             </i>
@@ -241,7 +241,7 @@
               
                 @can('routing_access')
                 <li class="nav-item">
-                        <a href="{{ route("admin.routings.index") }}" class="nav-link {{ request()->is("*admin/routings") ? "active" : "" }}">
+                        <a href="{{ route("admin.routings.index") }}" class="nav-link {{ request()->is("*admin/routings*") ? "active" : "" }}">
                             <i class="fa-fw nav-icon fas fa-mail-forward">
 
                             </i>
