@@ -74,8 +74,6 @@
 @section('javascript')
     @parent
 
-    @include('admin.my_forms2.punchingModalold')
-
     <script type="text/javascript">
 
     var urlajaxpen = "{{url('admin/employees/ajaxfind')}}"
@@ -94,9 +92,8 @@
 
     // register modal component
     Vue.component("modal", {
-        template: "#modal-template"
-      });
-
+        template: "#my-modal"
+    });
 
 
     window._form = {

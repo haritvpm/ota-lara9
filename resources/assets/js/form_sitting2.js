@@ -19,6 +19,7 @@ var vm = new Vue({
     presets: presets,
     calenderdays2: calenderdays2,
     showModal: false,
+   
     modaldata: [],
     modaldata_totalOT: 0,
     modaldata_empl:"",
@@ -194,7 +195,6 @@ var vm = new Vue({
         return
       };
 
-		  row.count = 0;
       self.modaldata = []
       self.modaldata_totalOT = 0;
       self.modaldata_empl = row.pen ;
@@ -205,22 +205,29 @@ var vm = new Vue({
 						console.log(response);
 						if (response.data) {
               //todo ask if unpresent dates where present
+              setEmployeeTypes(row);
               //warning this func modifies response.data
-             let  {count, modaldata} = checkDatesAndOT(row, response.data);
-              row.count = count
+              let  {count, modaldata} = checkDatesAndOT(row, response.data);
+              if( row.count != count){
+                row.count = count
 
-							//vue does not update time if we change date as it does not watch for array changes
-							 //https://v2.vuejs.org/v2/guide/reactivity#Change-Detection-Caveats
-							 Vue.set(this.form.overtimes,index, row)
+							  //vue does not update time if we change date as it does not watch for array changes
+							  //https://v2.vuejs.org/v2/guide/reactivity#Change-Detection-Caveats
+							  Vue.set(self.form.overtimes,index, row)
+              }
 
                if(show){
-                this.modaldata = modaldata
-                this.showModal = true
+                  self.modaldata_totalOT = count;
+                  self.modaldata = modaldata
+               // this.showModal = true
+                  document.getElementById('modalOpenBtn').click()
+
 
                }
 						}
 					})
 					.catch((err) => {
+		        row.count = 0;
             Vue.set(this.form.overtimes,index, row)
           });
 			
@@ -414,7 +421,7 @@ var vm = new Vue({
             type: 'error',
             title: 'Error',
             text: 'Please read the error(s) shown in red',
-            timer: 2500,
+           // timer: 2500,
 
           })
 
@@ -474,7 +481,7 @@ var vm = new Vue({
             type: 'error',
             title: 'Error',
             text: 'Please read the error(s) shown in red',
-            timer: 2500,
+           // timer: 2500,
 
           })
           //self.$swal.close();

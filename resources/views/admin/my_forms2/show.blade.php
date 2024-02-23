@@ -132,43 +132,8 @@ th{
 
 
 
-
-<!-- use the modal component, pass in the prop -->
-<modal v-if="showModal" @close="showModal = false">
- 	<h5 slot="header" class="modal-title" >SittingDay OT - @{{modaldata_empl}} </h5>
-	 
-	<template v-slot:body>
-
-	<div class="">
-	<table class="table table-sm " style="font-size: 10px;font-weight:normal">
-		<thead>
-			<tr>
-			<th scope="col"></th>
-			<th scope="col">Date</th>
-			<th scope="col">Punchin</th>
-			<th scope="col">Punchout</th>
-			<th scope="col">OT</th>
-			</tr>
-		</thead>
-		<tbody>
-		<tr v-for="(item, index) in modaldata" :key="item.date">
-			<td>@{{ index+1}}</td>
-			<td>@{{ item.date }}</td>
-			<td>@{{ item.punchin }}</td>
-			<td>@{{ item.punchout }}</td>
-			<td>@{{ item.ot }}</td>
-		</tr>
-		</tbody>
-	</table>
-	</div>
-  	</template>
-
-	<div slot="footer" class="modal-footer" >Total OT: @{{modaldata_totalOT}} </div>
-
-</modal>
-
-
-
+<my-modal></my-modal>
+@include('admin.my_forms2.punchingModal')
 
 
 <div class="card p-2">
@@ -379,9 +344,9 @@ th{
                     @if($form->overtime_slot == 'Sittings')
                     <td class="text-center" field-key='count'>{{ $overtime->count }}
                     @if ($overtime?->punching)
-                    <button v-if="" class="btn btn-sm btn-primary"  @click.prevent="showSittingOTs('{{$overtime}}')"><i class="fa fa-eye"></i> </button>
+                    <button v-if="" class="btn btn-sm btn-dark"  @click.prevent="showSittingOTs('{{$overtime}}')"><i class="fas fa-fingerprint"></i> </button>
                     @endif
-                   
+                    <a id="modalOpenBtn" hidden  href="#reject" role="button" data-toggle="modal"><i class="fas fa-fingerprint"></i> </a>
                     </td>
                     <!-- <td field-key='worknature'> <small> {{ $overtime->worknature }}</small></td> -->
                     @else
@@ -583,9 +548,6 @@ th{
 @section('javascript') 
 @parent
 
-@include('admin.my_forms2.punchingModalold')
-
-
 
 <script type="text/javascript">
  var editurl = "{{ route('admin.my_forms2.edit',[$form->id]) }}";
@@ -645,7 +607,7 @@ th{
     var urlredirect = "{{url('admin/my_forms2/')}}"
     var urlajaxgetpunchsittings = "{{url('admin/punchings/ajaxgetpunchsittings')}}"
 
-    
+
 
 </script>
 

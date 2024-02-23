@@ -12,7 +12,7 @@
             
             <div class="row">
 
-                <div class="col-xs-8 form-group">
+                <div class="col-sm-8 form-group">
                     {!! Form::label('sectt', 'Sectt', ['class' => 'control-label']) !!}
                     {!! Form::textarea('sectt', old('sectt'), ['class' => 'form-control ', 'placeholder' => '', 'required' => '']) !!}
                     <p class="help-block"></p>
@@ -23,7 +23,7 @@
                     @endif
                 </div>
              <!--    
-                 <div class="col-xs-6 form-group">
+                 <div class="col-sm-6 form-group">
                     {!! Form::label('hostel', 'Hostel', ['class' => 'control-label']) !!}
                     {!! Form::textarea('hostel', old('hostel'), ['class' => 'form-control ', 'placeholder' => '', 'required' => '']) !!}
                     <p class="help-block"></p>

@@ -83,7 +83,6 @@
 @section('javascript')
     @parent
 
-    @include('admin.my_forms2.punchingModalold')
 
 
     <script type="text/javascript">
@@ -101,10 +100,10 @@
     Vue.use(VueSweetAlert.default)
     var calenderdays2 = {!! $data['calenderdays2'] !!};
      // register modal component
-     Vue.component("modal", {
-        template: "#modal-template"
-      });
-  
+
+    Vue.component("modal", {
+        template: "#my-modal"
+    });
 
     window._form = {!! $form->toJson() !!};
     

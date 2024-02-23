@@ -20,7 +20,7 @@ function setEmployeeTypes(row) {
     console.error("setEmployeeTypes - not all Property set");
   }
   console.log("setEmployeeTypes");
-  row.isPartime = row.designation.toLowerCase().indexOf("part time") != -1 || row.category.toLowerCase().indexOf("PartTime") != -1 || row.designation.toLowerCase().indexOf("parttime") != -1 || row.normal_office_hours == 3; //ugly
+  row.isPartime = row.designation.toLowerCase().indexOf("part time") != -1 || row.category.toLowerCase().indexOf("parttime") != -1 || row.designation.toLowerCase().indexOf("parttime") != -1 || row.normal_office_hours == 3; //ugly
   row.isFulltime = row.category.toLowerCase().indexOf("fulltime") != -1 || row.normal_office_hours == 6;
   row.isWatchnward = row.category.toLowerCase().indexOf("watch") != -1;
 }
@@ -42,6 +42,7 @@ function checkDatesAndOT(row, data) {
   var count = 0;
   for (var i = 0; i < data.dates.length; i++) {
     // console.log(data.dates[i])
+
     var punchin = data.dates[i].punchin;
     var punchout = data.dates[i].punchout;
     if ("N/A" == punchin) {
@@ -49,29 +50,42 @@ function checkDatesAndOT(row, data) {
       data.dates[i].ot = '*';
       continue;
     }
+    if (!punchin || !punchout) {
+      //no punching day. NIC server down
+      data.dates[i].ot = 'No Punching';
+      continue;
+    }
     data.dates[i].ot = 'NO';
     if (row.isPartime) {
+      console.log('p');
       if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "11:25")) {
         data.dates[i].ot = 'YES';
         count++;
+      } else {
+        data.dates[i].ot = 'No. (06:00 - 11:30)';
       }
     } else if (row.isFulltime) {
       if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "16:25")) {
         count++;
         data.dates[i].ot = 'YES';
+      } else {
+        data.dates[i].ot = 'No. (06:00 - 4:30pm)';
       }
     } else if (row.isWatchnward) {
       //no punching
     } //all other employees for sitting days
     else {
+      console.log('n');
       if (timePeriodIncludesPeriod(punchin, punchout, "08:05", "17:25")) {
         count++;
         data.dates[i].ot = 'YES';
+      } else {
+        data.dates[i].ot = 'No. (08:00 - 5:30pm)';
       }
     }
   }
   return {
-    count: row.count,
+    count: count,
     modaldata: data.dates
   };
 }
@@ -297,7 +311,6 @@ var vm = new Vue({
         return;
       }
       ;
-      row.count = 0;
       self.modaldata = [];
       self.modaldata_totalOT = 0;
       self.modaldata_empl = row.pen;
@@ -305,21 +318,27 @@ var vm = new Vue({
         console.log(response);
         if (response.data) {
           //todo ask if unpresent dates where present
+          (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.setEmployeeTypes)(row);
           //warning this func modifies response.data
           var _checkDatesAndOT = (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.checkDatesAndOT)(row, response.data),
             count = _checkDatesAndOT.count,
             modaldata = _checkDatesAndOT.modaldata;
-          row.count = count;
+          if (row.count != count) {
+            row.count = count;
 
-          //vue does not update time if we change date as it does not watch for array changes
-          //https://v2.vuejs.org/v2/guide/reactivity#Change-Detection-Caveats
-          Vue.set(_this.form.overtimes, index, row);
+            //vue does not update time if we change date as it does not watch for array changes
+            //https://v2.vuejs.org/v2/guide/reactivity#Change-Detection-Caveats
+            Vue.set(self.form.overtimes, index, row);
+          }
           if (show) {
-            _this.modaldata = modaldata;
-            _this.showModal = true;
+            self.modaldata_totalOT = count;
+            self.modaldata = modaldata;
+            // this.showModal = true
+            document.getElementById('modalOpenBtn').click();
           }
         }
       })["catch"](function (err) {
+        row.count = 0;
         Vue.set(_this.form.overtimes, index, row);
       });
     },
@@ -462,9 +481,10 @@ var vm = new Vue({
       self.$swal({
         type: 'error',
         title: 'Error',
-        text: 'Please read the error(s) shown in red',
-        timer: 2500
+        text: 'Please read the error(s) shown in red'
+        // timer: 2500,
       });
+
       var response = error.response;
       self.isProcessing = false;
       //alert(JSON.stringify(response.data));    // alerts {"myProp":"Hello"};
@@ -506,8 +526,8 @@ var vm = new Vue({
       self.$swal({
         type: 'error',
         title: 'Error',
-        text: 'Please read the error(s) shown in red',
-        timer: 2500
+        text: 'Please read the error(s) shown in red'
+        // timer: 2500,
       });
       //self.$swal.close();
       var response = error.response;

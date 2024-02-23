@@ -12,7 +12,7 @@
 
         <div class="card-body">
             <div class="row">
-                <div class="col-xs-12 form-group">
+                <div class="col-sm-12 form-group">
                     {!! Form::label('title', trans('quickadmin.roles.fields.title').'*', ['class' => 'control-label']) !!}
                     {!! Form::text('title', old('title'), ['class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
                     <p class="help-block"></p>

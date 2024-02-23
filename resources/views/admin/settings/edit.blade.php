@@ -12,7 +12,7 @@
 
         <div class="card-body">
             <div class="row">
-                <div class="col-xs-12 form-group">
+                <div class="col-sm-12 form-group">
                     {!! Form::label('name', trans('quickadmin.settings.fields.name').'*', ['class' => 'control-label']) !!}
                     {!! Form::text('name', old('name'), ['class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
                     <p class="help-block"></p>
@@ -24,7 +24,7 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-xs-12 form-group">
+                <div class="col-sm-12 form-group">
                     {!! Form::label('value', trans('quickadmin.settings.fields.value').'*', ['class' => 'control-label']) !!}
                     {!! Form::text('value', old('value'), ['class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
                     <p class="help-block"></p>

@@ -21,7 +21,7 @@
         <div class="card-body">
             @if(auth()->user()->isAdmin())
             <div class="row">
-                <div class="col-xs-12 form-group">
+                <div class="col-sm-12 form-group">
                     {!! Form::label('user_id', trans('quickadmin.preset.fields.user').'*', ['class' => 'control-label']) !!}
                     {!! Form::select('user_id', $users, old('user_id'), ['class' => 'form-control select2', 'required' => '']) !!}
                     <p class="help-block"></p>
@@ -34,7 +34,7 @@
             </div>
             @endif
             <div class="row">
-                <div class="col-xs-12 form-group">
+                <div class="col-sm-12 form-group">
                     {!! Form::label('name', trans('quickadmin.preset.fields.name').'*', ['class' => 'control-label']) !!}
                     {!! Form::text('name', old('name'), ['class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
                     <p class="help-block"></p>
@@ -46,7 +46,7 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-xs-12 form-group">
+                <div class="col-sm-12 form-group">
                     {!! Form::label('pens', trans('quickadmin.preset.fields.pens').'*', ['class' => 'control-label']) !!}
                     {!! Form::textarea('pens', old('pens'), ['class' => 'form-control ', 'placeholder' => '', 'required' => '']) !!}
                     <p class="help-block"></p>

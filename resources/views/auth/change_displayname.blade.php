@@ -20,7 +20,7 @@
 
 			<div class="card-body">
 				<div class="row">
-					<div class="col-xs-12 form-group">
+					<div class="col-sm-12 form-group">
 						{!! Form::label('displayname', 'Name of Officer', ['class' => 'control-label']) !!}
 						{!! Form::text('displayname', $displayname ?: old('displayname'), ['class' => 'form-control', 'placeholder' => '']) !!}
 						<p class="help-block"></p>

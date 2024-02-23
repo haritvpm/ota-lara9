@@ -1,40 +1,7 @@
 
 
-<!-- use the modal component, pass in the prop -->
-<modal v-if="showModal" @close="showModal = false">
- 	<h5 slot="header" class="modal-title" >SittingDay OT - @{{modaldata_empl}} </h5>
-	 
-	<template v-slot:body>
-
-	<div class="">
-	<table class="table table-sm " style="font-size: 10px;font-weight:normal">
-		<thead>
-			<tr>
-			<th scope="col"></th>
-			<th scope="col">Date</th>
-			<th scope="col">Punchin</th>
-			<th scope="col">Punchout</th>
-			<th scope="col">OT</th>
-			</tr>
-		</thead>
-		<tbody>
-		<tr v-for="(item, index) in modaldata" :key="item.date">
-			<td>@{{ index+1}}</td>
-			<td>@{{ item.date }}</td>
-			<td>@{{ item.punchin }}</td>
-			<td>@{{ item.punchout }}</td>
-			<td>@{{ item.ot }}</td>
-		</tr>
-		
-		</tbody>
-	</table>
-	</div>
-  	</template>
-
-	<div slot="footer" class="modal-footer" >Total OT: @{{modaldata_totalOT}} </div>
-
-</modal>
-
+<my-modal></my-modal>
+@include('admin.my_forms2.punchingModal')
 
 <div class="row" v-cloak >
 
@@ -86,7 +53,8 @@
 </div>
 
 <div class="row" v-cloak>
-	
+
+
 	<div class="col-md-12">
 		<table class="table  table-condensed">
 			<thead v-show="form.overtimes.length" >
@@ -153,8 +121,11 @@
 						<input  type="number"  :name="'count[' + index + ']'" class="form-control"  min=1 oninput="validity.valid||(value='');" v-model="row.count" >
 						<div class="input-group-append">
 
-						<button v-if="row.punching && row.pen" :disabled='!row.from || !row.to' class="btn btn-sm btn-primary" id="show-modal" @click.prevent="showSittingOTs(index);"><i class="fa fa-eye"></i> </button>
-
+						<!-- <button v-if="row.punching && row.pen" :disabled='!row.from || !row.to' class="btn btn-sm btn-dark" id="show-modal" @click.prevent="showSittingOTs(index);"><i class="fas fa-fingerprint"></i>  </button> -->
+						
+						<a v-if="row.punching && row.pen"  :disabled='!row.from || !row.to'  href="#reject" role="button" class="btn btn-sm btn-dark" @click.prevent="showSittingOTs(index);"><i class="fas fa-fingerprint"></i> </a>
+						<a id="modalOpenBtn" hidden  href="#reject" role="button" data-toggle="modal"><i class="fas fa-fingerprint"></i> </a>
+					
 						</div>
 					</div>
 							

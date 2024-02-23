@@ -12,7 +12,7 @@
         <div class="card-body">
              @if(Auth::user()->isAdmin())     
              <div class="row">
-                <div class="col-xs-12 form-group">
+                <div class="col-sm-12 form-group">
                     {!! Form::label('user_id', 'User*', ['class' => 'control-label']) !!}
                     {!! Form::select('user_id', $users, old('user_id'), ['class' => 'form-control select2', 'required' => '']) !!}
                     <p class="help-block"></p>
@@ -25,7 +25,7 @@
              </div>
 
             <div class="row">
-                <div class="col-xs-12 form-group">
+                <div class="col-sm-12 form-group">
                     {!! Form::label('max_persons', 'max_persons', ['class' => 'control-label']) !!}
                     {!! Form::text('max_persons', old('max_persons'), ['class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
                     <p class="help-block"></p>
@@ -40,7 +40,7 @@
 
             @endif
             <div class="row">
-                <div class="col-xs-12 form-group">
+                <div class="col-sm-12 form-group">
                     {!! Form::label('designation', trans('quickadmin.designations-other.fields.designation').'*', ['class' => 'control-label']) !!}
                     {!! Form::text('designation', old('designation'), ['class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
                     <p class="help-block"></p>
@@ -52,7 +52,7 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-xs-12 form-group">
+                <div class="col-sm-12 form-group">
                     {!! Form::label('rate', trans('quickadmin.designations-other.fields.rate').'*', ['class' => 'control-label']) !!}
                     {!! Form::number('rate', old('rate'), ['class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
                     <p class="help-block"></p>

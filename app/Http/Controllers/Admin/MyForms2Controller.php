@@ -2,23 +2,23 @@
 
 namespace App\Http\Controllers\Admin;
 
+use PDF;
+use Auth;
 use App\Form;
-use App\Overtime;
-use App\Calender;
-use App\Punching;
-use App\Employee;
-use Illuminate\Http\Request;
 use Exception;
+use JavaScript;
+use App\Calender;
+use App\Employee;
 
-use Illuminate\Support\Facades\Gate;
-use App\Http\Controllers\Controller;
+use App\Overtime;
+use App\Punching;
 //use Yajra\DataTables\DataTables;
 //use Laracasts\Utilities\JavaScript\JavaScriptFacade;
-use JavaScript;
 use Carbon\Carbon;
-use Auth;
-use PDF;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Gate;
 
 
 class MyForms2Controller extends Controller
@@ -976,7 +976,7 @@ class MyForms2Controller extends Controller
             if( $calenderdate?->punching == 'MANUALENTRY' )
             {
                 $collection = collect($overtimes);
-\Log::info($date );
+// \Log::info($date );
                 $punchtimes =  $collection->map( function($overtime) use ($date) {
                 //date has  to be 'Y-m-d' here, because createMany of laravel is undefined.
                 //so we have to use Punching::upsert which does not call our Model's setDateAttribute
@@ -1252,17 +1252,46 @@ class MyForms2Controller extends Controller
         return $this->preparevariablesandGotoView(true, null);
        
     }
+    
+    private function getEmployeeType($emp) {
+     
+        $desig = strtolower($emp->designation->designation);
+        $category =   strtolower($emp->categories?->category); 
+        // Log::info($desig);
+        // Log::info($category);
+
+        $isPartime = str_contains($desig,"part time") || str_contains($desig,"parttime") || 
+                     str_contains($category,"parttime")||
+                     $emp->designation->normal_office_hours == 3; //ugly
+        $isFulltime = str_contains($category,"fulltime")||
+                      $emp->designation->normal_office_hours == 6;
+
+        $isWatchnward = str_contains($category,"watch") ;
+        $isNormal = !$isPartime && !$isFulltime && !$isWatchnward;
+
+        return [$isPartime,$isFulltime,  $isWatchnward,  $isNormal];
+    }
+
     private function getPunchingDataForEmp($calenderdays_in_range, $pen, $aadhaarid)
     {
         $punchings = [];
         $sittingsWithMinHoursSatisfied = 0; 
+        $sittingsWithTimeSatisfied = 0; 
         $sittingsWithPunchok= 0;
         $emp = Employee::with(['designation','categories'])->where( 'pen', $pen)->first();
         $dateformatwithoutime = '!'.config('app.date_format');
+        
+        [$isPartime,$isFulltime,  $isWatchnward,  $isNormal] = $this->getEmployeeType($emp);
+
+        //need to check office if any exempt for fulltime/pt at cat non-gazetted / mla hostel 
+        //we call this function only if overtime['punching] which should exclude watchnward
 
         foreach ($calenderdays_in_range as $day) {
             
-          //  Log::info($day);
+            Log::info($emp);
+            Log::info($day);
+            Log::info($isFulltime);
+            Log::info($isPartime);
 
             if( $day->punching == 'NOPUNCHING' ){
                // $sittingsWithNoPunching++; 
@@ -1288,7 +1317,7 @@ class MyForms2Controller extends Controller
                     'punchin' => $temp['punch_in'],
                     'punchout' => $temp['punch_out'],
                 ];
-                Log::info($temp);
+                // Log::info($temp);
 
                 $minutesreq = $emp->designation->normal_office_hours*60 + 150 - 10; //leeway 10 min
 
@@ -1297,16 +1326,41 @@ class MyForms2Controller extends Controller
                     return [ $timefrom,$timeto ];
                   };
                 
-                [$timefrom, $timeto] = $strtimes_totimestamps( $temp['punch_in'],$temp['punch_out']);
-                $othours_worked= ceil(abs($timeto - $timefrom) / 60);
+                [$punch_in, $punch_out] = $strtimes_totimestamps( $temp['punch_in'], $temp['punch_out']);
+                $othours_worked= ceil(abs($punch_out - $punch_in) / 60);
                 //check if time has min hours
                 if($othours_worked >= $minutesreq){
                    $sittingsWithMinHoursSatisfied++; 
                 }
+                //check time from
+               
+               
+                if($isNormal){
+                    [$fromReq, $toReq] = $strtimes_totimestamps( "08:05",  "17:25");
+                    if( $punch_in <= $fromReq && $punch_out >= $toReq){
+                        $sittingsWithTimeSatisfied++; 
+                    }
+                } else  if($isPartime){
+                    [$fromReq, $toReq] = $strtimes_totimestamps( "06:05",  "11:25");
+                    if( $punch_in <= $fromReq && $punch_out >= $toReq){
+                        $sittingsWithTimeSatisfied++; 
+                    }
+                }  else  if($isFulltime){
+                    [$fromReq, $toReq] = $strtimes_totimestamps( "06:05",  "16:00"); //its 4.25 actually. can enforce after checking
+                    if( $punch_in <= $fromReq && $punch_out >= $toReq){
+                        $sittingsWithTimeSatisfied++; 
+                    }
+                } else{
+                    //for what we dont check. ignore and give exact count
+                    Log::info('un empl');
+
+                    $sittingsWithTimeSatisfied++; 
+                }
+
             } 
         }
 
-        return [ $punchings, $sittingsWithPunchok, $sittingsWithMinHoursSatisfied ];
+        return [ $punchings, $sittingsWithPunchok, $sittingsWithMinHoursSatisfied, $sittingsWithTimeSatisfied ];
 
     }
     public function createovertimes_sitting( Request $request, &$myerrors, $formid=null)
@@ -1411,13 +1465,13 @@ class MyForms2Controller extends Controller
 
             $totalwouldbe =  $totalsittingexisting + $overtime['count'];
            
-
+            $name_for_err =  $overtime['pen'] . '-' .$overtime['name'];
             if($totalwouldbe > $maxsittings)
             {      
                if($totalsittingexisting){
-                array_push($myerrors,  $overtime['pen'] . '-' .$overtime['name'] . ' : Already saved ' . $totalsittingexisting . '. + this (' .$overtime['count'] .') = ' . $totalwouldbe. '. (maximum possible: ' . $maxsittings .')' );
+                array_push($myerrors,   $name_for_err . ' : Already saved ' . $totalsittingexisting . '. + this (' .$overtime['count'] .') = ' . $totalwouldbe. '. (maximum possible: ' . $maxsittings .')' );
                } else {
-                array_push($myerrors,  $overtime['pen'] . '-' .$overtime['name'] . ' : This = ' . $overtime['count'] . '. (maximum possible: ' . $maxsittings .')' );
+                array_push($myerrors,   $name_for_err . ' : This = ' . $overtime['count'] . '. (maximum possible: ' . $maxsittings .')' );
                }
             
                return null;   
@@ -1453,20 +1507,17 @@ class MyForms2Controller extends Controller
             
             if( $overtime['count'] >  $sittingsinrange ){
 
-              array_push($myerrors, $overtime['pen'] . '-' .$overtime['name'] . ' : From ' . $overtime['from'] . ' to ' . $overtime['to'] . ' there are only ' . $sittingsinrange .' sitting days.');
+              array_push($myerrors,  $name_for_err . ' : From ' . $overtime['from'] . ' to ' . $overtime['to'] . ' there are only ' . $sittingsinrange .' sitting days.');
               return null;
             
             }
        
- 
             if( $start_one < $sitting_start || $end_one > $sitting_end ) 
             {
-
-                array_push($myerrors, $overtime['pen'] . '-' .$overtime['name'] . ' : Select date range between ' . $sitting_start->format('d-m-Y') . ' and ' . $sitting_end->format('d-m-Y') . ' (' . $start_one->format('d-m-Y') . ',' . $end_one->format('d-m-Y') . ')' );
+                array_push($myerrors,  $name_for_err . ' : Select date range between ' . $sitting_start->format('d-m-Y') . ' and ' . $sitting_end->format('d-m-Y') . ' (' . $start_one->format('d-m-Y') . ',' . $end_one->format('d-m-Y') . ')' );
                     return null;
             }
 
-            
             //check date overlap
             //if this is a supply, allow user to enter any date range. person might have incorrectly submitted the first time.
             {
@@ -1485,7 +1536,7 @@ class MyForms2Controller extends Controller
                     $isoverlap = ($start_one <= $end_two) && ($end_one >= $start_two);
 
                     if($isoverlap){
-                        array_push($myerrors, $overtime['pen'] . '-' .$overtime['name'] . ' : Dates overlap with another OT from ' . $e['from'] . ' - ' . $e['to'] . ' for '.$e['count'] . ' day(s) (' . $e->form->creator . ' )' );
+                        array_push($myerrors,  $name_for_err . ' : Dates overlap with another OT from ' . $e['from'] . ' - ' . $e['to'] . ' for '.$e['count'] . ' day(s) (' . $e->form->creator . ' )' );
                         return null;
                     }
 
@@ -1494,21 +1545,25 @@ class MyForms2Controller extends Controller
 
             //new check punching times
             if( $overtime['punching'] == true ) {
-                [ $punchings, $sittingsWithPunchok, $sittingsWithMinHoursSatisfied ] = $this->getPunchingDataForEmp($calenderdays_in_range, $overtime['pen'], $overtime['aadhaarid']);
+                [ $punchings, $sittingsWithPunchok, $sittingsWithMinHoursSatisfied, $sittingsWithTimeSatisfied ] = $this->getPunchingDataForEmp($calenderdays_in_range, $overtime['pen'], $overtime['aadhaarid']);
                 //we need to also check time within 8 -> 5 but dont know how much luft. partime is ok
                 
                 if( $overtime['count'] > $sittingsWithPunchok ){
 
-                    array_push($myerrors, $overtime['pen'] . '-' .$overtime['name'] . ' : From ' . $overtime['from'] . ' to ' . $overtime['to'] . ' punched only for ' . $sittingsWithPunchok .' sitting days.');
+                    array_push($myerrors,  $name_for_err . ' : From ' . $overtime['from'] . ' to ' . $overtime['to'] . ' punched only for ' . $sittingsWithPunchok .' sitting days.');
                     return null;
                 }
                 if( $overtime['count'] > $sittingsWithMinHoursSatisfied ){
 
-                    array_push($myerrors, $overtime['pen'] . '-' .$overtime['name'] . ' : From ' . $overtime['from'] . ' to ' . $overtime['to'] . ' only ' . $sittingsWithMinHoursSatisfied .' sitting days have min req hours.');
+                    array_push($myerrors,  $name_for_err . ' : From ' . $overtime['from'] . ' to ' . $overtime['to'] . ' only ' . $sittingsWithMinHoursSatisfied .' sitting days have min req hours.');
+                    return null;
+                }
+                if( $overtime['count'] > $sittingsWithTimeSatisfied){
+                    array_push($myerrors,  $name_for_err . ' : From ' . $overtime['from'] . ' to ' . $overtime['to'] . ' only ' . $sittingsWithTimeSatisfied .' days satisfy 8am-5.30pm.');
                     return null;
                 }
             } else{
-                Log::info("No punch for" . $overtime['name']);
+                // Log::info("No punch for" . $overtime['name']);
             }
 
 

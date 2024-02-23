@@ -38,7 +38,7 @@
 
 <link href="{{ URL::asset('css/custom.css') }}" rel="stylesheet"><!-- for data table  -->
 
-<link href="{{ URL::asset('css/punching-modal.css') }}" rel="stylesheet">
+<!-- <link href="{{ URL::asset('css/punching-modal.css') }}" rel="stylesheet"> -->
 
 <style type="text/css">
 textarea {

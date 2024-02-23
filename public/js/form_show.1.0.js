@@ -20,7 +20,7 @@ function setEmployeeTypes(row) {
     console.error("setEmployeeTypes - not all Property set");
   }
   console.log("setEmployeeTypes");
-  row.isPartime = row.designation.toLowerCase().indexOf("part time") != -1 || row.category.toLowerCase().indexOf("PartTime") != -1 || row.designation.toLowerCase().indexOf("parttime") != -1 || row.normal_office_hours == 3; //ugly
+  row.isPartime = row.designation.toLowerCase().indexOf("part time") != -1 || row.category.toLowerCase().indexOf("parttime") != -1 || row.designation.toLowerCase().indexOf("parttime") != -1 || row.normal_office_hours == 3; //ugly
   row.isFulltime = row.category.toLowerCase().indexOf("fulltime") != -1 || row.normal_office_hours == 6;
   row.isWatchnward = row.category.toLowerCase().indexOf("watch") != -1;
 }
@@ -42,6 +42,7 @@ function checkDatesAndOT(row, data) {
   var count = 0;
   for (var i = 0; i < data.dates.length; i++) {
     // console.log(data.dates[i])
+
     var punchin = data.dates[i].punchin;
     var punchout = data.dates[i].punchout;
     if ("N/A" == punchin) {
@@ -49,29 +50,42 @@ function checkDatesAndOT(row, data) {
       data.dates[i].ot = '*';
       continue;
     }
+    if (!punchin || !punchout) {
+      //no punching day. NIC server down
+      data.dates[i].ot = 'No Punching';
+      continue;
+    }
     data.dates[i].ot = 'NO';
     if (row.isPartime) {
+      console.log('p');
       if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "11:25")) {
         data.dates[i].ot = 'YES';
         count++;
+      } else {
+        data.dates[i].ot = 'No. (06:00 - 11:30)';
       }
     } else if (row.isFulltime) {
       if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "16:25")) {
         count++;
         data.dates[i].ot = 'YES';
+      } else {
+        data.dates[i].ot = 'No. (06:00 - 4:30pm)';
       }
     } else if (row.isWatchnward) {
       //no punching
     } //all other employees for sitting days
     else {
+      console.log('n');
       if (timePeriodIncludesPeriod(punchin, punchout, "08:05", "17:25")) {
         count++;
         data.dates[i].ot = 'YES';
+      } else {
+        data.dates[i].ot = 'No. (08:00 - 5:30pm)';
       }
     }
   }
   return {
-    count: row.count,
+    count: count,
     modaldata: data.dates
   };
 }
@@ -171,7 +185,7 @@ Vue.use(VueSweetAlert["default"]);
 
 // register modal component
 Vue.component("modal", {
-  template: "#modal-template"
+  template: "#my-modal"
 });
 var vm = new Vue({
   el: '#app',
@@ -180,7 +194,6 @@ var vm = new Vue({
     needspostingchecked: false,
     approvaltext: malkla + ' കേരള നിയമസഭയുടെ  ' + sessionnumber + '-ാം സമ്മേളനത്തോടനുബന്ധിച്ച് അധികജോലിക്കു നിയോഗിക്കപ്പെട്ട ജീവനക്കാർക്ക്  ഓവർടൈം അലവൻസ് അനുവദിക്കുന്നതിനുള്ള ഈ ഓവർടൈം അലവൻസ്   സ്റ്റേറ്റ്മെന്റ്,   ഓവർടൈം അലവൻസ് അനുവദിക്കുന്നതിനായുള്ള നിലവിലെ സർക്കാർ ഉത്തരവിൽ  നിഷ്കർഷിച്ചിരിക്കുന്ന  നിബന്ധനകൾ  പാലിച്ചു തന്നെയാണ്  തയ്യാറാക്കി സമർപ്പിക്കുന്നതെന്ന് സാക്ഷ്യപ്പെടുത്തുന്നു.',
     approvalpostingcheckedtext: 'നിയമസഭാ സെക്രട്ടറിയുടെ മുൻ‌കൂട്ടിയുള്ള അനുമതിയോടെയാണ് ഈ ഓവർടൈമിന് ജീവനക്കാരെ നിയോഗിച്ചതെന്ന് സാക്ഷ്യപ്പെടുത്തുന്നു.',
-    showModal: false,
     modaldata: [],
     modaldata_totalOT: 0,
     modaldata_empl: ""
@@ -211,7 +224,7 @@ var vm = new Vue({
       // console.log(row.from);
 
       axios.get("".concat(urlajaxgetpunchsittings, "/").concat(session, "/").concat(row.from, "/").concat(row.to, "/").concat(row.pen, "/").concat(row.aadhaarid)).then(function (response) {
-        // console.log(response); 
+        //  console.log(response); 
         if (response.data) {
           //todo ask if unpresent dates where present
           (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.setEmployeeTypes)(row);
@@ -219,7 +232,9 @@ var vm = new Vue({
             count = _checkDatesAndOT.count,
             modaldata = _checkDatesAndOT.modaldata;
           _this.modaldata = modaldata;
-          _this.showModal = true;
+          _this.modaldata_totalOT = count;
+          _this.modaldata_empl = row.pen;
+          document.getElementById('modalOpenBtn').click();
         }
       })["catch"](function (err) {});
     },
