@@ -1301,10 +1301,10 @@ class MyForms2Controller extends Controller
 
         foreach ($calenderdays_in_range as $day) {
             
-            Log::info($emp);
-            Log::info($day);
-            Log::info($isFulltime);
-            Log::info($isPartime);
+            // Log::info($emp);
+            // Log::info($day);
+            // Log::info($isFulltime);
+            // Log::info($isPartime);
 
             if( $day->punching == 'NOPUNCHING' ){
                // $sittingsWithNoPunching++; 
@@ -1314,10 +1314,10 @@ class MyForms2Controller extends Controller
             $date = Carbon::createFromFormat($dateformatwithoutime, $day->date)->format('Y-m-d');
           
             $query =  Punching::where('date',$date);
-            $query->when( $pen  && strlen($pen) >= 5, function ($q)  use ($pen) {
+            $query->when( $day->punching == 'MANUALENTRY' &&  $pen  && strlen($pen) >= 5, function ($q)  use ($pen) {
                 return $q->where('pen',$pen);
             });
-            $query->when( $aadhaarid   && strlen($aadhaarid) >= 8, function ($q)  use ($aadhaarid){
+            $query->when( $day->punching == 'AEBAS' &&   $aadhaarid   && strlen($aadhaarid) >= 8, function ($q)  use ($aadhaarid){
                 return $q->where('aadhaarid',$aadhaarid);
             })
             ->wherenotnull('punch_in') //prevent if only one column is available
@@ -1566,13 +1566,14 @@ class MyForms2Controller extends Controller
                     array_push($myerrors,  $name_for_err . ' : From ' . $overtime['from'] . ' to ' . $overtime['to'] . ' punched only for ' . $sittingsWithPunchok .' sitting days.');
                     return null;
                 }
+               
+                if( $overtime['count'] > $sittingsWithTimeSatisfied){
+                    array_push($myerrors,  $name_for_err . ' : From ' . $overtime['from'] . ' to ' . $overtime['to'] . ' only ' . $sittingsWithTimeSatisfied .' days satisfy 8am-5.30pm.');
+                    return null;
+                }
                 if( $overtime['count'] > $sittingsWithMinHoursSatisfied ){
 
                     array_push($myerrors,  $name_for_err . ' : From ' . $overtime['from'] . ' to ' . $overtime['to'] . ' only ' . $sittingsWithMinHoursSatisfied .' sitting days have min req hours.');
-                    return null;
-                }
-                if( $overtime['count'] > $sittingsWithTimeSatisfied){
-                    array_push($myerrors,  $name_for_err . ' : From ' . $overtime['from'] . ' to ' . $overtime['to'] . ' only ' . $sittingsWithTimeSatisfied .' days satisfy 8am-5.30pm.');
                     return null;
                 }
             } else{

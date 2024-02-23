@@ -33,7 +33,7 @@
           </table>
           </div>
 	        <div class="modal-footer d-flex justify-content-between ">
-            Total OT: @{{modaldata_totalOT}} / @{{modaldata.length}}
+            Total OT: @{{modaldata_totalOT}} / @{{modaldata_totalOTDays}}
 	          <button type="button" class="btn btn-danger" data-dismiss="modal">OK</button>
 	        </div>
 	      </div>

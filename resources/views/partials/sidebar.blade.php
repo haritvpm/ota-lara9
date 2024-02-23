@@ -108,7 +108,7 @@
             @can('employee_access')
             
             <li class="nav-item">
-                <a href="{{ route("admin.employees.index") }}" class="nav-link {{ request()->is("*admin/employees*") ? "active" : "" }}">
+                <a href="{{ route("admin.employees.index") }}" class="nav-link {{ request()->is("*admin/employees") || request()->is("*admin/employees/*") ? "active" : "" }}">
                     <i class="fa-fw nav-icon fas fa-user">
                     </i>
                     <p>
@@ -137,7 +137,7 @@
                 @can('designation_access')
                     
                 <li class="nav-item">
-                    <a href="{{ route("admin.designations.index") }}" class="nav-link {{ request()->is("*admin/designations*") ? "active" : "" }}">
+                    <a href="{{ route("admin.designations.index") }}" class="nav-link {{ request()->is("*admin/designations") || request()->is("*admin/designations/*")  ? "active" : "" }}">
                         <i class="fa-fw nav-icon fas fa-id-badge">
                         </i>
                         <p>
@@ -401,7 +401,7 @@
             </li>
             @endcan
             <li class="nav-item">
-            <a  class="nav-link href="#logout" onclick="$('#logout').submit();">
+            <a  class="nav-link" href="#logout" onclick="$('#logout').submit();">
                     <i class="fas fa-fw  fa-arrow-left nav-icon"></i>
                     <p>
                     @lang('quickadmin.qa_logout')

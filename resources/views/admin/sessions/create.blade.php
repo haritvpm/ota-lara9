@@ -74,7 +74,7 @@
             <div class="row">
                 <div class="col-sm-12 form-group">
                     {!! Form::label('sittings_entry', trans('quickadmin.sessions.fields.sittings-entry').'', ['class' => 'control-label']) !!}
-                    {!! Form::select('sittings_entry', $enum_sittings_entry, old('sittings_entry'), ['class' => 'form-control select2']) !!}
+                    {!! Form::select('sittings_entry', $enum_sittings_entry, old('sittings_entry'), ['class' => 'form-control']) !!}
                     <p class="help-block"></p>
                     @if($errors->has('sittings_entry'))
                         <p class="help-block">

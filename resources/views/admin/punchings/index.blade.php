@@ -45,12 +45,22 @@
 	<form action="" method="get" id="filter" class="form-inline">
 	       
         <div class="form-group">     
-        	Date <input required class="form-control" placeholder="dd-mm-yyyy" type="search" name = "datefilter" value="{{ \Request('datefilter')}}" >
+        <!-- 	Date <input required class="form-control" placeholder="dd-mm-yyyy" type="search" name = "datefilter" value="{{ \Request('datefilter')}}" > -->
+
+           
+                <label class="required" for="datefilter">{{ trans('cruds.calender.fields.date') }}</label>
+                <input class="form-control date {{ $errors->has('datefilter') ? 'is-invalid' : '' }}" type="text" name="datefilter" id="datefilter" value="{{ old('datefilter') }}" required>
+                @if($errors->has('date'))
+                    <span class="text-danger">{{ $errors->first('datefilter') }}</span>
+                @endif
+                
+         
+
 		</div>
               
 
         @if(\Auth::user()->isAdmin())
-	    	<input  class="form-control" placeholder="AttendanceId/PEN" type="text" name = "namefilter" value="{{\Request('namefilter')}}" rel="filter">
+	    	<input  class="form-control" placeholder="AttendanceId/PEN" type="text" name = "namefilter" value="{{\Request('namefilter')}}" rel="filter" autocomplete="off">
     	@else
     		<input  class="form-control" placeholder="AttendanceId/PEN" type="text" name = "namefilter" value="{{\Request('namefilter')}}" rel="filter" required>
     	@endif

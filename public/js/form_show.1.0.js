@@ -40,6 +40,7 @@ function timePeriodIncludesPeriod(from, to, fromReq, toReq) {
 function checkDatesAndOT(row, data) {
   //we need to give some leeway. so commenting
   var count = 0;
+  var total_ot_days = 0;
   for (var i = 0; i < data.dates.length; i++) {
     // console.log(data.dates[i])
 
@@ -50,9 +51,10 @@ function checkDatesAndOT(row, data) {
       data.dates[i].ot = '*';
       continue;
     }
+    total_ot_days++;
     if (!punchin || !punchout) {
       //no punching day. NIC server down
-      data.dates[i].ot = 'No Punching';
+      data.dates[i].ot = 'Not Punched?';
       continue;
     }
     data.dates[i].ot = 'NO';
@@ -86,7 +88,8 @@ function checkDatesAndOT(row, data) {
   }
   return {
     count: count,
-    modaldata: data.dates
+    modaldata: data.dates,
+    total_ot_days: total_ot_days
   };
 }
 
@@ -196,6 +199,7 @@ var vm = new Vue({
     approvalpostingcheckedtext: 'നിയമസഭാ സെക്രട്ടറിയുടെ മുൻ‌കൂട്ടിയുള്ള അനുമതിയോടെയാണ് ഈ ഓവർടൈമിന് ജീവനക്കാരെ നിയോഗിച്ചതെന്ന് സാക്ഷ്യപ്പെടുത്തുന്നു.',
     modaldata: [],
     modaldata_totalOT: 0,
+    modaldata_totalOTDays: 0,
     modaldata_empl: ""
   },
   mounted: function mounted() {
@@ -230,10 +234,12 @@ var vm = new Vue({
           (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.setEmployeeTypes)(row);
           var _checkDatesAndOT = (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.checkDatesAndOT)(row, response.data),
             count = _checkDatesAndOT.count,
-            modaldata = _checkDatesAndOT.modaldata;
+            modaldata = _checkDatesAndOT.modaldata,
+            total_ot_days = _checkDatesAndOT.total_ot_days;
           _this.modaldata = modaldata;
           _this.modaldata_totalOT = count;
           _this.modaldata_empl = row.pen;
+          _this.modaldata_totalOTDays = total_ot_days;
           document.getElementById('modalOpenBtn').click();
         }
       })["catch"](function (err) {});

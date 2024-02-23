@@ -40,6 +40,7 @@ function timePeriodIncludesPeriod(from, to, fromReq, toReq) {
 function checkDatesAndOT(row, data) {
   //we need to give some leeway. so commenting
   var count = 0;
+  var total_ot_days = 0;
   for (var i = 0; i < data.dates.length; i++) {
     // console.log(data.dates[i])
 
@@ -50,9 +51,10 @@ function checkDatesAndOT(row, data) {
       data.dates[i].ot = '*';
       continue;
     }
+    total_ot_days++;
     if (!punchin || !punchout) {
       //no punching day. NIC server down
-      data.dates[i].ot = 'No Punching';
+      data.dates[i].ot = 'Not Punched?';
       continue;
     }
     data.dates[i].ot = 'NO';
@@ -86,7 +88,8 @@ function checkDatesAndOT(row, data) {
   }
   return {
     count: count,
-    modaldata: data.dates
+    modaldata: data.dates,
+    total_ot_days: total_ot_days
   };
 }
 
@@ -179,7 +182,8 @@ var vm = new Vue({
     showModal: false,
     modaldata: [],
     modaldata_totalOT: 0,
-    modaldata_empl: ""
+    modaldata_empl: "",
+    modaldata_totalOTDays: 0
   },
   created: function created() {
     Vue.set(this.$data, 'form', _form);
@@ -322,7 +326,8 @@ var vm = new Vue({
           //warning this func modifies response.data
           var _checkDatesAndOT = (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.checkDatesAndOT)(row, response.data),
             count = _checkDatesAndOT.count,
-            modaldata = _checkDatesAndOT.modaldata;
+            modaldata = _checkDatesAndOT.modaldata,
+            total_ot_days = _checkDatesAndOT.total_ot_days;
           if (row.count != count) {
             row.count = count;
 
@@ -333,6 +338,7 @@ var vm = new Vue({
           if (show) {
             self.modaldata_totalOT = count;
             self.modaldata = modaldata;
+            self.modaldata_totalOTDays = total_ot_days;
             // this.showModal = true
             document.getElementById('modalOpenBtn').click();
           }

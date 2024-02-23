@@ -40,6 +40,7 @@ function timePeriodIncludesPeriod(from, to, fromReq, toReq) {
 function checkDatesAndOT(row, data) {
   //we need to give some leeway. so commenting
   var count = 0;
+  var total_ot_days = 0;
   for (var i = 0; i < data.dates.length; i++) {
     // console.log(data.dates[i])
 
@@ -50,9 +51,10 @@ function checkDatesAndOT(row, data) {
       data.dates[i].ot = '*';
       continue;
     }
+    total_ot_days++;
     if (!punchin || !punchout) {
       //no punching day. NIC server down
-      data.dates[i].ot = 'No Punching';
+      data.dates[i].ot = 'Not Punched?';
       continue;
     }
     data.dates[i].ot = 'NO';
@@ -86,7 +88,8 @@ function checkDatesAndOT(row, data) {
   }
   return {
     count: count,
-    modaldata: data.dates
+    modaldata: data.dates,
+    total_ot_days: total_ot_days
   };
 }
 

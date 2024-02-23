@@ -24,7 +24,7 @@ class PunchingsController extends Controller
     //the args are set in route file web.php
     public function ajaxgetpunchsittings($session, $datefrom, $dateto, $pen, $aadhaarid)
     {
-        Log::info($datefrom);
+        // Log::info($datefrom);
 
     $dateformatwithoutime = '!'.config('app.date_format'); //! to set time to zero
     $datefrom = Carbon::createFromFormat($dateformatwithoutime, $datefrom)->format('Y-m-d');
@@ -33,7 +33,7 @@ class PunchingsController extends Controller
    // Log::info($session);
     // Calender::where('session_id', $session->id)
      //get all sitting days between these two days
-    $sittingsInRange = \App\Calender::with('session')
+    $sittingsInRange = Calender::with('session')
                             ->whereHas('session', function($query)  use ($session) { 
                                     $query->where('name', $session);
                             })                         
@@ -48,6 +48,8 @@ class PunchingsController extends Controller
     if(false !== $tmp){
         $pen = substr($pen, 0, $tmp);
     }
+    // Log::info($pen);
+    // Log::info($aadhaarid);
     $sittingsWithPunchok = 0; 
     $sittingsWithNoPunching = 0; 
     $dates = [];
@@ -63,16 +65,18 @@ class PunchingsController extends Controller
             ];
             continue;
         }
-        Log::info($pen);
+        
 
         $date = Carbon::createFromFormat($dateformatwithoutime, $day->date)->format('Y-m-d');
-        Log::info($date);
+        // Log::info($date);
+
+        //ignore pen if data from aebas and ignore aadhhar if data is from us saving
 
         $query =  Punching::where('date',$date);
-        $query->when( $pen  && strlen($pen) >= 5, function ($q)  use ($pen) {
+        $query->when( $day->punching == 'MANUALENTRY' && $pen  && strlen($pen) >= 5, function ($q)  use ($pen) {
             return $q->where('pen',$pen);
         });
-        $query->when( $aadhaarid   && strlen($aadhaarid) >= 8, function ($q)  use ($aadhaarid){
+        $query->when(  $day->punching == 'AEBAS' &&  $aadhaarid   && strlen($aadhaarid) >= 8, function ($q)  use ($aadhaarid){
             return $q->where('aadhaarid',$aadhaarid);
         });
         
@@ -110,7 +114,7 @@ class PunchingsController extends Controller
    
     return [
             'sittingsWithPunchok' => $sittingsWithPunchok,
-          //  'sittingsWithNoPunching' => $sittingsWithNoPunching,
+            // 'sittingsWithNoPunching' => $sittingsWithNoPunching,
             'sittingsInRange' => $sittingsInRange->count(),
             'dates' =>  $dates,
            ];
@@ -130,12 +134,14 @@ class PunchingsController extends Controller
     }
 
     $date = Carbon::createFromFormat(config('app.date_format'), $date)->format('Y-m-d');
+
+    $day = Calender::where('date',$date)->first();
        
     $query =  Punching::where('date',$date);
-    $query->when( $pen != '' && strlen($pen) >= 5, function ($q)  use ($pen) {
+    $query->when ($day->punching == 'MANUALENTRY' && $pen != '' && strlen($pen) >= 5, function ($q)  use ($pen) {
         return $q->where('pen',$pen);
     });
-    $query->when( strlen($aadhaarid) >= 8, function ($q)  use ($aadhaarid){
+    $query->when( $day->punching == 'AEBAS' &&  strlen($aadhaarid) >= 8, function ($q)  use ($aadhaarid){
         return $q->where('aadhaarid',$aadhaarid);
     });
     

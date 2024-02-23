@@ -29,23 +29,23 @@ export function timePeriodIncludesPeriod (from, to, fromReq, toReq)  {
 export function  checkDatesAndOT(row, data){
     //we need to give some leeway. so commenting
   let count = 0;
-
+  let total_ot_days = 0 ;
   for (let i = 0; i < data.dates.length; i++) {
     // console.log(data.dates[i])
   
 
     const punchin = data.dates[i].punchin;
     const punchout = data.dates[i].punchout;
-
     
-
     if( "N/A" == punchin ){ //no punching day. NIC server down
       data.dates[i].ot = '*'
       continue;
     }
 
+    total_ot_days++;
+
     if( !punchin || !punchout  ){ //no punching day. NIC server down
-      data.dates[i].ot = 'No Punching'
+      data.dates[i].ot = 'Not Punched?'
       continue;
     }
 
@@ -87,8 +87,9 @@ export function  checkDatesAndOT(row, data){
   }
  
  return {
-  count : count ,
-  modaldata : data.dates
+  count ,
+  modaldata : data.dates,
+  total_ot_days
  }
 
 }

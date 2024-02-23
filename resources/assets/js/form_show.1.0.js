@@ -42,7 +42,9 @@ var vm = new Vue({
      
         modaldata: [],
         modaldata_totalOT: 0,
+        modaldata_totalOTDays:0,
         modaldata_empl:"",
+
     },
 
     mounted: function () {
@@ -82,11 +84,12 @@ var vm = new Vue({
                         if (response.data) {
                             //todo ask if unpresent dates where present
                             setEmployeeTypes(row);
-                            let  {count, modaldata} = checkDatesAndOT(row, response.data);
+                            let  {count, modaldata,total_ot_days} = checkDatesAndOT(row, response.data);
                                                           
                             this.modaldata = modaldata
                             this.modaldata_totalOT = count;
                             this.modaldata_empl = row.pen ;
+                            this.modaldata_totalOTDays = total_ot_days;
                             document.getElementById('modalOpenBtn').click()
                      
       
