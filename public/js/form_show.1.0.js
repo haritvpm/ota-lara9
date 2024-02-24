@@ -50,7 +50,7 @@ function checkDatesAndOT(row, data) {
     var punchout = data.dates[i].punchout;
     if ("N/A" == punchin) {
       //no punching day. NIC server down
-      data.dates[i].ot = 'Enter in OT Form';
+      //  data.dates[i].ot = 'Enter in OT Form'
       data.dates[i].otna = true;
       continue;
     }

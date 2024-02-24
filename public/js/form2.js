@@ -50,7 +50,7 @@ function checkDatesAndOT(row, data) {
     var punchout = data.dates[i].punchout;
     if ("N/A" == punchin) {
       //no punching day. NIC server down
-      data.dates[i].ot = 'Enter in OT Form';
+      //  data.dates[i].ot = 'Enter in OT Form'
       data.dates[i].otna = true;
       continue;
     }
@@ -663,7 +663,7 @@ var vm = new Vue({
     var daytypedesc = "holiday";
     if (isSittingOrWorkingDay) {
       minothour_ideal = parseFloat(2.5);
-      minot_minutes = 140; //leeway
+      minot_minutes = 145; //leeway
       daytypedesc = "working day";
       if (isSittingDay) {
         daytypedesc = "sitting day";

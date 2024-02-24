@@ -595,7 +595,7 @@ var vm = new Vue({
 			var daytypedesc = "holiday";
 			if (isSittingOrWorkingDay) {
         		minothour_ideal = parseFloat(2.5);
-				minot_minutes = 140; //leeway
+				minot_minutes = 145; //leeway
 				daytypedesc = "working day";
 				if (isSittingDay) {
 					daytypedesc = "sitting day";

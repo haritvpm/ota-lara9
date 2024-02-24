@@ -14,7 +14,8 @@ use App\Http\Controllers\Controller;
 use JavaScript;
 use Carbon\Carbon;
 use Auth;
-use PDF;
+use Yajra\DataTables\DataTables;
+
 
 use Illuminate\Support\Facades\Log; 
 
@@ -54,20 +55,28 @@ class PunchingsController extends Controller
     $sittingsWithNoPunching = 0; 
     $dates = [];
     foreach ($sittingsInRange as $day) {
-// $date = Carbon::createFromFormat($dateformatwithoutime, $day->date)->format('Y-m-d');
+
+        $date = Carbon::createFromFormat($dateformatwithoutime, $day->date)->format('Y-m-d');
         if( $day->punching !== 'AEBAS' ){
+            //check if user has entered first OT for that day.
+            $sit = \App\Overtime::with('form')
+                ->wherehas( 'form', function($q) use( $date){
+                    $q->where( 'overtime_slot' , 'Multi' )
+                    ->where( 'duty_date', $date );
+                })->where('pen', $pen )
+                ->where('slots','like','%First%')
+                ->first(); 
+
             $sittingsWithNoPunching++; 
             $dates[] = [
                 'date' =>  $day->date, 
-                'ot'   => "*",//'Punching excused Use DutyForm to enter for the day',
+                'ot'   =>  $sit ? "Entered in that day's form" : "Enter in OT Form",//'Punching excused Use DutyForm to enter for the day',
                 'punchin' => "N/A",
                 'punchout' => "N/A",
             ];
             continue;
         }
-        
-
-        $date = Carbon::createFromFormat($dateformatwithoutime, $day->date)->format('Y-m-d');
+       
         // Log::info($date);
 
         //ignore pen if data from aebas and ignore aadhhar if data is from us saving
@@ -109,7 +118,7 @@ class PunchingsController extends Controller
     
     
    
-    Log::info($sittingsWithPunchok);
+   // Log::info($sittingsWithPunchok);
        
    
     return [
@@ -173,7 +182,7 @@ class PunchingsController extends Controller
         // The Y ( 4 digits year ) returns TRUE for any integer with any number of digits so changing the comparison from == to === fixes the issue.
         return $d && $d->format($format) === $date;
     }
-
+/*
     public function index(Request $request)
     {
         if (! Gate::allows('my_form_access')) {
@@ -244,12 +253,48 @@ class PunchingsController extends Controller
 
         return view('admin.punchings.index',compact('punchings' ));
     }
+*/
+    public function index(Request $request)
+    {
+        // abort_if(Gate::denies('punching_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+
+        if (request()->ajax()) {
+            $query = Punching::query()
+            ->orderBy('date', 'DESC');
+
+
+            $table = Datatables::of($query);
+
+            $table->setRowAttr([
+                'data-entry-id' => '{{$id}}',
+            ]);
+           
+      
+             
+            $table->addColumn('actions', '&nbsp;')->rawColumns(['actions']);;
+            $table->editColumn('actions', function ($row) {
+                $gateKey  = 'punching_';
+                $routeKey = 'admin.punchings';
+
+                return view('actionsTemplate', compact('row', 'gateKey', 'routeKey'));
+            });
+
+
+            return $table->make(true);
+        }
+
+        return view('admin.punchings.index');
+
+
+        
+    }
+
     public function create()
     {
         // abort_if(Gate::denies('punching_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
        // $forms = PunchingForm::pluck('creator', 'id')->prepend(trans('global.pleaseSelect'), '');
-
+       
         return view('admin.punchings.create');
     }
 
@@ -262,6 +307,8 @@ class PunchingsController extends Controller
 
     public function edit(Punching $punching)
     {
+
+
         // abort_if(Gate::denies('punching_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
       //  $forms = PunchingForm::pluck('creator', 'id')->prepend(trans('global.pleaseSelect'), '');
@@ -293,8 +340,7 @@ class PunchingsController extends Controller
     {
         // abort_if(Gate::denies('punching_show'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        $punching->load('form');
-
+      
         return view('admin.punchings.show', compact('punching'));
     }
 

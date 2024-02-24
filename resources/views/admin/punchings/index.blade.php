@@ -35,134 +35,40 @@
   <div class="" id="app">
     <!-- <h3 class="page-title">Search</h3> -->
      
-        <div class="">
-            Search Punching
-        </div>
-
-        <div class="">
-
-
-	<form action="" method="get" id="filter" class="form-inline">
-	       
-        <div class="form-group">     
-        <!-- 	Date <input required class="form-control" placeholder="dd-mm-yyyy" type="search" name = "datefilter" value="{{ \Request('datefilter')}}" > -->
-
-           
-                <label class="required" for="datefilter">{{ trans('cruds.calender.fields.date') }}</label>
-                <input class="form-control date {{ $errors->has('datefilter') ? 'is-invalid' : '' }}" type="text" name="datefilter" id="datefilter" value="{{ old('datefilter') }}" required>
-                @if($errors->has('date'))
-                    <span class="text-danger">{{ $errors->first('datefilter') }}</span>
-                @endif
-                
-         
-
-		</div>
-              
-
-        @if(\Auth::user()->isAdmin())
-	    	<input  class="form-control" placeholder="AttendanceId/PEN" type="text" name = "namefilter" value="{{\Request('namefilter')}}" rel="filter" autocomplete="off">
-    	@else
-    		<input  class="form-control" placeholder="AttendanceId/PEN" type="text" name = "namefilter" value="{{\Request('namefilter')}}" rel="filter" required>
-    	@endif
-    	
+ <div class=" ">
     
-
-
-    	 <!-- <input  class="form-control" placeholder="Designation" type="text" name = "desigfilter" value="{{ \Request('desigfilter')  }}" rel="filter"> -->
-
-      
-         <div class="form-group">                                
-                  
-        <!-- <input class="form-control" type="submit" value="Filter" rel="filter"> -->
-        <button type="submit" class="btn btn-primary" rel="filter"><i class="fas fa-fw  fa-search"></i></button>
-        <!-- <a href="{{url('admin/searches/')}}" data-toggle="tooltip" title="reset" class="btn btn-default pull-right"><i class="fa fa-minus-circle" aria-hidden="true"></i></a> -->
-        </div>
-    </form>
-
-
-
-    <hr>
-
-  
-    
-
-    @if( isset($punchings))
-    {!! $punchings->total() !!} Items    
-    <div class="panel-body table-responsive">
-        <table class="table table-bordered table-striped table-condensed }}">
-            <thead>
-                <tr>
-                   
-                    <th>PEN</th>
-                    <th>AttendanceId</th>
-                    <th>Duty Date</th>
-                    <th>Punchin</th>
-                    <th>Punchout</th>
-                    <th>Created by</th>
-                    <th>
-                                        &nbsp;
-                                    </th>
-                </tr>
-            </thead>
-            
-            <tbody>
-                @if( count($punchings) > 0)
-                      	@foreach ($punchings as $punching)
-                     
-			          
-                        <tr>
-
-                            <td >{{ $punching->pen }}</td>
-                            <td >{{ $punching->aadhaarid }}</td>
-                            <td >{{ $punching->date }}</td>
-                            <td >{{ $punching->punch_in }}</td>
-                            <td >{{ $punching->punch_out }}</td>
-                            <!-- <td class="small">{{ $punching->designation }}</td> -->
-                            <td >
-                           <!-- $form->creator == Auth::user()->username -->
-                               
-                               {{ $punching->creator }}
-                            
-                            </td>
-                            <td>
-                                           
-                                            
-                                                <a class="btn btn-sm btn-info" href="{{ route('admin.punchings.edit', $punching->id) }}">
-                                                    {{ trans('global.edit') }}
-                                                </a>
-                                           
-
-                                           <!-- 
-                                                <form action="{{ route('admin.punchings.destroy', $punching->id) }}" method="POST" onsubmit="return confirm('{{ trans('global.areYouSure') }}');" style="display: inline-block;">
-                                                    <input type="hidden" name="_method" value="DELETE">
-                                                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                                    <input type="submit" class="btn btn-sm btn-danger" value="{{ trans('global.delete') }}">
-                                                </form>
-                                           -->
-
-                                        </td>
-                         
-                        </tr>
-                    @endforeach
-                 
-                @else
+    <table class=" table table-borderless table-striped  ajaxTable">
+                <thead>
                     <tr>
-                        <td colspan="11">@lang('quickadmin.qa_no_entries_in_table')</td>
+                       
+                        <th>
+                            {{ trans('cruds.punching.fields.id') }}
+                        </th>
+                        <th>
+                            {{ trans('cruds.punching.fields.date') }}
+                        </th>
+                        <th>
+                            {{ trans('cruds.punching.fields.punch_in') }}
+                        </th>
+                        <th>
+                            {{ trans('cruds.punching.fields.punch_out') }}
+                        </th>
+                        <th>
+                            AttendanceId
+                        </th>
+                       
+                        <th>
+                            {{ trans('cruds.punching.fields.pen') }}
+                        </th>
+                      
+                        <th>
+                            &nbsp;
+                        </th>
                     </tr>
-                @endif
-
-                              
-
-            </tbody>
-        </table>
-
-        {!! $punchings->links() !!}          
-
-        </div>
-   
-  	@endif
-
-  
+                </thead>
+                
+            </table>
+            </div>
   </div>
   </div>
   
@@ -181,7 +87,43 @@ cannot trust form no, as a user might have started a form, but waited long to su
 
 <script type="text/javascript">
 
+// $(function () {
+//   let dtButtons = $.extend(true, [], $.fn.dataTable.defaults.buttons)
 
+//   $.extend(true, $.fn.dataTable.defaults, {
+//     orderCellsTop: true,
+//     order: [[ 1, 'desc' ]],
+//     pageLength: 100,
+//   });
+//   let table = $('.datatable-Punching:not(.ajaxTable)').DataTable({ buttons: dtButtons })
+//   $('a[data-toggle="tab"]').on('shown.bs.tab click', function(e){
+//       $($.fn.dataTable.tables(true)).DataTable()
+//           .columns.adjust();
+//   });
+  
+// })
+
+$(document).ready(function () {
+            window.dtDefaultOptions.ajax = '{!! route('admin.punchings.index') !!}';
+            window.dtDefaultOptions.columns = [
+             /*   @can('employee_delete')
+                    {data: 'massDelete', name: 'id', searchable: false, sortable: false},
+                @endcan*/
+                // {data: 'srismt', name: 'srismt'},
+                
+                {data: 'id', name: 'id'},
+                {data: 'date', name: 'date'},
+                {data: 'punch_in', name: 'punch_in'},
+                {data: 'punch_out', name: 'punch_out'},
+                {data: 'aadhaarid', name: 'aadhaarid'},
+                {data: 'pen', name: 'pen'},
+
+            
+              
+                {data: 'actions', name: 'actions', searchable: false, sortable: false}
+            ];
+            processAjaxTables();
+        });
 
 </script>
 
