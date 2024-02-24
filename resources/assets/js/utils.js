@@ -11,6 +11,8 @@ export function setEmployeeTypes(row) {
     row.isFulltime = row.category.toLowerCase().indexOf("fulltime") != -1 || 
                     row.normal_office_hours == 6;
     row.isWatchnward = row.category.toLowerCase().indexOf("watch") != -1;
+    row.isNormal = !row.isPartime && !row.isFulltime && !row.isWatchnward
+
 }
 export function stringTimeToDate(sTimeWithSemicolonSeperator) {
     var time = sTimeWithSemicolonSeperator.split(":").map(Number);
@@ -38,14 +40,14 @@ export function  checkDatesAndOT(row, data){
     const punchout = data.dates[i].punchout;
     
     if( "N/A" == punchin ){ //no punching day. NIC server down
-      data.dates[i].ot = '*'
+      data.dates[i].ot = 'Enter in OT Form'
       continue;
     }
 
     total_ot_days++;
 
-    if( !punchin || !punchout  ){ //no punching day. NIC server down
-      data.dates[i].ot = 'Not Punched?'
+    if( !punchin || !punchout  ){ //not punched
+      data.dates[i].ot = punchin || punchout ? 'Not Punched?' : 'Leave?'
       continue;
     }
 
@@ -92,4 +94,15 @@ export function  checkDatesAndOT(row, data){
   total_ot_days
  }
 
+}
+
+export function toHoursAndMinutes(totalMinutes) {
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if( hours ) return `${hours}:${padToTwoDigits(minutes)} hour`;
+  return `${minutes} min`;
+}
+
+function padToTwoDigits(num) {
+  return num.toString().padStart(2, '0');
 }

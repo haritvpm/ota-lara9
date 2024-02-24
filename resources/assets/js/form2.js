@@ -1,5 +1,5 @@
 "use strict";
-import { timePeriodIncludesPeriod, stringTimeToDate, setEmployeeTypes } from './utils.js';
+import {toHoursAndMinutes, timePeriodIncludesPeriod, stringTimeToDate, setEmployeeTypes } from './utils.js';
 
 const dateofdutyprefix = "Date of Duty";
 
@@ -418,12 +418,12 @@ var vm = new Vue({
 		},
 
 	
-		strTimesToDatesNormalized( from, to ){
+		strTimesToDatesNormalized( from, to, normalize=true ){
 			const datefrom = stringTimeToDate(from);
 			let dateto = stringTimeToDate(to);
 
 			//time after 12 am ?
-			if (dateto <= datefrom) {
+			if (normalize && dateto <= datefrom) {
 				dateto += 24 * 3600000;
 			}
 			return { datefrom, dateto }
@@ -615,14 +615,24 @@ var vm = new Vue({
 
 				//make sure our times are according to G.O
 				//note same form can have both part time and full time empl. amspkr office
+				let minscamebefore8am = 0 //only for us, not PT, FT for now
 				if (isSittingDay) {
 					if (!this.checkSittingDayTimeIsAsPerGO(row, i)) {
 						return false;
 					}
+					//if came before 8.00, adjust it to 2nd OT
+					//do it only if there is no sitting ot, because in that case, from will include before 8.00 am period
+					if( row.isNormal && row.punching  && !this.hasFirst(row.slots) ){
+						const {datefrom: punchin, dateto: eightam } =  this.strTimesToDatesNormalized(row.punchin, "08:00",false)
+						minscamebefore8am =  parseFloat((eightam - punchin) / 60000);
+						if(minscamebefore8am < 0) minscamebefore8am =0;
+					}
+
 				}
+				console.log('minscamebefore8am ' +minscamebefore8am )
 				const {datefrom, dateto }= this.strTimesToDatesNormalized(row.from, row.to)
 
-				var otmins_actual = parseFloat((dateto - datefrom) / 60000);
+				var otmins_actual = parseFloat((dateto - datefrom) / 60000) + minscamebefore8am;
 
 				//add totalhours needed
 				let otmins_practical = minot_minutes * row.slots.length; //if three OT, 3 * 2.5
@@ -637,7 +647,8 @@ var vm = new Vue({
 				//new validation after adding normal_office_hours
 				let diff = otmins_actual - otmins_practical;
 				if ( diff < 0) {
-					this.myerrors.push(`Row  ${i + 1} :Needs ${othours_ideal} hours for the selected OT(s) on a ${daytypedesc}. Diff=${Math.abs(diff)} minutes`);
+					let humandiff =  toHoursAndMinutes(Math.abs(diff))
+					this.myerrors.push(`Row  ${i + 1} :Needs ${othours_ideal} hours for the selected OT(s) on a ${daytypedesc}. Diff=${humandiff} `);
 					return false;
 				}
 
@@ -667,24 +678,24 @@ var vm = new Vue({
 					}
 				}
 
-				if (!row.isPartime && !row.isFulltime && !row.isWatchnward/*  && !isspeakeroffice */) {
+				if ( row.isNormal ) {
 					if ( isSittingDay || isWorkingDay ) {
 						//if there is second, third, but no first
 						if ( !this.hasFirst(row.slots) &&  row.slots.length) {
 							let sNormalStart = "10:15";
 							let sNormalStartWithGrace = "10:20";
 							let sNormalEnd = "17:15";
-							let sNormalEndWithGrace = "17:10";
+							let sNormalEndWithGrace = sNormalEnd//"17:10";
 							if (isSittingDay) {
 								sNormalStart = "08:00";
 								sNormalStartWithGrace = "08:05";
 								sNormalEnd = "17:30";
-								sNormalEndWithGrace = "17:25";
+								sNormalEndWithGrace = sNormalEnd//"17:25";
 							}
 							//if this slot does not contain sitting ot on a sitting day and first ot on a working day show error
 							if (
 								this.checkIf2ndOTOverlapsWithOfficeHours(datefrom, dateto, sNormalStartWithGrace, sNormalEndWithGrace)) {
-								this.myerrors.push(`Row ${i + 1} : 2nd/3rd OT cannot be between ${sNormalStart} and ${sNormalEnd} am on a ${daytypedesc}`);
+								this.myerrors.push(`Row ${i + 1} : 2nd/3rd OT cannot be between ${sNormalStart} and ${sNormalEnd} on a ${daytypedesc}`);
 								return false;
 							} 
 						}
@@ -702,7 +713,7 @@ var vm = new Vue({
 							//if this slot does not contain sitting ot on a sitting day 
 							if (
 								this.checkIf2ndOTOverlapsWithOfficeHours(datefrom, dateto, sNormalStart, sNormalEnd)) {
-								this.myerrors.push(`Row ${i + 1} : 2nd OT cannot be between ${sNormalStart} and ${sNormalEnd} am on a ${daytypedesc}`);
+								this.myerrors.push(`Row ${i + 1} : 2nd OT cannot be between ${sNormalStart} and ${sNormalEnd} on a ${daytypedesc}`);
 								return false;
 							} 
 						}

@@ -13,7 +13,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "checkDatesAndOT": () => (/* binding */ checkDatesAndOT),
 /* harmony export */   "setEmployeeTypes": () => (/* binding */ setEmployeeTypes),
 /* harmony export */   "stringTimeToDate": () => (/* binding */ stringTimeToDate),
-/* harmony export */   "timePeriodIncludesPeriod": () => (/* binding */ timePeriodIncludesPeriod)
+/* harmony export */   "timePeriodIncludesPeriod": () => (/* binding */ timePeriodIncludesPeriod),
+/* harmony export */   "toHoursAndMinutes": () => (/* binding */ toHoursAndMinutes)
 /* harmony export */ });
 function setEmployeeTypes(row) {
   if (!row.hasOwnProperty("designation") || !row.hasOwnProperty("category") || !row.hasOwnProperty("normal_office_hours")) {
@@ -23,6 +24,7 @@ function setEmployeeTypes(row) {
   row.isPartime = row.designation.toLowerCase().indexOf("part time") != -1 || row.category.toLowerCase().indexOf("parttime") != -1 || row.designation.toLowerCase().indexOf("parttime") != -1 || row.normal_office_hours == 3; //ugly
   row.isFulltime = row.category.toLowerCase().indexOf("fulltime") != -1 || row.normal_office_hours == 6;
   row.isWatchnward = row.category.toLowerCase().indexOf("watch") != -1;
+  row.isNormal = !row.isPartime && !row.isFulltime && !row.isWatchnward;
 }
 function stringTimeToDate(sTimeWithSemicolonSeperator) {
   var time = sTimeWithSemicolonSeperator.split(":").map(Number);
@@ -48,13 +50,13 @@ function checkDatesAndOT(row, data) {
     var punchout = data.dates[i].punchout;
     if ("N/A" == punchin) {
       //no punching day. NIC server down
-      data.dates[i].ot = '*';
+      data.dates[i].ot = 'Enter in OT Form';
       continue;
     }
     total_ot_days++;
     if (!punchin || !punchout) {
-      //no punching day. NIC server down
-      data.dates[i].ot = 'Not Punched?';
+      //not punched
+      data.dates[i].ot = punchin || punchout ? 'Not Punched?' : 'Leave?';
       continue;
     }
     data.dates[i].ot = 'NO';
@@ -91,6 +93,15 @@ function checkDatesAndOT(row, data) {
     modaldata: data.dates,
     total_ot_days: total_ot_days
   };
+}
+function toHoursAndMinutes(totalMinutes) {
+  var hours = Math.floor(totalMinutes / 60);
+  var minutes = totalMinutes % 60;
+  if (hours) return "".concat(hours, ":").concat(padToTwoDigits(minutes), " hour");
+  return "".concat(minutes, " min");
+}
+function padToTwoDigits(num) {
+  return num.toString().padStart(2, '0');
 }
 
 /***/ })

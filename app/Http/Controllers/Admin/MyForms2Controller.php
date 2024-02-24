@@ -640,7 +640,7 @@ class MyForms2Controller extends Controller
             }
 
             //all ots for this particular employee only
-            $emp = $res->reject(function($element) use ($pen) {
+            $emp_ots = $res->reject(function($element) use ($pen) {
                 //return strpos($element['pen'], $pen) === false;
                 return strncasecmp($element['pen'], $pen, strlen($pen)) != 0;
             });
@@ -648,7 +648,7 @@ class MyForms2Controller extends Controller
                     
            
             $otcount = 0;
-            $emp->each(function ($element) use ($request, $overtime,&$myerrors,&$otcount) {
+            $emp_ots->each(function ($element) use ($request, $overtime,&$myerrors,&$otcount) {
                 // \Log::info(explode(';', $element->slots));
                 // \Log::info($overtime['slots']);
                 $common = array_intersect( explode(';', $element->slots), $overtime['slots']);
@@ -679,7 +679,7 @@ class MyForms2Controller extends Controller
            [$timefrom_comp, $timeto_comp] = $strtimes_totimestamps( $overtime['from'], $overtime['to']);
 
             //check overlap with other OTS of this day for this employee
-            foreach ($emp as $e) {
+            foreach ($emp_ots as $e) {
           
                 [$timefrom, $timeto] = $strtimes_totimestamps($e['from'], $e['to']);
 
@@ -714,7 +714,7 @@ class MyForms2Controller extends Controller
        
             if( $mins_forthisOT <  $needed_mins_forthisOT){
                 //check grace time by adding times for all OTs.
-                $total_time_allotherOTs = $emp->sum(function ($ot) use($strtimes_totimestamps) {
+                $total_time_allotherOTs = $emp_ots->sum(function ($ot) use($strtimes_totimestamps) {
                     [$timefrom_thisOT, $timeto_thisOT] = $strtimes_totimestamps( $ot['from'],$ot['to']);
                     return ceil(abs($timeto_thisOT - $timefrom_thisOT) / 60);
                 });
@@ -723,7 +723,15 @@ class MyForms2Controller extends Controller
             //check if time is within punching time
             //todo get actual time from db, to prevent fronend tampering
             if($overtime['punching'] &&  $calender_day->punching == 'AEBAS'){
-                [$punchin, $punchout] = $strtimes_totimestamps( $overtime['punchin'], $overtime['punchout']);
+                $aadhaarid = $overtime['aadhaarid'];
+                $pquery = Punching::where('date',$date);
+                $pquery->when( $aadhaarid && strlen($aadhaarid) >= 8, function ($q)  use ($aadhaarid){
+                    return $q->where('aadhaarid',$aadhaarid);
+                });
+                $punch = $pquery->first(); 
+                Log::info($punch);
+                [$punchin, $punchout] = $strtimes_totimestamps( $punch['punch_in'], $punch['punch_out']);
+
                 if( !$punchin || !$punchout || !$timefrom_comp || !$timeto_comp ){
                         array_push($myerrors, $overtime['name'] . ' -' . $overtime['pen'] . ' : Invalid times');
                         return null;

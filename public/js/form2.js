@@ -13,7 +13,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "checkDatesAndOT": () => (/* binding */ checkDatesAndOT),
 /* harmony export */   "setEmployeeTypes": () => (/* binding */ setEmployeeTypes),
 /* harmony export */   "stringTimeToDate": () => (/* binding */ stringTimeToDate),
-/* harmony export */   "timePeriodIncludesPeriod": () => (/* binding */ timePeriodIncludesPeriod)
+/* harmony export */   "timePeriodIncludesPeriod": () => (/* binding */ timePeriodIncludesPeriod),
+/* harmony export */   "toHoursAndMinutes": () => (/* binding */ toHoursAndMinutes)
 /* harmony export */ });
 function setEmployeeTypes(row) {
   if (!row.hasOwnProperty("designation") || !row.hasOwnProperty("category") || !row.hasOwnProperty("normal_office_hours")) {
@@ -23,6 +24,7 @@ function setEmployeeTypes(row) {
   row.isPartime = row.designation.toLowerCase().indexOf("part time") != -1 || row.category.toLowerCase().indexOf("parttime") != -1 || row.designation.toLowerCase().indexOf("parttime") != -1 || row.normal_office_hours == 3; //ugly
   row.isFulltime = row.category.toLowerCase().indexOf("fulltime") != -1 || row.normal_office_hours == 6;
   row.isWatchnward = row.category.toLowerCase().indexOf("watch") != -1;
+  row.isNormal = !row.isPartime && !row.isFulltime && !row.isWatchnward;
 }
 function stringTimeToDate(sTimeWithSemicolonSeperator) {
   var time = sTimeWithSemicolonSeperator.split(":").map(Number);
@@ -48,13 +50,13 @@ function checkDatesAndOT(row, data) {
     var punchout = data.dates[i].punchout;
     if ("N/A" == punchin) {
       //no punching day. NIC server down
-      data.dates[i].ot = '*';
+      data.dates[i].ot = 'Enter in OT Form';
       continue;
     }
     total_ot_days++;
     if (!punchin || !punchout) {
-      //no punching day. NIC server down
-      data.dates[i].ot = 'Not Punched?';
+      //not punched
+      data.dates[i].ot = punchin || punchout ? 'Not Punched?' : 'Leave?';
       continue;
     }
     data.dates[i].ot = 'NO';
@@ -91,6 +93,15 @@ function checkDatesAndOT(row, data) {
     modaldata: data.dates,
     total_ot_days: total_ot_days
   };
+}
+function toHoursAndMinutes(totalMinutes) {
+  var hours = Math.floor(totalMinutes / 60);
+  var minutes = totalMinutes % 60;
+  if (hours) return "".concat(hours, ":").concat(padToTwoDigits(minutes), " hour");
+  return "".concat(minutes, " min");
+}
+function padToTwoDigits(num) {
+  return num.toString().padStart(2, '0');
 }
 
 /***/ })
@@ -504,11 +515,12 @@ var vm = new Vue({
     }
     return true;
   }), _defineProperty(_methods, "strTimesToDatesNormalized", function strTimesToDatesNormalized(from, to) {
+    var normalize = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
     var datefrom = (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.stringTimeToDate)(from);
     var dateto = (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.stringTimeToDate)(to);
 
     //time after 12 am ?
-    if (dateto <= datefrom) {
+    if (normalize && dateto <= datefrom) {
       dateto += 24 * 3600000;
     }
     return {
@@ -670,15 +682,26 @@ var vm = new Vue({
 
       //make sure our times are according to G.O
       //note same form can have both part time and full time empl. amspkr office
+      var minscamebefore8am = 0; //only for us, not PT, FT for now
       if (isSittingDay) {
         if (!this.checkSittingDayTimeIsAsPerGO(row, i)) {
           return false;
         }
+        //if came before 8.00, adjust it to 2nd OT
+        //do it only if there is no sitting ot, because in that case, from will include before 8.00 am period
+        if (row.isNormal && row.punching && !this.hasFirst(row.slots)) {
+          var _this$strTimesToDates3 = this.strTimesToDatesNormalized(row.punchin, "08:00", false),
+            punchin = _this$strTimesToDates3.datefrom,
+            eightam = _this$strTimesToDates3.dateto;
+          minscamebefore8am = parseFloat((eightam - punchin) / 60000);
+          if (minscamebefore8am < 0) minscamebefore8am = 0;
+        }
       }
-      var _this$strTimesToDates3 = this.strTimesToDatesNormalized(row.from, row.to),
-        datefrom = _this$strTimesToDates3.datefrom,
-        dateto = _this$strTimesToDates3.dateto;
-      var otmins_actual = parseFloat((dateto - datefrom) / 60000);
+      console.log('minscamebefore8am ' + minscamebefore8am);
+      var _this$strTimesToDates4 = this.strTimesToDatesNormalized(row.from, row.to),
+        datefrom = _this$strTimesToDates4.datefrom,
+        dateto = _this$strTimesToDates4.dateto;
+      var otmins_actual = parseFloat((dateto - datefrom) / 60000) + minscamebefore8am;
 
       //add totalhours needed
       var otmins_practical = minot_minutes * row.slots.length; //if three OT, 3 * 2.5
@@ -693,7 +716,8 @@ var vm = new Vue({
       //new validation after adding normal_office_hours
       var diff = otmins_actual - otmins_practical;
       if (diff < 0) {
-        this.myerrors.push("Row  ".concat(i + 1, " :Needs ").concat(othours_ideal, " hours for the selected OT(s) on a ").concat(daytypedesc, ". Diff=").concat(Math.abs(diff), " minutes"));
+        var humandiff = (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.toHoursAndMinutes)(Math.abs(diff));
+        this.myerrors.push("Row  ".concat(i + 1, " :Needs ").concat(othours_ideal, " hours for the selected OT(s) on a ").concat(daytypedesc, ". Diff=").concat(humandiff, " "));
         return false;
       }
 
@@ -721,23 +745,23 @@ var vm = new Vue({
           }
         }
       }
-      if (!row.isPartime && !row.isFulltime && !row.isWatchnward /*  && !isspeakeroffice */) {
+      if (row.isNormal) {
         if (isSittingDay || isWorkingDay) {
           //if there is second, third, but no first
           if (!this.hasFirst(row.slots) && row.slots.length) {
             var sNormalStart = "10:15";
             var sNormalStartWithGrace = "10:20";
             var sNormalEnd = "17:15";
-            var sNormalEndWithGrace = "17:10";
+            var sNormalEndWithGrace = sNormalEnd; //"17:10";
             if (isSittingDay) {
               sNormalStart = "08:00";
               sNormalStartWithGrace = "08:05";
               sNormalEnd = "17:30";
-              sNormalEndWithGrace = "17:25";
+              sNormalEndWithGrace = sNormalEnd; //"17:25";
             }
             //if this slot does not contain sitting ot on a sitting day and first ot on a working day show error
             if (this.checkIf2ndOTOverlapsWithOfficeHours(datefrom, dateto, sNormalStartWithGrace, sNormalEndWithGrace)) {
-              this.myerrors.push("Row ".concat(i + 1, " : 2nd/3rd OT cannot be between ").concat(sNormalStart, " and ").concat(sNormalEnd, " am on a ").concat(daytypedesc));
+              this.myerrors.push("Row ".concat(i + 1, " : 2nd/3rd OT cannot be between ").concat(sNormalStart, " and ").concat(sNormalEnd, " on a ").concat(daytypedesc));
               return false;
             }
           }
@@ -754,7 +778,7 @@ var vm = new Vue({
           var _sNormalEnd = "11:30";
           //if this slot does not contain sitting ot on a sitting day 
           if (this.checkIf2ndOTOverlapsWithOfficeHours(datefrom, dateto, _sNormalStart, _sNormalEnd)) {
-            this.myerrors.push("Row ".concat(i + 1, " : 2nd OT cannot be between ").concat(_sNormalStart, " and ").concat(_sNormalEnd, " am on a ").concat(daytypedesc));
+            this.myerrors.push("Row ".concat(i + 1, " : 2nd OT cannot be between ").concat(_sNormalStart, " and ").concat(_sNormalEnd, " on a ").concat(daytypedesc));
             return false;
           }
         }
