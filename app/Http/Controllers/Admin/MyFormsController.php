@@ -840,42 +840,7 @@ class MyFormsController extends Controller
             return $form->id;
         });
 
-        try  {
-        //using try catch because this can cause exception if we try to save a 2nd form during manual edit of punching times
-           
-            $date = Carbon::createFromFormat(config('app.date_format'), $request['duty_date'])->format('Y-m-d');
-            //also save punchtime to punching table if this is manual entry day
-            $calenderdate = Calender::where('date', $date)->first();
-
-            if( $calenderdate?->punching == 'MANUALENTRY' ){
-                             
-                $collection = collect($overtimes);
-
-                $punchtimes =  $collection->map( function($overtime) use ($date) {
-                // date shoulbe in 'Y-m-d', because insert/createMany of laravel is undefined.
-                //so we have to use Punching::insert which does not call our Model's setDateAttribute
-                    return [
-                      //  'session' => $request['session'],
-                        'creator' => \Auth::user()->username,
-                        'date'  => $date,
-                        'pen'  => $overtime['pen'],
-                        'aadhaarid'  => '-', //composite keys wont work if we give null. so something else
-                        'name'  => $overtime['name'],
-                        'punch_in'  => $overtime['punchin'],
-                        'punch_out' => $overtime['punchout'],
-                        
-                    ];
-                } );
-                \App\Punching::insert($punchtimes->toArray());
-
-            }
-        } catch(Exception $e){
-        
-            //do nothing. as this may be due to an already existing punching in db for the date and PEN composite key
-          
-        }
-
-       
+               
         $request->session()->flash('message-success', 'Created form no:' . $formid ); 
         
         return response()->json([
@@ -996,49 +961,6 @@ class MyFormsController extends Controller
             return $form->id;
 
         });
-
-        //update ot times if user is the one who created it in the first place
-        //using try catch because this can cause exception if we try to save a 2nd form during manual edit of punching times
-        try  {
-
-            $date = Carbon::createFromFormat(config('app.date_format'), $request['duty_date'])->format('Y-m-d');
-
-            //also save punchtime to punching table
-            $calenderdate = Calender::where('date',$date)->first();
-            
-            if( $calenderdate?->punching == 'MANUALENTRY' )
-            {
-                $collection = collect($overtimes);
-
-                $punchtimes =  $collection->map( function($overtime) use ($date) {
-                //date has  to be 'Y-m-d' here, because createMany of laravel is undefined.
-                //so we have to use Punching::upsert which does not call our Model's setDateAttribute
-
-                    return [
-                     //   'session' => $request['session'],
-                        'creator' => \Auth::user()->username,
-                        'date'  => $date,
-                        'pen'  => $overtime['pen'],
-                        'name'  => $overtime['name'],
-                        'aadhaarid'  => '-', //date-aadhaarid-pen composite keys wont work if we give null. so something else
-                        'punch_in'  => $overtime['punchin'],
-                        'punch_out' => $overtime['punchout'],
-                        'punching_id' => $overtime['punching_id'],
-                        
-                    ];
-                } );
-                // the second argument lists the column(s) that uniquely identify records within the associated table. The method's third and final argument is an array of the columns that should be updated if a matching record already exists in the database.
-                //only allow punching time update if it was the original section whose data we saved.
-                //this does not affect ot form as they have their own
-                \App\Punching::upsert($punchtimes->toArray(), ['date', 'pen', 'creator','punching_id'], ['punch_in', 'punch_out']);
-            }
-
-        } catch(Exception $e){
-        
-            //do nothing. as this may be due to an already existing punching in db for the date and PEN composite key
-          
-        }
-        
 
         $request->session()->flash('message-success', 'Updated form-no: ' . $formid ); 
 

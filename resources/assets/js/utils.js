@@ -41,8 +41,10 @@ export function  checkDatesAndOT(row, data){
     
     if( "N/A" == punchin ){ //no punching day. NIC server down
       data.dates[i].ot = 'Enter in OT Form'
+      data.dates[i].otna = true
       continue;
     }
+    data.dates[i].otna = false
 
     total_ot_days++;
 

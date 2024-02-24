@@ -1,5 +1,5 @@
 <template id="my-modal">
-    <div class="modal fade" id="reject" role="dialog">
+    <div class="modal fade" id="sittingotmodal" role="dialog">
 	    <div class="modal-dialog">
 	      <div class="modal-content">
 	        <div class="modal-header">
@@ -20,12 +20,12 @@
               </tr>
             </thead>
             <tbody>
-            <tr v-for="(item, index) in modaldata" :key="item.date">
+            <tr v-bind:class="{'table-secondary' : item.otna }" v-for="(item, index) in modaldata" :key="item.date">
               <td>@{{ index+1}}</td>
               <td>@{{ item.date }}</td>
               <td>@{{ item.punchin }}</td>
               <td>@{{ item.punchout }}</td>
-              <td>@{{ item.ot }}</td>
+              <td >@{{ item.ot }}</td>
             </tr>
             
             </tbody>

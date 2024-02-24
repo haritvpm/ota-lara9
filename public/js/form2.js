@@ -51,8 +51,10 @@ function checkDatesAndOT(row, data) {
     if ("N/A" == punchin) {
       //no punching day. NIC server down
       data.dates[i].ot = 'Enter in OT Form';
+      data.dates[i].otna = true;
       continue;
     }
+    data.dates[i].otna = false;
     total_ot_days++;
     if (!punchin || !punchout) {
       //not punched
@@ -260,7 +262,7 @@ var vm = new Vue({
       //we can in the future add an option for users to check days they were present in sitting form
       //for now, this is a workaround
 
-      var isNoPunchingDay = this.form.duty_date && calenderdaypunching[this.form.duty_date] === 'NOPUNCHING';
+      var isNoPunchingDay = this.form.duty_date && (calenderdaypunching[this.form.duty_date] === 'NOPUNCHING' || calenderdaypunching[this.form.duty_date] === 'MANUALENTRY');
       if (!ispartimefulltime) {
         switch (calenderdaysmap[this.form.duty_date]) {
           case 'Sitting day':
@@ -292,7 +294,8 @@ var vm = new Vue({
     },
     allowPunchingEntry: function allowPunchingEntry() {
       //if date is not set, make punching true or copytonewform will have punching readonly
-      return this.form.duty_date ? calenderdaypunching[this.form.duty_date] === 'MANUALENTRY' : true;
+      var wholedayallow = this.form.duty_date ? calenderdaypunching[this.form.duty_date] === 'MANUALENTRY' : true;
+      return wholedayallow;
     }
   },
   watch: {},
@@ -334,6 +337,10 @@ var vm = new Vue({
       if (this.form.duty_date != "" && this.form.duty_date != null) {
         if (e.oldDate != e.date) {
           this.fetchPunching();
+          //clear all slots
+          for (var i = 0; i < this.form.overtimes.length; i++) {
+            this.form.overtimes[i].slots = [];
+          }
         }
       }
     },
@@ -484,6 +491,8 @@ var vm = new Vue({
     row.punchin = "";
     row.punchout = "";
     row.punching_id = null;
+    row.punchin_from_aebas = false;
+    row.punchout_from_aebas = false;
     if (self.dayHasPunching && row.punching) {
       axios.get(urlajaxgetpunchtimes + "/" + self.form.duty_date + "/" + row.pen + "/" + row.aadhaarid).then(function (response) {
         //console.log(response);
@@ -493,6 +502,8 @@ var vm = new Vue({
           row.punchout = response.data.punchout;
           row.aadhaarid = response.data.aadhaarid;
           row.punching_id = response.data.id;
+          row.punchin_from_aebas = response.data.punchin_from_aebas == 1;
+          row.punchout_from_aebas = response.data.punchout_from_aebas == 1;
           //vue does not update time if we change date as it does not watch for array changes
           //https://v2.vuejs.org/v2/guide/reactivity#Change-Detection-Caveats
           Vue.set(_this3.form.overtimes, index, row);
@@ -1020,6 +1031,7 @@ var vm = new Vue({
             employee_id: obj[key].employee_id,
             punching: obj[key].punching,
             normal_office_hours: obj[key].normal_office_hours,
+            aadhaarid: obj[key].aadhaarid,
             slots: []
           });
           index = self.form.overtimes.length - 1;

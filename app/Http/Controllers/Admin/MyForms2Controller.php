@@ -495,6 +495,17 @@ class MyForms2Controller extends Controller
                     $item['punching'] = $item?->employee->categories?->punching &&
                                         $item?->employee->designation->punching && $item?->employee->punching;
                     $item['slots'] =  explode(';',  $item->slots);
+                    //if there is punching id, load punching time readlonly too
+
+                    if( $item['punching_id']  ){
+                        $punch = Punching::find($item['punching_id'] );
+                        if($punch){
+                            $item['punchin_from_aebas'] = $punch->punchin_from_aebas == 1;
+                            $item['punchout_from_aebas'] =  $punch->punchout_from_aebas == 1;
+                        }
+                    }
+
+                  
                     
                     return $item;
                                     
@@ -729,7 +740,7 @@ class MyForms2Controller extends Controller
                     return $q->where('aadhaarid',$aadhaarid);
                 });
                 $punch = $pquery->first(); 
-                Log::info($punch);
+                // Log::info($punch);
                 [$punchin, $punchout] = $strtimes_totimestamps( $punch['punch_in'], $punch['punch_out']);
 
                 if( !$punchin || !$punchout || !$timefrom_comp || !$timeto_comp ){
@@ -826,6 +837,7 @@ class MyForms2Controller extends Controller
             return $form->id;
         });
 
+        /* no saving manual punch times
         try  {
         //using try catch because this can cause exception if we try to save a 2nd form during manual edit of punching times
            
@@ -863,10 +875,9 @@ class MyForms2Controller extends Controller
 
             }
         } catch(Exception $e){
-        
             //do nothing. as this may be due to an already existing punching in db for the date and PEN composite key
-          
         }
+        */
 
        
         $request->session()->flash('message-success', 'Created form no:' . $formid ); 
@@ -991,6 +1002,7 @@ class MyForms2Controller extends Controller
 
         });
 
+        /* NO updating manual time
         //update ot times if user is the one who created it in the first place
         //using try catch because this can cause exception if we try to save a 2nd form during manual edit of punching times
         //try  
@@ -1032,10 +1044,9 @@ class MyForms2Controller extends Controller
         }
         // catch(Exception $e)
         {
-        
             //do nothing. as this may be due to an already existing punching in db for the date and PEN composite key
-          
         }
+        */
         
 
         $request->session()->flash('message-success', 'Updated form-no: ' . $formid ); 
@@ -1300,9 +1311,8 @@ class MyForms2Controller extends Controller
         return [$isPartime,$isFulltime,  $isWatchnward,  $isNormal];
     }
 
-    private function getPunchingDataForEmp($calenderdays_in_range, $pen, $aadhaarid)
+    private function checkPunchingDataForEmp($calenderdays_in_range, $pen, $aadhaarid)
     {
-        $punchings = [];
         $sittingsWithMinHoursSatisfied = 0; 
         $sittingsWithTimeSatisfied = 0; 
         $sittingsWithPunchok= 0;
@@ -1321,7 +1331,7 @@ class MyForms2Controller extends Controller
             // Log::info($isFulltime);
             // Log::info($isPartime);
 
-            if( $day->punching == 'NOPUNCHING' ){
+            if( $day->punching !== 'AEBAS' ){
                // $sittingsWithNoPunching++; 
                 continue;
             }
@@ -1341,12 +1351,7 @@ class MyForms2Controller extends Controller
            
             if($temp ){
                 $sittingsWithPunchok++; 
-                $punchings[] = [
-                    'punchin' => $temp['punch_in'],
-                    'punchout' => $temp['punch_out'],
-                ];
-                // Log::info($temp);
-
+               
                 $minutesreq = $emp->designation->normal_office_hours*60 + 150 - 10; //leeway 10 min
 
                 $strtimes_totimestamps = function ( $from, $to )  {
@@ -1388,7 +1393,7 @@ class MyForms2Controller extends Controller
             } 
         }
 
-        return [ $punchings, $sittingsWithPunchok, $sittingsWithMinHoursSatisfied, $sittingsWithTimeSatisfied ];
+        return [ $sittingsWithPunchok, $sittingsWithMinHoursSatisfied, $sittingsWithTimeSatisfied ];
 
     }
     public function createovertimes_sitting( Request $request, &$myerrors, $formid=null)
@@ -1573,7 +1578,7 @@ class MyForms2Controller extends Controller
 
             //new check punching times
             if( $overtime['punching'] == true ) {
-                [ $punchings, $sittingsWithPunchok, $sittingsWithMinHoursSatisfied, $sittingsWithTimeSatisfied ] = $this->getPunchingDataForEmp($calenderdays_in_range, $overtime['pen'], $overtime['aadhaarid']);
+                [ $sittingsWithPunchok, $sittingsWithMinHoursSatisfied, $sittingsWithTimeSatisfied ] = $this->checkPunchingDataForEmp($calenderdays_in_range, $overtime['pen'], $overtime['aadhaarid']);
                 //we need to also check time within 8 -> 5 but dont know how much luft. partime is ok
                 
                 if( $overtime['count'] > $sittingsWithPunchok ){

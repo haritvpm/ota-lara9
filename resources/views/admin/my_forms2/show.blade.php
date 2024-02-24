@@ -346,7 +346,7 @@ th{
                     @if ($overtime?->punching)
                     <button v-if="" class="btn btn-sm btn-dark"  @click.prevent="showSittingOTs('{{$overtime}}')"><i class="fas fa-fingerprint"></i> </button>
                     @endif
-                    <a id="modalOpenBtn" hidden  href="#reject" role="button" data-toggle="modal"><i class="fas fa-fingerprint"></i> </a>
+                    <a id="modalOpenBtn" hidden  href="#sittingotmodal" role="button" data-toggle="modal"><i class="fas fa-fingerprint"></i> </a>
                     </td>
                     <!-- <td field-key='worknature'> <small> {{ $overtime->worknature }}</small></td> -->
                     @else

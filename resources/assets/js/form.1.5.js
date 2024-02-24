@@ -123,6 +123,7 @@ var vm = new Vue({
 		},
 		dayHasPunching: function () {
 			return calenderdaypunching[this.form.duty_date] !== 'NOPUNCHING' || calenderdaypunching[this.form.duty_date] == '' 
+			
 		},
 		allowPunchingEntry: function () {
 			return this.form.duty_date ? calenderdaypunching[this.form.duty_date] === 'MANUALENTRY' : false

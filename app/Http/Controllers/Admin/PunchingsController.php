@@ -55,11 +55,11 @@ class PunchingsController extends Controller
     $dates = [];
     foreach ($sittingsInRange as $day) {
 // $date = Carbon::createFromFormat($dateformatwithoutime, $day->date)->format('Y-m-d');
-        if( $day->punching == 'NOPUNCHING' ){
+        if( $day->punching !== 'AEBAS' ){
             $sittingsWithNoPunching++; 
             $dates[] = [
                 'date' =>  $day->date, 
-                'ot'   => "*",//'Punching excused for all. Use DutyForm to enter for the day',
+                'ot'   => "*",//'Punching excused Use DutyForm to enter for the day',
                 'punchin' => "N/A",
                 'punchout' => "N/A",
             ];
@@ -158,6 +158,9 @@ class PunchingsController extends Controller
             'punchout' => $temp['punch_out'],
             'creator' => $temp['creator'],
             'aadhaarid' => $temp['aadhaarid'],
+            'punchout_from_aebas'=> $temp['punchout_from_aebas'],
+            'punchin_from_aebas'=> $temp['punchin_from_aebas'],
+
             'id' => $temp['id']
         ];
     } else return [];

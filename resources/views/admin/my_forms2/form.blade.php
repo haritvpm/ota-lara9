@@ -99,11 +99,11 @@
 					
 					
 					<td v-show="dayHasPunching" class="col-md-1">
-					<input  :name="'punchin[' + index + ']'" type="text" v-model="row.punchin" required class="form-control" :disabled="!dayHasPunching || !row.punching" :readonly="!allowPunchingEntry" autocomplete="off">
+					<input  :name="'punchin[' + index + ']'" type="text" v-model="row.punchin" required class="form-control" :disabled="!dayHasPunching || !row.punching" :readonly="!allowPunchingEntry || row.punchin_from_aebas" autocomplete="off">
 					</td>
 					
 					<td v-show="dayHasPunching" class="col-md-1">
-					<input  :name="'punchout[' + index + ']'" type="text" v-model="row.punchout" required class="form-control" :disabled="!dayHasPunching || !row.punching" :readonly="!allowPunchingEntry"  autocomplete="off">
+					<input  :name="'punchout[' + index + ']'" type="text" v-model="row.punchout" required class="form-control" :disabled="!dayHasPunching || !row.punching" :readonly="!allowPunchingEntry || row.punchout_from_aebas"  autocomplete="off">
 					</td>
 				
 

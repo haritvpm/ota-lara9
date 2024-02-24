@@ -123,8 +123,8 @@
 
 						<!-- <button v-if="row.punching && row.pen" :disabled='!row.from || !row.to' class="btn btn-sm btn-dark" id="show-modal" @click.prevent="showSittingOTs(index);"><i class="fas fa-fingerprint"></i>  </button> -->
 						
-						<a v-if="row.punching && row.pen"  :disabled='!row.from || !row.to'  href="#reject" role="button" class="btn btn-sm btn-dark" @click.prevent="showSittingOTs(index);"><i class="fas fa-fingerprint"></i> </a>
-						<a id="modalOpenBtn" hidden  href="#reject" role="button" data-toggle="modal"><i class="fas fa-fingerprint"></i> </a>
+						<a v-if="row.punching && row.pen"  :disabled='!row.from || !row.to'  href="#sittingotmodal" role="button" class="btn btn-sm btn-dark" @click.prevent="showSittingOTs(index);"><i class="fas fa-fingerprint"></i> </a>
+						<a id="modalOpenBtn" hidden  href="#sittingotmodal" role="button" data-toggle="modal"><i class="fas fa-fingerprint"></i> </a>
 					
 						</div>
 					</div>
