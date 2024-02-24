@@ -182,85 +182,31 @@ class PunchingsController extends Controller
         // The Y ( 4 digits year ) returns TRUE for any integer with any number of digits so changing the comparison from == to === fixes the issue.
         return $d && $d->format($format) === $date;
     }
-/*
-    public function index(Request $request)
-    {
-        if (! Gate::allows('my_form_access')) {
-            return abort(401);
-        }
-        
-   
-        // $sessions = \App\Session::query();
 
-        // if( \Auth::user()->isAdmin() ){
-        //     $sessions =  $sessions->orderby('id','desc')->pluck('name');;
-        // }
-        // else{
-        //     $sessions =  $sessions->whereshowInDatatable('Yes')->orderby('id','desc')->pluck('name');
-        // }
-         
-        // if(!$request->filled('session'))
-        // {            
-        // 	return view('admin.punchings.index',compact('sessions'));
-        // }
-
-        // $str_sessionfilter = null;                 
-        // $str_datefilter = null;
-        // $str_namefilter = null;
-        // $session = $request->query('session');
-        $datefilter=  $request->query('datefilter');
-        $namefilter=  $request->query('namefilter');
-
-            
-        // $punchings = Punching::where('session',$session);
-        $punchings = Punching::query();
-
-          
-        // if ($request->filled('session')){
-                  
-        //     $punchings = $punchings->where( 'session',$session);
-			               		
-
-        //     $str_sessionfilter = '&session='.$session;
-        // }
-        
-        if ($request->filled('datefilter')){
-            $date =  $datefilter;
-           
-            if(!$this->validateDate( $datefilter, 'Y-m-d')){
-                $date = Carbon::createFromFormat(config('app.date_format'), $datefilter)->format('Y-m-d');
-            }
-                  
-            $punchings = $punchings->where( 'date',$date);
-			               		
-
-           // $str_datefilter = '&datefilter='.$datefilter;
-        } else {
-            $punchings = $punchings->where( 'date','0000-00-00');
-        }
-
-        
-        if ($request->filled('namefilter')){
-                    
-            $punchings = $punchings->where( function ($query) use ($namefilter) {
-                $query->where('pen','like', '%' . $namefilter.'%' )
-                    ->orwhere('aadhaarid','like', '%' . $namefilter.'%' ) ;
-            });
-        
-        }
-        
-        $punchings =  $punchings->paginate(10)->appends($request->except('page'));
-
-        return view('admin.punchings.index',compact('punchings' ));
-    }
-*/
     public function index(Request $request)
     {
         // abort_if(Gate::denies('punching_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         if (request()->ajax()) {
-            $query = Punching::query()
-            ->orderBy('date', 'DESC');
+            //Log::info($request);
+            $query = Punching::query();
+
+             
+            if ($request->filled('datefilter')){
+                $date =  $request->query('datefilter');
+            
+                if(!$this->validateDate( $date, 'Y-m-d')){
+                    $date = Carbon::createFromFormat(config('app.date_format'), $date)->format('Y-m-d');
+                }
+                    
+                $query = $query->where( 'date',$date);
+             }
+				
+
+           // $str_datefilter = '&datefilter='.$datefilter;
+        
+            
+           $query = $query->orderBy('date', 'DESC');
 
 
             $table = Datatables::of($query);

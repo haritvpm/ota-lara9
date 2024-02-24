@@ -192,7 +192,7 @@ var vm = new Vue({
    
 			if(row.pen == "" || !self.form.session || !row.from || !row.to){ 
       
-        console.log(self.form.session | row.from | row.to)  
+       // console.log(self.form.session | row.from | row.to)  
         return
       };
 
@@ -203,7 +203,7 @@ var vm = new Vue({
 			axios.get(`${urlajaxgetpunchsittings}/${self.form.session}/${row.from}/${row.to}/${row.pen}/${row.aadhaarid}`)
 					.then((response) => {
 					
-						console.log(response);
+						//console.log(response);
 						if (response.data) {
               //todo ask if unpresent dates where present
               setEmployeeTypes(row);

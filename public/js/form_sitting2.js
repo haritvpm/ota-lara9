@@ -324,7 +324,7 @@ var vm = new Vue({
       var self = this;
       var row = self.form.overtimes[index];
       if (row.pen == "" || !self.form.session || !row.from || !row.to) {
-        console.log(self.form.session | row.from | row.to);
+        // console.log(self.form.session | row.from | row.to)  
         return;
       }
       ;
@@ -332,7 +332,7 @@ var vm = new Vue({
       self.modaldata_totalOT = 0;
       self.modaldata_empl = row.pen;
       axios.get("".concat(urlajaxgetpunchsittings, "/").concat(self.form.session, "/").concat(row.from, "/").concat(row.to, "/").concat(row.pen, "/").concat(row.aadhaarid)).then(function (response) {
-        console.log(response);
+        //console.log(response);
         if (response.data) {
           //todo ask if unpresent dates where present
           (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.setEmployeeTypes)(row);

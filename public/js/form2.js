@@ -708,7 +708,7 @@ var vm = new Vue({
           if (minscamebefore8am < 0) minscamebefore8am = 0;
         }
       }
-      console.log('minscamebefore8am ' + minscamebefore8am);
+      //console.log('minscamebefore8am ' +minscamebefore8am )
       var _this$strTimesToDates4 = this.strTimesToDatesNormalized(row.from, row.to),
         datefrom = _this$strTimesToDates4.datefrom,
         dateto = _this$strTimesToDates4.dateto;
@@ -1040,7 +1040,7 @@ var vm = new Vue({
       }
     }
   }), _defineProperty(_methods, "copytimedownonerow", function copytimedownonerow() {
-    console.log("copytimedownonerow");
+    //console.log("copytimedownonerow");
     for (var i = 0; i < this.form.overtimes.length - 1; i++) {
       if (this.form.overtimes[i].from != "" && this.form.overtimes[i].to != "" && this.form.overtimes[i + 1].from == "" && this.form.overtimes[i + 1].to == "") {
         this.form.overtimes[i + 1].from = this.form.overtimes[i].from;

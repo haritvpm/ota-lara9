@@ -642,7 +642,7 @@ var vm = new Vue({
 					}
 
 				}
-				console.log('minscamebefore8am ' +minscamebefore8am )
+				//console.log('minscamebefore8am ' +minscamebefore8am )
 				const {datefrom, dateto }= this.strTimesToDatesNormalized(row.from, row.to)
 
 				var otmins_actual = parseFloat((dateto - datefrom) / 60000) + minscamebefore8am;
@@ -1026,7 +1026,7 @@ var vm = new Vue({
 		}, //loadpresetdata
 
 		copytimedownonerow() {
-			console.log("copytimedownonerow");
+			//console.log("copytimedownonerow");
 			for (var i = 0; i < this.form.overtimes.length - 1; i++) {
 				if (
 					this.form.overtimes[i].from != "" &&

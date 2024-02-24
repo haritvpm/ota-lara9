@@ -104,7 +104,15 @@ cannot trust form no, as a user might have started a form, but waited long to su
 // })
 
 $(document).ready(function () {
-            window.dtDefaultOptions.ajax = '{!! route('admin.punchings.index') !!}';
+    const urlParams = new URLSearchParams(window.location.search);
+    const myParam = urlParams.get('datefilter');
+
+            window.dtDefaultOptions.ajax = {
+                url: '{!! route('admin.punchings.index') !!}',
+                data: {
+                    datefilter: myParam
+                }
+            } 
             window.dtDefaultOptions.columns = [
              /*   @can('employee_delete')
                     {data: 'massDelete', name: 'id', searchable: false, sortable: false},
