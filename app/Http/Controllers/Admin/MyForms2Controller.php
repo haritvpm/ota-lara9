@@ -845,14 +845,21 @@ class MyForms2Controller extends Controller
                         'creator' => \Auth::user()->username,
                         'date'  => $date,
                         'pen'  => $overtime['pen'],
-                        'aadhaarid'  => '-', //composite keys wont work if we give null. so something else
+                        'aadhaarid'  => $overtime['aadhaarid'], //composite keys wont work if we give null. so something else
                         'name'  => $overtime['name'],
                         'punch_in'  => $overtime['punchin'],
                         'punch_out' => $overtime['punchout'],
                         
                     ];
                 } );
-                \App\Punching::insert($punchtimes->toArray());
+                
+                $punchtimes->filter( function ($overtime) {
+                    return $overtime['aadhaarid'];
+                });
+
+                if($punchtimes->count()) {
+                    Punching::insert($punchtimes->toArray());
+                }
 
             }
         } catch(Exception $e){
@@ -1008,7 +1015,7 @@ class MyForms2Controller extends Controller
                         'date'  => $date,
                         'pen'  => $overtime['pen'],
                         'name'  => $overtime['name'],
-                        'aadhaarid'  => '-', //date-aadhaarid-pen composite keys wont work if we give null. so something else
+                        'aadhaarid'  => $overtime['aadhaarid'] ?? '-', //date-aadhaarid composite keys wont work if we give null. so something else
                         'punch_in'  => $overtime['punchin'],
                         'punch_out' => $overtime['punchout'],
                      //   'punching_id' => $overtime['punching_id'],
@@ -1018,7 +1025,7 @@ class MyForms2Controller extends Controller
                 // the second argument lists the column(s) that uniquely identify records within the associated table. The method's third and final argument is an array of the columns that should be updated if a matching record already exists in the database.
                 //only allow punching time update if it was the original section whose data we saved.
                 //this does not affect ot form as they have their own
-                \App\Punching::upsert($punchtimes->toArray(), ['date', 'pen', 'aadhaarid'], ['punch_in', 'punch_out' ]);
+                \App\Punching::upsert($punchtimes->toArray(), ['date', 'aadhaarid'], ['punch_in', 'punch_out' ]);
                 //\App\Punching::upsert($punchtimes->toArray(), ['date', 'pen', 'aadhaarid'], ['punching_id','creator','punch_in', 'punch_out','aadhaarid' ]);
             }
 
@@ -1322,10 +1329,10 @@ class MyForms2Controller extends Controller
             $date = Carbon::createFromFormat($dateformatwithoutime, $day->date)->format('Y-m-d');
           
             $query =  Punching::where('date',$date);
-            $query->when( $day->punching == 'MANUALENTRY' &&  $pen  && strlen($pen) >= 5, function ($q)  use ($pen) {
-                return $q->where('pen',$pen);
-            });
-            $query->when( $day->punching == 'AEBAS' &&   $aadhaarid   && strlen($aadhaarid) >= 8, function ($q)  use ($aadhaarid){
+            // $query->when( $day->punching == 'MANUALENTRY' &&  $pen  && strlen($pen) >= 5, function ($q)  use ($pen) {
+            //     return $q->where('pen',$pen);
+            // });
+            $query->when( /* $day->punching == 'AEBAS' &&  */  $aadhaarid   && strlen($aadhaarid) >= 8, function ($q)  use ($aadhaarid){
                 return $q->where('aadhaarid',$aadhaarid);
             })
             ->wherenotnull('punch_in') //prevent if only one column is available

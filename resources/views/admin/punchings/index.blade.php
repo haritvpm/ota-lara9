@@ -87,6 +87,7 @@
     
 
     @if( isset($punchings))
+    {!! $punchings->total() !!} Items    
     <div class="panel-body table-responsive">
         <table class="table table-bordered table-striped table-condensed }}">
             <thead>
@@ -131,13 +132,13 @@
                                                 </a>
                                            
 
-                                           
+                                           <!-- 
                                                 <form action="{{ route('admin.punchings.destroy', $punching->id) }}" method="POST" onsubmit="return confirm('{{ trans('global.areYouSure') }}');" style="display: inline-block;">
                                                     <input type="hidden" name="_method" value="DELETE">
                                                     <input type="hidden" name="_token" value="{{ csrf_token() }}">
                                                     <input type="submit" class="btn btn-sm btn-danger" value="{{ trans('global.delete') }}">
                                                 </form>
-                                          
+                                           -->
 
                                         </td>
                          

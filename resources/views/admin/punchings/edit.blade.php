@@ -63,8 +63,10 @@ Editing will not affect already submitted OT forms, as they have their own field
                             <span class="help-block">{{ trans('cruds.punching.fields.punch_out_helper') }}</span>
                         </div>
                        
+                     
 
                         <div class="form-group">
+                        <a href="{{route('admin.punchings.index',['datefilter' => $punching->date])}}" class="btn btn-default">Cancel</a>
                             <button class="btn btn-danger" type="submit">
                                 {{ trans('global.save') }}
                             </button>

@@ -73,10 +73,10 @@ class PunchingsController extends Controller
         //ignore pen if data from aebas and ignore aadhhar if data is from us saving
 
         $query =  Punching::where('date',$date);
-        $query->when( $day->punching == 'MANUALENTRY' && $pen  && strlen($pen) >= 5, function ($q)  use ($pen) {
-            return $q->where('pen',$pen);
-        });
-        $query->when(  $day->punching == 'AEBAS' &&  $aadhaarid   && strlen($aadhaarid) >= 8, function ($q)  use ($aadhaarid){
+        // $query->when( $day->punching == 'MANUALENTRY' && $pen  && strlen($pen) >= 5, function ($q)  use ($pen) {
+        //     return $q->where('pen',$pen);
+        // });
+        $query->when( /*  $day->punching == 'AEBAS' &&  */ $aadhaarid   && strlen($aadhaarid) >= 8, function ($q)  use ($aadhaarid){
             return $q->where('aadhaarid',$aadhaarid);
         });
         
@@ -138,10 +138,10 @@ class PunchingsController extends Controller
     $day = Calender::where('date',$date)->first();
        
     $query =  Punching::where('date',$date);
-    $query->when ($day->punching == 'MANUALENTRY' && $pen != '' && strlen($pen) >= 5, function ($q)  use ($pen) {
-        return $q->where('pen',$pen);
-    });
-    $query->when( $day->punching == 'AEBAS' &&  strlen($aadhaarid) >= 8, function ($q)  use ($aadhaarid){
+    // $query->when ($day->punching == 'MANUALENTRY' && $pen != '' && strlen($pen) >= 5, function ($q)  use ($pen) {
+    //     return $q->where('pen',$pen);
+    // });
+     $query->when( /* $day->punching == 'AEBAS' &&  */ strlen($aadhaarid) >= 8, function ($q)  use ($aadhaarid){
         return $q->where('aadhaarid',$aadhaarid);
     });
     
@@ -164,6 +164,12 @@ class PunchingsController extends Controller
         
     }
 
+    private function validateDate($date, $format = 'Y-m-d')
+    {
+        $d = \DateTime::createFromFormat($format, $date);
+        // The Y ( 4 digits year ) returns TRUE for any integer with any number of digits so changing the comparison from == to === fixes the issue.
+        return $d && $d->format($format) === $date;
+    }
 
     public function index(Request $request)
     {
@@ -207,8 +213,11 @@ class PunchingsController extends Controller
         // }
         
         if ($request->filled('datefilter')){
-    
-            $date = Carbon::createFromFormat(config('app.date_format'), $datefilter)->format('Y-m-d');
+            $date =  $datefilter;
+           
+            if(!$this->validateDate( $datefilter, 'Y-m-d')){
+                $date = Carbon::createFromFormat(config('app.date_format'), $datefilter)->format('Y-m-d');
+            }
                   
             $punchings = $punchings->where( 'date',$date);
 			               		
@@ -263,7 +272,15 @@ class PunchingsController extends Controller
     public function update(Request $request, Punching $punching)
     {
     
-        $punching->update($request->all());
+       
+        $punching->update(
+            [
+                'pen' => $request['pen'],
+                'punch_in' => !$punching->punchin_from_aebas ? $request['punch_in'] : $punching->punch_in,
+                'punch_out' =>  !$punching->punchout_from_aebas ?  $request['punch_out'] : $punching->punch_out,
+            ]
+
+        );
         $reportdate = Carbon::createFromFormat('Y-m-d', $punching->date)->format(config('app.date_format'));
 
         return redirect()->route('admin.punchings.index', ['datefilter'=> $reportdate]);
