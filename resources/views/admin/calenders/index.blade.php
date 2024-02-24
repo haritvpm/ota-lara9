@@ -24,7 +24,7 @@ Set empty/nothing for old sessions before punching impl
         
 
         <div class="">
-            <table class="table table-bordered table-striped ajaxTable">
+            <table class="table table-bordered table-striped ajaxTable" style="width:100%">
                 <thead>
                     <tr>
                        

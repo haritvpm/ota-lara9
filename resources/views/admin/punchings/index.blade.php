@@ -37,7 +37,7 @@
      
  <div class=" ">
     
-    <table class=" table table-borderless table-striped  ajaxTable">
+    <table class=" table table-borderless table-striped  ajaxTable" style="width:100%">
                 <thead>
                     <tr>
                        

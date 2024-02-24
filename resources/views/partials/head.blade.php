@@ -24,6 +24,7 @@
 <link href="{{ asset('css/adminltev3.css') }}" rel="stylesheet" />
 <link href="{{ asset('css/all.css') }}" rel="stylesheet" />
 <!-- <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet" /> -->
+<!-- <link href="{{ asset('css/dataTables.dataTables20.css') }}" rel="stylesheet" /> -->
 <link href="{{ asset('css/jquery.dataTables.min.css') }}" rel="stylesheet" />
 <link href="{{ asset('css/dataTables.bootstrap4.min.css') }}" rel="stylesheet" />
 <link href="{{ asset('css/select.dataTables.min.css') }}" rel="stylesheet" />
