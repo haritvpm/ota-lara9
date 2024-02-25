@@ -653,7 +653,7 @@ var vm = new Vue({
       }
     }
     return true;
-  }), _defineProperty(_methods, "checkIf2ndOTOverlapsWithOfficeHours", function checkIf2ndOTOverlapsWithOfficeHours(datefrom, dateto, sNormalStart, sNormalEnd) {
+  }), _defineProperty(_methods, "timePeriodsOverlap", function timePeriodsOverlap(datefrom, dateto, sNormalStart, sNormalEnd) {
     var time800am = (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.stringTimeToDate)(sNormalStart);
     var time530pm = (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.stringTimeToDate)(sNormalEnd);
     var isoverlap = time800am < dateto && time530pm > datefrom /*|| time800am == datefrom || time530pm == dateto*/;
@@ -677,6 +677,28 @@ var vm = new Vue({
     var isHoliDay = calenderdaysmap[this.form.duty_date].indexOf("oliday") != -1;
     if (!isHoliDay) return false;
     return row.designation == "Deputy Secretary" || row.designation == "Joint Secretary" || row.designation == "Additional Secretary" || row.designation == "Special Secretary";
+  }), _defineProperty(_methods, "overlapsWithOfficeHoursForNormalEmpl", function overlapsWithOfficeHoursForNormalEmpl(datefrom, dateto, isSittingDay, isWorkingDay) {
+    var overlap = false;
+    var checkingPeriod = "".concat(sNormalStart, " and ").concat(sNormalEnd);
+    var sNormalStart = "10:15";
+    var sNormalEnd = "17:15";
+    if (isSittingDay) {
+      sNormalStart = "08:00";
+      sNormalEnd = "17:30";
+    }
+    if (isWorkingDay || isSittingDay) {
+      if (this.timePeriodsOverlap(datefrom, dateto, sNormalStart, sNormalEnd)) {
+        overlap = true;
+        return {
+          overlap: overlap,
+          checkingPeriod: checkingPeriod
+        };
+      }
+    }
+    return {
+      overlap: overlap,
+      checkingPeriod: checkingPeriod
+    };
   }), _defineProperty(_methods, "rowsvalid", function rowsvalid() {
     this.myerrors = [];
     this.errors = [];
@@ -725,11 +747,11 @@ var vm = new Vue({
       isWorkingDay = _this$getDayTypes.isWorkingDay,
       isHoliDay = _this$getDayTypes.isHoliDay;
     var minothour_ideal = parseFloat(3);
-    var minot_minutes = 170; //corrected to allow leeway 
+    var minot_minutes = 180 - 10; //corrected to allow leeway 
     var daytypedesc = "holiday";
     if (isSittingOrWorkingDay) {
       minothour_ideal = parseFloat(2.5);
-      minot_minutes = 145; //leeway
+      minot_minutes = 150 - 5; //leeway
       daytypedesc = "working day";
       if (isSittingDay) {
         daytypedesc = "sitting day";
@@ -759,26 +781,15 @@ var vm = new Vue({
 
       //make sure our times are according to G.O
       //note same form can have both part time and full time empl. amspkr office
-      var minscamebefore8am = 0; //only for us, not PT, FT for now
       if (isSittingDay) {
         if (!this.checkSittingDayTimeIsAsPerGO(row, i)) {
           return false;
         }
-        //if came before 8.00, adjust it to 2nd OT
-        //do it only if there is no sitting ot, because in that case, from will include before 8.00 am period
-        if (row.isNormal && row.punching && !this.hasFirst(row.slots)) {
-          var _this$strTimesToDates3 = this.strTimesToDatesNormalized(row.punchin, "08:00", false),
-            punchin = _this$strTimesToDates3.datefrom,
-            eightam = _this$strTimesToDates3.dateto;
-          minscamebefore8am = parseFloat((eightam - punchin) / 60000);
-          if (minscamebefore8am < 0) minscamebefore8am = 0;
-        }
       }
-      console.log('minscamebefore8am ' + minscamebefore8am);
-      var _this$strTimesToDates4 = this.strTimesToDatesNormalized(row.from, row.to),
-        datefrom = _this$strTimesToDates4.datefrom,
-        dateto = _this$strTimesToDates4.dateto;
-      var otmins_actual = parseFloat((dateto - datefrom) / 60000) + minscamebefore8am;
+      var _this$strTimesToDates3 = this.strTimesToDatesNormalized(row.from, row.to),
+        datefrom = _this$strTimesToDates3.datefrom,
+        dateto = _this$strTimesToDates3.dateto;
+      var otmins_actual = parseFloat((dateto - datefrom) / 60000);
 
       //add totalhours needed
       var otmins_practical = minot_minutes * row.slots.length; //if three OT, 3 * 2.5
@@ -787,9 +798,19 @@ var vm = new Vue({
         //	console.log('oh: ' + this._daylenmultiplier);
         otmins_practical += row.normal_office_hours * 60 * this._daylenmultiplier;
         othours_ideal += row.normal_office_hours * this._daylenmultiplier;
+      } else if (row.isNormal && isSittingDay) {
+        //parttime does not have this type of adjustment where work before 8.00 am on sitting day
+        //sec office on sitday works from 7 to 7 for 2 OT. let them enter the whole period
+        var _this$overlapsWithOff = this.overlapsWithOfficeHoursForNormalEmpl(datefrom, dateto, isSittingDay, isWorkingDay),
+          overlap = _this$overlapsWithOff.overlap,
+          checkingPeriod = _this$overlapsWithOff.checkingPeriod;
+        if (overlap) {
+          //if there is overlap, we check the fulltime instead of just from 5.30
+          otmins_practical += (570 - 10) * this._daylenmultiplier;
+          othours_ideal += 9.5 * this._daylenmultiplier;
+        }
       }
-      //console.log('otmins_needed: ' + otmins_practical);
-      //console.log('otmins_actual: ' + otmins_actual);
+      console.log('otmins_needed: ' + otmins_practical);
       //new validation after adding normal_office_hours
       var diff = otmins_actual - otmins_practical;
       if (diff < 0) {
@@ -823,22 +844,14 @@ var vm = new Vue({
         }
       }
       if (row.isNormal) {
-        if (isSittingDay || isWorkingDay) {
+        if ( /*isSittingDay ||*/isWorkingDay) {
           //if there is second, third, but no first
           if (!this.hasFirst(row.slots) && row.slots.length) {
-            var sNormalStart = "10:15";
-            var sNormalStartWithGrace = "10:20";
-            var sNormalEnd = "17:15";
-            var sNormalEndWithGrace = sNormalEnd; //"17:10";
-            if (isSittingDay) {
-              sNormalStart = "08:00";
-              sNormalStartWithGrace = "08:05";
-              sNormalEnd = "17:30";
-              sNormalEndWithGrace = sNormalEnd; //"17:25";
-            }
-            //if this slot does not contain sitting ot on a sitting day and first ot on a working day show error
-            if (this.checkIf2ndOTOverlapsWithOfficeHours(datefrom, dateto, sNormalStartWithGrace, sNormalEndWithGrace)) {
-              this.myerrors.push("Row ".concat(i + 1, " : 2nd/3rd OT cannot be between ").concat(sNormalStart, " and ").concat(sNormalEnd, " on a ").concat(daytypedesc));
+            var _this$overlapsWithOff2 = this.overlapsWithOfficeHoursForNormalEmpl(datefrom, dateto, isSittingDay, isWorkingDay),
+              _overlap = _this$overlapsWithOff2.overlap,
+              _checkingPeriod = _this$overlapsWithOff2.checkingPeriod;
+            if (_overlap) {
+              this.myerrors.push("Row ".concat(i + 1, " : 2nd/3rd OT cannot overlap with ").concat(_checkingPeriod, " on a ").concat(daytypedesc));
               return false;
             }
           }
@@ -851,11 +864,11 @@ var vm = new Vue({
       } else if (row.isPartime && isSittingDay) {
         //if there is second, third, but no first
         if (!this.hasFirst(row.slots) && row.slots.length) {
-          var _sNormalStart = "06:00";
-          var _sNormalEnd = "11:30";
+          var sNormalStart = "06:00";
+          var sNormalEnd = "11:30";
           //if this slot does not contain sitting ot on a sitting day 
-          if (this.checkIf2ndOTOverlapsWithOfficeHours(datefrom, dateto, _sNormalStart, _sNormalEnd)) {
-            this.myerrors.push("Row ".concat(i + 1, " : 2nd OT cannot be between ").concat(_sNormalStart, " and ").concat(_sNormalEnd, " on a ").concat(daytypedesc));
+          if (this.timePeriodsOverlap(datefrom, dateto, sNormalStart, sNormalEnd)) {
+            this.myerrors.push("Row ".concat(i + 1, " : 2nd OT cannot be between ").concat(sNormalStart, " and ").concat(sNormalEnd, " on a ").concat(daytypedesc));
             return false;
           }
         }
