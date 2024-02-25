@@ -78,7 +78,7 @@ var vm = new Vue({
         },
         showSittingOTs(row){
             row = JSON.parse(row)
-             console.log(row);
+            //  console.log(row);
             // console.log(row.pen);
             // console.log(row.from);
               row.overtimesittings = row.overtimesittings_   
@@ -90,15 +90,14 @@ var vm = new Vue({
                         if (response.data) {
                             //todo ask if unpresent dates where present
                             setEmployeeTypes(row);
-                            let  {count, modaldata,total_ot_days,naDays} = checkDatesAndOT(row, response.data);
+                            let  {count, modaldata,total_nondecision_days,total_userdecision_days} = checkDatesAndOT(row, response.data);
                                                           
                             this.modaldata = modaldata
                             this.modaldata_fixedOT = count;
                             this.modaldata_row = row ;
-                            this.modaldata_totalOTDays = total_ot_days+naDays;
-                            let yesdays = modaldata.filter( x => x.ot == 'YES' ).map( x => x.date )
-                            this.modaldata_seldays = [ ...new Set([ ...yesdays , ...this.modaldata_seldays])]
-
+                            this.modaldata_totalOTDays = total_nondecision_days+total_userdecision_days;
+                            let yesdays = this.modaldata.filter( x => x.ot == 'YES' && x.userdecision == false ).map( x => x.date )
+                            this.modaldata_seldays = [ ...new Set([ ...yesdays , ...row.overtimesittings])]
                             document.getElementById('modalOpenBtn').click()
                      
       

@@ -36,8 +36,8 @@ var vm = new Vue({
 
     Vue.set(this.$data, 'form', _form);
     //copy name to PEN field
- console.log('got')
- console.log(_form)
+//  console.log('got')
+ //console.log(_form)
     
   
 
@@ -189,12 +189,12 @@ var vm = new Vue({
 
     },
     modalClosed: function(){
-      console.log(this.modaldata_seldays)  
+      // console.log(this.modaldata_seldays)  
      
-     // let yesdays = this.modaldata.filter( x => x.ot == 'YES' ).map( x => x.date )
-      this.modaldata_row.overtimesittings = [ ...new Set([...this.modaldata_seldays])]
+      let yesdays = this.modaldata.filter( x => x.ot == 'YES' && x.userdecision == false ).map( x => x.date )
+      this.modaldata_row.overtimesittings = [ ...new Set([...yesdays, ...this.modaldata_seldays])]
       this.modaldata_row.count = this.modaldata_row.overtimesittings.length
-      console.log(this.modaldata_row.overtimesittings)  
+      // console.log(this.modaldata_row.overtimesittings)  
       
       //copy dates from 
 
@@ -223,32 +223,32 @@ var vm = new Vue({
       self.modaldata_fixedOT = 0;
       self.modaldata_row = row ;
       row.isProcessing = true;
-      this.modaldata_seldays = [...row.overtimesittings]
+     
 			axios.get(`${urlajaxgetpunchsittings}/${self.form.session}/${row.from}/${row.to}/${row.pen}/${row.aadhaarid}`)
 					.then((response) => {
 						row.isProcessing = false;
-						//console.log(response);
+	
 						if (response.data) {
               //todo ask if unpresent dates where present
               setEmployeeTypes(row);
               //warning this func modifies response.data
-              let  {count, modaldata,total_ot_days,naDays} = checkDatesAndOT(row, response.data);
-              if( row.count != count && naDays == 0){ //if there are no days that are either MANUALENTRy or NOPUNCHING
-                 // row.count = count
+              let {count, modaldata,total_nondecision_days,total_userdecision_days} = checkDatesAndOT(row, response.data);
+            
+              if( row.count != count && total_userdecision_days == 0){ //if there are no days that are either MANUALENTRy or NOPUNCHING
+                 row.count = count
 							  //vue does not update time if we change date as it does not watch for array changes
 							  //https://v2.vuejs.org/v2/guide/reactivity#Change-Detection-Caveats
-							  // Vue.set(self.form.overtimes,index, row)
+							   Vue.set(self.form.overtimes,index, row)
               }
 
                if(show){
                   self.modaldata_fixedOT = count;
                   self.modaldata = modaldata
-                  self.modaldata_totalOTDays =  total_ot_days + naDays;
-                 // self.modaldata_seldays = [ ...modaldata.map(d => a.date), ...row.overtimesittings];  
-                  let yesdays = modaldata.filter( x => x.ot == 'YES' ).map( x => x.date )
-                  this.modaldata_seldays = [ ...new Set([ ...yesdays , ...this.modaldata_seldays])]
+                  self.modaldata_totalOTDays =  total_nondecision_days + total_userdecision_days;
+                  let yesdays = this.modaldata.filter( x => x.ot == 'YES' && x.userdecision == false ).map( x => x.date )
+                 // this.modaldata_seldays = [ ...new Set([ ...yesdays , ...this.modaldata_seldays])]
+                  this.modaldata_seldays =  [ ...new Set([...yesdays , ...row.overtimesittings])]
                   document.getElementById('modalOpenBtn').click()
-
 
                }
 						}
@@ -295,7 +295,7 @@ var vm = new Vue({
 					row.employee_id = desig.employee_id;
 
           setEmployeeTypes(row);
-        //  self.getSittingOTs(id)
+          self.getSittingOTs(id)
 
         }
       })

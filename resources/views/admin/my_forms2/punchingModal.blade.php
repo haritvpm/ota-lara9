@@ -20,12 +20,12 @@
               </tr>
             </thead>
             <tbody>
-            <tr v-bind:class="{'table-secondary' : item.otna }" v-for="(item, index) in modaldata" :key="item.date">
+            <tr v-bind:class="{'table-secondary' : !item.userdecision }" v-for="(item, index) in modaldata" :key="item.date">
               <td>@{{ index+1}}</td>
               <td>@{{ item.date }}</td>
               <td>@{{ item.punchin }}</td>
               <td>@{{ item.punchout }}</td>
-              <td v-if = "modaldata_showonly || !item.otna" >
+              <td v-if = "modaldata_showonly || !item.userdecision" >
               @{{ item.ot }}
               </td>
               <td v-else >

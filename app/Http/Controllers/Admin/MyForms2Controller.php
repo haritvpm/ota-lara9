@@ -1327,13 +1327,12 @@ class MyForms2Controller extends Controller
     //for sitting days 
     private function checkPunchingDataForEmp($calenderdays_in_range, $pen, $aadhaarid)
     {
-        $sittingsWithMinHoursSatisfied = 0; 
         $sittingsWithTimeSatisfied = 0; 
-        $sittingsWithPunchok= 0;
         $emp = Employee::with(['designation','categories'])->where( 'pen', $pen)->first();
         $dateformatwithoutime = '!'.config('app.date_format');
-        $sittingsWithNoPunching=0; 
+        $sittingsWithUserDecision=0; 
         [$isPartime,$isFulltime,  $isWatchnward,  $isNormal] = $this->getEmployeeType($emp);
+        $sittingsWith=0; 
 
         //need to check office if any exempt for fulltime/pt at cat non-gazetted / mla hostel 
         //we call this function only if overtime['punching] which should exclude watchnward
@@ -1345,56 +1344,37 @@ class MyForms2Controller extends Controller
             // Log::info($isFulltime);
             // Log::info($isPartime);
 
-            if( $day->punching !== 'AEBAS' ){
-                $sittingsWithNoPunching++; 
-                continue;
-            }
             $date = Carbon::createFromFormat($dateformatwithoutime, $day->date)->format('Y-m-d');
-
-             //check if user has entered first OT for that day.
-            $sit = Overtime::with('form')
-                ->wherehas( 'form', function($q) use( $date){
-                    $q->where( 'overtime_slot' , 'Multi' )
-                    ->where( 'duty_date', $date );
-                })->where('pen', $pen )
-                ->where('slots','like','%First%')
-                ->first(); 
-
-            //may be day was nopunching/manualentry intitially, and user entered 'sit' in multi and we changed the day type to aebas 
-            //in that case, do not include it in count
-            if($sit) {  //user has already entered sitting for that day
-                continue;
-            }    
              
             $query =  Punching::where('date',$date);
-            // $query->when( $day->punching == 'MANUALENTRY' &&  $pen  && strlen($pen) >= 5, function ($q)  use ($pen) {
-            //     return $q->where('pen',$pen);
-            // });
-            $query->when( /* $day->punching == 'AEBAS' &&  */  $aadhaarid   && strlen($aadhaarid) >= 8, function ($q)  use ($aadhaarid){
+            $query->when(  $aadhaarid  && strlen($aadhaarid) >= 8, function ($q)  use ($aadhaarid){
                 return $q->where('aadhaarid',$aadhaarid);
-            })
-            ->wherenotnull('punch_in') //prevent if only one column is available
-            ->wherenotnull('punch_out');
+            });
+            //->wherenotnull('punch_in') //prevent if only one column is available
+           // ->wherenotnull('punch_out');
             $temp = $query->first(); 
-           
-            if($temp ){
-                $sittingsWithPunchok++; 
+            
+            if(!$temp ){
                
-                $minutesreq = $emp->designation->normal_office_hours*60 + 150 - 10; //leeway 10 min
+              if( $day->punching !== 'AEBAS' ){
+                $sittingsWithUserDecision++;
+              }
 
-                $strtimes_totimestamps = function ( $from, $to )  {
-                    $timefrom = strtotime($from);   $timeto = strtotime($to);
-                    return [ $timefrom,$timeto ];
-                  };
+              continue;
+            }
+            
+            $strtimes_totimestamps = function ( $from, $to )  {
+                $timefrom = strtotime($from);   $timeto = strtotime($to);
+                return [ $timefrom,$timeto ];
+            };
+
+            if($temp['punch_in'] && $temp['punch_out'] ){
+                             
                 
                 [$punch_in, $punch_out] = $strtimes_totimestamps( $temp['punch_in'], $temp['punch_out']);
                 $othours_worked= ceil(abs($punch_out - $punch_in) / 60);
-                //check if time has min hours
-                if($othours_worked >= $minutesreq){
-                   $sittingsWithMinHoursSatisfied++; 
-                }
+        
                 //check time from
-               
                
                 if($isNormal){
                     [$fromReq, $toReq] = $strtimes_totimestamps( "08:05",  "17:25");
@@ -1411,17 +1391,44 @@ class MyForms2Controller extends Controller
                     if( $punch_in <= $fromReq && $punch_out >= $toReq){
                         $sittingsWithTimeSatisfied++; 
                     }
-                } else{
-                    //for what we dont check. ignore and give exact count
-                    Log::info('un empl');
-
-                    $sittingsWithTimeSatisfied++; 
+                } 
+                continue;
+            }  else if( $day->punching == 'AEBAS' ) {
+                continue; //leave/or not punched in/out
+            }
+            //user has punched once on non-aebas day
+            $punchingtimesnotincorrect  = function ( $fromreq, $toreq, $in, $out )  {
+                $timefromReq = strtotime($fromreq);   $timetoReq = strtotime($toreq);
+                if( $in ){
+                    $punchin = strtotime($in);  
+                    if( $punchin > $timefromReq )   return false;
                 }
+                if( $out ){
+                    $punchout = strtotime($out);  
+                    if( $punchout < $timetoReq )   return false;
+                }
+                return true;
+            };
+            
+            // NON AEBAS day.
 
+            if($isNormal){
+                if($punchingtimesnotincorrect( "08:05",  "17:25",  $temp['punch_in'], $temp['punch_out'])){
+                    $sittingsWithUserDecision++; 
+                }
+            } else  if($isPartime){
+                if($punchingtimesnotincorrect( "06:05",  "11:25",  $temp['punch_in'], $temp['punch_out'])){
+                    $sittingsWithUserDecision++; 
+                }
+            } else  if($isFulltime){
+                 if($punchingtimesnotincorrect( "06:05",  "16:00", $temp['punch_in'], $temp['punch_out'])){ //its 4.25 actually. 
+                    $sittingsWithUserDecision++; 
+                }
             } 
+          
         }
 
-        return [ $sittingsWithPunchok, $sittingsWithMinHoursSatisfied, $sittingsWithTimeSatisfied,$sittingsWithNoPunching ];
+        return [ $sittingsWithTimeSatisfied,$sittingsWithUserDecision ];
 
     }
     public function createovertimes_sitting( Request $request, &$myerrors, $formid=null)
@@ -1608,28 +1615,16 @@ class MyForms2Controller extends Controller
 
             //new check punching times
             if( $overtime['punching'] == true ) {
-                [ $sittingsWithPunchok, $sittingsWithMinHoursSatisfied, $sittingsWithTimeSatisfied,$sittingsWithNoPunching ] = $this->checkPunchingDataForEmp($calenderdays_in_range, $overtime['pen'], $overtime['aadhaarid']);
+                [ $sittingsWithTimeSatisfied,$sittingsWithUserDecision ] = $this->checkPunchingDataForEmp($calenderdays_in_range, $overtime['pen'], $overtime['aadhaarid']);
                 //we need to also check time within 8 -> 5 but dont know how much luft. partime is ok
-                
-                if( $overtime['count'] > $sittingsWithPunchok + $sittingsWithNoPunching ){
-
-                    array_push($myerrors,  $name_for_err . ' : From ' . $overtime['from'] . ' to ' . $overtime['to'] . ' punched only for ' . $sittingsWithPunchok .' sitting days.');
+                if( $overtime['count'] > $sittingsWithTimeSatisfied + $sittingsWithUserDecision){
+                    array_push($myerrors,  $name_for_err . ' : From ' . $overtime['from'] . ' to ' . $overtime['to'] . ' only ' . $sittingsWithTimeSatisfied .' days satisfy time per G.O');
                     return null;
                 }
-               
-                if( $overtime['count'] > $sittingsWithTimeSatisfied + $sittingsWithNoPunching){
-                    array_push($myerrors,  $name_for_err . ' : From ' . $overtime['from'] . ' to ' . $overtime['to'] . ' only ' . $sittingsWithTimeSatisfied .' days satisfy 8am-5.30pm.');
-                    return null;
-                }
-                if( $overtime['count'] > $sittingsWithMinHoursSatisfied + $sittingsWithNoPunching){
-
-                    array_push($myerrors,  $name_for_err . ' : From ' . $overtime['from'] . ' to ' . $overtime['to'] . ' only ' . $sittingsWithMinHoursSatisfied .' sitting days have min req hours.');
-                    return null;
-                }
+         
             } else{
                 // Log::info("No punch for" . $overtime['name']);
             }
-
      
 
             {                

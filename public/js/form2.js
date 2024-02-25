@@ -12,6 +12,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "checkDatesAndOT": () => (/* binding */ checkDatesAndOT),
 /* harmony export */   "setEmployeeTypes": () => (/* binding */ setEmployeeTypes),
+/* harmony export */   "sittingAllowableForNonAebasDay": () => (/* binding */ sittingAllowableForNonAebasDay),
 /* harmony export */   "stringTimeToDate": () => (/* binding */ stringTimeToDate),
 /* harmony export */   "timePeriodIncludesPeriod": () => (/* binding */ timePeriodIncludesPeriod),
 /* harmony export */   "toHoursAndMinutes": () => (/* binding */ toHoursAndMinutes)
@@ -39,47 +40,86 @@ function timePeriodIncludesPeriod(from, to, fromReq, toReq) {
   var time530pm = stringTimeToDate(toReq);
   return time800am >= datefrom && time530pm <= dateto;
 }
+//check if punchin or out if available, fails
+//if time is not available, it is ok
+function sittingAllowableForNonAebasDay(from, to, fromReq, toReq) {
+  if (from) {
+    var datefrom = stringTimeToDate(from);
+    var time800am = stringTimeToDate(fromReq);
+    if (datefrom > time800am) return false;
+  }
+  if (to) {
+    var dateto = stringTimeToDate(to);
+    var time530pm = stringTimeToDate(toReq);
+    if (dateto < time530pm) return false;
+  }
+  return true;
+}
 function checkDatesAndOT(row, data) {
   //we need to give some leeway. so commenting
-  var count = 0;
-  var total_ot_days = 0;
-  var naDays = 0;
+  var count = 0; //ot given to user
+  var total_nondecision_days = 0;
+  var total_userdecision_days = 0;
   for (var i = 0; i < data.dates.length; i++) {
     // console.log(data.dates[i])
 
     var punchin = data.dates[i].punchin;
     var punchout = data.dates[i].punchout;
-    if (!data.dates[i].applicable) {
-      //no punching day. NIC server down. not aebas. either manualentry or nopunching
-      //  data.dates[i].ot = 'N/A. ' + data.dates[i].ot 
-      data.dates[i].ot = 'NO';
-      data.dates[i].otna = true;
-      naDays++;
-      if (row.overtimesittings.indexOf(data.dates[i].date) != -1) {
-        data.dates[i].ot = 'YES';
+    var pos = row.overtimesittings.indexOf(data.dates[i].date);
+    if (punchin && punchout) {
+      //punched
+
+      if (row.isPartime) {
+        if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "11:25")) {
+          data.dates[i].ot = 'YES';
+          count++;
+        } else {
+          data.dates[i].ot = 'No. (06:00 - 11:30)';
+        }
+      } else if (row.isFulltime) {
+        if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "16:25")) {
+          count++;
+          data.dates[i].ot = 'YES';
+        } else {
+          data.dates[i].ot = 'No. (06:00 - 4:30pm)';
+        }
+      } else if (row.isWatchnward) {
+        //no punching
+      } //all other employees for sitting days
+      else {
+        if (timePeriodIncludesPeriod(punchin, punchout, "08:05", "17:25")) {
+          count++;
+          data.dates[i].ot = 'YES';
+        } else {
+          data.dates[i].ot = 'No. (08:00 - 5:30pm)';
+        }
       }
+      data.dates[i].userdecision = false;
+      total_nondecision_days++;
+      if (data.dates[i].ot != 'YES' && pos != -1) row.overtimesittings.splice(pos, 1); //remove from sel if it is NO
       continue;
     }
-    data.dates[i].otna = false;
-    total_ot_days++;
-    if (!punchin || !punchout) {
-      //not punched
+
+    //punchin or out is not available
+    if (data.dates[i].aebasday) {
+      data.dates[i].userdecision = false;
       data.dates[i].ot = punchin || punchout ? 'Not Punched?' : 'Leave?';
+      total_nondecision_days++;
+      if (pos != -1) row.overtimesittings.splice(pos, 1); //remove from sel if it is NO
       continue;
     }
-    data.dates[i].ot = 'NO';
+
+    //non aebasday, check if user has not punched incorrectly when server was failing
+    data.dates[i].userdecision = false;
     if (row.isPartime) {
-      console.log('p');
-      if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "11:25")) {
-        data.dates[i].ot = 'YES';
-        count++;
+      if (sittingAllowableForNonAebasDay(punchin, punchout, "06:05", "11:25")) {
+        data.dates[i].userdecision = true;
       } else {
         data.dates[i].ot = 'No. (06:00 - 11:30)';
       }
     } else if (row.isFulltime) {
-      if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "16:25")) {
-        count++;
-        data.dates[i].ot = 'YES';
+      if (sittingAllowableForNonAebasDay(punchin, punchout, "06:05", "16:25")) {
+        data.dates[i].userdecision = true;
       } else {
         data.dates[i].ot = 'No. (06:00 - 4:30pm)';
       }
@@ -87,20 +127,30 @@ function checkDatesAndOT(row, data) {
       //no punching
     } //all other employees for sitting days
     else {
-      console.log('n');
-      if (timePeriodIncludesPeriod(punchin, punchout, "08:05", "17:25")) {
-        count++;
-        data.dates[i].ot = 'YES';
+      if (sittingAllowableForNonAebasDay(punchin, punchout, "08:05", "17:25")) {
+        data.dates[i].userdecision = true;
       } else {
         data.dates[i].ot = 'No. (08:00 - 5:30pm)';
       }
     }
+    if (data.dates[i].userdecision) {
+      data.dates[i].ot = 'NO';
+      total_userdecision_days++;
+      if (pos != -1) {
+        data.dates[i].ot = 'YES';
+        count++;
+      }
+    } else {
+      total_nondecision_days++;
+      if (!data.dates[i].userdecision && pos != -1) row.overtimesittings.splice(pos, 1); //remove from sel if it is NO
+    }
   }
+
   return {
     count: count,
     modaldata: data.dates,
-    total_ot_days: total_ot_days,
-    naDays: naDays
+    total_nondecision_days: total_nondecision_days,
+    total_userdecision_days: total_userdecision_days
   };
 }
 function toHoursAndMinutes(totalMinutes) {
@@ -724,7 +774,7 @@ var vm = new Vue({
           if (minscamebefore8am < 0) minscamebefore8am = 0;
         }
       }
-      //console.log('minscamebefore8am ' +minscamebefore8am )
+      console.log('minscamebefore8am ' + minscamebefore8am);
       var _this$strTimesToDates4 = this.strTimesToDatesNormalized(row.from, row.to),
         datefrom = _this$strTimesToDates4.datefrom,
         dateto = _this$strTimesToDates4.dateto;
