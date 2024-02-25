@@ -88,7 +88,7 @@
     Vue.component('Multiselect', VueMultiselect.default);
     // Vue.component('flat-pickr', VueFlatpickr.default);
     Vue.use(VueSweetAlert.default)
-    Vue.component('date-picker', VueBootstrapDatetimePicker.default);
+    Vue.component('date-picker', VueBootstrapDatetimePicker.default); //https://github.com/ankurk91/vue-bootstrap-datetimepicker
 
     // register modal component
     Vue.component("modal", {

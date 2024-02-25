@@ -185,12 +185,12 @@ var vm = new Vue({
 		},
 
 		onChange: function (e) {
-			if( e?.type != 'dp' ) return ; //this func seems to be called twice on date change. this prevents that as the first call does not have that set
+			//if( e?.type != 'dp' ) return ; //this func seems to be called twice on date change. this prevents that as the first call does not have that set
 			
 			this.updateDateDependencies()
 			if (this.form.duty_date != "" && this.form.duty_date != null) {
 			
-				if( e.oldDate != e.date )
+			//	if( e.oldDate != e.date )
 				{
 					this.fetchPunching()
 					//clear all slots
@@ -390,6 +390,7 @@ var vm = new Vue({
 			 row.punchin_from_aebas = false
 			 row.punchout_from_aebas = false
 			if (  self.dayHasPunching && row.punching ) {
+				this.isProcessing = true;
 				axios
 					.get(urlajaxgetpunchtimes + "/" + self.form.duty_date + "/" +  row.pen + "/" +  row.aadhaarid)
 					.then((response) => {
@@ -406,8 +407,10 @@ var vm = new Vue({
 							 //https://v2.vuejs.org/v2/guide/reactivity#Change-Detection-Caveats
 							 Vue.set(this.form.overtimes,index, row)
 						}
+						this.isProcessing = false;
 					})
 					.catch((err) => {
+						this.isProcessing = false;
 						Vue.set(this.form.overtimes,index, row)
 					});
 			}

@@ -40,7 +40,7 @@
 			<label for="duty_date">Date</label>
 			 @{{ selectdaylabel }}		
 			  
-			<date-picker {{$readonly}} v-model="form.duty_date" @dp-change="onChange"
+			<date-picker {{$readonly}} v-model="form.duty_date" @dp-hide="onChange"
 					:config="configdate"
 					placeholder="Select date"
 					:required="true"

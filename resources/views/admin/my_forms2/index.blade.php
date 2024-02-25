@@ -11,8 +11,8 @@
     <h4 class="page-title">Create Forms</h4>
 
     <p>
-        <a href="{{ route('admin.my_forms2.create') }}" class="btn btn-success"  data-toggle="tooltip" title="Prepare a form for 1st, 2nd or 3rd OT. Form to be submitted on the next working day itself."  >@lang('quickadmin.qa_new_daily_form')</a>
-        <a href="{{ route('admin.my_forms2.create_sitting') }}" class="btn btn-warning" data-toggle="tooltip" title="Prepare a form for total sitting days attended. Form to be submitted only after an assembly session is over."  > New Sitting-days Form</a>
+        <a href="{{ route('admin.my_forms2.create') }}" class="btn btn-success"  data-toggle="tooltip" title="Form for 1st, 2nd or 3rd OT. Form to be submitted on the next working day itself."  >@lang('quickadmin.qa_new_daily_form')</a>
+        <a href="{{ route('admin.my_forms2.create_sitting') }}" class="btn btn-warning" data-toggle="tooltip" title="Form for total sitting days attended. Form to be submitted only after an assembly session is over."  > New Sitting-days Form</a>
     </p>
    
     @endif
@@ -135,7 +135,7 @@
                                 $daytype = $form->day_type() ;   
                                 @endphp
                                 @if($daytype == 'S')
-                                <small><i class="fa fa-calendar-o" style="color:green"></i></small>
+                                <small><i class="fa fa-university" style="color:green"></i></small>
                                 @elseif($daytype == 'H')
                                 <small><i class="fa fa-calendar-o" style="color:red"></i></small>
                                 @else

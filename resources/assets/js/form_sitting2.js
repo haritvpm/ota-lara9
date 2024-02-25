@@ -22,7 +22,7 @@ var vm = new Vue({
    
     modaldata: [],
     modaldata_totalOT: 0,
-    modaldata_empl:"",
+    modaldata_row:"",
     modaldata_totalOTDays:0,
   },
 
@@ -98,9 +98,16 @@ var vm = new Vue({
       //this.slotoptions = this.slotoptions
       // this.selectdaylabel =  ': ' + calenderdaysmap [this.form.duty_date]
       //this.form.overtime_slot =''
-
-
     },
+
+    onRowPeriodChange: function (index) {
+			//if( e?.type != 'dp' ) return ; //this func seems to be called twice on date change. this prevents that as the first call does not have that set
+		//	console.log(i)
+    //reset count to zero
+    this.form.overtimes[index].count = ""
+    //  this.getSittingOTs(index)
+		
+		},
 
     addRow: function () {
       //  var elem = document.createElement('tr');
@@ -122,6 +129,7 @@ var vm = new Vue({
         slots: [],
         aadhaarid: null,
         punching: true, //by default everyone ha punching
+        isProcessing: false,
       });
 
       this.pen_names = []; //clear previos selection from dropdown
@@ -179,7 +187,14 @@ var vm = new Vue({
       }
 
     },
-    
+    modalClosed: function(){
+    //  console.log(this.modaldata_totalOT)  
+      this.modaldata_row.count = this.modaldata_totalOT
+		  //vue does not update time if we change date as it does not watch for array changes
+		  //https://v2.vuejs.org/v2/guide/reactivity#Change-Detection-Caveats
+		//	Vue.set(this.form.overtimes,index, row)
+
+    },
     showSittingOTs: function(index){
 
       this.getSittingOTs(index,true)
@@ -198,23 +213,22 @@ var vm = new Vue({
 
       self.modaldata = []
       self.modaldata_totalOT = 0;
-      self.modaldata_empl = row.pen ;
-
+      self.modaldata_row = row ;
+      row.isProcessing = true;
 			axios.get(`${urlajaxgetpunchsittings}/${self.form.session}/${row.from}/${row.to}/${row.pen}/${row.aadhaarid}`)
 					.then((response) => {
-					
+						row.isProcessing = false;
 						//console.log(response);
 						if (response.data) {
               //todo ask if unpresent dates where present
               setEmployeeTypes(row);
               //warning this func modifies response.data
-              let  {count, modaldata,total_ot_days} = checkDatesAndOT(row, response.data);
-              if( row.count != count){
-                row.count = count
-
+              let  {count, modaldata,total_ot_days,naDays} = checkDatesAndOT(row, response.data);
+              if( row.count != count && naDays == 0){ //if there are no days that are either MANUALENTRy or NOPUNCHING
+                  row.count = count
 							  //vue does not update time if we change date as it does not watch for array changes
 							  //https://v2.vuejs.org/v2/guide/reactivity#Change-Detection-Caveats
-							  Vue.set(self.form.overtimes,index, row)
+							   Vue.set(self.form.overtimes,index, row)
               }
 
                if(show){
@@ -229,6 +243,7 @@ var vm = new Vue({
 						}
 					})
 					.catch((err) => {
+            row.isProcessing = false;
 		        row.count = 0;
             Vue.set(this.form.overtimes,index, row)
           });
@@ -269,7 +284,7 @@ var vm = new Vue({
 					row.employee_id = desig.employee_id;
 
           setEmployeeTypes(row);
-          self.getSittingOTs(id)
+        //  self.getSittingOTs(id)
 
         }
       })

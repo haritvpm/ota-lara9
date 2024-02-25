@@ -20,7 +20,7 @@ function setEmployeeTypes(row) {
   if (!row.hasOwnProperty("designation") || !row.hasOwnProperty("category") || !row.hasOwnProperty("normal_office_hours")) {
     console.error("setEmployeeTypes - not all Property set");
   }
-  console.log("setEmployeeTypes");
+  // console.log("setEmployeeTypes");
   row.isPartime = row.designation.toLowerCase().indexOf("part time") != -1 || row.category.toLowerCase().indexOf("parttime") != -1 || row.designation.toLowerCase().indexOf("parttime") != -1 || row.normal_office_hours == 3; //ugly
   row.isFulltime = row.category.toLowerCase().indexOf("fulltime") != -1 || row.normal_office_hours == 6;
   row.isWatchnward = row.category.toLowerCase().indexOf("watch") != -1;
@@ -43,15 +43,17 @@ function checkDatesAndOT(row, data) {
   //we need to give some leeway. so commenting
   var count = 0;
   var total_ot_days = 0;
+  var naDays = 0;
   for (var i = 0; i < data.dates.length; i++) {
     // console.log(data.dates[i])
 
     var punchin = data.dates[i].punchin;
     var punchout = data.dates[i].punchout;
-    if ("N/A" == punchin) {
-      //no punching day. NIC server down
-      //  data.dates[i].ot = 'Enter in OT Form'
+    if (!data.dates[i].applicable) {
+      //no punching day. NIC server down. not aebas. either manualentry or nopunching
+      data.dates[i].ot = 'N/A. ' + data.dates[i].ot;
       data.dates[i].otna = true;
+      naDays++;
       continue;
     }
     data.dates[i].otna = false;
@@ -93,7 +95,8 @@ function checkDatesAndOT(row, data) {
   return {
     count: count,
     modaldata: data.dates,
-    total_ot_days: total_ot_days
+    total_ot_days: total_ot_days,
+    naDays: naDays
   };
 }
 function toHoursAndMinutes(totalMinutes) {
@@ -213,7 +216,7 @@ var vm = new Vue({
     modaldata: [],
     modaldata_totalOT: 0,
     modaldata_totalOTDays: 0,
-    modaldata_empl: ""
+    modaldata_row: null
   },
   mounted: function mounted() {
     //alert(navigator.sayswho);
@@ -233,6 +236,7 @@ var vm = new Vue({
   },
   // define methods under the `methods` object
   methods: {
+    modalClosed: function modalClosed() {},
     showSittingOTs: function showSittingOTs(row) {
       var _this = this;
       row = JSON.parse(row);
@@ -248,10 +252,11 @@ var vm = new Vue({
           var _checkDatesAndOT = (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.checkDatesAndOT)(row, response.data),
             count = _checkDatesAndOT.count,
             modaldata = _checkDatesAndOT.modaldata,
-            total_ot_days = _checkDatesAndOT.total_ot_days;
+            total_ot_days = _checkDatesAndOT.total_ot_days,
+            naDays = _checkDatesAndOT.naDays;
           _this.modaldata = modaldata;
           _this.modaldata_totalOT = count;
-          _this.modaldata_empl = row.pen;
+          _this.modaldata_row = row;
           _this.modaldata_totalOTDays = total_ot_days;
           document.getElementById('modalOpenBtn').click();
         }

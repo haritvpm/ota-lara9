@@ -3,7 +3,7 @@ export function setEmployeeTypes(row) {
     if( !row.hasOwnProperty("designation") || !row.hasOwnProperty("category") || !row.hasOwnProperty("normal_office_hours") ){
         console.error("setEmployeeTypes - not all Property set");
     }
-    console.log("setEmployeeTypes");
+   // console.log("setEmployeeTypes");
     row.isPartime = row.designation.toLowerCase().indexOf("part time") != -1 || 
                     row.category.toLowerCase().indexOf("parttime") != -1 ||
                     row.designation.toLowerCase().indexOf("parttime") != -1 || 
@@ -32,6 +32,7 @@ export function  checkDatesAndOT(row, data){
     //we need to give some leeway. so commenting
   let count = 0;
   let total_ot_days = 0 ;
+  let  naDays = 0;
   for (let i = 0; i < data.dates.length; i++) {
     // console.log(data.dates[i])
   
@@ -39,9 +40,10 @@ export function  checkDatesAndOT(row, data){
     const punchin = data.dates[i].punchin;
     const punchout = data.dates[i].punchout;
     
-    if( "N/A" == punchin ){ //no punching day. NIC server down
-    //  data.dates[i].ot = 'Enter in OT Form'
+    if(  !data.dates[i].applicable ){ //no punching day. NIC server down. not aebas. either manualentry or nopunching
+      data.dates[i].ot = 'N/A. ' + data.dates[i].ot 
       data.dates[i].otna = true
+      naDays++;
       continue;
     }
     data.dates[i].otna = false
@@ -93,7 +95,8 @@ export function  checkDatesAndOT(row, data){
  return {
   count ,
   modaldata : data.dates,
-  total_ot_days
+  total_ot_days,
+  naDays
  }
 
 }

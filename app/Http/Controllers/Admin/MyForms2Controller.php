@@ -1311,6 +1311,7 @@ class MyForms2Controller extends Controller
         return [$isPartime,$isFulltime,  $isWatchnward,  $isNormal];
     }
 
+    //for sitting days 
     private function checkPunchingDataForEmp($calenderdays_in_range, $pen, $aadhaarid)
     {
         $sittingsWithMinHoursSatisfied = 0; 
@@ -1335,9 +1336,23 @@ class MyForms2Controller extends Controller
                // $sittingsWithNoPunching++; 
                 continue;
             }
-   
             $date = Carbon::createFromFormat($dateformatwithoutime, $day->date)->format('Y-m-d');
-          
+
+             //check if user has entered first OT for that day.
+            $sit = Overtime::with('form')
+                ->wherehas( 'form', function($q) use( $date){
+                    $q->where( 'overtime_slot' , 'Multi' )
+                    ->where( 'duty_date', $date );
+                })->where('pen', $pen )
+                ->where('slots','like','%First%')
+                ->first(); 
+
+            //may be day was nopunching/manualentry intitially, and user entered 'sit' in multi and we changed the day type to aebas 
+            //in that case, do not include it in count
+            if($sit) {  //user has already entered sitting for that day
+                continue;
+            }    
+             
             $query =  Punching::where('date',$date);
             // $query->when( $day->punching == 'MANUALENTRY' &&  $pen  && strlen($pen) >= 5, function ($q)  use ($pen) {
             //     return $q->where('pen',$pen);

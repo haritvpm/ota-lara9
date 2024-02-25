@@ -20,7 +20,7 @@ function setEmployeeTypes(row) {
   if (!row.hasOwnProperty("designation") || !row.hasOwnProperty("category") || !row.hasOwnProperty("normal_office_hours")) {
     console.error("setEmployeeTypes - not all Property set");
   }
-  console.log("setEmployeeTypes");
+  // console.log("setEmployeeTypes");
   row.isPartime = row.designation.toLowerCase().indexOf("part time") != -1 || row.category.toLowerCase().indexOf("parttime") != -1 || row.designation.toLowerCase().indexOf("parttime") != -1 || row.normal_office_hours == 3; //ugly
   row.isFulltime = row.category.toLowerCase().indexOf("fulltime") != -1 || row.normal_office_hours == 6;
   row.isWatchnward = row.category.toLowerCase().indexOf("watch") != -1;
@@ -43,15 +43,17 @@ function checkDatesAndOT(row, data) {
   //we need to give some leeway. so commenting
   var count = 0;
   var total_ot_days = 0;
+  var naDays = 0;
   for (var i = 0; i < data.dates.length; i++) {
     // console.log(data.dates[i])
 
     var punchin = data.dates[i].punchin;
     var punchout = data.dates[i].punchout;
-    if ("N/A" == punchin) {
-      //no punching day. NIC server down
-      //  data.dates[i].ot = 'Enter in OT Form'
+    if (!data.dates[i].applicable) {
+      //no punching day. NIC server down. not aebas. either manualentry or nopunching
+      data.dates[i].ot = 'N/A. ' + data.dates[i].ot;
       data.dates[i].otna = true;
+      naDays++;
       continue;
     }
     data.dates[i].otna = false;
@@ -93,7 +95,8 @@ function checkDatesAndOT(row, data) {
   return {
     count: count,
     modaldata: data.dates,
-    total_ot_days: total_ot_days
+    total_ot_days: total_ot_days,
+    naDays: naDays
   };
 }
 function toHoursAndMinutes(totalMinutes) {
@@ -195,7 +198,7 @@ var vm = new Vue({
     showModal: false,
     modaldata: [],
     modaldata_totalOT: 0,
-    modaldata_empl: "",
+    modaldata_row: "",
     modaldata_totalOTDays: 0
   },
   created: function created() {
@@ -256,6 +259,14 @@ var vm = new Vue({
       //this.form.overtime_slot =''
     },
 
+    onRowPeriodChange: function onRowPeriodChange(index) {
+      //if( e?.type != 'dp' ) return ; //this func seems to be called twice on date change. this prevents that as the first call does not have that set
+      //	console.log(i)
+      //reset count to zero
+      this.form.overtimes[index].count = "";
+      //  this.getSittingOTs(index)
+    },
+
     addRow: function addRow() {
       //  var elem = document.createElement('tr');
       var self = this;
@@ -274,9 +285,10 @@ var vm = new Vue({
         worknature: "",
         slots: [],
         aadhaarid: null,
-        punching: true //by default everyone ha punching
+        punching: true,
+        //by default everyone ha punching
+        isProcessing: false
       });
-
       this.pen_names = []; //clear previos selection from dropdown
       this.pen_names_to_desig = [];
       this.$nextTick(function () {
@@ -315,6 +327,14 @@ var vm = new Vue({
         });
       }
     },
+    modalClosed: function modalClosed() {
+      //  console.log(this.modaldata_totalOT)  
+      this.modaldata_row.count = this.modaldata_totalOT;
+      //vue does not update time if we change date as it does not watch for array changes
+      //https://v2.vuejs.org/v2/guide/reactivity#Change-Detection-Caveats
+      //	Vue.set(this.form.overtimes,index, row)
+    },
+
     showSittingOTs: function showSittingOTs(index) {
       this.getSittingOTs(index, true);
     },
@@ -330,8 +350,10 @@ var vm = new Vue({
       ;
       self.modaldata = [];
       self.modaldata_totalOT = 0;
-      self.modaldata_empl = row.pen;
+      self.modaldata_row = row;
+      row.isProcessing = true;
       axios.get("".concat(urlajaxgetpunchsittings, "/").concat(self.form.session, "/").concat(row.from, "/").concat(row.to, "/").concat(row.pen, "/").concat(row.aadhaarid)).then(function (response) {
+        row.isProcessing = false;
         //console.log(response);
         if (response.data) {
           //todo ask if unpresent dates where present
@@ -340,10 +362,11 @@ var vm = new Vue({
           var _checkDatesAndOT = (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.checkDatesAndOT)(row, response.data),
             count = _checkDatesAndOT.count,
             modaldata = _checkDatesAndOT.modaldata,
-            total_ot_days = _checkDatesAndOT.total_ot_days;
-          if (row.count != count) {
+            total_ot_days = _checkDatesAndOT.total_ot_days,
+            naDays = _checkDatesAndOT.naDays;
+          if (row.count != count && naDays == 0) {
+            //if there are no days that are either MANUALENTRy or NOPUNCHING
             row.count = count;
-
             //vue does not update time if we change date as it does not watch for array changes
             //https://v2.vuejs.org/v2/guide/reactivity#Change-Detection-Caveats
             Vue.set(self.form.overtimes, index, row);
@@ -357,6 +380,7 @@ var vm = new Vue({
           }
         }
       })["catch"](function (err) {
+        row.isProcessing = false;
         row.count = 0;
         Vue.set(_this.form.overtimes, index, row);
       });
@@ -388,7 +412,7 @@ var vm = new Vue({
         row.category = desig.category;
         row.employee_id = desig.employee_id;
         (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.setEmployeeTypes)(row);
-        self.getSittingOTs(id);
+        //  self.getSittingOTs(id)
       }
     });
   }), _defineProperty(_methods, "checkDuplicates", function checkDuplicates() {

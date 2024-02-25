@@ -100,13 +100,15 @@
 					
 					<td class="col-sm-4">
 					<div class="input-group" >
-					<date-picker v-model="row.from" :config="configdate"
+					<date-picker v-model="row.from" :config="configdate" 
+						@dp-hide="onRowPeriodChange(index)"
 						:required="true"
 						placeholder="Period from which statement is related"
 						class="form-control" >
 					</date-picker> 
 				
 					<date-picker v-model="row.to" :config="configdate"
+						@dp-hide="onRowPeriodChange(index)"
 						:required="true"
 						placeholder="Period to which statement is related"                
 						class="form-control">
@@ -117,13 +119,15 @@
 					
 					<td  class="col-sm-2" > 
 					
-					<div class="input-group">
-						<input  type="number"  :name="'count[' + index + ']'" class="form-control"  min=1 oninput="validity.valid||(value='');" v-model="row.count" >
+					
+
+					<div  class="input-group">
+						<input :readonly="row.isProcessing"  type="number"  :name="'count[' + index + ']'" class="form-control"  min=1 oninput="validity.valid||(value='');" v-model="row.count" >
 						<div class="input-group-append">
 
 						<!-- <button v-if="row.punching && row.pen" :disabled='!row.from || !row.to' class="btn btn-sm btn-dark" id="show-modal" @click.prevent="showSittingOTs(index);"><i class="fas fa-fingerprint"></i>  </button> -->
 						
-						<a v-if="row.punching && row.pen"  :disabled='!row.from || !row.to'  href="#sittingotmodal" role="button" class="btn btn-sm btn-dark" @click.prevent="showSittingOTs(index);"><i class="fas fa-fingerprint"></i> </a>
+						<a v-if="row.punching && row.pen"  :disabled='!row.from || !row.to || row.isProcessing'  href="#sittingotmodal" role="button" class="btn btn-sm btn-dark" @click.prevent="showSittingOTs(index);"><i class="fas fa-fingerprint"></i> </a>
 						<a id="modalOpenBtn" hidden  href="#sittingotmodal" role="button" data-toggle="modal"><i class="fas fa-fingerprint"></i> </a>
 					
 						</div>

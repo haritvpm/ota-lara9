@@ -57,30 +57,15 @@ class PunchingsController extends Controller
     foreach ($sittingsInRange as $day) {
 
         $date = Carbon::createFromFormat($dateformatwithoutime, $day->date)->format('Y-m-d');
-        if( $day->punching !== 'AEBAS' ){
-            //check if user has entered first OT for that day.
-            $sit = \App\Overtime::with('form')
-                ->wherehas( 'form', function($q) use( $date){
-                    $q->where( 'overtime_slot' , 'Multi' )
-                    ->where( 'duty_date', $date );
-                })->where('pen', $pen )
-                ->where('slots','like','%First%')
-                ->first(); 
-
-            $sittingsWithNoPunching++; 
-            $dates[] = [
-                'date' =>  $day->date, 
-                'ot'   =>  $sit ? "Entered in that day's form" : "Enter in OT Form",//'Punching excused Use DutyForm to enter for the day',
-                'punchin' => "N/A",
-                'punchout' => "N/A",
-            ];
-            continue;
-        }
-       
-        // Log::info($date);
+        
+        $data = [
+            'applicable' => true,
+            'date' =>  $day->date, 
+            'punchin' => "",
+            'punchout' => "",
+        ];
 
         //ignore pen if data from aebas and ignore aadhhar if data is from us saving
-
         $query =  Punching::where('date',$date);
         // $query->when( $day->punching == 'MANUALENTRY' && $pen  && strlen($pen) >= 5, function ($q)  use ($pen) {
         //     return $q->where('pen',$pen);
@@ -95,31 +80,42 @@ class PunchingsController extends Controller
         $temp = $query->first(); 
        
         if($temp ){
-
-            //check punching times
-
-
-            $sittingsWithPunchok++; 
-            $dates[] = [
-                'date' =>  $day->date, 
-           //     'OT'   => 'yes',
-                'punchin' => $temp['punch_in'],
-                'punchout' => $temp['punch_out'],
-            ];
-        } else{
-            $dates[] = [
-                'date' =>  $day->date, 
-                'ot'   => 'no',
-                'punchin' => "",
-                'punchout' => "",
-            ];
+           $sittingsWithPunchok++; 
+           $data['punchin'] =  $temp['punch_in'];
+           $data['punchout'] =  $temp['punch_out'];
         }
-    }
-    
-    
-   
-   // Log::info($sittingsWithPunchok);
-       
+
+        //check if user has entered first OT for that day.
+        $sit = \App\Overtime::with('form')
+                    ->wherehas( 'form', function($q) use( $date){
+                        $q->where( 'overtime_slot' , 'Multi' )
+                        ->where( 'duty_date', $date );
+                    })->where('pen', $pen )
+                    ->where('slots','like','%First%')
+                    ->first(); 
+
+
+        if( $day->punching !== 'AEBAS' ){
+        
+            $sittingsWithNoPunching++; 
+            $data['applicable'] =  false; //whether to count
+            $data['ot'] =  $sit ? "Entered in that day's form" : "Enter in OT Form";//'Punching excused Use DutyForm to enter for the day',
+        } 
+
+        //may be it was nopunching intitially, and user entered sit in multi and we changed the day type to aebas 
+        //in that case, do not include it in count
+        if($sit) {  //user has already entered sitting for that day
+            $sittingsWithNoPunching++; 
+            $data['applicable'] =  false; //whether to count
+            $data['ot'] =   "Entered in that day's form";//'Punching excused Use DutyForm to enter for the day',
+        
+        }
+
+
+        $dates[] = $data;
+
+     }
+               
    
     return [
             'sittingsWithPunchok' => $sittingsWithPunchok,
@@ -127,8 +123,7 @@ class PunchingsController extends Controller
             'sittingsInRange' => $sittingsInRange->count(),
             'dates' =>  $dates,
            ];
-  
-        
+          
     }
 
 
