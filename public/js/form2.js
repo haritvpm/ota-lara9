@@ -51,9 +51,13 @@ function checkDatesAndOT(row, data) {
     var punchout = data.dates[i].punchout;
     if (!data.dates[i].applicable) {
       //no punching day. NIC server down. not aebas. either manualentry or nopunching
-      data.dates[i].ot = 'N/A. ' + data.dates[i].ot;
+      //  data.dates[i].ot = 'N/A. ' + data.dates[i].ot 
+      data.dates[i].ot = 'NO';
       data.dates[i].otna = true;
       naDays++;
+      if (row.overtimesittings.indexOf(data.dates[i].date) != -1) {
+        data.dates[i].ot = 'YES';
+      }
       continue;
     }
     data.dates[i].otna = false;
@@ -265,11 +269,14 @@ var vm = new Vue({
       //we can in the future add an option for users to check days they were present in sitting form
       //for now, this is a workaround
 
-      var isNoPunchingDay = this.form.duty_date && (calenderdaypunching[this.form.duty_date] === 'NOPUNCHING' || calenderdaypunching[this.form.duty_date] === 'MANUALENTRY');
+      //let isNoPunchingDay = this.form.duty_date && (calenderdaypunching[this.form.duty_date] === 'NOPUNCHING' || calenderdaypunching[this.form.duty_date] === 'MANUALENTRY')
+
       if (!ispartimefulltime) {
         switch (calenderdaysmap[this.form.duty_date]) {
           case 'Sitting day':
-            return isNoPunchingDay ? ['First', 'Second', 'Third'] : ['Second', 'Third'];
+            return ['Second', 'Third'];
+          //return isNoPunchingDay ? ['First', 'Second', 'Third'] : ['Second', 'Third'];
+
           case 'Prior holiday':
           case 'Holiday':
             return ['First', 'Second', 'Third', 'Additional'];
@@ -281,7 +288,9 @@ var vm = new Vue({
       } else {
         switch (calenderdaysmap[this.form.duty_date]) {
           case 'Sitting day':
-            return isNoPunchingDay ? ['First', 'Second'] : ['Second'];
+            return ['Second'];
+          //return isNoPunchingDay ? ['First', 'Second'] : ['Second'];
+
           default:
             return ['First', 'Second'];
         } //switch

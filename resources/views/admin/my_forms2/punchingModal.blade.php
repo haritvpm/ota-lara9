@@ -25,7 +25,13 @@
               <td>@{{ item.date }}</td>
               <td>@{{ item.punchin }}</td>
               <td>@{{ item.punchout }}</td>
-              <td >@{{ item.ot }}</td>
+              <td v-if = "modaldata_showonly || !item.otna" >
+              @{{ item.ot }}
+              </td>
+              <td v-else >
+                <input type="checkbox"  :value="item.date" v-model="modaldata_seldays">
+                <label >Yes</label>
+              </td>
             </tr>
             
             </tbody>
@@ -33,7 +39,7 @@
           </table>
           </div>
 	        <div class="modal-footer d-flex justify-content-between ">
-            Total OT: @{{modaldata_totalOT}} / @{{modaldata_totalOTDays}}
+            Total OT: @{{modaldata_seldays.length}} / @{{modaldata_totalOTDays}}
 	          <button type="button" class="btn btn-danger"  @click="modalClosed" data-dismiss="modal">OK</button>
 	        </div>
 	      </div>

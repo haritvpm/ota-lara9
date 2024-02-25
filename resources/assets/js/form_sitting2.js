@@ -21,25 +21,25 @@ var vm = new Vue({
     showModal: false,
    
     modaldata: [],
-    modaldata_totalOT: 0,
-    modaldata_row:"",
+    modaldata_fixedOT: 0,
+    modaldata_row:null,
     modaldata_totalOTDays:0,
+    modaldata_seldays:[],
+    modaldata_showonly: false
   },
 
   created: function () {
+
+    for(var i=0; i < _form.overtimes.length; i++){
+      _form.overtimes[i].overtimesittings =  _.uniq(_form.overtimes[i].overtimesittings_);
+    }
+
     Vue.set(this.$data, 'form', _form);
     //copy name to PEN field
-
-    /*
-      for(var i=0; i < this.form.overtimes.length; i++){
-         
-         //copy if we have a name
-         if(this.form.overtimes[i].name != null){
-
-          this.form.overtimes[i].pen += '-' +this.form.overtimes[i].name ;
-       }
-          
-      }*/
+ console.log('got')
+ console.log(_form)
+    
+  
 
     this.sessionchanged();
 
@@ -130,6 +130,7 @@ var vm = new Vue({
         aadhaarid: null,
         punching: true, //by default everyone ha punching
         isProcessing: false,
+        overtimesittings: [], //days user has worked 
       });
 
       this.pen_names = []; //clear previos selection from dropdown
@@ -188,15 +189,21 @@ var vm = new Vue({
 
     },
     modalClosed: function(){
-    //  console.log(this.modaldata_totalOT)  
-      this.modaldata_row.count = this.modaldata_totalOT
+      console.log(this.modaldata_seldays)  
+     
+     // let yesdays = this.modaldata.filter( x => x.ot == 'YES' ).map( x => x.date )
+      this.modaldata_row.overtimesittings = [ ...new Set([...this.modaldata_seldays])]
+      this.modaldata_row.count = this.modaldata_row.overtimesittings.length
+      console.log(this.modaldata_row.overtimesittings)  
+      
+      //copy dates from 
+
 		  //vue does not update time if we change date as it does not watch for array changes
 		  //https://v2.vuejs.org/v2/guide/reactivity#Change-Detection-Caveats
-		//	Vue.set(this.form.overtimes,index, row)
+		  //	Vue.set(this.form.overtimes,index, row)
 
     },
     showSittingOTs: function(index){
-
       this.getSittingOTs(index,true)
       
     },
@@ -210,11 +217,13 @@ var vm = new Vue({
        // console.log(self.form.session | row.from | row.to)  
         return
       };
+     //   console.log(row.overtimesittings)  
 
       self.modaldata = []
-      self.modaldata_totalOT = 0;
+      self.modaldata_fixedOT = 0;
       self.modaldata_row = row ;
       row.isProcessing = true;
+      this.modaldata_seldays = [...row.overtimesittings]
 			axios.get(`${urlajaxgetpunchsittings}/${self.form.session}/${row.from}/${row.to}/${row.pen}/${row.aadhaarid}`)
 					.then((response) => {
 						row.isProcessing = false;
@@ -225,17 +234,19 @@ var vm = new Vue({
               //warning this func modifies response.data
               let  {count, modaldata,total_ot_days,naDays} = checkDatesAndOT(row, response.data);
               if( row.count != count && naDays == 0){ //if there are no days that are either MANUALENTRy or NOPUNCHING
-                  row.count = count
+                 // row.count = count
 							  //vue does not update time if we change date as it does not watch for array changes
 							  //https://v2.vuejs.org/v2/guide/reactivity#Change-Detection-Caveats
-							   Vue.set(self.form.overtimes,index, row)
+							  // Vue.set(self.form.overtimes,index, row)
               }
 
                if(show){
-                  self.modaldata_totalOT = count;
+                  self.modaldata_fixedOT = count;
                   self.modaldata = modaldata
-                  self.modaldata_totalOTDays =  total_ot_days;
-               // this.showModal = true
+                  self.modaldata_totalOTDays =  total_ot_days + naDays;
+                 // self.modaldata_seldays = [ ...modaldata.map(d => a.date), ...row.overtimesittings];  
+                  let yesdays = modaldata.filter( x => x.ot == 'YES' ).map( x => x.date )
+                  this.modaldata_seldays = [ ...new Set([ ...yesdays , ...this.modaldata_seldays])]
                   document.getElementById('modalOpenBtn').click()
 
 

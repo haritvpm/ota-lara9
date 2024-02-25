@@ -2,6 +2,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Class Overtime
@@ -23,7 +24,8 @@ class Overtime extends Model
     'punching', //whether punching is applicable to this employee
     'punchin', 'punchout', 'punching_id', 'employee_id','slots',
     'normal_office_hours', //this is not saved. just for backend validation
-    'aadhaarid'//this is not saved. just for backend validation
+    'aadhaarid',//this is not saved. just for backend validation
+    'overtimesittings' //for sitting days, each day of user is saved. 
 ];
     
 
@@ -54,10 +56,11 @@ class Overtime extends Model
     }
     public function employee($sortby=null)
     {
-        
         return $this->belongsTo(Employee::class, 'employee_id');
-               
-
+    }
+    public function overtimesittings(): HasMany
+    {
+        return $this->hasMany(OvertimeSitting::class);
     }
     public function getPENNameAttribute()
     {

@@ -51,9 +51,13 @@ function checkDatesAndOT(row, data) {
     var punchout = data.dates[i].punchout;
     if (!data.dates[i].applicable) {
       //no punching day. NIC server down. not aebas. either manualentry or nopunching
-      data.dates[i].ot = 'N/A. ' + data.dates[i].ot;
+      //  data.dates[i].ot = 'N/A. ' + data.dates[i].ot 
+      data.dates[i].ot = 'NO';
       data.dates[i].otna = true;
       naDays++;
+      if (row.overtimesittings.indexOf(data.dates[i].date) != -1) {
+        data.dates[i].ot = 'YES';
+      }
       continue;
     }
     data.dates[i].otna = false;
@@ -177,11 +181,17 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _utils_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./utils.js */ "./resources/assets/js/utils.js");
 
 
-var _methods;
 function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
+var _methods;
 function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return _typeof(key) === "symbol" ? key : String(key); }
 function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (_typeof(res) !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
 var vm = new Vue({
   el: '#app',
@@ -197,24 +207,20 @@ var vm = new Vue({
     calenderdays2: calenderdays2,
     showModal: false,
     modaldata: [],
-    modaldata_totalOT: 0,
-    modaldata_row: "",
-    modaldata_totalOTDays: 0
+    modaldata_fixedOT: 0,
+    modaldata_row: null,
+    modaldata_totalOTDays: 0,
+    modaldata_seldays: [],
+    modaldata_showonly: false
   },
   created: function created() {
+    for (var i = 0; i < _form.overtimes.length; i++) {
+      _form.overtimes[i].overtimesittings = _.uniq(_form.overtimes[i].overtimesittings_);
+    }
     Vue.set(this.$data, 'form', _form);
     //copy name to PEN field
-
-    /*
-      for(var i=0; i < this.form.overtimes.length; i++){
-         
-         //copy if we have a name
-         if(this.form.overtimes[i].name != null){
-           this.form.overtimes[i].pen += '-' +this.form.overtimes[i].name ;
-       }
-          
-      }*/
-
+    console.log('got');
+    console.log(_form);
     this.sessionchanged();
     if (this.form.session != '' && this.form.overtimes.length == 0) {//sessions available for dataentry,
       //and this is a new form, not editing existing
@@ -287,8 +293,10 @@ var vm = new Vue({
         aadhaarid: null,
         punching: true,
         //by default everyone ha punching
-        isProcessing: false
+        isProcessing: false,
+        overtimesittings: [] //days user has worked 
       });
+
       this.pen_names = []; //clear previos selection from dropdown
       this.pen_names_to_desig = [];
       this.$nextTick(function () {
@@ -328,8 +336,15 @@ var vm = new Vue({
       }
     },
     modalClosed: function modalClosed() {
-      //  console.log(this.modaldata_totalOT)  
-      this.modaldata_row.count = this.modaldata_totalOT;
+      console.log(this.modaldata_seldays);
+
+      // let yesdays = this.modaldata.filter( x => x.ot == 'YES' ).map( x => x.date )
+      this.modaldata_row.overtimesittings = _toConsumableArray(new Set(_toConsumableArray(this.modaldata_seldays)));
+      this.modaldata_row.count = this.modaldata_row.overtimesittings.length;
+      console.log(this.modaldata_row.overtimesittings);
+
+      //copy dates from 
+
       //vue does not update time if we change date as it does not watch for array changes
       //https://v2.vuejs.org/v2/guide/reactivity#Change-Detection-Caveats
       //	Vue.set(this.form.overtimes,index, row)
@@ -348,10 +363,13 @@ var vm = new Vue({
         return;
       }
       ;
+      //   console.log(row.overtimesittings)  
+
       self.modaldata = [];
-      self.modaldata_totalOT = 0;
+      self.modaldata_fixedOT = 0;
       self.modaldata_row = row;
       row.isProcessing = true;
+      this.modaldata_seldays = _toConsumableArray(row.overtimesittings);
       axios.get("".concat(urlajaxgetpunchsittings, "/").concat(self.form.session, "/").concat(row.from, "/").concat(row.to, "/").concat(row.pen, "/").concat(row.aadhaarid)).then(function (response) {
         row.isProcessing = false;
         //console.log(response);
@@ -364,18 +382,23 @@ var vm = new Vue({
             modaldata = _checkDatesAndOT.modaldata,
             total_ot_days = _checkDatesAndOT.total_ot_days,
             naDays = _checkDatesAndOT.naDays;
-          if (row.count != count && naDays == 0) {
-            //if there are no days that are either MANUALENTRy or NOPUNCHING
-            row.count = count;
+          if (row.count != count && naDays == 0) {//if there are no days that are either MANUALENTRy or NOPUNCHING
+            // row.count = count
             //vue does not update time if we change date as it does not watch for array changes
             //https://v2.vuejs.org/v2/guide/reactivity#Change-Detection-Caveats
-            Vue.set(self.form.overtimes, index, row);
+            // Vue.set(self.form.overtimes,index, row)
           }
           if (show) {
-            self.modaldata_totalOT = count;
+            self.modaldata_fixedOT = count;
             self.modaldata = modaldata;
-            self.modaldata_totalOTDays = total_ot_days;
-            // this.showModal = true
+            self.modaldata_totalOTDays = total_ot_days + naDays;
+            // self.modaldata_seldays = [ ...modaldata.map(d => a.date), ...row.overtimesittings];  
+            var yesdays = modaldata.filter(function (x) {
+              return x.ot == 'YES';
+            }).map(function (x) {
+              return x.date;
+            });
+            _this.modaldata_seldays = _toConsumableArray(new Set([].concat(_toConsumableArray(yesdays), _toConsumableArray(_this.modaldata_seldays))));
             document.getElementById('modalOpenBtn').click();
           }
         }

@@ -41,9 +41,13 @@ export function  checkDatesAndOT(row, data){
     const punchout = data.dates[i].punchout;
     
     if(  !data.dates[i].applicable ){ //no punching day. NIC server down. not aebas. either manualentry or nopunching
-      data.dates[i].ot = 'N/A. ' + data.dates[i].ot 
+    //  data.dates[i].ot = 'N/A. ' + data.dates[i].ot 
+      data.dates[i].ot = 'NO' 
       data.dates[i].otna = true
       naDays++;
+      if(row.overtimesittings.indexOf(data.dates[i].date)!=-1){
+        data.dates[i].ot = 'YES'
+      }
       continue;
     }
     data.dates[i].otna = false

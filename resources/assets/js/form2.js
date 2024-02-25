@@ -99,14 +99,14 @@ var vm = new Vue({
 			//we can in the future add an option for users to check days they were present in sitting form
 			//for now, this is a workaround
 
-			let isNoPunchingDay = this.form.duty_date && 
-				(calenderdaypunching[this.form.duty_date] === 'NOPUNCHING' || calenderdaypunching[this.form.duty_date] === 'MANUALENTRY')
+			//let isNoPunchingDay = this.form.duty_date && (calenderdaypunching[this.form.duty_date] === 'NOPUNCHING' || calenderdaypunching[this.form.duty_date] === 'MANUALENTRY')
 	  
 			if (!ispartimefulltime) {
 			  switch (calenderdaysmap[this.form.duty_date]) {
 	  
 				case 'Sitting day':
-				  return isNoPunchingDay ? ['First', 'Second', 'Third'] : ['Second', 'Third'];
+					return ['Second', 'Third'];
+					//return isNoPunchingDay ? ['First', 'Second', 'Third'] : ['Second', 'Third'];
 	  
 				case 'Prior holiday':
 				case 'Holiday':
@@ -120,7 +120,8 @@ var vm = new Vue({
 			  switch (calenderdaysmap[this.form.duty_date]) {
 	  
 				case 'Sitting day':
-				  return isNoPunchingDay ? ['First', 'Second'] : ['Second'];
+					return  ['Second'];
+					//return isNoPunchingDay ? ['First', 'Second'] : ['Second'];
 	  
 				default:
 				  return ['First', 'Second'];

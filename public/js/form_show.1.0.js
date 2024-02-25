@@ -51,9 +51,13 @@ function checkDatesAndOT(row, data) {
     var punchout = data.dates[i].punchout;
     if (!data.dates[i].applicable) {
       //no punching day. NIC server down. not aebas. either manualentry or nopunching
-      data.dates[i].ot = 'N/A. ' + data.dates[i].ot;
+      //  data.dates[i].ot = 'N/A. ' + data.dates[i].ot 
+      data.dates[i].ot = 'NO';
       data.dates[i].otna = true;
       naDays++;
+      if (row.overtimesittings.indexOf(data.dates[i].date) != -1) {
+        data.dates[i].ot = 'YES';
+      }
       continue;
     }
     data.dates[i].otna = false;
@@ -179,6 +183,12 @@ function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" =
 function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return _typeof(key) === "symbol" ? key : String(key); }
 function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (_typeof(res) !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
 
 ///detect brwowser
@@ -214,9 +224,11 @@ var vm = new Vue({
     approvaltext: malkla + ' കേരള നിയമസഭയുടെ  ' + sessionnumber + '-ാം സമ്മേളനത്തോടനുബന്ധിച്ച് അധികജോലിക്കു നിയോഗിക്കപ്പെട്ട ജീവനക്കാർക്ക്  ഓവർടൈം അലവൻസ് അനുവദിക്കുന്നതിനുള്ള ഈ ഓവർടൈം അലവൻസ്   സ്റ്റേറ്റ്മെന്റ്,   ഓവർടൈം അലവൻസ് അനുവദിക്കുന്നതിനായുള്ള നിലവിലെ സർക്കാർ ഉത്തരവിൽ  നിഷ്കർഷിച്ചിരിക്കുന്ന  നിബന്ധനകൾ  പാലിച്ചു തന്നെയാണ്  തയ്യാറാക്കി സമർപ്പിക്കുന്നതെന്ന് സാക്ഷ്യപ്പെടുത്തുന്നു.',
     approvalpostingcheckedtext: 'നിയമസഭാ സെക്രട്ടറിയുടെ മുൻ‌കൂട്ടിയുള്ള അനുമതിയോടെയാണ് ഈ ഓവർടൈമിന് ജീവനക്കാരെ നിയോഗിച്ചതെന്ന് സാക്ഷ്യപ്പെടുത്തുന്നു.',
     modaldata: [],
-    modaldata_totalOT: 0,
+    modaldata_fixedOT: 0,
     modaldata_totalOTDays: 0,
-    modaldata_row: null
+    modaldata_row: null,
+    modaldata_showonly: true,
+    modaldata_seldays: []
   },
   mounted: function mounted() {
     //alert(navigator.sayswho);
@@ -240,9 +252,11 @@ var vm = new Vue({
     showSittingOTs: function showSittingOTs(row) {
       var _this = this;
       row = JSON.parse(row);
-      // console.log(row);
+      console.log(row);
       // console.log(row.pen);
       // console.log(row.from);
+      row.overtimesittings = row.overtimesittings_;
+      // console.log(row);
 
       axios.get("".concat(urlajaxgetpunchsittings, "/").concat(session, "/").concat(row.from, "/").concat(row.to, "/").concat(row.pen, "/").concat(row.aadhaarid)).then(function (response) {
         //  console.log(response); 
@@ -255,9 +269,15 @@ var vm = new Vue({
             total_ot_days = _checkDatesAndOT.total_ot_days,
             naDays = _checkDatesAndOT.naDays;
           _this.modaldata = modaldata;
-          _this.modaldata_totalOT = count;
+          _this.modaldata_fixedOT = count;
           _this.modaldata_row = row;
-          _this.modaldata_totalOTDays = total_ot_days;
+          _this.modaldata_totalOTDays = total_ot_days + naDays;
+          var yesdays = modaldata.filter(function (x) {
+            return x.ot == 'YES';
+          }).map(function (x) {
+            return x.date;
+          });
+          _this.modaldata_seldays = _toConsumableArray(new Set([].concat(_toConsumableArray(yesdays), _toConsumableArray(_this.modaldata_seldays))));
           document.getElementById('modalOpenBtn').click();
         }
       })["catch"](function (err) {});

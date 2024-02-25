@@ -41,9 +41,11 @@ var vm = new Vue({
         approvalpostingcheckedtext: 'നിയമസഭാ സെക്രട്ടറിയുടെ മുൻ‌കൂട്ടിയുള്ള അനുമതിയോടെയാണ് ഈ ഓവർടൈമിന് ജീവനക്കാരെ നിയോഗിച്ചതെന്ന് സാക്ഷ്യപ്പെടുത്തുന്നു.',
      
         modaldata: [],
-        modaldata_totalOT: 0,
+        modaldata_fixedOT: 0,
         modaldata_totalOTDays:0,
         modaldata_row:null,
+        modaldata_showonly: true,
+        modaldata_seldays:[],
 
     },
 
@@ -76,10 +78,12 @@ var vm = new Vue({
         },
         showSittingOTs(row){
             row = JSON.parse(row)
-            // console.log(row);
+             console.log(row);
             // console.log(row.pen);
             // console.log(row.from);
-                                       
+              row.overtimesittings = row.overtimesittings_   
+            // console.log(row);
+
               axios.get(`${urlajaxgetpunchsittings}/${session}/${row.from}/${row.to}/${row.pen}/${row.aadhaarid}`)
                         .then((response) => {
                         //  console.log(response); 
@@ -89,9 +93,12 @@ var vm = new Vue({
                             let  {count, modaldata,total_ot_days,naDays} = checkDatesAndOT(row, response.data);
                                                           
                             this.modaldata = modaldata
-                            this.modaldata_totalOT = count;
+                            this.modaldata_fixedOT = count;
                             this.modaldata_row = row ;
-                            this.modaldata_totalOTDays = total_ot_days;
+                            this.modaldata_totalOTDays = total_ot_days+naDays;
+                            let yesdays = modaldata.filter( x => x.ot == 'YES' ).map( x => x.date )
+                            this.modaldata_seldays = [ ...new Set([ ...yesdays , ...this.modaldata_seldays])]
+
                             document.getElementById('modalOpenBtn').click()
                      
       
