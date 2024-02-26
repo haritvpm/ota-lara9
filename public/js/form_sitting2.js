@@ -269,9 +269,7 @@ var vm = new Vue({
     }
     Vue.set(this.$data, 'form', _form);
     //copy name to PEN field
-    //  console.log('got')
-    //console.log(_form)
-
+    $('[data-widget="pushmenu"]').PushMenu('collapse');
     this.sessionchanged();
     if (this.form.session != '' && this.form.overtimes.length == 0) {//sessions available for dataentry,
       //and this is a new form, not editing existing

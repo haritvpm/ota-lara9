@@ -63,11 +63,9 @@
 					<th>PEN - Name</th>
 					<th>Designation</th>
 					
-					<th v-show="dayHasPunching">PunchIn</th>
-					<th v-show="dayHasPunching">PunchOut</th>
+					<th v-show="dayHasPunching">PunchIn <-> PunchOut</th>
 					
-					<th>Time-From</th>
-					<th>Time-To</th>
+					<th>Time-From <-> Time-To</th>
 					<th class="text-center">OT</th>
 					<th></th>
 				</tr>
@@ -94,45 +92,44 @@
 					</td>
 
 					<td class="align-middle">
-					<div class="small"> @{{ row.designation }} </div> 
+					<input class="form-control" style="font-size: 12px;" :value="row.designation" readonly >
 					</td>
 					
 					
-					<td v-show="dayHasPunching" class="col-md-1">
+					<td v-show="dayHasPunching" class="col-md-2">
+					<div class="input-group">
 					<input  :name="'punchin[' + index + ']'" type="text" v-model="row.punchin" required class="form-control" :disabled="!dayHasPunching || !row.punching" :readonly="!allowPunchingEntry || row.punchin_from_aebas" autocomplete="off">
-					</td>
 					
-					<td v-show="dayHasPunching" class="col-md-1">
 					<input  :name="'punchout[' + index + ']'" type="text" v-model="row.punchout" required class="form-control" :disabled="!dayHasPunching || !row.punching" :readonly="!allowPunchingEntry || row.punchout_from_aebas"  autocomplete="off">
+					</div>
 					</td>
 				
 
-					<td class="col-md-1">
+					<td class="col-md-2">
+					<div class="input-group">
 					<input  :name="'from[' + index + ']'" type="text" v-model="row.from" required class="form-control"  autocomplete="off">
-					</td>
-					
-					<td class="col-md-1">
 					<input  :name="'to[' + index + ']'" type="text" v-model="row.to" required class="form-control"  autocomplete="off">
+					</div>
 					</td>
 					
 					<td class="text-center align-middle">
 					
 					<div class="form-check form-check-inline">
-					<input class="form-check-input"  v-if="slotoptions.includes('First')" type="checkbox"   :id="'Firstslot[' + index + ']'" value="First" v-model="row.slots">
+					<input class="form-check-input checkbox-1x"  v-if="slotoptions.includes('First')" type="checkbox"   :id="'Firstslot[' + index + ']'" value="First" v-model="row.slots">
 					<label class="form-check-label" v-if="slotoptions.includes('First')" :for="'Firstslot[' + index + ']'" >
 					<div v-html="firstOTLabel"></div>
 					</label>
 					</div>
 					<div class="form-check form-check-inline">
-					<input class="form-check-input" v-if="slotoptions.includes('Second')" type="checkbox"   :id="'Secondslot[' + index + ']'" value="Second" v-model="row.slots">
+					<input class="form-check-input checkbox-1x" v-if="slotoptions.includes('Second')" type="checkbox"   :id="'Secondslot[' + index + ']'" value="Second" v-model="row.slots">
 					<label class="form-check-label" v-if="slotoptions.includes('Second')" :for="'Secondslot[' + index + ']'">2<sup>nd</sup></label>
 					</div>
 					<div class="form-check form-check-inline">
-					<input class="form-check-input" v-if="slotoptions.includes('Third') && !canShowAddlOT(row)" type="checkbox"   :id="'Thirdslot[' + index + ']'" value="Third" v-model="row.slots">
+					<input class="form-check-input checkbox-1x" v-if="slotoptions.includes('Third') && !canShowAddlOT(row)" type="checkbox"   :id="'Thirdslot[' + index + ']'" value="Third" v-model="row.slots">
 					<label class="form-check-label" v-if="slotoptions.includes('Third') && !canShowAddlOT(row)" :for="'Thirdslot[' + index + ']'">3<sup>rd</sup></label>
 					</div>
 					<div class="form-check form-check-inline">
-					<input class="form-check-input" v-if="slotoptions.includes('Additional') && canShowAddlOT(row)" type="checkbox"   :id="'Addlslot[' + index + ']'" value="Addl" v-model="row.slots">
+					<input class="form-check-input checkbox-1x" v-if="slotoptions.includes('Additional') && canShowAddlOT(row)" type="checkbox"   :id="'Addlslot[' + index + ']'" value="Addl" v-model="row.slots">
 					<label class="form-check-label"  v-if="slotoptions.includes('Additional') && canShowAddlOT(row)" :for="'Addlslot[' + index + ']'">Addl</label>
 					</div>
 				

@@ -400,14 +400,14 @@
                     </a>
             </li>
             @endcan
-            <li class="nav-item">
+           <!--  <li class="nav-item">
             <a  class="nav-link" href="#logout" onclick="$('#logout').submit();">
                     <i class="fas fa-fw  fa-arrow-left nav-icon"></i>
                     <p>
                     @lang('quickadmin.qa_logout')
                     </p> 
                 </a>
-                </li>
+                </li> -->
            
         </ul>
         </nav>

@@ -15,14 +15,23 @@
             <!-- Left navbar links -->
             <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link" data-widget="pushmenu" href="#"><i class="fa fa-bars"></i></a>
+                    <a class="nav-link" data-auto-collapse-size="768" data-widget="pushmenu" href="#"><i class="fa fa-bars"></i></a>
                 </li>
             </ul>
         <!-- Right navbar links -->
       
                 <ul class="navbar-nav ml-auto">
+               
                 <li class="nav-item">
-                    <a class="nav-link" data-widget="pushmenu" href="#"><i class="fa fa-user"></i>({{Auth::user()->DispNameWithName}})</a>
+                    <a  class="nav-link" href="#logout" onclick="$('#logout').submit();">
+                    <i class="fas fa-sign-out-alt"></i>
+                    
+                    @lang('quickadmin.qa_logout')
+                    
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#"><i class="fa fa-user"></i>({{Auth::user()->DispNameWithName}})</a>
                 </li>
                 </ul>
  

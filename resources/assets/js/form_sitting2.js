@@ -36,8 +36,8 @@ var vm = new Vue({
 
     Vue.set(this.$data, 'form', _form);
     //copy name to PEN field
-//  console.log('got')
- //console.log(_form)
+		$('[data-widget="pushmenu"]').PushMenu('collapse')
+
     
   
 

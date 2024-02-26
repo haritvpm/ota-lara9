@@ -1,8 +1,15 @@
 @extends('layouts.app')
 
     <style>
-        [v-cloak] { display:none;  opacity: 0.0;}
-
+        [v-cloak] { display:none; }
+        .checkbox-1x {
+    transform: scale(1.5);
+    -webkit-transform: scale(1.5);
+}
+.checkbox-2x {
+    transform: scale(2);
+    -webkit-transform: scale(2);
+}
     </style>
 
 @section('content')

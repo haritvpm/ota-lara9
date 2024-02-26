@@ -282,7 +282,7 @@ var vm = new Vue({
     Vue.set(this.$data, "form", _form);
 
     //copy name to PEN field
-
+    $('[data-widget="pushmenu"]').PushMenu('collapse');
     //due to a bug, onchange is not called
     var self = this;
     this.$watch("form.duty_date", function (newVal, oldVal) {
