@@ -10,6 +10,8 @@
     transform: scale(2);
     -webkit-transform: scale(2);
 }
+
+
     </style>
 
 @section('content')

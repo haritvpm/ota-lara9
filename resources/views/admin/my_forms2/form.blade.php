@@ -55,7 +55,7 @@
 <div class="row" v-cloak>
 	
 	<div class="col-md-12 form-group ">
-		<table class="table  table-condensed">
+		<table class="table  table-sm">
 			<thead v-show="form.overtimes.length" >
 			
 				<tr class="text-center" style="font-size: 12px; font-weight: bold">
@@ -112,8 +112,8 @@
 					</div>
 					</td>
 					
-					<td class="text-center align-middle">
-					
+					<td class="col-md-2 text-center align-middle">
+					<div class="input-group">
 					<div class="form-check form-check-inline">
 					<input class="form-check-input checkbox-1x"  v-if="slotoptions.includes('First')" type="checkbox"   :id="'Firstslot[' + index + ']'" value="First" v-model="row.slots">
 					<label class="form-check-label" v-if="slotoptions.includes('First')" :for="'Firstslot[' + index + ']'" >
@@ -132,7 +132,7 @@
 					<input class="form-check-input checkbox-1x" v-if="slotoptions.includes('Additional') && canShowAddlOT(row)" type="checkbox"   :id="'Addlslot[' + index + ']'" value="Addl" v-model="row.slots">
 					<label class="form-check-label"  v-if="slotoptions.includes('Additional') && canShowAddlOT(row)" :for="'Addlslot[' + index + ']'">Addl</label>
 					</div>
-				
+					</div>
 					</td>
 					
 					
