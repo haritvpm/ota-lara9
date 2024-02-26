@@ -433,6 +433,16 @@ var vm = new Vue({
             modaldata = _checkDatesAndOT.modaldata,
             total_nondecision_days = _checkDatesAndOT.total_nondecision_days,
             total_userdecision_days = _checkDatesAndOT.total_userdecision_days;
+          //date period may have changed. only include those dates and remove the rest
+          //this is to copy the user decided dates to new array.
+          //overtimesittings_ has the original data from db
+          var temp = _this.modaldata.filter(function (x) {
+            return row.overtimesittings.indexOf(x.date) != -1;
+          });
+          //let temp =  this.modaldata.filter( x => row.overtimesittings_.indexOf( x.date ) != -1 )
+          row.overtimesittings = _toConsumableArray(temp.map(function (x) {
+            return x.date;
+          }));
           if (row.count != count && total_userdecision_days == 0) {
             //if there are no days that are either MANUALENTRy or NOPUNCHING
             row.count = count;

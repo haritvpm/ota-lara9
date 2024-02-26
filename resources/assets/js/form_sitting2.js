@@ -233,7 +233,12 @@ var vm = new Vue({
               setEmployeeTypes(row);
               //warning this func modifies response.data
               let {count, modaldata,total_nondecision_days,total_userdecision_days} = checkDatesAndOT(row, response.data);
-            
+              //date period may have changed. only include those dates and remove the rest
+              //this is to copy the user decided dates to new array.
+              //overtimesittings_ has the original data from db
+              let temp =  this.modaldata.filter( x => row.overtimesittings.indexOf( x.date ) != -1 )
+              //let temp =  this.modaldata.filter( x => row.overtimesittings_.indexOf( x.date ) != -1 )
+              row.overtimesittings = [...temp.map( x => x.date )]
               if( row.count != count && total_userdecision_days == 0){ //if there are no days that are either MANUALENTRy or NOPUNCHING
                  row.count = count
 							  //vue does not update time if we change date as it does not watch for array changes

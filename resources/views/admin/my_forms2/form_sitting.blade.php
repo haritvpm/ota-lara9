@@ -56,7 +56,7 @@
 
 
 	<div class="col-md-12">
-		<table class="table  table-sm">
+		<table class="table  table-sm ">
 			<thead v-show="form.overtimes.length" >
 				<tr class="text-center" style="font-size: 12px; font-weight: bold">
 					<th>No</th>
