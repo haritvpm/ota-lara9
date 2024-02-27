@@ -462,9 +462,14 @@ var vm = new Vue({
               return x.date;
             });
             //overtimesittings stores prev selected days/ find only those days from the period
-            //if user changes perod without userdecision and then backagain, this will be lost. so just ignore and make him reselect
-            // let temp =  row.overtimesittings.filter( date => modaldata.map(d=>d.date).indexOf( date ) != -1 )
-            self.modaldata_seldays = _toConsumableArray(new Set(_toConsumableArray(yesdays)));
+            //if user changes perod without userdecision and then backagain, this will be lost.
+            //but if user sets and then opens again, we need this
+            var temp = row.overtimesittings.filter(function (date) {
+              return modaldata.map(function (d) {
+                return d.date;
+              }).indexOf(date) != -1;
+            });
+            self.modaldata_seldays = _toConsumableArray(new Set([].concat(_toConsumableArray(yesdays), _toConsumableArray(temp))));
             document.getElementById('modalOpenBtn').click();
           }
         }

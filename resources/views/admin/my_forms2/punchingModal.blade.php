@@ -28,9 +28,11 @@
               <td v-if = "modaldata_showonly || !item.userdecision" >
               @{{ item.ot }}
               </td>
-              <td v-else >
-                <input type="checkbox"  :value="item.date" v-model="modaldata_seldays">
-                <label >Yes</label>
+              <td v-else class="align middle" >
+                  <input type="checkbox"  v-model="modaldata_seldays" :value="item.date"  :id="item.date">
+                  <label :for="item.date">Yes</label>
+                <!-- <input type="checkbox"  :value="item.date" v-model="modaldata_seldays"> -->
+                <!-- <label >Yes</label> -->
               </td>
             </tr>
             

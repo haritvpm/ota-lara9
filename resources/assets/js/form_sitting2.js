@@ -255,9 +255,10 @@ var vm = new Vue({
                   self.modaldata_totalOTDays =  total_nondecision_days + total_userdecision_days;
                   let yesdays = modaldata.filter( x => x.ot == 'YES' && x.userdecision == false ).map( x => x.date )
                   //overtimesittings stores prev selected days/ find only those days from the period
-                  //if user changes perod without userdecision and then backagain, this will be lost. so just ignore and make him reselect
-                 // let temp =  row.overtimesittings.filter( date => modaldata.map(d=>d.date).indexOf( date ) != -1 )
-                  self.modaldata_seldays =  [ ...new Set([...yesdays])]
+                  //if user changes perod without userdecision and then backagain, this will be lost.
+                  //but if user sets and then opens again, we need this
+                  let temp =  row.overtimesittings.filter( date => modaldata.map(d=>d.date).indexOf( date ) != -1 )
+                  self.modaldata_seldays =  [ ...new Set([...yesdays,...temp])]
                   document.getElementById('modalOpenBtn').click()
 
                }
