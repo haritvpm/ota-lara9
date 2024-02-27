@@ -536,7 +536,7 @@ class MyForms2Controller extends Controller
                                          $item?->employee->designation->punching && $item?->employee->punching;
                     $item['normal_office_hours'] = $item?->employee?->designation?->normal_office_hours;
 
-                    $item['overtimesittings_'] =$item?->overtimesittings->pluck('date');
+                   // $item['overtimesittings_'] =$item?->overtimesittings->pluck('date');
 
 
                  //   Log::info($item['overtimesittings']);
@@ -1126,7 +1126,7 @@ class MyForms2Controller extends Controller
 	        }
             else {
               
-                $overtime['overtimesittings_'] =$overtime?->overtimesittings->pluck('date');
+              //  $overtime['overtimesittings_'] =$overtime?->overtimesittings->pluck('date');
 
             }
             return $overtime;

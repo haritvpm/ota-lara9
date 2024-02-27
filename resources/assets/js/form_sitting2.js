@@ -31,7 +31,10 @@ var vm = new Vue({
   created: function () {
 
     for(var i=0; i < _form.overtimes.length; i++){
-      _form.overtimes[i].overtimesittings =  _.uniq(_form.overtimes[i].overtimesittings_);
+      //console.log( _form.overtimes[i].overtimesittings)
+      //console.log( _form.overtimes[i].overtimesittings_)row.overtimesittings.map(s => s.date);
+      _form.overtimes[i].overtimesittings =  _.uniq(_form.overtimes[i].overtimesittings.map(s => s.date));
+      //_form.overtimes[i].overtimesittings =  _.uniq(_form.overtimes[i].overtimesittings_);
     }
 
     Vue.set(this.$data, 'form', _form);
@@ -105,7 +108,8 @@ var vm = new Vue({
 		//	console.log(i)
     //reset count to zero
     this.form.overtimes[index].count = ""
-    //  this.getSittingOTs(index)
+    this.form.overtimes[index].overtimesittings=[]
+    this.getSittingOTs(index)
 		
 		},
 
@@ -211,13 +215,13 @@ var vm = new Vue({
    
       var self = this;
 			let row = self.form.overtimes[index];
-   
+
 			if(row.pen == "" || !self.form.session || !row.from || !row.to){ 
       
        // console.log(self.form.session | row.from | row.to)  
         return
       };
-     //   console.log(row.overtimesittings)  
+      console.log(row.overtimesittings)  
 
       self.modaldata = []
       self.modaldata_fixedOT = 0;
@@ -236,9 +240,8 @@ var vm = new Vue({
               //date period may have changed. only include those dates and remove the rest
               //this is to copy the user decided dates to new array.
               //overtimesittings_ has the original data from db
-              let temp =  this.modaldata.filter( x => row.overtimesittings.indexOf( x.date ) != -1 )
               //let temp =  this.modaldata.filter( x => row.overtimesittings_.indexOf( x.date ) != -1 )
-              row.overtimesittings = [...temp.map( x => x.date )]
+              //row.overtimesittings = [...modaldata.map( x => x.date )]
               if( row.count != count && total_userdecision_days == 0){ //if there are no days that are either MANUALENTRy or NOPUNCHING
                  row.count = count
 							  //vue does not update time if we change date as it does not watch for array changes
@@ -250,9 +253,11 @@ var vm = new Vue({
                   self.modaldata_fixedOT = count;
                   self.modaldata = modaldata
                   self.modaldata_totalOTDays =  total_nondecision_days + total_userdecision_days;
-                  let yesdays = this.modaldata.filter( x => x.ot == 'YES' && x.userdecision == false ).map( x => x.date )
-                 // this.modaldata_seldays = [ ...new Set([ ...yesdays , ...this.modaldata_seldays])]
-                  this.modaldata_seldays =  [ ...new Set([...yesdays , ...row.overtimesittings])]
+                  let yesdays = modaldata.filter( x => x.ot == 'YES' && x.userdecision == false ).map( x => x.date )
+                  //overtimesittings stores prev selected days/ find only those days from the period
+                  let temp =  row.overtimesittings.filter( date => modaldata.map(d=>d.date).indexOf( date ) != -1 )
+
+                  self.modaldata_seldays =  [ ...new Set([...yesdays , ...temp])]
                   document.getElementById('modalOpenBtn').click()
 
                }
@@ -298,6 +303,9 @@ var vm = new Vue({
 					row.normal_office_hours = desig.desig_normal_office_hours ;
           row.category = desig.category;
 					row.employee_id = desig.employee_id;
+          row.isProcessing= false;
+          row.count= "";
+          row.overtimesittings=[];
 
           setEmployeeTypes(row);
           self.getSittingOTs(id)

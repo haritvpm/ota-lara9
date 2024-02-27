@@ -81,7 +81,8 @@ var vm = new Vue({
             //  console.log(row);
             // console.log(row.pen);
             // console.log(row.from);
-              row.overtimesittings = row.overtimesittings_   
+              row.overtimesittings = row.overtimesittings.map(s => s.date);// row.overtimesittings_  
+               
             // console.log(row);
 
               axios.get(`${urlajaxgetpunchsittings}/${session}/${row.from}/${row.to}/${row.pen}/${row.aadhaarid}`)

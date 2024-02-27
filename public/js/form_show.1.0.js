@@ -305,7 +305,10 @@ var vm = new Vue({
       //  console.log(row);
       // console.log(row.pen);
       // console.log(row.from);
-      row.overtimesittings = row.overtimesittings_;
+      row.overtimesittings = row.overtimesittings.map(function (s) {
+        return s.date;
+      }); // row.overtimesittings_  
+
       // console.log(row);
 
       axios.get("".concat(urlajaxgetpunchsittings, "/").concat(session, "/").concat(row.from, "/").concat(row.to, "/").concat(row.pen, "/").concat(row.aadhaarid)).then(function (response) {

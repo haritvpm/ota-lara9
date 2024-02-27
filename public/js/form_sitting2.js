@@ -265,8 +265,14 @@ var vm = new Vue({
   },
   created: function created() {
     for (var i = 0; i < _form.overtimes.length; i++) {
-      _form.overtimes[i].overtimesittings = _.uniq(_form.overtimes[i].overtimesittings_);
+      //console.log( _form.overtimes[i].overtimesittings)
+      //console.log( _form.overtimes[i].overtimesittings_)row.overtimesittings.map(s => s.date);
+      _form.overtimes[i].overtimesittings = _.uniq(_form.overtimes[i].overtimesittings.map(function (s) {
+        return s.date;
+      }));
+      //_form.overtimes[i].overtimesittings =  _.uniq(_form.overtimes[i].overtimesittings_);
     }
+
     Vue.set(this.$data, 'form', _form);
     //copy name to PEN field
     $('[data-widget="pushmenu"]').PushMenu('collapse');
@@ -319,9 +325,9 @@ var vm = new Vue({
       //	console.log(i)
       //reset count to zero
       this.form.overtimes[index].count = "";
-      //  this.getSittingOTs(index)
+      this.form.overtimes[index].overtimesittings = [];
+      this.getSittingOTs(index);
     },
-
     addRow: function addRow() {
       //  var elem = document.createElement('tr');
       var self = this;
@@ -416,8 +422,7 @@ var vm = new Vue({
         return;
       }
       ;
-      //   console.log(row.overtimesittings)  
-
+      console.log(row.overtimesittings);
       self.modaldata = [];
       self.modaldata_fixedOT = 0;
       self.modaldata_row = row;
@@ -436,13 +441,8 @@ var vm = new Vue({
           //date period may have changed. only include those dates and remove the rest
           //this is to copy the user decided dates to new array.
           //overtimesittings_ has the original data from db
-          var temp = _this.modaldata.filter(function (x) {
-            return row.overtimesittings.indexOf(x.date) != -1;
-          });
           //let temp =  this.modaldata.filter( x => row.overtimesittings_.indexOf( x.date ) != -1 )
-          row.overtimesittings = _toConsumableArray(temp.map(function (x) {
-            return x.date;
-          }));
+          //row.overtimesittings = [...modaldata.map( x => x.date )]
           if (row.count != count && total_userdecision_days == 0) {
             //if there are no days that are either MANUALENTRy or NOPUNCHING
             row.count = count;
@@ -454,13 +454,18 @@ var vm = new Vue({
             self.modaldata_fixedOT = count;
             self.modaldata = modaldata;
             self.modaldata_totalOTDays = total_nondecision_days + total_userdecision_days;
-            var yesdays = _this.modaldata.filter(function (x) {
+            var yesdays = modaldata.filter(function (x) {
               return x.ot == 'YES' && x.userdecision == false;
             }).map(function (x) {
               return x.date;
             });
-            // this.modaldata_seldays = [ ...new Set([ ...yesdays , ...this.modaldata_seldays])]
-            _this.modaldata_seldays = _toConsumableArray(new Set([].concat(_toConsumableArray(yesdays), _toConsumableArray(row.overtimesittings))));
+            //overtimesittings stores prev selected days/ find only those days from the period
+            var temp = row.overtimesittings.filter(function (date) {
+              return modaldata.map(function (d) {
+                return d.date;
+              }).indexOf(date) != -1;
+            });
+            self.modaldata_seldays = _toConsumableArray(new Set([].concat(_toConsumableArray(yesdays), _toConsumableArray(temp))));
             document.getElementById('modalOpenBtn').click();
           }
         }
@@ -496,6 +501,9 @@ var vm = new Vue({
         row.normal_office_hours = desig.desig_normal_office_hours;
         row.category = desig.category;
         row.employee_id = desig.employee_id;
+        row.isProcessing = false;
+        row.count = "";
+        row.overtimesittings = [];
         (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.setEmployeeTypes)(row);
         self.getSittingOTs(id);
       }
