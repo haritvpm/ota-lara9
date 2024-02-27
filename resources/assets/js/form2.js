@@ -100,7 +100,7 @@ var vm = new Vue({
 
 			//let isNoPunchingDay = this.form.duty_date && (calenderdaypunching[this.form.duty_date] === 'NOPUNCHING' || calenderdaypunching[this.form.duty_date] === 'MANUALENTRY')
 	  
-			if (!ispartimefulltime) {
+			if (isThirdOTAllowed) {
 			  switch (calenderdaysmap[this.form.duty_date]) {
 	  
 				case 'Sitting day':

@@ -371,53 +371,20 @@ class MyForms2Controller extends Controller
             }
         }
 
-       
-      //hard corded. ugly i know. 
-        $ispartimefulltime = 0;
-        $iswatchnward = 0;
-      //  $isspeakeroffice = 0;
-
-
+        $form = null;
+      
         if(!$issitting && $id)
         {
            $form = Form::findOrFail($id);
-           
-           //we should set parttime even if it is being edited by house keeping
-
-            if(false !== strpos( $form->creator, 'health') || 
-               false !== strpos( $form->creator, 'agri' )){
-                $ispartimefulltime = 1;            
-            }
-
-            if(false !== strpos($form->creator, 'watchnward')){
-                $iswatchnward = 1;
-            }
-
-            if(false !== strpos($form->creator, 'sn.am') || 
-               false !== strpos($form->creator, 'sn.ma')){
-                $ispartimefulltime = 1;
-            }
 
         }
 
-        if( false !== strpos(  \Auth::user()->username, 'watchnward') ){
-            $iswatchnward = 1;
-        }
-
+    
        // if( false !== strpos(  \Auth::user()->username, 'oo.') ){
         //    $isspeakeroffice = 1; //dyspkr and sec too
        // }
 
-        //amhostel and sn.mae and sn.amresspkr has parttimes too
-        
-        if( false !== strpos( \Auth::user()->username, 'health' ) || 
-            false !== strpos( \Auth::user()->username, 'agri') || 
-            false !== strpos( \Auth::user()->username, 'sn.am') || 
-            false !== strpos( \Auth::user()->username, 'sn.ma')
-             ){
 
-            $ispartimefulltime = 1;            
-        }
 
        // $designations = \App\Designation::orderby('designation','asc')->get(['designation'])->pluck('designation');
 
@@ -470,8 +437,7 @@ class MyForms2Controller extends Controller
             'old_slotselected' => old('overtime_slot') ? old('overtime_slot') : '',
             'old_calenderdayselected' => old('duty_date') ? old('duty_date') : '',
             'presets' => $presets,
-            'ispartimefulltime' => $ispartimefulltime,
-            'iswatchnward' => $iswatchnward,
+            'isThirdOTAllowed' => \Auth::user()->isThirdOTAllowed($form?->creator ?? null),
           //  'isspeakeroffice' => $isspeakeroffice,
             'autoloadpens' => $autoloadpens,
             'presets_default' => $presets_default,
