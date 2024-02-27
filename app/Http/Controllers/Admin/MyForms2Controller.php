@@ -1125,7 +1125,7 @@ class MyForms2Controller extends Controller
                 $overtime['slots'] = implode(', ',$slots);
 	        }
             else {
-              
+                $form->overtimes?->load('overtimesittings');
               //  $overtime['overtimesittings_'] =$overtime?->overtimesittings->pluck('date');
 
             }

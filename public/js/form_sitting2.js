@@ -448,8 +448,10 @@ var vm = new Vue({
             row.count = count;
             //vue does not update time if we change date as it does not watch for array changes
             //https://v2.vuejs.org/v2/guide/reactivity#Change-Detection-Caveats
-            Vue.set(self.form.overtimes, index, row);
           }
+
+          Vue.set(self.form.overtimes, index, row); //update isProcessing
+
           if (show) {
             self.modaldata_fixedOT = count;
             self.modaldata = modaldata;
