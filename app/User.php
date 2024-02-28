@@ -105,7 +105,18 @@ class User extends Authenticatable
     {
        return $this->role_id == 7;
     }
-     
+    public function hasPunching() 
+    {
+       
+                  
+        if( false !== strpos( $this->username, 'oo.dyspkr' ) 
+            ){
+                return false ;        
+        }
+
+        return true;        
+
+    }
     public function isThirdOTAllowed( $formcreator=null) 
     {
          //we should set parttime even if it is being edited by house keeping

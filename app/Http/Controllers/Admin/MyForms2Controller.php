@@ -380,10 +380,7 @@ class MyForms2Controller extends Controller
         }
 
     
-       // if( false !== strpos(  \Auth::user()->username, 'oo.') ){
-        //    $isspeakeroffice = 1; //dyspkr and sec too
-       // }
-
+  
 
 
        // $designations = \App\Designation::orderby('designation','asc')->get(['designation'])->pluck('designation');
@@ -438,7 +435,6 @@ class MyForms2Controller extends Controller
             'old_calenderdayselected' => old('duty_date') ? old('duty_date') : '',
             'presets' => $presets,
             'isThirdOTAllowed' => \Auth::user()->isThirdOTAllowed($form?->creator ?? null),
-          //  'isspeakeroffice' => $isspeakeroffice,
             'autoloadpens' => $autoloadpens,
             'presets_default' => $presets_default,
             

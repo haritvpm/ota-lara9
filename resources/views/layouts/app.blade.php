@@ -41,13 +41,18 @@
         <div class="content-wrapper" style="min-height: 917px;">
             <!-- Main content -->
             <section class="content" style="padding-top: 20px">
-                @if(session('message'))
-                    <div class="row mb-2">
-                        <div class="col-lg-12">
-                            <div class="alert alert-success" role="alert">{{ session('message') }}</div>
+                <div class="flash-message">
+                    @foreach (['danger', 'warning', 'success', 'info'] as $msg)
+                        @if(Session::has('message-' . $msg))
+                        <div class="alert alert-{{ $msg }} alert-dismissable hidden-print">
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>	
+                        {{ Session::get('message-' . $msg) }}
                         </div>
-                    </div>
-                @endif
+                        @endif
+                        {{Session::forget('message-' . $msg)}}
+                    @endforeach
+                    
+                </div>
                 @if($errors->count() > 0)
                     <div class="alert alert-danger"  role="alert">
                         <ul class="list-unstyled">
