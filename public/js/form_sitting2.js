@@ -12,6 +12,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "checkDatesAndOT": () => (/* binding */ checkDatesAndOT),
 /* harmony export */   "setEmployeeTypes": () => (/* binding */ setEmployeeTypes),
+/* harmony export */   "sittingAllowableForNonAebasDay": () => (/* binding */ sittingAllowableForNonAebasDay),
 /* harmony export */   "stringTimeToDate": () => (/* binding */ stringTimeToDate),
 /* harmony export */   "timePeriodIncludesPeriod": () => (/* binding */ timePeriodIncludesPeriod),
 /* harmony export */   "toHoursAndMinutes": () => (/* binding */ toHoursAndMinutes)
@@ -39,43 +40,86 @@ function timePeriodIncludesPeriod(from, to, fromReq, toReq) {
   var time530pm = stringTimeToDate(toReq);
   return time800am >= datefrom && time530pm <= dateto;
 }
+//check if punchin or out if available, fails
+//if time is not available, it is ok
+function sittingAllowableForNonAebasDay(from, to, fromReq, toReq) {
+  if (from) {
+    var datefrom = stringTimeToDate(from);
+    var time800am = stringTimeToDate(fromReq);
+    if (datefrom > time800am) return false;
+  }
+  if (to) {
+    var dateto = stringTimeToDate(to);
+    var time530pm = stringTimeToDate(toReq);
+    if (dateto < time530pm) return false;
+  }
+  return true;
+}
 function checkDatesAndOT(row, data) {
   //we need to give some leeway. so commenting
-  var count = 0;
-  var total_ot_days = 0;
-  var naDays = 0;
+  var count = 0; //ot given to user
+  var total_nondecision_days = 0;
+  var total_userdecision_days = 0;
   for (var i = 0; i < data.dates.length; i++) {
     // console.log(data.dates[i])
 
     var punchin = data.dates[i].punchin;
     var punchout = data.dates[i].punchout;
-    if (!data.dates[i].applicable) {
-      //no punching day. NIC server down. not aebas. either manualentry or nopunching
-      data.dates[i].ot = 'N/A. ' + data.dates[i].ot;
-      data.dates[i].otna = true;
-      naDays++;
+    var pos = row.overtimesittings.indexOf(data.dates[i].date);
+    if (punchin && punchout) {
+      //punched
+
+      if (row.isPartime) {
+        if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "11:25")) {
+          data.dates[i].ot = 'YES';
+          count++;
+        } else {
+          data.dates[i].ot = 'No. (06:00 - 11:30)';
+        }
+      } else if (row.isFulltime) {
+        if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "16:25")) {
+          count++;
+          data.dates[i].ot = 'YES';
+        } else {
+          data.dates[i].ot = 'No. (06:00 - 4:30pm)';
+        }
+      } else if (row.isWatchnward) {
+        //no punching
+      } //all other employees for sitting days
+      else {
+        if (timePeriodIncludesPeriod(punchin, punchout, "08:05", "17:25")) {
+          count++;
+          data.dates[i].ot = 'YES';
+        } else {
+          data.dates[i].ot = 'No. (08:00 - 5:30pm)';
+        }
+      }
+      data.dates[i].userdecision = false;
+      total_nondecision_days++;
+      if (data.dates[i].ot != 'YES' && pos != -1) row.overtimesittings.splice(pos, 1); //remove from sel if it is NO
       continue;
     }
-    data.dates[i].otna = false;
-    total_ot_days++;
-    if (!punchin || !punchout) {
-      //not punched
+
+    //punchin or out is not available
+    if (data.dates[i].aebasday) {
+      data.dates[i].userdecision = false;
       data.dates[i].ot = punchin || punchout ? 'Not Punched?' : 'Leave?';
+      total_nondecision_days++;
+      if (pos != -1) row.overtimesittings.splice(pos, 1); //remove from sel if it is NO
       continue;
     }
-    data.dates[i].ot = 'NO';
+
+    //non aebasday, check if user has not punched incorrectly when server was failing
+    data.dates[i].userdecision = false;
     if (row.isPartime) {
-      console.log('p');
-      if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "11:25")) {
-        data.dates[i].ot = 'YES';
-        count++;
+      if (sittingAllowableForNonAebasDay(punchin, punchout, "06:05", "11:25")) {
+        data.dates[i].userdecision = true;
       } else {
         data.dates[i].ot = 'No. (06:00 - 11:30)';
       }
     } else if (row.isFulltime) {
-      if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "16:25")) {
-        count++;
-        data.dates[i].ot = 'YES';
+      if (sittingAllowableForNonAebasDay(punchin, punchout, "06:05", "16:25")) {
+        data.dates[i].userdecision = true;
       } else {
         data.dates[i].ot = 'No. (06:00 - 4:30pm)';
       }
@@ -83,20 +127,30 @@ function checkDatesAndOT(row, data) {
       //no punching
     } //all other employees for sitting days
     else {
-      console.log('n');
-      if (timePeriodIncludesPeriod(punchin, punchout, "08:05", "17:25")) {
-        count++;
-        data.dates[i].ot = 'YES';
+      if (sittingAllowableForNonAebasDay(punchin, punchout, "08:05", "17:25")) {
+        data.dates[i].userdecision = true;
       } else {
         data.dates[i].ot = 'No. (08:00 - 5:30pm)';
       }
     }
+    if (data.dates[i].userdecision) {
+      data.dates[i].ot = 'NO';
+      total_userdecision_days++;
+      if (pos != -1) {
+        data.dates[i].ot = 'YES';
+        count++;
+      }
+    } else {
+      total_nondecision_days++;
+      if (!data.dates[i].userdecision && pos != -1) row.overtimesittings.splice(pos, 1); //remove from sel if it is NO
+    }
   }
+
   return {
     count: count,
     modaldata: data.dates,
-    total_ot_days: total_ot_days,
-    naDays: naDays
+    total_nondecision_days: total_nondecision_days,
+    total_userdecision_days: total_userdecision_days
   };
 }
 function toHoursAndMinutes(totalMinutes) {
@@ -177,11 +231,17 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _utils_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./utils.js */ "./resources/assets/js/utils.js");
 
 
-var _methods;
 function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
+var _methods;
 function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return _typeof(key) === "symbol" ? key : String(key); }
 function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (_typeof(res) !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
 var vm = new Vue({
   el: '#app',
@@ -197,24 +257,25 @@ var vm = new Vue({
     calenderdays2: calenderdays2,
     showModal: false,
     modaldata: [],
-    modaldata_totalOT: 0,
-    modaldata_row: "",
-    modaldata_totalOTDays: 0
+    modaldata_fixedOT: 0,
+    modaldata_row: null,
+    modaldata_totalOTDays: 0,
+    modaldata_seldays: [],
+    modaldata_showonly: false
   },
   created: function created() {
+    for (var i = 0; i < _form.overtimes.length; i++) {
+      //console.log( _form.overtimes[i].overtimesittings)
+      //console.log( _form.overtimes[i].overtimesittings_)row.overtimesittings.map(s => s.date);
+      _form.overtimes[i].overtimesittings = _.uniq(_form.overtimes[i].overtimesittings.map(function (s) {
+        return s.date;
+      }));
+      //_form.overtimes[i].overtimesittings =  _.uniq(_form.overtimes[i].overtimesittings_);
+    }
+
     Vue.set(this.$data, 'form', _form);
     //copy name to PEN field
-
-    /*
-      for(var i=0; i < this.form.overtimes.length; i++){
-         
-         //copy if we have a name
-         if(this.form.overtimes[i].name != null){
-           this.form.overtimes[i].pen += '-' +this.form.overtimes[i].name ;
-       }
-          
-      }*/
-
+    $('[data-widget="pushmenu"]').PushMenu('collapse');
     this.sessionchanged();
     if (this.form.session != '' && this.form.overtimes.length == 0) {//sessions available for dataentry,
       //and this is a new form, not editing existing
@@ -264,9 +325,9 @@ var vm = new Vue({
       //	console.log(i)
       //reset count to zero
       this.form.overtimes[index].count = "";
-      //  this.getSittingOTs(index)
+      this.form.overtimes[index].overtimesittings = [];
+      this.getSittingOTs(index);
     },
-
     addRow: function addRow() {
       //  var elem = document.createElement('tr');
       var self = this;
@@ -287,8 +348,10 @@ var vm = new Vue({
         aadhaarid: null,
         punching: true,
         //by default everyone ha punching
-        isProcessing: false
+        isProcessing: false,
+        overtimesittings: [] //days user has worked 
       });
+
       this.pen_names = []; //clear previos selection from dropdown
       this.pen_names_to_desig = [];
       this.$nextTick(function () {
@@ -328,8 +391,19 @@ var vm = new Vue({
       }
     },
     modalClosed: function modalClosed() {
-      //  console.log(this.modaldata_totalOT)  
-      this.modaldata_row.count = this.modaldata_totalOT;
+      // console.log(this.modaldata_seldays)  
+
+      var yesdays = this.modaldata.filter(function (x) {
+        return x.ot == 'YES' && x.userdecision == false;
+      }).map(function (x) {
+        return x.date;
+      });
+      this.modaldata_row.overtimesittings = _toConsumableArray(new Set([].concat(_toConsumableArray(yesdays), _toConsumableArray(this.modaldata_seldays))));
+      this.modaldata_row.count = this.modaldata_row.overtimesittings.length;
+      // console.log(this.modaldata_row.overtimesittings)  
+
+      //copy dates from 
+
       //vue does not update time if we change date as it does not watch for array changes
       //https://v2.vuejs.org/v2/guide/reactivity#Change-Detection-Caveats
       //	Vue.set(this.form.overtimes,index, row)
@@ -348,13 +422,13 @@ var vm = new Vue({
         return;
       }
       ;
+      console.log(row.overtimesittings);
       self.modaldata = [];
-      self.modaldata_totalOT = 0;
+      self.modaldata_fixedOT = 0;
       self.modaldata_row = row;
       row.isProcessing = true;
       axios.get("".concat(urlajaxgetpunchsittings, "/").concat(self.form.session, "/").concat(row.from, "/").concat(row.to, "/").concat(row.pen, "/").concat(row.aadhaarid)).then(function (response) {
         row.isProcessing = false;
-        //console.log(response);
         if (response.data) {
           //todo ask if unpresent dates where present
           (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.setEmployeeTypes)(row);
@@ -362,20 +436,40 @@ var vm = new Vue({
           var _checkDatesAndOT = (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.checkDatesAndOT)(row, response.data),
             count = _checkDatesAndOT.count,
             modaldata = _checkDatesAndOT.modaldata,
-            total_ot_days = _checkDatesAndOT.total_ot_days,
-            naDays = _checkDatesAndOT.naDays;
-          if (row.count != count && naDays == 0) {
+            total_nondecision_days = _checkDatesAndOT.total_nondecision_days,
+            total_userdecision_days = _checkDatesAndOT.total_userdecision_days;
+          //date period may have changed. only include those dates and remove the rest
+          //this is to copy the user decided dates to new array.
+          //overtimesittings_ has the original data from db
+          //let temp =  this.modaldata.filter( x => row.overtimesittings_.indexOf( x.date ) != -1 )
+          //row.overtimesittings = [...modaldata.map( x => x.date )]
+          if (row.count != count && total_userdecision_days == 0) {
             //if there are no days that are either MANUALENTRy or NOPUNCHING
             row.count = count;
             //vue does not update time if we change date as it does not watch for array changes
             //https://v2.vuejs.org/v2/guide/reactivity#Change-Detection-Caveats
-            Vue.set(self.form.overtimes, index, row);
           }
+
+          Vue.set(self.form.overtimes, index, row); //update isProcessing
+
           if (show) {
-            self.modaldata_totalOT = count;
+            self.modaldata_fixedOT = count;
             self.modaldata = modaldata;
-            self.modaldata_totalOTDays = total_ot_days;
-            // this.showModal = true
+            self.modaldata_totalOTDays = total_nondecision_days + total_userdecision_days;
+            var yesdays = modaldata.filter(function (x) {
+              return x.ot == 'YES' && x.userdecision == false;
+            }).map(function (x) {
+              return x.date;
+            });
+            //overtimesittings stores prev selected days/ find only those days from the period
+            //if user changes perod without userdecision and then backagain, this will be lost.
+            //but if user sets and then opens again, we need this
+            var temp = row.overtimesittings.filter(function (date) {
+              return modaldata.map(function (d) {
+                return d.date;
+              }).indexOf(date) != -1;
+            });
+            self.modaldata_seldays = _toConsumableArray(new Set([].concat(_toConsumableArray(yesdays), _toConsumableArray(temp))));
             document.getElementById('modalOpenBtn').click();
           }
         }
@@ -411,8 +505,11 @@ var vm = new Vue({
         row.normal_office_hours = desig.desig_normal_office_hours;
         row.category = desig.category;
         row.employee_id = desig.employee_id;
+        row.isProcessing = false;
+        row.count = "";
+        row.overtimesittings = [];
         (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.setEmployeeTypes)(row);
-        //  self.getSittingOTs(id)
+        self.getSittingOTs(id);
       }
     });
   }), _defineProperty(_methods, "checkDuplicates", function checkDuplicates() {

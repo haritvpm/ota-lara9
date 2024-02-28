@@ -12,6 +12,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "checkDatesAndOT": () => (/* binding */ checkDatesAndOT),
 /* harmony export */   "setEmployeeTypes": () => (/* binding */ setEmployeeTypes),
+/* harmony export */   "sittingAllowableForNonAebasDay": () => (/* binding */ sittingAllowableForNonAebasDay),
 /* harmony export */   "stringTimeToDate": () => (/* binding */ stringTimeToDate),
 /* harmony export */   "timePeriodIncludesPeriod": () => (/* binding */ timePeriodIncludesPeriod),
 /* harmony export */   "toHoursAndMinutes": () => (/* binding */ toHoursAndMinutes)
@@ -39,43 +40,86 @@ function timePeriodIncludesPeriod(from, to, fromReq, toReq) {
   var time530pm = stringTimeToDate(toReq);
   return time800am >= datefrom && time530pm <= dateto;
 }
+//check if punchin or out if available, fails
+//if time is not available, it is ok
+function sittingAllowableForNonAebasDay(from, to, fromReq, toReq) {
+  if (from) {
+    var datefrom = stringTimeToDate(from);
+    var time800am = stringTimeToDate(fromReq);
+    if (datefrom > time800am) return false;
+  }
+  if (to) {
+    var dateto = stringTimeToDate(to);
+    var time530pm = stringTimeToDate(toReq);
+    if (dateto < time530pm) return false;
+  }
+  return true;
+}
 function checkDatesAndOT(row, data) {
   //we need to give some leeway. so commenting
-  var count = 0;
-  var total_ot_days = 0;
-  var naDays = 0;
+  var count = 0; //ot given to user
+  var total_nondecision_days = 0;
+  var total_userdecision_days = 0;
   for (var i = 0; i < data.dates.length; i++) {
     // console.log(data.dates[i])
 
     var punchin = data.dates[i].punchin;
     var punchout = data.dates[i].punchout;
-    if (!data.dates[i].applicable) {
-      //no punching day. NIC server down. not aebas. either manualentry or nopunching
-      data.dates[i].ot = 'N/A. ' + data.dates[i].ot;
-      data.dates[i].otna = true;
-      naDays++;
+    var pos = row.overtimesittings.indexOf(data.dates[i].date);
+    if (punchin && punchout) {
+      //punched
+
+      if (row.isPartime) {
+        if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "11:25")) {
+          data.dates[i].ot = 'YES';
+          count++;
+        } else {
+          data.dates[i].ot = 'No. (06:00 - 11:30)';
+        }
+      } else if (row.isFulltime) {
+        if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "16:25")) {
+          count++;
+          data.dates[i].ot = 'YES';
+        } else {
+          data.dates[i].ot = 'No. (06:00 - 4:30pm)';
+        }
+      } else if (row.isWatchnward) {
+        //no punching
+      } //all other employees for sitting days
+      else {
+        if (timePeriodIncludesPeriod(punchin, punchout, "08:05", "17:25")) {
+          count++;
+          data.dates[i].ot = 'YES';
+        } else {
+          data.dates[i].ot = 'No. (08:00 - 5:30pm)';
+        }
+      }
+      data.dates[i].userdecision = false;
+      total_nondecision_days++;
+      if (data.dates[i].ot != 'YES' && pos != -1) row.overtimesittings.splice(pos, 1); //remove from sel if it is NO
       continue;
     }
-    data.dates[i].otna = false;
-    total_ot_days++;
-    if (!punchin || !punchout) {
-      //not punched
+
+    //punchin or out is not available
+    if (data.dates[i].aebasday) {
+      data.dates[i].userdecision = false;
       data.dates[i].ot = punchin || punchout ? 'Not Punched?' : 'Leave?';
+      total_nondecision_days++;
+      if (pos != -1) row.overtimesittings.splice(pos, 1); //remove from sel if it is NO
       continue;
     }
-    data.dates[i].ot = 'NO';
+
+    //non aebasday, check if user has not punched incorrectly when server was failing
+    data.dates[i].userdecision = false;
     if (row.isPartime) {
-      console.log('p');
-      if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "11:25")) {
-        data.dates[i].ot = 'YES';
-        count++;
+      if (sittingAllowableForNonAebasDay(punchin, punchout, "06:05", "11:25")) {
+        data.dates[i].userdecision = true;
       } else {
         data.dates[i].ot = 'No. (06:00 - 11:30)';
       }
     } else if (row.isFulltime) {
-      if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "16:25")) {
-        count++;
-        data.dates[i].ot = 'YES';
+      if (sittingAllowableForNonAebasDay(punchin, punchout, "06:05", "16:25")) {
+        data.dates[i].userdecision = true;
       } else {
         data.dates[i].ot = 'No. (06:00 - 4:30pm)';
       }
@@ -83,20 +127,30 @@ function checkDatesAndOT(row, data) {
       //no punching
     } //all other employees for sitting days
     else {
-      console.log('n');
-      if (timePeriodIncludesPeriod(punchin, punchout, "08:05", "17:25")) {
-        count++;
-        data.dates[i].ot = 'YES';
+      if (sittingAllowableForNonAebasDay(punchin, punchout, "08:05", "17:25")) {
+        data.dates[i].userdecision = true;
       } else {
         data.dates[i].ot = 'No. (08:00 - 5:30pm)';
       }
     }
+    if (data.dates[i].userdecision) {
+      data.dates[i].ot = 'NO';
+      total_userdecision_days++;
+      if (pos != -1) {
+        data.dates[i].ot = 'YES';
+        count++;
+      }
+    } else {
+      total_nondecision_days++;
+      if (!data.dates[i].userdecision && pos != -1) row.overtimesittings.splice(pos, 1); //remove from sel if it is NO
+    }
   }
+
   return {
     count: count,
     modaldata: data.dates,
-    total_ot_days: total_ot_days,
-    naDays: naDays
+    total_nondecision_days: total_nondecision_days,
+    total_userdecision_days: total_userdecision_days
   };
 }
 function toHoursAndMinutes(totalMinutes) {
@@ -177,11 +231,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _utils_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./utils.js */ "./resources/assets/js/utils.js");
 
 
-var _methods;
-function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
-function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return _typeof(key) === "symbol" ? key : String(key); }
-function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (_typeof(res) !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
 
 var dateofdutyprefix = "Date of Duty";
 var def_time_start = "17:30";
@@ -228,7 +277,7 @@ var vm = new Vue({
     Vue.set(this.$data, "form", _form);
 
     //copy name to PEN field
-
+    $('[data-widget="pushmenu"]').PushMenu('collapse');
     //due to a bug, onchange is not called
     var self = this;
     this.$watch("form.duty_date", function (newVal, oldVal) {
@@ -265,11 +314,14 @@ var vm = new Vue({
       //we can in the future add an option for users to check days they were present in sitting form
       //for now, this is a workaround
 
-      var isNoPunchingDay = this.form.duty_date && (calenderdaypunching[this.form.duty_date] === 'NOPUNCHING' || calenderdaypunching[this.form.duty_date] === 'MANUALENTRY');
-      if (!ispartimefulltime) {
+      //let isNoPunchingDay = this.form.duty_date && (calenderdaypunching[this.form.duty_date] === 'NOPUNCHING' || calenderdaypunching[this.form.duty_date] === 'MANUALENTRY')
+
+      if (isThirdOTAllowed) {
         switch (calenderdaysmap[this.form.duty_date]) {
           case 'Sitting day':
-            return isNoPunchingDay ? ['First', 'Second', 'Third'] : ['Second', 'Third'];
+            return ['Second', 'Third'];
+          //return isNoPunchingDay ? ['First', 'Second', 'Third'] : ['Second', 'Third'];
+
           case 'Prior holiday':
           case 'Holiday':
             return ['First', 'Second', 'Third', 'Additional'];
@@ -281,7 +333,9 @@ var vm = new Vue({
       } else {
         switch (calenderdaysmap[this.form.duty_date]) {
           case 'Sitting day':
-            return isNoPunchingDay ? ['First', 'Second'] : ['Second'];
+            return ['Second'];
+          //return isNoPunchingDay ? ['First', 'Second'] : ['Second'];
+
           default:
             return ['First', 'Second'];
         } //switch
@@ -302,7 +356,7 @@ var vm = new Vue({
     }
   },
   watch: {},
-  methods: (_methods = {
+  methods: {
     copytimedown: function copytimedown() {
       if (this.form.overtimes.length > 1) {
         for (var i = 1; i < this.form.overtimes.length; i++) {
@@ -361,18 +415,20 @@ var vm = new Vue({
         this.myerrors.push("For session " + this.form.session + ", please select a date between : " + calenderdays2[this.form.session][0] + " and " + calenderdays2[this.form.session][calenderdays2[this.form.session].length - 1] + ".");
       }
     },
-    onChangeSlot: function onChangeSlot() {
-      this.myerrors = [];
-      if (this.form.overtimes.length > 0 && this.form.overtimes[0].from == "") {
-        //do this only if first row of a slot is empty
+    // onChangeSlot: function () {
+    // 	this.myerrors = [];
 
-        //clear all times
-        for (var i = 0; i < this.form.overtimes.length; i++) {
-          this.form.overtimes[i].from = "";
-          this.form.overtimes[i].to = "";
-        }
-      }
-    },
+    // 	if (this.form.overtimes.length > 0 && this.form.overtimes[0].from == "") {
+    // 		//do this only if first row of a slot is empty
+
+    // 		//clear all times
+    // 		for (var i = 0; i < this.form.overtimes.length; i++) {
+    // 			this.form.overtimes[i].from = "";
+    // 			this.form.overtimes[i].to = "";
+    // 		}
+    // 	}
+    // },
+
     fetchPunching: function fetchPunching() {
       for (var i = 0; i < this.form.overtimes.length; i++) {
         this.fetchPunchingTimeForRow(i);
@@ -439,623 +495,667 @@ var vm = new Vue({
     clearAll: function clearAll() {
       this.pen_names = [];
       this.pen_names_to_desig = [];
-    }
-  }, _defineProperty(_methods, "limitText", function limitText(count) {
-    return "and ".concat(count, " other ");
-  }), _defineProperty(_methods, "changeSelect", function changeSelect(selectedOption, id) {
-    var _this2 = this;
-    //	console.log(this.form.overtimes)
-    this.myerrors = [];
-    var self = this;
-    var desig = self.pen_names_to_desig[selectedOption];
-    self.$nextTick(function () {
-      var row = self.form.overtimes[id];
-      row.punching = self.dayHasPunching;
-      row.normal_office_hours = 0;
-      row.category = "";
-      if (desig !== undefined && desig.desig) {
-        row.designation = desig.desig;
-        row.punching = desig.punching;
-        row.normal_office_hours = desig.desig_normal_office_hours;
-        row.category = desig.category;
-        row.employee_id = desig.employee_id;
-        row.aadhaarid = desig.aadhaarid;
-        //if you add any new prop here, check to update in EmployeesController:ajaxfind,
-        //MyFormsController:preparevariablesandGotoView in two locations for edit and copytonewform since we need these variables when we try to edit this
-        //and also in loadpresetdata in this file itself
-        (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.setEmployeeTypes)(row);
-        //	console.log(row);
-        if (0 == id) {
-          //const { def_time_start, def_time_end } = this.getDefaultTimes(this.form.overtime_slot, row);
-          //row.from = def_time_start ?? "";	row.to = def_time_end ?? "";
-          row.from = "";
-          row.to = "";
+    },
+    //here, id is the ref property of multiselect which we have set as the index.
+    changeSelect: function changeSelect(selectedOption, id) {
+      var _this2 = this;
+      //	console.log(this.form.overtimes)
+      this.myerrors = [];
+      var self = this;
+      var desig = self.pen_names_to_desig[selectedOption];
+      self.$nextTick(function () {
+        var row = self.form.overtimes[id];
+        row.punching = self.dayHasPunching;
+        row.normal_office_hours = 0;
+        row.category = "";
+        row.slots = [];
+        if (desig !== undefined && desig.desig) {
+          row.designation = desig.desig;
+          row.punching = desig.punching;
+          row.normal_office_hours = desig.desig_normal_office_hours;
+          row.category = desig.category;
+          row.employee_id = desig.employee_id;
+          row.aadhaarid = desig.aadhaarid;
+          //if you add any new prop here, check to update in EmployeesController:ajaxfind,
+          //MyFormsController:preparevariablesandGotoView in two locations for edit and copytonewform since we need these variables when we try to edit this
+          //and also in loadpresetdata in this file itself
+          (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.setEmployeeTypes)(row);
+          //	console.log(row);
+          if (0 == id) {
+            //const { def_time_start, def_time_end } = this.getDefaultTimes(this.form.overtime_slot, row);
+            //row.from = def_time_start ?? "";	row.to = def_time_end ?? "";
+            row.from = "";
+            row.to = "";
+          }
+
+          //self.$forceUpdate()
         }
 
-        //self.$forceUpdate()
-      }
-
-      _this2.fetchPunchingTimeForRow(id);
-    });
-
-    //no need we will check on form submit
-    //this also seems to display a warning when we
-    //a. select a duplicate, b. change to a non duplicate immediately
-    //that is not needed.
-    //this.checkDuplicates()
-
-    //alert(id) unable to get id. so a hack
-  }), _defineProperty(_methods, "fetchPunchingTimeForRow", function fetchPunchingTimeForRow(index) {
-    var _this3 = this;
-    var self = this;
-    var row = self.form.overtimes[index];
-    if (row.pen == "" || !self.form.duty_date) return;
-    //set punchtime if not set and available
-    //reset for example if user selects another person after selecting a person with punchtime
-    row.punchin = "";
-    row.punchout = "";
-    row.punching_id = null;
-    row.punchin_from_aebas = false;
-    row.punchout_from_aebas = false;
-    if (self.dayHasPunching && row.punching) {
-      this.isProcessing = true;
-      axios.get(urlajaxgetpunchtimes + "/" + self.form.duty_date + "/" + row.pen + "/" + row.aadhaarid).then(function (response) {
-        //console.log(response);
-        if (response.data && response.data.hasOwnProperty("punchin") && response.data.hasOwnProperty("punchout")) {
-          //console.log("set punch data");
-          row.punchin = response.data.punchin;
-          row.punchout = response.data.punchout;
-          row.aadhaarid = response.data.aadhaarid;
-          row.punching_id = response.data.id;
-          row.punchin_from_aebas = response.data.punchin_from_aebas == 1;
-          row.punchout_from_aebas = response.data.punchout_from_aebas == 1;
-          //vue does not update time if we change date as it does not watch for array changes
-          //https://v2.vuejs.org/v2/guide/reactivity#Change-Detection-Caveats
-          Vue.set(_this3.form.overtimes, index, row);
-        }
-        _this3.isProcessing = false;
-      })["catch"](function (err) {
-        _this3.isProcessing = false;
-        Vue.set(_this3.form.overtimes, index, row);
+        _this2.fetchPunchingTimeForRow(id);
       });
-    }
-  }), _defineProperty(_methods, "checkDuplicates", function checkDuplicates() {
-    var self = this;
-    //see if there are duplicates
-    var obj = {};
-    for (var i = 0; i < self.form.overtimes.length; i++) {
-      if (obj[self.form.overtimes[i].pen] == undefined) {
-        obj[self.form.overtimes[i].pen] = true;
-      } else {
-        this.myerrors.push("Duplicate name found: " + self.form.overtimes[i].pen);
-        return false;
-      }
-    }
-    return true;
-  }), _defineProperty(_methods, "strTimesToDatesNormalized", function strTimesToDatesNormalized(from, to) {
-    var normalize = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
-    var datefrom = (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.stringTimeToDate)(from);
-    var dateto = (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.stringTimeToDate)(to);
 
-    //time after 12 am ?
-    if (normalize && dateto <= datefrom) {
-      dateto += 24 * 3600000;
-    }
-    return {
-      datefrom: datefrom,
-      dateto: dateto
-    };
-  }), _defineProperty(_methods, "checkTimeWithinPunchingTime", function checkTimeWithinPunchingTime(row) {
-    if (!row.punching) return true;
-    var _this$strTimesToDates = this.strTimesToDatesNormalized(row.from, row.to),
-      datefrom = _this$strTimesToDates.datefrom,
-      dateto = _this$strTimesToDates.dateto;
-    var _this$strTimesToDates2 = this.strTimesToDatesNormalized(row.punchin, row.punchout),
-      datepunchin = _this$strTimesToDates2.datefrom,
-      datepunchout = _this$strTimesToDates2.dateto;
-    if (datepunchin > datefrom || datepunchout < dateto) {
-      return false;
-    }
-    return true;
-  }), _defineProperty(_methods, "checkSittingDayTimeIsAsPerGO", function checkSittingDayTimeIsAsPerGO(row, i) {
-    if (row.isPartime) {
-      //parttime emp
+      //no need we will check on form submit
+      //this also seems to display a warning when we
+      //a. select a duplicate, b. change to a non duplicate immediately
+      //that is not needed.
+      //this.checkDuplicates()
 
-      if (this.hasFirst(row.slots)) {
-        if (!(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(row.from, row.to, "06:05", "11:25")) {
-          this.myerrors.push("Row " + (i + 1) + ": Parttime employee - time should include 06:00 to 11:30 as per G.O on a sitting day");
-          return false;
-        }
-      } else if (this.hasSecond(row.slots)) {
-        //no need to strict time. let them decide for themselves. 2 to 4.30 is actual
-        if (!(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(row.from, row.to, "14:05", "16:25")) {
-          this.myerrors.push("Row " + (i + 1) + ": Parttime employee - time should include 14:00 to 16:30 as per G.O on a sitting day");
-          return false;
-        }
-      } else {
-        //no third OT. we check that in parent function
-      }
-    } else if (row.isFulltime) {
-      if (this.hasFirst(row.slots)) {
-        ////its acutally 4.30. no need to enforce ending time. have doubts regarding mla hostel.
-        if (!(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(row.from, row.to, "06:05", "16:00")) {
-          this.myerrors.push("Row " + (i + 1) + ": Fulltime employee - time shall include 06:00 a.m. to 4.30 pm as per G.O on a sitting day");
-          return false;
-        }
-      }
-      //no second, third OT. we check that in parent function
-    } else if (row.isWatchnward) {} //all other employees for sitting days
-    else {
-      if (this.hasFirst(row.slots)) {
-        if (!(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(row.from, row.to, "08:05", "17:25")) {
-          this.myerrors.push("Row " + (i + 1) + ": For sitting OT, time should include 08:00 to 17:30 as per GO");
-          return false;
-        }
-      }
-    }
-    return true;
-  }), _defineProperty(_methods, "checkIf2ndOTOverlapsWithOfficeHours", function checkIf2ndOTOverlapsWithOfficeHours(datefrom, dateto, sNormalStart, sNormalEnd) {
-    var time800am = (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.stringTimeToDate)(sNormalStart);
-    var time530pm = (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.stringTimeToDate)(sNormalEnd);
-    var isoverlap = time800am < dateto && time530pm > datefrom /*|| time800am == datefrom || time530pm == dateto*/;
-
-    if (isoverlap) {
-      return true;
-    }
-    return false;
-  }), _defineProperty(_methods, "getDayTypes", function getDayTypes() {
-    var isSittingDay = calenderdaysmap[this.form.duty_date] == "Sitting day";
-    var isSittingOrWorkingDay = calenderdaysmap[this.form.duty_date].indexOf("oliday") == -1;
-    var isWorkingDay = calenderdaysmap[this.form.duty_date].indexOf("orking") != -1;
-    var isHoliDay = calenderdaysmap[this.form.duty_date].indexOf("oliday") != -1;
-    return {
-      isSittingDay: isSittingDay,
-      isSittingOrWorkingDay: isSittingOrWorkingDay,
-      isWorkingDay: isWorkingDay,
-      isHoliDay: isHoliDay
-    };
-  }), _defineProperty(_methods, "canShowAddlOT", function canShowAddlOT(row) {
-    var isHoliDay = calenderdaysmap[this.form.duty_date].indexOf("oliday") != -1;
-    if (!isHoliDay) return false;
-    return row.designation == "Deputy Secretary" || row.designation == "Joint Secretary" || row.designation == "Additional Secretary" || row.designation == "Special Secretary";
-  }), _defineProperty(_methods, "rowsvalid", function rowsvalid() {
-    this.myerrors = [];
-    this.errors = [];
-    var self = this;
-    if (self.form.session == "" || self.form.duty_date == "") {
-      this.$swal("Error", "Please select session/date", "error");
-      return false;
-    }
-
-    //check if date belongs to the session
-    if (-1 == calenderdays2[self.form.session].indexOf(self.form.duty_date)) {
-      this.$swal("Error", "The duty date is not a calender date for the session: " + self.form.session, "error");
-      return false;
-    }
-    for (var i = 0; i < self.form.overtimes.length; i++) {
-      var row = self.form.overtimes[i];
-      if (row.pen == "" || row.designation == "" || row.from == "" || row.to == "" || row.from == null || row.to == null) {
-        this.$swal("Row: " + (i + 1), "Fill all the fields in every row", "error");
-        return false;
-      }
+      //alert(id) unable to get id. so a hack
+    },
+    //this can be used to update punching times if we chage calender dates after entering/loading employees.
+    fetchPunchingTimeForRow: function fetchPunchingTimeForRow(index) {
+      var _this3 = this;
+      var self = this;
+      var row = self.form.overtimes[index];
+      if (row.pen == "" || !self.form.duty_date) return;
+      //set punchtime if not set and available
+      //reset for example if user selects another person after selecting a person with punchtime
+      row.punchin = "";
+      row.punchout = "";
+      row.punching_id = null;
+      row.punchin_from_aebas = false;
+      row.punchout_from_aebas = false;
       if (self.dayHasPunching && row.punching) {
-        if (row.punchin == null || row.punchin == "" || row.punchout == null || row.punchout == "") {
-          this.$swal("Row: " + (i + 1), "Punch in/out time not found", "error");
-          //this.$swal("Row: " + (i + 1), "Fill punch in/out time for every row", "error");
+        this.isProcessing = true;
+        axios.get(urlajaxgetpunchtimes + "/" + self.form.duty_date + "/" + row.pen + "/" + row.aadhaarid).then(function (response) {
+          //console.log(response);
+          if (response.data && response.data.hasOwnProperty("punchin") && response.data.hasOwnProperty("punchout")) {
+            //console.log("set punch data");
+            row.punchin = response.data.punchin;
+            row.punchout = response.data.punchout;
+            row.aadhaarid = response.data.aadhaarid;
+            row.punching_id = response.data.id;
+            row.punchin_from_aebas = response.data.punchin_from_aebas == 1;
+            row.punchout_from_aebas = response.data.punchout_from_aebas == 1;
+            //vue does not update time if we change date as it does not watch for array changes
+            //https://v2.vuejs.org/v2/guide/reactivity#Change-Detection-Caveats
+            Vue.set(_this3.form.overtimes, index, row);
+          }
+          _this3.isProcessing = false;
+        })["catch"](function (err) {
+          _this3.isProcessing = false;
+          Vue.set(_this3.form.overtimes, index, row);
+        });
+      }
+    },
+    checkDuplicates: function checkDuplicates() {
+      var self = this;
+      //see if there are duplicates
+      var obj = {};
+      for (var i = 0; i < self.form.overtimes.length; i++) {
+        if (obj[self.form.overtimes[i].pen] == undefined) {
+          obj[self.form.overtimes[i].pen] = true;
+        } else {
+          this.myerrors.push("Duplicate name found: " + self.form.overtimes[i].pen);
           return false;
         }
       }
-      if (!row.slots.length) {
-        this.$swal("Error", "Please select the number of OTs", "error");
-        return false;
-      }
-      if (this.hasAddl(row.slots) && !self.canShowAddlOT(row)) {
-        this.$swal("Error", "Only DS or above can have Additional OT!", "error");
-        return false;
-      }
+      return true;
+    },
+    strTimesToDatesNormalized: function strTimesToDatesNormalized(from, to) {
+      var normalize = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+      var datefrom = (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.stringTimeToDate)(from);
+      var dateto = (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.stringTimeToDate)(to);
 
-      //if user selects 1st and 3rd, but not 2nd, with continuous time, it does not make sense. they need to splitup into two forms
-      if (this.hasFirst(row.slots) && (this.hasThird(row.slots) || this.hasAddl(row.slots)) && !this.hasSecond(row.slots)) {
-        this.$swal("Error", "Can't have third OT without second", "error");
+      //time after 12 am ?
+      if (normalize && dateto <= datefrom) {
+        dateto += 24 * 3600000;
+      }
+      return {
+        datefrom: datefrom,
+        dateto: dateto
+      };
+    },
+    checkTimeWithinPunchingTime: function checkTimeWithinPunchingTime(row) {
+      if (!row.punching) return true;
+      var _this$strTimesToDates = this.strTimesToDatesNormalized(row.from, row.to),
+        datefrom = _this$strTimesToDates.datefrom,
+        dateto = _this$strTimesToDates.dateto;
+      var _this$strTimesToDates2 = this.strTimesToDatesNormalized(row.punchin, row.punchout),
+        datepunchin = _this$strTimesToDates2.datefrom,
+        datepunchout = _this$strTimesToDates2.dateto;
+      if (datepunchin > datefrom || datepunchout < dateto) {
         return false;
       }
-    }
-    var _this$getDayTypes = this.getDayTypes(),
-      isSittingDay = _this$getDayTypes.isSittingDay,
-      isSittingOrWorkingDay = _this$getDayTypes.isSittingOrWorkingDay,
-      isWorkingDay = _this$getDayTypes.isWorkingDay,
-      isHoliDay = _this$getDayTypes.isHoliDay;
-    var minothour_ideal = parseFloat(3);
-    var minot_minutes = 170; //corrected to allow leeway 
-    var daytypedesc = "holiday";
-    if (isSittingOrWorkingDay) {
-      minothour_ideal = parseFloat(2.5);
-      minot_minutes = 145; //leeway
-      daytypedesc = "working day";
-      if (isSittingDay) {
-        daytypedesc = "sitting day";
-      }
-    }
-
-    //check time diff
-    for (var i = 0; i < self.form.overtimes.length; i++) {
-      var row = self.form.overtimes[i];
-      //console.log(row);
-      (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.setEmployeeTypes)(row);
-      if (row.punching) {
-        row.punchin = validateHhMm(row.punchin.trim());
-        row.punchout = validateHhMm(row.punchout.trim());
-      }
-      row.from = validateHhMm(row.from.trim());
-      row.to = validateHhMm(row.to.trim());
-      if (row.from.toLowerCase() == "invalid date" || row.to.toLowerCase() == "invalid date") {
-        row.from = row.to = "";
-        this.myerrors.push("Row " + (i + 1) + ": Invalid time format. Enter (HH:MM) in 24 hour format ( examples: 09:30, 17:30).");
-        return false;
-      }
-      if (!this.checkTimeWithinPunchingTime(row)) {
-        this.myerrors.push("Row " + (i + 1) + ": OT period should be within punching times");
-        return false;
-      }
-
-      //make sure our times are according to G.O
-      //note same form can have both part time and full time empl. amspkr office
-      var minscamebefore8am = 0; //only for us, not PT, FT for now
-      if (isSittingDay) {
-        if (!this.checkSittingDayTimeIsAsPerGO(row, i)) {
-          return false;
-        }
-        //if came before 8.00, adjust it to 2nd OT
-        //do it only if there is no sitting ot, because in that case, from will include before 8.00 am period
-        if (row.isNormal && row.punching && !this.hasFirst(row.slots)) {
-          var _this$strTimesToDates3 = this.strTimesToDatesNormalized(row.punchin, "08:00", false),
-            punchin = _this$strTimesToDates3.datefrom,
-            eightam = _this$strTimesToDates3.dateto;
-          minscamebefore8am = parseFloat((eightam - punchin) / 60000);
-          if (minscamebefore8am < 0) minscamebefore8am = 0;
-        }
-      }
-      //console.log('minscamebefore8am ' +minscamebefore8am )
-      var _this$strTimesToDates4 = this.strTimesToDatesNormalized(row.from, row.to),
-        datefrom = _this$strTimesToDates4.datefrom,
-        dateto = _this$strTimesToDates4.dateto;
-      var otmins_actual = parseFloat((dateto - datefrom) / 60000) + minscamebefore8am;
-
-      //add totalhours needed
-      var otmins_practical = minot_minutes * row.slots.length; //if three OT, 3 * 2.5
-      var othours_ideal = minothour_ideal * row.slots.length; //if three OT, 3 * 2.5
-      if (isSittingOrWorkingDay && this.hasFirst(row.slots)) {
-        //	console.log('oh: ' + this._daylenmultiplier);
-        otmins_practical += row.normal_office_hours * 60 * this._daylenmultiplier;
-        othours_ideal += row.normal_office_hours * this._daylenmultiplier;
-      }
-      //console.log('otmins_needed: ' + otmins_practical);
-      //console.log('otmins_actual: ' + otmins_actual);
-      //new validation after adding normal_office_hours
-      var diff = otmins_actual - otmins_practical;
-      if (diff < 0) {
-        var humandiff = (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.toHoursAndMinutes)(Math.abs(diff));
-        this.myerrors.push("Row  ".concat(i + 1, " :Needs ").concat(othours_ideal, " hours for the selected OT(s) on a ").concat(daytypedesc, ". Diff=").concat(humandiff, " "));
-        return false;
-      }
-
-      //partime emp cannot have 3rd OT on sitting and 2nd or 3rd ot on working days
+      return true;
+    },
+    checkSittingDayTimeIsAsPerGO: function checkSittingDayTimeIsAsPerGO(row, i) {
       if (row.isPartime) {
+        //parttime emp
+
+        if (this.hasFirst(row.slots)) {
+          if (!(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(row.from, row.to, "06:05", "11:25")) {
+            this.myerrors.push("Row " + (i + 1) + ": Parttime employee - time should include 06:00 to 11:30 as per G.O on a sitting day");
+            return false;
+          }
+        } else if (this.hasSecond(row.slots)) {
+          //no need to strict time. let them decide for themselves. 2 to 4.30 is actual
+          if (!(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(row.from, row.to, "14:05", "16:25")) {
+            this.myerrors.push("Row " + (i + 1) + ": Parttime employee - time should include 14:00 to 16:30 as per G.O on a sitting day");
+            return false;
+          }
+        } else {
+          //no third OT. we check that in parent function
+        }
+      } else if (row.isFulltime) {
+        if (this.hasFirst(row.slots)) {
+          ////its acutally 4.30. no need to enforce ending time. have doubts regarding mla hostel.
+          if (!(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(row.from, row.to, "06:05", "16:00")) {
+            this.myerrors.push("Row " + (i + 1) + ": Fulltime employee - time shall include 06:00 a.m. to 4.30 pm as per G.O on a sitting day");
+            return false;
+          }
+        }
+        //no second, third OT. we check that in parent function
+      } else if (row.isWatchnward) {} //all other employees for sitting days
+      else {
+        if (this.hasFirst(row.slots)) {
+          if (!(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(row.from, row.to, "08:05", "17:25")) {
+            this.myerrors.push("Row " + (i + 1) + ": For sitting OT, time should include 08:00 to 17:30 as per GO");
+            return false;
+          }
+        }
+      }
+      return true;
+    },
+    timePeriodsOverlap: function timePeriodsOverlap(datefrom, dateto, sNormalStart, sNormalEnd) {
+      var time800am = (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.stringTimeToDate)(sNormalStart);
+      var time530pm = (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.stringTimeToDate)(sNormalEnd);
+      var isoverlap = time800am < dateto && time530pm > datefrom /*|| time800am == datefrom || time530pm == dateto*/;
+
+      if (isoverlap) {
+        return true;
+      }
+      return false;
+    },
+    getDayTypes: function getDayTypes() {
+      var isSittingDay = calenderdaysmap[this.form.duty_date] == "Sitting day";
+      var isSittingOrWorkingDay = calenderdaysmap[this.form.duty_date].indexOf("oliday") == -1;
+      var isWorkingDay = calenderdaysmap[this.form.duty_date].indexOf("orking") != -1;
+      var isHoliDay = calenderdaysmap[this.form.duty_date].indexOf("oliday") != -1;
+      return {
+        isSittingDay: isSittingDay,
+        isSittingOrWorkingDay: isSittingOrWorkingDay,
+        isWorkingDay: isWorkingDay,
+        isHoliDay: isHoliDay
+      };
+    },
+    canShowAddlOT: function canShowAddlOT(row) {
+      var isHoliDay = calenderdaysmap[this.form.duty_date].indexOf("oliday") != -1;
+      if (!isHoliDay) return false;
+      return row.designation == "Deputy Secretary" || row.designation == "Joint Secretary" || row.designation == "Additional Secretary" || row.designation == "Special Secretary";
+    },
+    overlapsWithOfficeHoursForNormalEmpl: function overlapsWithOfficeHoursForNormalEmpl(datefrom, dateto, isSittingDay, isWorkingDay) {
+      var overlap = false;
+      var checkingPeriod = "".concat(sNormalStart, " and ").concat(sNormalEnd);
+      var sNormalStart = "10:15";
+      var sNormalEnd = "17:15";
+      if (isSittingDay) {
+        sNormalStart = "08:00";
+        sNormalEnd = "17:30";
+      }
+      if (isWorkingDay || isSittingDay) {
+        if (this.timePeriodsOverlap(datefrom, dateto, sNormalStart, sNormalEnd)) {
+          overlap = true;
+          return {
+            overlap: overlap,
+            checkingPeriod: checkingPeriod
+          };
+        }
+      }
+      return {
+        overlap: overlap,
+        checkingPeriod: checkingPeriod
+      };
+    },
+    rowsvalid: function rowsvalid() {
+      this.myerrors = [];
+      this.errors = [];
+      var self = this;
+      if (self.form.session == "" || self.form.duty_date == "") {
+        this.$swal("Error", "Please select session/date", "error");
+        return false;
+      }
+
+      //check if date belongs to the session
+      if (-1 == calenderdays2[self.form.session].indexOf(self.form.duty_date)) {
+        this.$swal("Error", "The duty date is not a calender date for the session: " + self.form.session, "error");
+        return false;
+      }
+      for (var i = 0; i < self.form.overtimes.length; i++) {
+        var row = self.form.overtimes[i];
+        if (row.pen == "" || row.designation == "" || row.from == "" || row.to == "" || row.from == null || row.to == null) {
+          this.$swal("Row: " + (i + 1), "Fill all the fields in every row", "error");
+          return false;
+        }
+        if (self.dayHasPunching && row.punching) {
+          if (row.punchin == null || row.punchin == "" || row.punchout == null || row.punchout == "") {
+            this.$swal("Row: " + (i + 1), "Punch in/out time not found", "error");
+            //this.$swal("Row: " + (i + 1), "Fill punch in/out time for every row", "error");
+            return false;
+          }
+        }
+        if (!row.slots.length) {
+          this.$swal("Error", "Please select the number of OTs", "error");
+          return false;
+        }
+        if (this.hasAddl(row.slots) && !self.canShowAddlOT(row)) {
+          this.$swal("Error", "Only DS or above can have Additional OT!", "error");
+          return false;
+        }
+
+        //if user selects 1st and 3rd, but not 2nd, with continuous time, it does not make sense. they need to splitup into two forms
+        if (this.hasFirst(row.slots) && (this.hasThird(row.slots) || this.hasAddl(row.slots)) && !this.hasSecond(row.slots)) {
+          this.$swal("Error", "Can't have third OT without second", "error");
+          return false;
+        }
+      }
+      var _this$getDayTypes = this.getDayTypes(),
+        isSittingDay = _this$getDayTypes.isSittingDay,
+        isSittingOrWorkingDay = _this$getDayTypes.isSittingOrWorkingDay,
+        isWorkingDay = _this$getDayTypes.isWorkingDay,
+        isHoliDay = _this$getDayTypes.isHoliDay;
+      var minothour_ideal = parseFloat(3);
+      var minot_minutes = 180; //corrected to allow leeway 
+      var daytypedesc = "holiday";
+      if (isSittingOrWorkingDay) {
+        minothour_ideal = parseFloat(2.5);
+        minot_minutes = 150;
+        daytypedesc = "working day";
         if (isSittingDay) {
-          if (this.hasThird(row.slots)) {
-            this.myerrors.push("Row " + (i + 1) + ": Parttime employees cannot have third OT on sitting day");
-            return false;
-          }
-        } else if (isWorkingDay) {
-          if (this.hasThird(row.slots) || this.hasSecond(row.slots)) {
-            this.myerrors.push("Row " + (i + 1) + ": Parttime employees cannot have second/third OT on working day");
-            return false;
-          }
+          daytypedesc = "sitting day";
         }
       }
 
-      //fulltime emp cannot have 2nd or 3rd OT on sitting/working days
-      if (row.isFulltime) {
-        if (isSittingOrWorkingDay) {
-          if (this.hasThird(row.slots) || this.hasSecond(row.slots)) {
-            this.myerrors.push("Row " + (i + 1) + ": FullTime employees cannot have second/third OT on working/sitting day");
+      //check time diff
+      for (var i = 0; i < self.form.overtimes.length; i++) {
+        var row = self.form.overtimes[i];
+        if (row.punching && self.dayHasPunching) minot_minutes -= isSittingOrWorkingDay ? 5 : 10; //corrected to allow leeway 
+
+        (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.setEmployeeTypes)(row);
+        if (row.punching) {
+          row.punchin = validateHhMm(row.punchin.trim());
+          row.punchout = validateHhMm(row.punchout.trim());
+        }
+        row.from = validateHhMm(row.from.trim());
+        row.to = validateHhMm(row.to.trim());
+        if (row.from.toLowerCase() == "invalid date" || row.to.toLowerCase() == "invalid date") {
+          row.from = row.to = "";
+          this.myerrors.push("Row " + (i + 1) + ": Invalid time format. Enter (HH:MM) in 24 hour format ( examples: 09:30, 17:30).");
+          return false;
+        }
+        if (!this.checkTimeWithinPunchingTime(row)) {
+          this.myerrors.push("Row " + (i + 1) + ": OT period should be within punching times");
+          return false;
+        }
+
+        //make sure our times are according to G.O
+        //note same form can have both part time and full time empl. amspkr office
+        if (isSittingDay) {
+          if (!this.checkSittingDayTimeIsAsPerGO(row, i)) {
             return false;
           }
         }
-      }
-      if (row.isNormal) {
-        if (isSittingDay || isWorkingDay) {
-          //if there is second, third, but no first
-          if (!this.hasFirst(row.slots) && row.slots.length) {
-            var sNormalStart = "10:15";
-            var sNormalStartWithGrace = "10:20";
-            var sNormalEnd = "17:15";
-            var sNormalEndWithGrace = sNormalEnd; //"17:10";
-            if (isSittingDay) {
-              sNormalStart = "08:00";
-              sNormalStartWithGrace = "08:05";
-              sNormalEnd = "17:30";
-              sNormalEndWithGrace = sNormalEnd; //"17:25";
+        var _this$strTimesToDates3 = this.strTimesToDatesNormalized(row.from, row.to),
+          datefrom = _this$strTimesToDates3.datefrom,
+          dateto = _this$strTimesToDates3.dateto;
+        var otmins_actual = parseFloat((dateto - datefrom) / 60000);
+
+        //add totalhours needed
+        var otmins_practical = minot_minutes * row.slots.length; //if three OT, 3 * 2.5
+        var othours_ideal = minothour_ideal * row.slots.length; //if three OT, 3 * 2.5
+        if (isSittingOrWorkingDay && this.hasFirst(row.slots)) {
+          //	console.log('oh: ' + this._daylenmultiplier);
+          otmins_practical += row.normal_office_hours * 60 * this._daylenmultiplier;
+          othours_ideal += row.normal_office_hours * this._daylenmultiplier;
+        } else if (row.isNormal && isSittingDay) {
+          //parttime does not have this type of adjustment where work before 8.00 am on sitting day
+          //sec office on sitday works from 7 to 7 for 2 OT. let them enter the whole period
+          var _this$overlapsWithOff = this.overlapsWithOfficeHoursForNormalEmpl(datefrom, dateto, isSittingDay, isWorkingDay),
+            overlap = _this$overlapsWithOff.overlap,
+            checkingPeriod = _this$overlapsWithOff.checkingPeriod;
+          if (overlap) {
+            //if there is overlap, we check the fulltime instead of just from 5.30
+            var otmins_onsitday_includingsitOT = 570;
+            if (row.punching && self.dayHasPunching) {
+              otmins_onsitday_includingsitOT -= 10;
             }
-            //if this slot does not contain sitting ot on a sitting day and first ot on a working day show error
-            if (this.checkIf2ndOTOverlapsWithOfficeHours(datefrom, dateto, sNormalStartWithGrace, sNormalEndWithGrace)) {
-              this.myerrors.push("Row ".concat(i + 1, " : 2nd/3rd OT cannot be between ").concat(sNormalStart, " and ").concat(sNormalEnd, " on a ").concat(daytypedesc));
+            otmins_practical += otmins_onsitday_includingsitOT * this._daylenmultiplier;
+            othours_ideal += 9.5 * this._daylenmultiplier;
+          }
+        }
+        console.log('otmins_needed: ' + otmins_practical);
+        //new validation after adding normal_office_hours
+        var diff = otmins_actual - otmins_practical;
+        if (diff < 0) {
+          var humandiff = (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.toHoursAndMinutes)(Math.abs(diff));
+          this.myerrors.push("Row  ".concat(i + 1, " :Needs ").concat(othours_ideal, " hours for the selected OT(s) on a ").concat(daytypedesc, ". Diff=").concat(humandiff, " "));
+          return false;
+        }
+
+        //partime emp cannot have 3rd OT on sitting and 2nd or 3rd ot on working days
+        if (row.isPartime) {
+          if (isSittingDay) {
+            if (this.hasThird(row.slots)) {
+              this.myerrors.push("Row " + (i + 1) + ": Parttime employees cannot have third OT on sitting day");
+              return false;
+            }
+          } else if (isWorkingDay) {
+            if (this.hasThird(row.slots) || this.hasSecond(row.slots)) {
+              this.myerrors.push("Row " + (i + 1) + ": Parttime employees cannot have second/third OT on working day");
               return false;
             }
           }
         }
-        //check if there is time left for OT. if so this must be user careless or adding time from another section's time
-        if (diff >= minot_minutes) {
-          //this.myerrors.push(`Row ${i + 1} :Time left for another OT. If number of OT is correct, adjust from/to times accordingly`);
-          //return false;
-        }
-      } else if (row.isPartime && isSittingDay) {
-        //if there is second, third, but no first
-        if (!this.hasFirst(row.slots) && row.slots.length) {
-          var _sNormalStart = "06:00";
-          var _sNormalEnd = "11:30";
-          //if this slot does not contain sitting ot on a sitting day 
-          if (this.checkIf2ndOTOverlapsWithOfficeHours(datefrom, dateto, _sNormalStart, _sNormalEnd)) {
-            this.myerrors.push("Row ".concat(i + 1, " : 2nd OT cannot be between ").concat(_sNormalStart, " and ").concat(_sNormalEnd, " on a ").concat(daytypedesc));
-            return false;
-          }
-        }
-      }
-    }
-    return this.checkDuplicates();
-  }), _defineProperty(_methods, "hasFirst", function hasFirst(slots) {
-    return slots.includes("First");
-  }), _defineProperty(_methods, "hasSecond", function hasSecond(slots) {
-    return slots.includes("Second");
-  }), _defineProperty(_methods, "hasThird", function hasThird(slots) {
-    return slots.includes("Third");
-  }), _defineProperty(_methods, "hasAddl", function hasAddl(slots) {
-    return slots.includes("Additional");
-  }), _defineProperty(_methods, "create", function create() {
-    if (this.isProcessing) {
-      //alert('no dbl click');
-      return;
-    }
-    this.isProcessing = true;
-    this.errors = [];
-    if (!this.rowsvalid()) {
-      this.isProcessing = false;
-      return;
-    }
-    var self = this;
-    if (self.form.overtimes.length <= 0) {
-      //this.myerrors.push("Fill all the required fields!");
-      this.$swal("Error", "Need at least one row!", "error");
-      this.isProcessing = false;
-      return false;
-    }
-    if (self.form.worknature == "") {
-      this.$swal("Error", "Please enter the nature of work done", "error");
-      this.isProcessing = false;
-      return false;
-    }
-    axios.post(urlformsubmit, self.form).then(function (response) {
-      //self.$swal.close();
-      // alert('success ajax');
-      if (response.data.created) {
-        window.location.href = urlformsucessredirect + "/" + response.data.id;
-      } else {
-        self.isProcessing = false;
-      }
-    })["catch"](function (error) {
-      self.$swal({
-        type: "error",
-        title: "Error",
-        text: "Please see the error(s) shown in red at the top",
-        timer: 2500
-      });
-      // alert('fail ajax');
-      var response = error.response;
-      self.isProcessing = false;
-      self.errors = response.data;
-    });
-  }), _defineProperty(_methods, "update", function update() {
-    //  console.log('update 1')
 
-    if (this.isProcessing) {
-      return;
-    }
-    this.isProcessing = true;
-    this.errors = [];
-    if (!this.rowsvalid()) {
-      this.isProcessing = false;
-      return;
-    }
-    var self = this;
-    if (self.form.overtimes.length <= 0) {
-      this.$swal("Error", "Need at least one row!", "error");
-      this.isProcessing = false;
-      return false;
-    }
-    if (self.form.worknature == "") {
-      this.$swal("Error", "Please enter the nature of work done", "error");
-      this.isProcessing = false;
-      return false;
-    }
-
-    //this.$swal('Please wait')
-    //this.$swal.showLoading()
-
-    var updateurl = urlformsubmit + "/" + self.form.id;
-
-    // axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
-    // axios.defaults.headers.common['X-CSRF-TOKEN'] = '{{csrf_token()}}';
-    // axios.post('/overtime-allowance/public/admin/forms', self.form).then(response => {
-    axios.put(updateurl, self.form).then(function (response) {
-      //self.$swal.close();
-      // alert('success ajax');
-      if (response.data.created) {
-        window.location.href = urlformsucessredirect + "/" + response.data.id;
-      } else {
-        self.isProcessing = false;
-      }
-    })["catch"](function (error) {
-      self.$swal({
-        type: "error",
-        title: "Error",
-        text: "Please read the error(s) shown in red at the top",
-        timer: 2500
-      });
-      //self.$swal.close();
-      var response = error.response;
-      self.isProcessing = false;
-      self.errors = response.data;
-    });
-  }), _defineProperty(_methods, "savepreset", function savepreset() {
-    var self = this;
-    var pens = [];
-    for (var i = 0; i < self.form.overtimes.length; i++) {
-      var pen_name = self.form.overtimes[i].pen;
-      if (pen_name != "") {
-        pens.push(pen_name);
-      }
-    }
-    if (pens.length == 0) {
-      self.$swal("", "No rows to save", "error");
-      return;
-    }
-    var obj = {};
-    obj["pens"] = pens;
-    obj["name"] = "default";
-    self.$swal({
-      text: "Enter a name for preset",
-      input: "text",
-      inputValue: "",
-      showCancelButton: true,
-      showLoaderOnConfirm: true,
-      useRejections: true,
-      inputValidator: function inputValidator(value) {
-        return new Promise(function (resolve, reject) {
-          if (value) {
-            var found = presets.indexOf(value) > -1;
-            if (found) {
-              reject("Preset with same name exists!");
-            } else {
-              resolve();
+        //fulltime emp cannot have 2nd or 3rd OT on sitting/working days
+        if (row.isFulltime) {
+          if (isSittingOrWorkingDay) {
+            if (this.hasThird(row.slots) || this.hasSecond(row.slots)) {
+              this.myerrors.push("Row " + (i + 1) + ": FullTime employees cannot have second/third OT on working/sitting day");
+              return false;
             }
-          } else {
-            reject("You need to write something!");
           }
+        }
+        if (row.isNormal) {
+          if ( /*isSittingDay ||*/isWorkingDay) {
+            //if there is second, third, but no first
+            if (!this.hasFirst(row.slots) && row.slots.length) {
+              var _this$overlapsWithOff2 = this.overlapsWithOfficeHoursForNormalEmpl(datefrom, dateto, isSittingDay, isWorkingDay),
+                _overlap = _this$overlapsWithOff2.overlap,
+                _checkingPeriod = _this$overlapsWithOff2.checkingPeriod;
+              if (_overlap) {
+                this.myerrors.push("Row ".concat(i + 1, " : 2nd/3rd OT cannot overlap with ").concat(_checkingPeriod, " on a ").concat(daytypedesc));
+                return false;
+              }
+            }
+          }
+          //check if there is time left for OT. if so this must be user careless or adding time from another section's time
+          if (diff >= minot_minutes) {
+            //this.myerrors.push(`Row ${i + 1} :Time left for another OT. If number of OT is correct, adjust from/to times accordingly`);
+            //return false;
+          }
+        } else if (row.isPartime && isSittingDay) {
+          //if there is second, third, but no first
+          if (!this.hasFirst(row.slots) && row.slots.length) {
+            var sNormalStart = "06:00";
+            var sNormalEnd = "11:30";
+            //if this slot does not contain sitting ot on a sitting day 
+            if (this.timePeriodsOverlap(datefrom, dateto, sNormalStart, sNormalEnd)) {
+              this.myerrors.push("Row ".concat(i + 1, " : 2nd OT cannot be between ").concat(sNormalStart, " and ").concat(sNormalEnd, " on a ").concat(daytypedesc));
+              return false;
+            }
+          }
+        }
+      }
+      return this.checkDuplicates();
+    },
+    hasFirst: function hasFirst(slots) {
+      return slots.includes("First");
+    },
+    hasSecond: function hasSecond(slots) {
+      return slots.includes("Second");
+    },
+    hasThird: function hasThird(slots) {
+      return slots.includes("Third");
+    },
+    hasAddl: function hasAddl(slots) {
+      return slots.includes("Additional");
+    },
+    create: function create() {
+      if (this.isProcessing) {
+        //alert('no dbl click');
+        return;
+      }
+      this.isProcessing = true;
+      this.errors = [];
+      if (!this.rowsvalid()) {
+        this.isProcessing = false;
+        return;
+      }
+      var self = this;
+      if (self.form.overtimes.length <= 0) {
+        //this.myerrors.push("Fill all the required fields!");
+        this.$swal("Error", "Need at least one row!", "error");
+        this.isProcessing = false;
+        return false;
+      }
+      if (self.form.worknature == "") {
+        this.$swal("Error", "Please enter the nature of work done", "error");
+        this.isProcessing = false;
+        return false;
+      }
+      axios.post(urlformsubmit, self.form).then(function (response) {
+        //self.$swal.close();
+        // alert('success ajax');
+        if (response.data.created) {
+          window.location.href = urlformsucessredirect + "/" + response.data.id;
+        } else {
+          self.isProcessing = false;
+        }
+      })["catch"](function (error) {
+        self.$swal({
+          type: "error",
+          title: "Error",
+          text: "Please see the error(s) shown in red at the top",
+          timer: 2500
         });
-      },
-      preConfirm: function preConfirm(text) {
-        return new Promise(function (resolve, reject) {
-          obj["name"] = text;
-          axios.post(urlpresetsubmit, obj).then(function (response) {
-            if (response.data.result == true) {
+        // alert('fail ajax');
+        var response = error.response;
+        self.isProcessing = false;
+        self.errors = response.data;
+      });
+    },
+    update: function update() {
+      //  console.log('update 1')
+
+      if (this.isProcessing) {
+        return;
+      }
+      this.isProcessing = true;
+      this.errors = [];
+      if (!this.rowsvalid()) {
+        this.isProcessing = false;
+        return;
+      }
+      var self = this;
+      if (self.form.overtimes.length <= 0) {
+        this.$swal("Error", "Need at least one row!", "error");
+        this.isProcessing = false;
+        return false;
+      }
+      if (self.form.worknature == "") {
+        this.$swal("Error", "Please enter the nature of work done", "error");
+        this.isProcessing = false;
+        return false;
+      }
+
+      //this.$swal('Please wait')
+      //this.$swal.showLoading()
+
+      var updateurl = urlformsubmit + "/" + self.form.id;
+
+      // axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+      // axios.defaults.headers.common['X-CSRF-TOKEN'] = '{{csrf_token()}}';
+      // axios.post('/overtime-allowance/public/admin/forms', self.form).then(response => {
+      axios.put(updateurl, self.form).then(function (response) {
+        //self.$swal.close();
+        // alert('success ajax');
+        if (response.data.created) {
+          window.location.href = urlformsucessredirect + "/" + response.data.id;
+        } else {
+          self.isProcessing = false;
+        }
+      })["catch"](function (error) {
+        self.$swal({
+          type: "error",
+          title: "Error",
+          text: "Please read the error(s) shown in red at the top",
+          timer: 2500
+        });
+        //self.$swal.close();
+        var response = error.response;
+        self.isProcessing = false;
+        self.errors = response.data;
+      });
+    },
+    savepreset: function savepreset() {
+      var self = this;
+      var pens = [];
+      for (var i = 0; i < self.form.overtimes.length; i++) {
+        var pen_name = self.form.overtimes[i].pen;
+        if (pen_name != "") {
+          pens.push(pen_name);
+        }
+      }
+      if (pens.length == 0) {
+        self.$swal("", "No rows to save", "error");
+        return;
+      }
+      var obj = {};
+      obj["pens"] = pens;
+      obj["name"] = "default";
+      self.$swal({
+        text: "Enter a name for preset",
+        input: "text",
+        inputValue: "",
+        showCancelButton: true,
+        showLoaderOnConfirm: true,
+        useRejections: true,
+        inputValidator: function inputValidator(value) {
+          return new Promise(function (resolve, reject) {
+            if (value) {
+              var found = presets.indexOf(value) > -1;
+              if (found) {
+                reject("Preset with same name exists!");
+              } else {
+                resolve();
+              }
+            } else {
+              reject("You need to write something!");
+            }
+          });
+        },
+        preConfirm: function preConfirm(text) {
+          return new Promise(function (resolve, reject) {
+            obj["name"] = text;
+            axios.post(urlpresetsubmit, obj).then(function (response) {
+              if (response.data.result == true) {
+                resolve();
+              } else {
+                reject(response.data.error);
+              }
+            })["catch"](function (error) {
+              reject(error.response.data);
+            });
+          });
+        }
+      }).then(function (result) {
+        self.$swal({
+          type: "success",
+          html: "Saved!",
+          timer: 1500,
+          useRejections: false
+        });
+      });
+    },
+    loadpreset: function loadpreset() {
+      var self = this;
+      if (presets.length == 0) {
+        self.$swal("Sorry, no presets to load. Save a preset first");
+        return;
+      }
+      self.$swal({
+        text: "Load Preset",
+        input: "select",
+        inputOptions: presets,
+        inputPlaceholder: "Select preset",
+        showCancelButton: true,
+        useRejections: false,
+        inputValidator: function inputValidator(value) {
+          return new Promise(function (resolve, reject) {
+            if (value) {
               resolve();
             } else {
-              reject(response.data.error);
+              reject("You need to select something)");
             }
-          })["catch"](function (error) {
-            reject(error.response.data);
           });
-        });
-      }
-    }).then(function (result) {
-      self.$swal({
-        type: "success",
-        html: "Saved!",
-        timer: 1500,
-        useRejections: false
-      });
-    });
-  }), _defineProperty(_methods, "loadpreset", function loadpreset() {
-    var self = this;
-    if (presets.length == 0) {
-      self.$swal("Sorry, no presets to load. Save a preset first");
-      return;
-    }
-    self.$swal({
-      text: "Load Preset",
-      input: "select",
-      inputOptions: presets,
-      inputPlaceholder: "Select preset",
-      showCancelButton: true,
-      useRejections: false,
-      inputValidator: function inputValidator(value) {
-        return new Promise(function (resolve, reject) {
-          if (value) {
-            resolve();
-          } else {
-            reject("You need to select something)");
-          }
-        });
-      },
-      showLoaderOnConfirm: true,
-      preConfirm: function preConfirm(index) {
-        return new Promise(function (resolve, reject) {
-          axios.get(urlajaxpresets + "/" + presets[index]).then(function (response) {
-            self.loadpresetdata(response.data);
-            resolve();
-          })["catch"](function (error) {
-            reject(error.response.data);
+        },
+        showLoaderOnConfirm: true,
+        preConfirm: function preConfirm(index) {
+          return new Promise(function (resolve, reject) {
+            axios.get(urlajaxpresets + "/" + presets[index]).then(function (response) {
+              self.loadpresetdata(response.data);
+              resolve();
+            })["catch"](function (error) {
+              reject(error.response.data);
+            });
           });
-        });
-      }
-    }).then(function (result) {}); //success
-  }), _defineProperty(_methods, "loadpresetdata", function loadpresetdata(obj) {
-    var self = this;
-    var timefrom = "";
-    var timeto = "";
-    //var worknature = self.presets_default["default_worknature"];
-
-    if (this.form.overtime_slot != "") {
-      timefrom = def_time_start;
-      timeto = def_time_end;
-    }
-    if (self.form.overtimes.length > 0) {
-      timefrom = self.form.overtimes[0].from;
-      timeto = self.form.overtimes[0].to;
-      //worknature = self.form.overtimes[0].worknature;
-    }
-
-    for (var key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        //we can either clear items or we check for duplicates
-
-        var index = -1;
-        for (var i = 0; i < self.form.overtimes.length; i++) {
-          var pen_name = self.form.overtimes[i].pen;
-          if (pen_name == key) {
-            index = i;
-            break;
-          }
         }
-        if (index === -1) {
-          self.form.overtimes.push({
-            pen: key,
-            designation: obj[key].desig,
-            from: timefrom,
-            to: timeto,
-            //worknature: worknature,
-            category: obj[key].category,
-            employee_id: obj[key].employee_id,
-            punching: obj[key].punching,
-            normal_office_hours: obj[key].normal_office_hours,
-            aadhaarid: obj[key].aadhaarid,
-            slots: []
-          });
-          index = self.form.overtimes.length - 1;
+      }).then(function (result) {}); //success
+    },
+
+    //loadpreset
+
+    loadpresetdata: function loadpresetdata(obj) {
+      var self = this;
+      var timefrom = "";
+      var timeto = "";
+      //var worknature = self.presets_default["default_worknature"];
+
+      if (this.form.overtime_slot != "") {
+        timefrom = def_time_start;
+        timeto = def_time_end;
+      }
+      if (self.form.overtimes.length > 0) {
+        timefrom = self.form.overtimes[0].from;
+        timeto = self.form.overtimes[0].to;
+        //worknature = self.form.overtimes[0].worknature;
+      }
+
+      for (var key in obj) {
+        if (obj.hasOwnProperty(key)) {
+          //we can either clear items or we check for duplicates
+
+          var index = -1;
+          for (var i = 0; i < self.form.overtimes.length; i++) {
+            var pen_name = self.form.overtimes[i].pen;
+            if (pen_name == key) {
+              index = i;
+              break;
+            }
+          }
+          if (index === -1) {
+            self.form.overtimes.push({
+              pen: key,
+              designation: obj[key].desig,
+              from: timefrom,
+              to: timeto,
+              //worknature: worknature,
+              category: obj[key].category,
+              employee_id: obj[key].employee_id,
+              punching: obj[key].punching,
+              normal_office_hours: obj[key].normal_office_hours,
+              aadhaarid: obj[key].aadhaarid,
+              slots: []
+            });
+            index = self.form.overtimes.length - 1;
+          }
+          this.fetchPunchingTimeForRow(index);
         }
-        this.fetchPunchingTimeForRow(index);
+      }
+    },
+    //loadpresetdata
+    copytimedownonerow: function copytimedownonerow() {
+      //console.log("copytimedownonerow");
+      for (var i = 0; i < this.form.overtimes.length - 1; i++) {
+        if (this.form.overtimes[i].from != "" && this.form.overtimes[i].to != "" && this.form.overtimes[i + 1].from == "" && this.form.overtimes[i + 1].to == "") {
+          this.form.overtimes[i + 1].from = this.form.overtimes[i].from;
+          this.form.overtimes[i + 1].to = this.form.overtimes[i].to;
+          break;
+        }
       }
     }
-  }), _defineProperty(_methods, "copytimedownonerow", function copytimedownonerow() {
-    //console.log("copytimedownonerow");
-    for (var i = 0; i < this.form.overtimes.length - 1; i++) {
-      if (this.form.overtimes[i].from != "" && this.form.overtimes[i].to != "" && this.form.overtimes[i + 1].from == "" && this.form.overtimes[i + 1].to == "") {
-        this.form.overtimes[i + 1].from = this.form.overtimes[i].from;
-        this.form.overtimes[i + 1].to = this.form.overtimes[i].to;
-        break;
-      }
-    }
-  }), _methods) //methods
+  } //methods
 }); //vue
 
 window.addEventListener("keydown", function (event) {

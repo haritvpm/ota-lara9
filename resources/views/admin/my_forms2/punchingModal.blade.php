@@ -20,12 +20,20 @@
               </tr>
             </thead>
             <tbody>
-            <tr v-bind:class="{'table-secondary' : item.otna }" v-for="(item, index) in modaldata" :key="item.date">
+            <tr v-bind:class="{'table-secondary' : !item.userdecision }" v-for="(item, index) in modaldata" :key="item.date">
               <td>@{{ index+1}}</td>
               <td>@{{ item.date }}</td>
               <td>@{{ item.punchin }}</td>
               <td>@{{ item.punchout }}</td>
-              <td >@{{ item.ot }}</td>
+              <td v-if = "modaldata_showonly || !item.userdecision" >
+              @{{ item.ot }}
+              </td>
+              <td v-else class="align middle" >
+                  <input type="checkbox"  v-model="modaldata_seldays" :value="item.date"  :id="item.date">
+                  <label :for="item.date">Yes</label>
+                <!-- <input type="checkbox"  :value="item.date" v-model="modaldata_seldays"> -->
+                <!-- <label >Yes</label> -->
+              </td>
             </tr>
             
             </tbody>
@@ -33,7 +41,7 @@
           </table>
           </div>
 	        <div class="modal-footer d-flex justify-content-between ">
-            Total OT: @{{modaldata_totalOT}} / @{{modaldata_totalOTDays}}
+            Total OT: @{{modaldata_seldays.length}} / @{{modaldata_totalOTDays}}
 	          <button type="button" class="btn btn-danger"  @click="modalClosed" data-dismiss="modal">OK</button>
 	        </div>
 	      </div>

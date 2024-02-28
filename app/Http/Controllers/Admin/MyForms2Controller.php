@@ -18,6 +18,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use App\OvertimeSitting;
 use Illuminate\Support\Facades\Gate;
 
 
@@ -370,53 +371,17 @@ class MyForms2Controller extends Controller
             }
         }
 
-       
-      //hard corded. ugly i know. 
-        $ispartimefulltime = 0;
-        $iswatchnward = 0;
-      //  $isspeakeroffice = 0;
-
-
+        $form = null;
+      
         if(!$issitting && $id)
         {
            $form = Form::findOrFail($id);
-           
-           //we should set parttime even if it is being edited by house keeping
-
-            if(false !== strpos( $form->creator, 'health') || 
-               false !== strpos( $form->creator, 'agri' )){
-                $ispartimefulltime = 1;            
-            }
-
-            if(false !== strpos($form->creator, 'watchnward')){
-                $iswatchnward = 1;
-            }
-
-            if(false !== strpos($form->creator, 'sn.am') || 
-               false !== strpos($form->creator, 'sn.ma')){
-                $ispartimefulltime = 1;
-            }
 
         }
 
-        if( false !== strpos(  \Auth::user()->username, 'watchnward') ){
-            $iswatchnward = 1;
-        }
+    
+  
 
-       // if( false !== strpos(  \Auth::user()->username, 'oo.') ){
-        //    $isspeakeroffice = 1; //dyspkr and sec too
-       // }
-
-        //amhostel and sn.mae and sn.amresspkr has parttimes too
-        
-        if( false !== strpos( \Auth::user()->username, 'health' ) || 
-            false !== strpos( \Auth::user()->username, 'agri') || 
-            false !== strpos( \Auth::user()->username, 'sn.am') || 
-            false !== strpos( \Auth::user()->username, 'sn.ma')
-             ){
-
-            $ispartimefulltime = 1;            
-        }
 
        // $designations = \App\Designation::orderby('designation','asc')->get(['designation'])->pluck('designation');
 
@@ -469,9 +434,7 @@ class MyForms2Controller extends Controller
             'old_slotselected' => old('overtime_slot') ? old('overtime_slot') : '',
             'old_calenderdayselected' => old('duty_date') ? old('duty_date') : '',
             'presets' => $presets,
-            'ispartimefulltime' => $ispartimefulltime,
-            'iswatchnward' => $iswatchnward,
-          //  'isspeakeroffice' => $isspeakeroffice,
+            'isThirdOTAllowed' => \Auth::user()->isThirdOTAllowed($form?->creator ?? null),
             'autoloadpens' => $autoloadpens,
             'presets_default' => $presets_default,
             
@@ -522,7 +485,8 @@ class MyForms2Controller extends Controller
        else{ //sitting forms
             if($id)
             {
-                $form = Form::with(['created_by','overtimes','overtimes.employee.categories','overtimes.employee.designation'])->findOrFail($id);
+                $form = Form::with(['created_by','overtimes','overtimes.employee.categories','overtimes.employee.designation',
+                'overtimes.overtimesittings'])->findOrFail($id);
 
                 $form->overtimes->transform(function ($item) {
                     if($item['name'] != null){
@@ -533,6 +497,12 @@ class MyForms2Controller extends Controller
                     $item['punching'] =  $item?->employee->categories?->punching &&
                                          $item?->employee->designation->punching && $item?->employee->punching;
                     $item['normal_office_hours'] = $item?->employee?->designation?->normal_office_hours;
+
+                   // $item['overtimesittings_'] =$item?->overtimesittings->pluck('date');
+
+
+                 //   Log::info($item['overtimesittings']);
+                    
                     return $item;
                                    
                 });
@@ -1116,6 +1086,11 @@ class MyForms2Controller extends Controller
         
                 $overtime['slots'] = implode(', ',$slots);
 	        }
+            else {
+                $form->overtimes?->load('overtimesittings');
+              //  $overtime['overtimesittings_'] =$overtime?->overtimesittings->pluck('date');
+
+            }
             return $overtime;
         });
 
@@ -1314,13 +1289,12 @@ class MyForms2Controller extends Controller
     //for sitting days 
     private function checkPunchingDataForEmp($calenderdays_in_range, $pen, $aadhaarid)
     {
-        $sittingsWithMinHoursSatisfied = 0; 
         $sittingsWithTimeSatisfied = 0; 
-        $sittingsWithPunchok= 0;
         $emp = Employee::with(['designation','categories'])->where( 'pen', $pen)->first();
         $dateformatwithoutime = '!'.config('app.date_format');
-        
+        $sittingsWithUserDecision=0; 
         [$isPartime,$isFulltime,  $isWatchnward,  $isNormal] = $this->getEmployeeType($emp);
+        $sittingsWith=0; 
 
         //need to check office if any exempt for fulltime/pt at cat non-gazetted / mla hostel 
         //we call this function only if overtime['punching] which should exclude watchnward
@@ -1332,56 +1306,37 @@ class MyForms2Controller extends Controller
             // Log::info($isFulltime);
             // Log::info($isPartime);
 
-            if( $day->punching !== 'AEBAS' ){
-               // $sittingsWithNoPunching++; 
-                continue;
-            }
             $date = Carbon::createFromFormat($dateformatwithoutime, $day->date)->format('Y-m-d');
-
-             //check if user has entered first OT for that day.
-            $sit = Overtime::with('form')
-                ->wherehas( 'form', function($q) use( $date){
-                    $q->where( 'overtime_slot' , 'Multi' )
-                    ->where( 'duty_date', $date );
-                })->where('pen', $pen )
-                ->where('slots','like','%First%')
-                ->first(); 
-
-            //may be day was nopunching/manualentry intitially, and user entered 'sit' in multi and we changed the day type to aebas 
-            //in that case, do not include it in count
-            if($sit) {  //user has already entered sitting for that day
-                continue;
-            }    
              
             $query =  Punching::where('date',$date);
-            // $query->when( $day->punching == 'MANUALENTRY' &&  $pen  && strlen($pen) >= 5, function ($q)  use ($pen) {
-            //     return $q->where('pen',$pen);
-            // });
-            $query->when( /* $day->punching == 'AEBAS' &&  */  $aadhaarid   && strlen($aadhaarid) >= 8, function ($q)  use ($aadhaarid){
+            $query->when(  $aadhaarid  && strlen($aadhaarid) >= 8, function ($q)  use ($aadhaarid){
                 return $q->where('aadhaarid',$aadhaarid);
-            })
-            ->wherenotnull('punch_in') //prevent if only one column is available
-            ->wherenotnull('punch_out');
+            });
+            //->wherenotnull('punch_in') //prevent if only one column is available
+           // ->wherenotnull('punch_out');
             $temp = $query->first(); 
-           
-            if($temp ){
-                $sittingsWithPunchok++; 
+            
+            if(!$temp ){
                
-                $minutesreq = $emp->designation->normal_office_hours*60 + 150 - 10; //leeway 10 min
+              if( $day->punching !== 'AEBAS' ){
+                $sittingsWithUserDecision++;
+              }
 
-                $strtimes_totimestamps = function ( $from, $to )  {
-                    $timefrom = strtotime($from);   $timeto = strtotime($to);
-                    return [ $timefrom,$timeto ];
-                  };
+              continue;
+            }
+            
+            $strtimes_totimestamps = function ( $from, $to )  {
+                $timefrom = strtotime($from);   $timeto = strtotime($to);
+                return [ $timefrom,$timeto ];
+            };
+
+            if($temp['punch_in'] && $temp['punch_out'] ){
+                             
                 
                 [$punch_in, $punch_out] = $strtimes_totimestamps( $temp['punch_in'], $temp['punch_out']);
                 $othours_worked= ceil(abs($punch_out - $punch_in) / 60);
-                //check if time has min hours
-                if($othours_worked >= $minutesreq){
-                   $sittingsWithMinHoursSatisfied++; 
-                }
+        
                 //check time from
-               
                
                 if($isNormal){
                     [$fromReq, $toReq] = $strtimes_totimestamps( "08:05",  "17:25");
@@ -1398,17 +1353,44 @@ class MyForms2Controller extends Controller
                     if( $punch_in <= $fromReq && $punch_out >= $toReq){
                         $sittingsWithTimeSatisfied++; 
                     }
-                } else{
-                    //for what we dont check. ignore and give exact count
-                    Log::info('un empl');
-
-                    $sittingsWithTimeSatisfied++; 
+                } 
+                continue;
+            }  else if( $day->punching == 'AEBAS' ) {
+                continue; //leave/or not punched in/out
+            }
+            //user has punched once on non-aebas day
+            $punchingtimesnotincorrect  = function ( $fromreq, $toreq, $in, $out )  {
+                $timefromReq = strtotime($fromreq);   $timetoReq = strtotime($toreq);
+                if( $in ){
+                    $punchin = strtotime($in);  
+                    if( $punchin > $timefromReq )   return false;
                 }
+                if( $out ){
+                    $punchout = strtotime($out);  
+                    if( $punchout < $timetoReq )   return false;
+                }
+                return true;
+            };
+            
+            // NON AEBAS day.
 
+            if($isNormal){
+                if($punchingtimesnotincorrect( "08:05",  "17:25",  $temp['punch_in'], $temp['punch_out'])){
+                    $sittingsWithUserDecision++; 
+                }
+            } else  if($isPartime){
+                if($punchingtimesnotincorrect( "06:05",  "11:25",  $temp['punch_in'], $temp['punch_out'])){
+                    $sittingsWithUserDecision++; 
+                }
+            } else  if($isFulltime){
+                 if($punchingtimesnotincorrect( "06:05",  "16:00", $temp['punch_in'], $temp['punch_out'])){ //its 4.25 actually. 
+                    $sittingsWithUserDecision++; 
+                }
             } 
+          
         }
 
-        return [ $sittingsWithPunchok, $sittingsWithMinHoursSatisfied, $sittingsWithTimeSatisfied ];
+        return [ $sittingsWithTimeSatisfied,$sittingsWithUserDecision ];
 
     }
     public function createovertimes_sitting( Request $request, &$myerrors, $formid=null)
@@ -1437,6 +1419,7 @@ class MyForms2Controller extends Controller
             return $overtime;
         });
 
+     //   Log::info($request);
         
         $designations = $collection->pluck('designation');
         $rates = \App\Designation::wherein ('designation', $designations )->pluck('rate','designation');
@@ -1487,13 +1470,14 @@ class MyForms2Controller extends Controller
         $sitting_start = Carbon::createFromFormat( $dateformatwithoutime, $maxsittingdates->first());
         $sitting_end = Carbon::createFromFormat($dateformatwithoutime, $maxsittingdates->last());
 
-       
+        
+
         $overtimes =$collection->transform(function($overtime) 
                                            use ($res, $request,$formid, &$myerrors,$maxsittings,
                                             $rates,$sitting_start, $sitting_end,$dateformatwithoutime,$maxsittingdates, 
                                             $checksecretaryattendance, $attendance) 
         {
-             
+            
             $pen = $overtime['pen'];
             $tmp = strpos($pen, '-');
             if(false !== $tmp){
@@ -1593,28 +1577,17 @@ class MyForms2Controller extends Controller
 
             //new check punching times
             if( $overtime['punching'] == true ) {
-                [ $sittingsWithPunchok, $sittingsWithMinHoursSatisfied, $sittingsWithTimeSatisfied ] = $this->checkPunchingDataForEmp($calenderdays_in_range, $overtime['pen'], $overtime['aadhaarid']);
+                [ $sittingsWithTimeSatisfied,$sittingsWithUserDecision ] = $this->checkPunchingDataForEmp($calenderdays_in_range, $overtime['pen'], $overtime['aadhaarid']);
                 //we need to also check time within 8 -> 5 but dont know how much luft. partime is ok
-                
-                if( $overtime['count'] > $sittingsWithPunchok ){
-
-                    array_push($myerrors,  $name_for_err . ' : From ' . $overtime['from'] . ' to ' . $overtime['to'] . ' punched only for ' . $sittingsWithPunchok .' sitting days.');
+                if( $overtime['count'] > $sittingsWithTimeSatisfied + $sittingsWithUserDecision){
+                    array_push($myerrors,  $name_for_err . ' : From ' . $overtime['from'] . ' to ' . $overtime['to'] . ' only ' . $sittingsWithTimeSatisfied .' days satisfy time per G.O');
                     return null;
                 }
-               
-                if( $overtime['count'] > $sittingsWithTimeSatisfied){
-                    array_push($myerrors,  $name_for_err . ' : From ' . $overtime['from'] . ' to ' . $overtime['to'] . ' only ' . $sittingsWithTimeSatisfied .' days satisfy 8am-5.30pm.');
-                    return null;
-                }
-                if( $overtime['count'] > $sittingsWithMinHoursSatisfied ){
-
-                    array_push($myerrors,  $name_for_err . ' : From ' . $overtime['from'] . ' to ' . $overtime['to'] . ' only ' . $sittingsWithMinHoursSatisfied .' sitting days have min req hours.');
-                    return null;
-                }
+         
             } else{
                 // Log::info("No punch for" . $overtime['name']);
             }
-
+     
 
             {                
                 
@@ -1649,7 +1622,7 @@ class MyForms2Controller extends Controller
         $myerrors = [];
 
         $overtimes = $this->createovertimes_sitting( $request, $myerrors );
-       
+      
         
         if( count($myerrors) > 0) 
         {
@@ -1680,6 +1653,21 @@ class MyForms2Controller extends Controller
    
 
             $form->overtimes()->saveMany($overtimes);
+
+            //save days
+            $overtimesittingscollectionforeachpen = collect($request->overtimes)->mapWithKeys(function($ot){
+                $newsits = collect($ot['overtimesittings'])->map(function($date){
+                    return new OvertimeSitting( ['date' => $date ] ); 
+                });
+                return [$ot['pen'] => $newsits];
+            });
+
+            $form->overtimes()->each(function ($ot, $key) use ($overtimesittingscollectionforeachpen ) {
+                $otsittingsforthispen = $overtimesittingscollectionforeachpen[$ot['pen'] . '-'. $ot['name']];
+                $ot->overtimesittings()->saveMany( $otsittingsforthispen );
+            });
+            
+          
 
             return $form->id;
 
@@ -1998,6 +1986,13 @@ class MyForms2Controller extends Controller
                 'updated_at' => Carbon::now(),
 
             ]);
+            
+            $overtimesittingscollectionforeachpen = collect($request->overtimes)->mapWithKeys(function($ot){
+                $newsits = collect($ot['overtimesittings'])->map(function($date){
+                    return new OvertimeSitting( ['date' => $date ] ); 
+                });
+                return [$ot['pen'] => $newsits];
+            });
 
             //see if user has made any changes
 
@@ -2005,19 +2000,29 @@ class MyForms2Controller extends Controller
             //same number or added new items
             if( $overtimes_old->count() && $overtimes->count()){
 
+                //remove all overtimesittings
+                $idsold = $overtimes_old->pluck('id')->toarray();
+                OvertimeSitting::wherein('overtime_id', $idsold)->delete();
+
                 //update same row indices
                 $i=0;
                 $same_rows = min($overtimes_old->count(), $overtimes->count());
                 for (; $i < $same_rows; $i++) { 
-                   Overtime::where('id', $overtimes_old[$i]['id'])
-                            ->update($overtimes[$i]->toarray());
-               
+                   $newot =  Overtime::findOrFail( $overtimes_old[$i]['id']);
+                   $newot->update($overtimes[$i]->toarray());
+                   $otsittingsforthispen = $overtimesittingscollectionforeachpen[$newot['pen'] . '-'. $newot['name']];
+                   $newot->overtimesittings()->saveMany( $otsittingsforthispen );
                 }
                 
                 if($overtimes_old->count() < $overtimes->count()){
                     //update if a new row added
                     $overtimes = $overtimes->slice($i);
                     $form->overtimes()->saveMany($overtimes);
+                    $form->overtimes()->each(function ($ot) use ($overtimesittingscollectionforeachpen ) {
+                        $otsittingsforthispen = $overtimesittingscollectionforeachpen[$ot['pen'] . '-'. $ot['name']];
+                        $ot->overtimesittings()->saveMany( $otsittingsforthispen );
+                    });
+
                 } else if ( $overtimes_old->count() > $overtimes->count()) {
                     //remove rows removed
                     $idsremoved = $overtimes_old->slice($i)->pluck('id')->toarray();

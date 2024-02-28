@@ -12,6 +12,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "checkDatesAndOT": () => (/* binding */ checkDatesAndOT),
 /* harmony export */   "setEmployeeTypes": () => (/* binding */ setEmployeeTypes),
+/* harmony export */   "sittingAllowableForNonAebasDay": () => (/* binding */ sittingAllowableForNonAebasDay),
 /* harmony export */   "stringTimeToDate": () => (/* binding */ stringTimeToDate),
 /* harmony export */   "timePeriodIncludesPeriod": () => (/* binding */ timePeriodIncludesPeriod),
 /* harmony export */   "toHoursAndMinutes": () => (/* binding */ toHoursAndMinutes)
@@ -39,43 +40,86 @@ function timePeriodIncludesPeriod(from, to, fromReq, toReq) {
   var time530pm = stringTimeToDate(toReq);
   return time800am >= datefrom && time530pm <= dateto;
 }
+//check if punchin or out if available, fails
+//if time is not available, it is ok
+function sittingAllowableForNonAebasDay(from, to, fromReq, toReq) {
+  if (from) {
+    var datefrom = stringTimeToDate(from);
+    var time800am = stringTimeToDate(fromReq);
+    if (datefrom > time800am) return false;
+  }
+  if (to) {
+    var dateto = stringTimeToDate(to);
+    var time530pm = stringTimeToDate(toReq);
+    if (dateto < time530pm) return false;
+  }
+  return true;
+}
 function checkDatesAndOT(row, data) {
   //we need to give some leeway. so commenting
-  var count = 0;
-  var total_ot_days = 0;
-  var naDays = 0;
+  var count = 0; //ot given to user
+  var total_nondecision_days = 0;
+  var total_userdecision_days = 0;
   for (var i = 0; i < data.dates.length; i++) {
     // console.log(data.dates[i])
 
     var punchin = data.dates[i].punchin;
     var punchout = data.dates[i].punchout;
-    if (!data.dates[i].applicable) {
-      //no punching day. NIC server down. not aebas. either manualentry or nopunching
-      data.dates[i].ot = 'N/A. ' + data.dates[i].ot;
-      data.dates[i].otna = true;
-      naDays++;
+    var pos = row.overtimesittings.indexOf(data.dates[i].date);
+    if (punchin && punchout) {
+      //punched
+
+      if (row.isPartime) {
+        if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "11:25")) {
+          data.dates[i].ot = 'YES';
+          count++;
+        } else {
+          data.dates[i].ot = 'No. (06:00 - 11:30)';
+        }
+      } else if (row.isFulltime) {
+        if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "16:25")) {
+          count++;
+          data.dates[i].ot = 'YES';
+        } else {
+          data.dates[i].ot = 'No. (06:00 - 4:30pm)';
+        }
+      } else if (row.isWatchnward) {
+        //no punching
+      } //all other employees for sitting days
+      else {
+        if (timePeriodIncludesPeriod(punchin, punchout, "08:05", "17:25")) {
+          count++;
+          data.dates[i].ot = 'YES';
+        } else {
+          data.dates[i].ot = 'No. (08:00 - 5:30pm)';
+        }
+      }
+      data.dates[i].userdecision = false;
+      total_nondecision_days++;
+      if (data.dates[i].ot != 'YES' && pos != -1) row.overtimesittings.splice(pos, 1); //remove from sel if it is NO
       continue;
     }
-    data.dates[i].otna = false;
-    total_ot_days++;
-    if (!punchin || !punchout) {
-      //not punched
+
+    //punchin or out is not available
+    if (data.dates[i].aebasday) {
+      data.dates[i].userdecision = false;
       data.dates[i].ot = punchin || punchout ? 'Not Punched?' : 'Leave?';
+      total_nondecision_days++;
+      if (pos != -1) row.overtimesittings.splice(pos, 1); //remove from sel if it is NO
       continue;
     }
-    data.dates[i].ot = 'NO';
+
+    //non aebasday, check if user has not punched incorrectly when server was failing
+    data.dates[i].userdecision = false;
     if (row.isPartime) {
-      console.log('p');
-      if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "11:25")) {
-        data.dates[i].ot = 'YES';
-        count++;
+      if (sittingAllowableForNonAebasDay(punchin, punchout, "06:05", "11:25")) {
+        data.dates[i].userdecision = true;
       } else {
         data.dates[i].ot = 'No. (06:00 - 11:30)';
       }
     } else if (row.isFulltime) {
-      if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "16:25")) {
-        count++;
-        data.dates[i].ot = 'YES';
+      if (sittingAllowableForNonAebasDay(punchin, punchout, "06:05", "16:25")) {
+        data.dates[i].userdecision = true;
       } else {
         data.dates[i].ot = 'No. (06:00 - 4:30pm)';
       }
@@ -83,20 +127,30 @@ function checkDatesAndOT(row, data) {
       //no punching
     } //all other employees for sitting days
     else {
-      console.log('n');
-      if (timePeriodIncludesPeriod(punchin, punchout, "08:05", "17:25")) {
-        count++;
-        data.dates[i].ot = 'YES';
+      if (sittingAllowableForNonAebasDay(punchin, punchout, "08:05", "17:25")) {
+        data.dates[i].userdecision = true;
       } else {
         data.dates[i].ot = 'No. (08:00 - 5:30pm)';
       }
     }
+    if (data.dates[i].userdecision) {
+      data.dates[i].ot = 'NO';
+      total_userdecision_days++;
+      if (pos != -1) {
+        data.dates[i].ot = 'YES';
+        count++;
+      }
+    } else {
+      total_nondecision_days++;
+      if (!data.dates[i].userdecision && pos != -1) row.overtimesittings.splice(pos, 1); //remove from sel if it is NO
+    }
   }
+
   return {
     count: count,
     modaldata: data.dates,
-    total_ot_days: total_ot_days,
-    naDays: naDays
+    total_nondecision_days: total_nondecision_days,
+    total_userdecision_days: total_userdecision_days
   };
 }
 function toHoursAndMinutes(totalMinutes) {
@@ -179,6 +233,12 @@ function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" =
 function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return _typeof(key) === "symbol" ? key : String(key); }
 function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (_typeof(res) !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
 
 ///detect brwowser
@@ -214,9 +274,11 @@ var vm = new Vue({
     approvaltext: malkla + ' കേരള നിയമസഭയുടെ  ' + sessionnumber + '-ാം സമ്മേളനത്തോടനുബന്ധിച്ച് അധികജോലിക്കു നിയോഗിക്കപ്പെട്ട ജീവനക്കാർക്ക്  ഓവർടൈം അലവൻസ് അനുവദിക്കുന്നതിനുള്ള ഈ ഓവർടൈം അലവൻസ്   സ്റ്റേറ്റ്മെന്റ്,   ഓവർടൈം അലവൻസ് അനുവദിക്കുന്നതിനായുള്ള നിലവിലെ സർക്കാർ ഉത്തരവിൽ  നിഷ്കർഷിച്ചിരിക്കുന്ന  നിബന്ധനകൾ  പാലിച്ചു തന്നെയാണ്  തയ്യാറാക്കി സമർപ്പിക്കുന്നതെന്ന് സാക്ഷ്യപ്പെടുത്തുന്നു.',
     approvalpostingcheckedtext: 'നിയമസഭാ സെക്രട്ടറിയുടെ മുൻ‌കൂട്ടിയുള്ള അനുമതിയോടെയാണ് ഈ ഓവർടൈമിന് ജീവനക്കാരെ നിയോഗിച്ചതെന്ന് സാക്ഷ്യപ്പെടുത്തുന്നു.',
     modaldata: [],
-    modaldata_totalOT: 0,
+    modaldata_fixedOT: 0,
     modaldata_totalOTDays: 0,
-    modaldata_row: null
+    modaldata_row: null,
+    modaldata_showonly: true,
+    modaldata_seldays: []
   },
   mounted: function mounted() {
     //alert(navigator.sayswho);
@@ -240,9 +302,14 @@ var vm = new Vue({
     showSittingOTs: function showSittingOTs(row) {
       var _this = this;
       row = JSON.parse(row);
-      // console.log(row);
+      //  console.log(row);
       // console.log(row.pen);
       // console.log(row.from);
+      row.overtimesittings = row.overtimesittings.map(function (s) {
+        return s.date;
+      }); // row.overtimesittings_  
+
+      // console.log(row);
 
       axios.get("".concat(urlajaxgetpunchsittings, "/").concat(session, "/").concat(row.from, "/").concat(row.to, "/").concat(row.pen, "/").concat(row.aadhaarid)).then(function (response) {
         //  console.log(response); 
@@ -252,12 +319,18 @@ var vm = new Vue({
           var _checkDatesAndOT = (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.checkDatesAndOT)(row, response.data),
             count = _checkDatesAndOT.count,
             modaldata = _checkDatesAndOT.modaldata,
-            total_ot_days = _checkDatesAndOT.total_ot_days,
-            naDays = _checkDatesAndOT.naDays;
+            total_nondecision_days = _checkDatesAndOT.total_nondecision_days,
+            total_userdecision_days = _checkDatesAndOT.total_userdecision_days;
           _this.modaldata = modaldata;
-          _this.modaldata_totalOT = count;
+          _this.modaldata_fixedOT = count;
           _this.modaldata_row = row;
-          _this.modaldata_totalOTDays = total_ot_days;
+          _this.modaldata_totalOTDays = total_nondecision_days + total_userdecision_days;
+          var yesdays = _this.modaldata.filter(function (x) {
+            return x.ot == 'YES' && x.userdecision == false;
+          }).map(function (x) {
+            return x.date;
+          });
+          _this.modaldata_seldays = _toConsumableArray(new Set([].concat(_toConsumableArray(yesdays), _toConsumableArray(row.overtimesittings))));
           document.getElementById('modalOpenBtn').click();
         }
       })["catch"](function (err) {});

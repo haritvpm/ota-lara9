@@ -105,6 +105,42 @@ class User extends Authenticatable
     {
        return $this->role_id == 7;
     }
+    public function hasPunching() 
+    {
+       
+                  
+        if( false !== strpos( $this->username, 'oo.dyspkr' ) 
+            ){
+                return false ;        
+        }
+
+        return true;        
+
+    }
+    public function isThirdOTAllowed( $formcreator=null) 
+    {
+         //we should set parttime even if it is being edited by house keeping
+        if($formcreator){
+            if(false !== strpos($formcreator, 'health') || 
+               false !== strpos($formcreator, 'agri' ) ||
+               false !== strpos($formcreator, 'sn.am') || 
+               false !== strpos($formcreator, 'sn.ma')
+            ){
+               return false ;       
+            }
+        }
+                
+        if( false !== strpos( $this->username, 'health' ) || 
+            false !== strpos( $this->username, 'agri') || 
+            false !== strpos( $this->username, 'sn.am') || 
+            false !== strpos( $this->username, 'sn.ma')
+            ){
+                return false ;        
+        }
+
+        return true;        
+    }
+
     public function isDataEntryLevel() 
     {
        // return 0 === strpos( $this->username  , 'sn.') || 0 === strpos( $this->username  , 'od.') || 0 === strpos( $this->username  , 'de.');

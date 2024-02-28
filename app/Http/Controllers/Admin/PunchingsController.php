@@ -59,7 +59,7 @@ class PunchingsController extends Controller
         $date = Carbon::createFromFormat($dateformatwithoutime, $day->date)->format('Y-m-d');
         
         $data = [
-            'applicable' => true,
+            'aebasday' => true,
             'date' =>  $day->date, 
             'punchin' => "",
             'punchout' => "",
@@ -81,36 +81,18 @@ class PunchingsController extends Controller
        
         if($temp ){
            $sittingsWithPunchok++; 
-           $data['punchin'] =  $temp['punch_in'];
-           $data['punchout'] =  $temp['punch_out'];
+           $data['punchin'] =  $temp['punch_in'] ;
+           $data['punchout'] =  $temp['punch_out'] ;
         }
-
-        //check if user has entered first OT for that day.
-        $sit = \App\Overtime::with('form')
-                    ->wherehas( 'form', function($q) use( $date){
-                        $q->where( 'overtime_slot' , 'Multi' )
-                        ->where( 'duty_date', $date );
-                    })->where('pen', $pen )
-                    ->where('slots','like','%First%')
-                    ->first(); 
 
 
         if( $day->punching !== 'AEBAS' ){
         
             $sittingsWithNoPunching++; 
-            $data['applicable'] =  false; //whether to count
-            $data['ot'] =  $sit ? "Entered in that day's form" : "Enter in OT Form";//'Punching excused Use DutyForm to enter for the day',
+            $data['aebasday'] =  false; //whether to count
+          //  $data['ot'] =  $sit ? "Entered in that day's form" : "Enter in OT Form";//'Punching excused Use DutyForm to enter for the day',
+            $data['ot'] = "*";
         } 
-
-        //may be it was nopunching intitially, and user entered sit in multi and we changed the day type to aebas 
-        //in that case, do not include it in count
-        if($sit) {  //user has already entered sitting for that day
-            $sittingsWithNoPunching++; 
-            $data['applicable'] =  false; //whether to count
-            $data['ot'] =   "Entered in that day's form";//'Punching excused Use DutyForm to enter for the day',
-        
-        }
-
 
         $dates[] = $data;
 

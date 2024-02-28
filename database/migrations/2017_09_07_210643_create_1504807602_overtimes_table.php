@@ -11,7 +11,7 @@ class Create1504807602OvertimesTable extends Migration
      * @return void
      */
     public function up()
-    {
+    {//https://github.com/AXN-Informatique/laravel-pk-int-to-bigint
         if(! Schema::hasTable('overtimes')) {
             Schema::create('overtimes', function (Blueprint $table) {
                 $table->increments('id');

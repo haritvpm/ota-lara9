@@ -21,25 +21,28 @@ var vm = new Vue({
     showModal: false,
    
     modaldata: [],
-    modaldata_totalOT: 0,
-    modaldata_row:"",
+    modaldata_fixedOT: 0,
+    modaldata_row:null,
     modaldata_totalOTDays:0,
+    modaldata_seldays:[],
+    modaldata_showonly: false
   },
 
   created: function () {
+
+    for(var i=0; i < _form.overtimes.length; i++){
+      //console.log( _form.overtimes[i].overtimesittings)
+      //console.log( _form.overtimes[i].overtimesittings_)row.overtimesittings.map(s => s.date);
+      _form.overtimes[i].overtimesittings =  _.uniq(_form.overtimes[i].overtimesittings.map(s => s.date));
+      //_form.overtimes[i].overtimesittings =  _.uniq(_form.overtimes[i].overtimesittings_);
+    }
+
     Vue.set(this.$data, 'form', _form);
     //copy name to PEN field
+		$('[data-widget="pushmenu"]').PushMenu('collapse')
 
-    /*
-      for(var i=0; i < this.form.overtimes.length; i++){
-         
-         //copy if we have a name
-         if(this.form.overtimes[i].name != null){
-
-          this.form.overtimes[i].pen += '-' +this.form.overtimes[i].name ;
-       }
-          
-      }*/
+    
+  
 
     this.sessionchanged();
 
@@ -105,7 +108,8 @@ var vm = new Vue({
 		//	console.log(i)
     //reset count to zero
     this.form.overtimes[index].count = ""
-    //  this.getSittingOTs(index)
+    this.form.overtimes[index].overtimesittings=[]
+    this.getSittingOTs(index)
 		
 		},
 
@@ -130,6 +134,7 @@ var vm = new Vue({
         aadhaarid: null,
         punching: true, //by default everyone ha punching
         isProcessing: false,
+        overtimesittings: [], //days user has worked 
       });
 
       this.pen_names = []; //clear previos selection from dropdown
@@ -188,15 +193,21 @@ var vm = new Vue({
 
     },
     modalClosed: function(){
-    //  console.log(this.modaldata_totalOT)  
-      this.modaldata_row.count = this.modaldata_totalOT
+      // console.log(this.modaldata_seldays)  
+     
+      let yesdays = this.modaldata.filter( x => x.ot == 'YES' && x.userdecision == false ).map( x => x.date )
+      this.modaldata_row.overtimesittings = [ ...new Set([...yesdays, ...this.modaldata_seldays])]
+      this.modaldata_row.count = this.modaldata_row.overtimesittings.length
+      // console.log(this.modaldata_row.overtimesittings)  
+      
+      //copy dates from 
+
 		  //vue does not update time if we change date as it does not watch for array changes
 		  //https://v2.vuejs.org/v2/guide/reactivity#Change-Detection-Caveats
-		//	Vue.set(this.form.overtimes,index, row)
+		  //	Vue.set(this.form.overtimes,index, row)
 
     },
     showSittingOTs: function(index){
-
       this.getSittingOTs(index,true)
       
     },
@@ -204,40 +215,51 @@ var vm = new Vue({
    
       var self = this;
 			let row = self.form.overtimes[index];
-   
+
 			if(row.pen == "" || !self.form.session || !row.from || !row.to){ 
       
        // console.log(self.form.session | row.from | row.to)  
         return
       };
+      console.log(row.overtimesittings)  
 
       self.modaldata = []
-      self.modaldata_totalOT = 0;
+      self.modaldata_fixedOT = 0;
       self.modaldata_row = row ;
       row.isProcessing = true;
+     
 			axios.get(`${urlajaxgetpunchsittings}/${self.form.session}/${row.from}/${row.to}/${row.pen}/${row.aadhaarid}`)
 					.then((response) => {
 						row.isProcessing = false;
-						//console.log(response);
+	
 						if (response.data) {
               //todo ask if unpresent dates where present
               setEmployeeTypes(row);
               //warning this func modifies response.data
-              let  {count, modaldata,total_ot_days,naDays} = checkDatesAndOT(row, response.data);
-              if( row.count != count && naDays == 0){ //if there are no days that are either MANUALENTRy or NOPUNCHING
-                  row.count = count
+              let {count, modaldata,total_nondecision_days,total_userdecision_days} = checkDatesAndOT(row, response.data);
+              //date period may have changed. only include those dates and remove the rest
+              //this is to copy the user decided dates to new array.
+              //overtimesittings_ has the original data from db
+              //let temp =  this.modaldata.filter( x => row.overtimesittings_.indexOf( x.date ) != -1 )
+              //row.overtimesittings = [...modaldata.map( x => x.date )]
+              if( row.count != count && total_userdecision_days == 0){ //if there are no days that are either MANUALENTRy or NOPUNCHING
+                 row.count = count
 							  //vue does not update time if we change date as it does not watch for array changes
 							  //https://v2.vuejs.org/v2/guide/reactivity#Change-Detection-Caveats
-							   Vue.set(self.form.overtimes,index, row)
               }
+              Vue.set(self.form.overtimes,index, row) //update isProcessing
 
                if(show){
-                  self.modaldata_totalOT = count;
+                  self.modaldata_fixedOT = count;
                   self.modaldata = modaldata
-                  self.modaldata_totalOTDays =  total_ot_days;
-               // this.showModal = true
+                  self.modaldata_totalOTDays =  total_nondecision_days + total_userdecision_days;
+                  let yesdays = modaldata.filter( x => x.ot == 'YES' && x.userdecision == false ).map( x => x.date )
+                  //overtimesittings stores prev selected days/ find only those days from the period
+                  //if user changes perod without userdecision and then backagain, this will be lost.
+                  //but if user sets and then opens again, we need this
+                  let temp =  row.overtimesittings.filter( date => modaldata.map(d=>d.date).indexOf( date ) != -1 )
+                  self.modaldata_seldays =  [ ...new Set([...yesdays,...temp])]
                   document.getElementById('modalOpenBtn').click()
-
 
                }
 						}
@@ -282,9 +304,12 @@ var vm = new Vue({
 					row.normal_office_hours = desig.desig_normal_office_hours ;
           row.category = desig.category;
 					row.employee_id = desig.employee_id;
+          row.isProcessing= false;
+          row.count= "";
+          row.overtimesittings=[];
 
           setEmployeeTypes(row);
-        //  self.getSittingOTs(id)
+          self.getSittingOTs(id)
 
         }
       })
