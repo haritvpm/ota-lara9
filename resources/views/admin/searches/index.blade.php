@@ -3,28 +3,14 @@
 
 @section('content')
 
-<style>
-.nav-pills>li.active>a,
-.nav-pills>li.active>a:focus,
-.nav-pills>li.active>a:hover {
-   background-color: orange;
-   
-}
-.nav>li>a {
-    padding-top: 3px;
-    padding-bottom: 3px;
-}
-
-</style>
-
     <!-- <h3 class="page-title">Search</h3> -->
     
-    <div class="panel panel-default" id="app">
-        <div class="panel-heading">
+    <div class="" id="app">
+        <div class="">
             Search
         </div>
 
-        <div class="panel-body">
+        <div class="">
             <p>Note: only the <i>Name</i> field is required. Other fields are optional.</p>
 
 	<form action="" method="get" id="filter" class="form-inline">
@@ -67,25 +53,7 @@
 
     	 <input  class="form-control" placeholder="Designation" type="text" name = "desigfilter" value="{{ \Request('desigfilter')  }}"  list="desiglist">
 
-       <!--  <datalist id="desiglist">
-            @foreach ($designations as $desig)
-             <option value="={{ $desig }}">{{ $desig }}</option>
-            @endforeach
-           
-        </datalist>
- -->
-<!-- 
-        <div class="form-group">                                
-        <select class="form-control" name="overtime_slot">
-                <option value="">All</option>
-                <option value="First" {{  \Request('overtime_slot')  == 'First' ? 'selected' : '' }}>First</option>
-                <option value="Second" {{ \Request('overtime_slot') == 'Second' ? 'selected' : '' }}>Second</option>
-                <option value="Third"  {{ \Request('overtime_slot') == 'Third' ? 'selected' : '' }}>Third</option>
-                <option value="Sittings"  {{ \Request('overtime_slot') == 'Sittings' ? 'selected' : '' }}>Sittings</option>
-                 <option value="Additional"  {{ \Request('overtime_slot') == 'Additional' ? 'selected' : '' }}>Additional</option>
-                 <option value="Non-Sittings"  {{ \Request('overtime_slot') == 'Non-Sittings' ? 'selected' : '' }}>Non-Sittings</option>
-        </select>
-        </div> -->
+
          <div class="form-group">     
         	<input  class="form-control" placeholder="dd-mm-yyyy" type="search" name = "datefilter" value="{{ \Request('datefilter')}}" >
 		</div>
@@ -104,19 +72,19 @@
         </select>
         @endif
         
-        @if(Auth::user()->isAdmin())
+        <!-- @if(Auth::user()->isAdmin())
         <input  class="form-control" placeholder="WorkNature" type="text" name = "worknaturefilter" value="{{\Request('worknaturefilter')}}" rel="filter">
-        @endif
+        @endif -->
 
 
-        <button type="submit" class="btn btn-danger" rel="filter"><span class="glyphicon glyphicon-search"></span></button>
-        <!-- <a href="{{url('admin/searches/')}}" data-toggle="tooltip" title="reset" class="btn btn-default pull-right"><span class="glyphicon glyphicon-remove-circle"></span></a> -->
+        <button type="submit" class="btn btn-danger" rel="filter"> <i class="fas fa-fw  fa-search"></i></button>
+        <!-- <a href="{{url('admin/searches/')}}" data-toggle="tooltip" title="reset" class="btn btn-default pull-right"><i class="fa fa-minus-circle" aria-hidden="true"></i></a> -->
         </div>
     </form>
 
 
 
-    <hr>
+
 
   
     
@@ -141,8 +109,8 @@
 
     @endif
 
-    <div class="panel-body table-responsive">
-        <table class="table table-bordered table-striped table-condensed }}">
+    <div class="">
+        <table class="table table-bordered table-striped table-sm }}">
             <thead>
                 <tr>
                    	
@@ -304,17 +272,17 @@ cannot trust form no, as a user might have started a form, but waited long to su
 
 @if( \Auth::user()->isAdmin() )
 
-<div class="panel panel-default" id="app1">
-    <div class="panel-heading">
-        Download Overtime Data
+<div class="card p-2" id="app1">
+    <div class="card-title">
+        Overtime Data
     </div>
 
-    <div class="panel-body">
+    <div class="card-body">
 
 
 
         <form action="{{url('admin/searches/download')}}" method="get" class="form-inline">
-            <div class="form-group">
+            <div class="form-group ">
                 Session <select class="form-control" name="session">
 
                     @foreach($sessions as $session)
@@ -377,7 +345,7 @@ cannot trust form no, as a user might have started a form, but waited long to su
         </select>
     </div> -->
     <!-- <input class="form-control" type="submit" value="Filter" rel="filter"> -->
-    <button type="submit" class="btn btn-success" rel="filter"><span class="glyphicon glyphicon-save"></span> </button>
+    <button type="submit" class="btn btn-success" rel="filter"><i class="fas fa-fw  fa-download"></i>Download </button>
 
 </form>
 
@@ -387,17 +355,18 @@ cannot trust form no, as a user might have started a form, but waited long to su
 
 
 <!-- calender -->
-
-<div class="panel panel-default" id="app2">
-    <div class="panel-heading">
-        Download Calender
+<div class="row">
+<div class="col">
+<div class="card p-2" id="app2">
+    <div class="card-title">
+        Calender
     </div>
 
-    <div class="panel-body">
+    <div class="card-body">
 
         <form action="{{url('admin/searches/download_calender')}}" method="get" class="form-inline">
             <div class="form-group">
-                Session <select class="form-control" name="session">
+                <select class="form-control" name="session">
 
                     @foreach($sessions as $session)
                     <option>{{$session}}</option>
@@ -409,52 +378,52 @@ cannot trust form no, as a user might have started a form, but waited long to su
 
 
             <!-- <input class="form-control" type="submit" value="Filter" rel="filter"> -->
-            <button type="submit" class="btn btn-info" rel="filter"><span class="glyphicon glyphicon-save"></span> </button>
+            <button type="submit" class="btn btn-info" rel="filter"><i class="fas fa-fw  fa-download"></i> Download</button>
 
         </form>
 
     </div>
 </div>
-
+</div>
 <!-- Designations -->
-
-
-<div class="panel panel-default" id="app3">
-    <div class="panel-heading">
-        Download Designation and Rates
+<div class="col">
+<div class="card p-2" id="app3">
+    <div class="card-title">
+        Designation and Rates
     </div>
 
-    <div class="panel-body">
+    <div class="card-body">
 
         <form action="{{url('admin/searches/download_desig')}}" method="get" class="form-inline">
             
             <!-- <input class="form-control" type="submit" value="Filter" rel="filter"> -->
-            <button type="submit" class="btn btn-warning" rel="filter"><span class="glyphicon glyphicon-save"></span> </button>
+            <button type="submit" class="btn btn-warning" rel="filter"><i class="fas fa-fw  fa-download"></i>Download </button>
 
         </form>
 
     </div>
 </div>
-
+</div>
 <!-- Employees -->
 
-
-<div class="panel panel-default" id="app3">
-    <div class="panel-heading">
-        Download Employee Data 
+<div class="col">
+<div class="card p-2" id="app3">
+    <div class="card-title">
+        Employee Data 
     </div>
 
-    <div class="panel-body">
+    <div class="card-body">
 
         <form action="{{url('admin/searches/download_emp')}}" method="get" class="form-inline">
            
             <!-- <input class="form-control" type="submit" value="Filter" rel="filter"> -->
-            <button type="submit" class="btn btn-primary" rel="filter"><span class="glyphicon glyphicon-save"></span> </button>
+            <button type="submit" class="btn btn-primary" rel="filter"><i class="fas fa-fw  fa-download"></i> Download</button>
 
         </form>
 
     </div>
 </div>
+</div> <!-- downloads -->
 
 @endif 
 

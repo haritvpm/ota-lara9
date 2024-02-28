@@ -3,9 +3,9 @@
 @section('content')
     <div class="row">
         <div class="col-md-8 col-md-offset-2">
-            <div class="panel panel-default">
-                <div class="panel-heading">@lang('quickadmin.qa_reset_password')</div>
-                <div class="panel-body">
+            <div class="card p-2">
+                <div class="card-title">@lang('quickadmin.qa_reset_password')</div>
+                <div class="card-body">
                     @if (count($errors) > 0)
                         <div class="alert alert-danger">
                             @lang('quickadmin.qa_reset_password_woops')

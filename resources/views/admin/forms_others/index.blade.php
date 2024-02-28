@@ -12,10 +12,8 @@
 
     
 
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            @lang('quickadmin.qa_list')
-        </div>
+    <div class="card p-2">
+        
 
         <div class="panel-body table-responsive">
             <table class="table table-bordered table-striped ajaxTable @can('forms_other_delete') dt-select @endcan">

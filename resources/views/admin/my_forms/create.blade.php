@@ -12,12 +12,12 @@
 
     @if(count($sessions) > 0)
 
-    <div class="panel panel-default" id="app">
-        <div class="panel-heading">
+    <div class="card p-2" id="app">
+        <div class="card-title">
             @lang('quickadmin.qa_create')
         </div>
 
-        <div class="panel-body">
+        <div class="card-body">
         
 
             <?php
@@ -28,7 +28,7 @@
  
          </div>
 
-        <div class="panel-footer">
+        <div class="card-footer">
             <a href="{{route('admin.my_forms.index')}}" class="btn btn-default">Cancel</a>
             <button class="btn btn-primary" @click.prevent="create" :disabled="isProcessing"><i class="fa fa-save"></i> Save <i  v-show="isProcessing" class="fa fa-spinner fa-spin"></i></button>
 

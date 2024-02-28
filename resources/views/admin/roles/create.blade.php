@@ -4,14 +4,14 @@
     <h3 class="page-title">@lang('quickadmin.roles.title')</h3>
     {!! Form::open(['method' => 'POST', 'route' => ['admin.roles.store']]) !!}
 
-    <div class="panel panel-default">
-        <div class="panel-heading">
+    <div class="card p-2">
+        <div class="card-title">
             @lang('quickadmin.qa_create')
         </div>
         
-        <div class="panel-body">
+        <div class="card-body">
             <div class="row">
-                <div class="col-xs-12 form-group">
+                <div class="col-sm-12 form-group">
                     {!! Form::label('title', trans('quickadmin.roles.fields.title').'*', ['class' => 'control-label']) !!}
                     {!! Form::text('title', old('title'), ['class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
                     <p class="help-block"></p>

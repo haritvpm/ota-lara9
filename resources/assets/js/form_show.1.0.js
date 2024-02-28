@@ -1,3 +1,4 @@
+import { checkDatesAndOT, setEmployeeTypes } from './utils.js';
 
 
 ///detect brwowser
@@ -23,6 +24,14 @@ var isWinXP = ua.indexOf('windows nt 5.1') > 0;
 
 Vue.use(VueSweetAlert.default)
 
+
+// register modal component
+  Vue.component("modal", {
+  template: "#my-modal"
+});
+
+
+
 var vm = new Vue({
     el: '#app',
     data: {
@@ -30,6 +39,12 @@ var vm = new Vue({
         needspostingchecked: false,
         approvaltext: malkla + ' കേരള നിയമസഭയുടെ  ' + sessionnumber + '-ാം സമ്മേളനത്തോടനുബന്ധിച്ച് അധികജോലിക്കു നിയോഗിക്കപ്പെട്ട ജീവനക്കാർക്ക്  ഓവർടൈം അലവൻസ് അനുവദിക്കുന്നതിനുള്ള ഈ ഓവർടൈം അലവൻസ്   സ്റ്റേറ്റ്മെന്റ്,   ഓവർടൈം അലവൻസ് അനുവദിക്കുന്നതിനായുള്ള നിലവിലെ സർക്കാർ ഉത്തരവിൽ  നിഷ്കർഷിച്ചിരിക്കുന്ന  നിബന്ധനകൾ  പാലിച്ചു തന്നെയാണ്  തയ്യാറാക്കി സമർപ്പിക്കുന്നതെന്ന് സാക്ഷ്യപ്പെടുത്തുന്നു.',
         approvalpostingcheckedtext: 'നിയമസഭാ സെക്രട്ടറിയുടെ മുൻ‌കൂട്ടിയുള്ള അനുമതിയോടെയാണ് ഈ ഓവർടൈമിന് ജീവനക്കാരെ നിയോഗിച്ചതെന്ന് സാക്ഷ്യപ്പെടുത്തുന്നു.',
+     
+        modaldata: [],
+        modaldata_totalOT: 0,
+        modaldata_totalOTDays:0,
+        modaldata_row:null,
+
     },
 
     mounted: function () {
@@ -56,6 +71,37 @@ var vm = new Vue({
     },
     // define methods under the `methods` object
     methods: {
+        modalClosed: function(){
+           
+        },
+        showSittingOTs(row){
+            row = JSON.parse(row)
+            // console.log(row);
+            // console.log(row.pen);
+            // console.log(row.from);
+                                       
+              axios.get(`${urlajaxgetpunchsittings}/${session}/${row.from}/${row.to}/${row.pen}/${row.aadhaarid}`)
+                        .then((response) => {
+                        //  console.log(response); 
+                        if (response.data) {
+                            //todo ask if unpresent dates where present
+                            setEmployeeTypes(row);
+                            let  {count, modaldata,total_ot_days,naDays} = checkDatesAndOT(row, response.data);
+                                                          
+                            this.modaldata = modaldata
+                            this.modaldata_totalOT = count;
+                            this.modaldata_row = row ;
+                            this.modaldata_totalOTDays = total_ot_days;
+                            document.getElementById('modalOpenBtn').click()
+                     
+      
+                        }
+                       })
+                       .catch((err) => {
+                  
+                });
+                  
+          },
 
         forwardClick(userdisplname) {
 

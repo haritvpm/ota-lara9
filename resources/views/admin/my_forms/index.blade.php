@@ -3,16 +3,7 @@
 
 @section('content')
 
-<style>
 
-.nav>li>a {
-    padding-top: 3px;
-    padding-bottom: 3px;
-}
-
-
-
-</style>
 
         
     <div  id="app">
@@ -29,22 +20,17 @@
     @endif
 
     <hr>
-    <h4 class="page-title">Index of Forms 
-    @if(auth()->user()->isAdmin())
-    <small>Loaded in {{$timetaken}}</small>
-    @endif
-    </h4>
-
+  
     @if(!auth()->user()->isAudit()) 
     <p>
         
-        <ul class="nav nav-pills ">
+    <ul class="nav nav-pills ">
         @if(!auth()->user()->isAdmin())
-        <li @click="setActive('todo')" :class="{ active: isActive('todo') }"><a href="#">ToDo</a></li>
+        <li class="nav-item" @click="setActive('todo')" ><a class="nav-link" :class="{ active: isActive('todo') }" href="#">ToDo</a></li>
         @else
-        <li @click="setActive('all')" :class="{ active: isActive('all') }"><a href="#">All</a></li>
+        <li  class="nav-item" @click="setActive('all')" ><a class="nav-link"  :class="{ active: isActive('all') }" href="#">All</a></li>
         
-        <li @click="setActive('Draft')" :class="{ active: isActive('Draft') }"><a href="#">Draft</a></li>
+        <li class="nav-item"  @click="setActive('Draft')" ><a class="nav-link" :class="{ active: isActive('Draft') }" href="#">Draft</a></li>
         @endif
          <!-- @if($to_approve != -1) -->
         <!-- <li @click="setActive('To_approve')" :class="{ active: isActive('To_approve') }"><a href="#">To Approve</a></li> -->
@@ -52,10 +38,10 @@
         
         
         @if($pending_approval != -1)
-        <li @click="setActive('Pending')" :class="{ active: isActive('Pending') }"><a href="#">Sent for Approval</a></li>
+        <li  class="nav-item" @click="setActive('Pending')" ><a class="nav-link" :class="{ active: isActive('Pending') }"  href="#">Sent for Approval</a></li>
         @endif
        
-        <li @click="setActive('Submitted')" :class="{ active: isActive('Submitted') }"><a href="#">Submitted to Accounts</a></li>
+        <li  class="nav-item" @click="setActive('Submitted')" ><a class="nav-link" :class="{ active: isActive('Submitted') }" href="#">Submitted to Accounts</a></li>
 
       <!--   @if(auth()->user()->isAdmin()) 
         <li @click="setActive('')" :class="{ active: isActive('') }"><a href="#">All</a></li>
@@ -65,13 +51,11 @@
     </p>
     @endif
 
-    <div class="panel panel-default">
-    <div class="panel-heading">
-        @lang('quickadmin.qa_list')
-    </div>
+    <div class="">
+  
 
-    <div class="panel-body table-responsive">
-        <table class="table table-bordered table-striped  }}">
+    <div class="">
+        <table class="table borderless table-striped table-sm }}">
             <thead>
                 <tr>
                     @if(auth()->user()->isAdminorAudit()) 
@@ -212,11 +196,11 @@
 
                           
                             <td class="text-nowrap">
-                                <a href="{{ route('admin.my_forms.show',[$form->id]) }}" class="btn btn-xs btn-primary">@lang('quickadmin.qa_view') </a>  <small>{{$form->overtimes()->count()}} </small>
+                                <a href="{{ route('admin.my_forms.show',[$form->id]) }}" class="btn btn-sm btn-dark">@lang('quickadmin.qa_view') </a>  <small>{{$form->overtimes()->count()}} </small>
                                 
                                 <!-- @unless( Auth::user()->isAdminorAudit())                                
                                 @if( Auth::user()->username == $form->owner)
-                                <a href="{{ route('admin.my_forms.edit',[$form->id]) }}" class="btn btn-xs btn-info">@lang('quickadmin.qa_edit')</a>
+                                <a href="{{ route('admin.my_forms.edit',[$form->id]) }}" class="btn btn-sm btn-info">@lang('quickadmin.qa_edit')</a>
                                                                
                                 {!! Form::open(array(
                                   
@@ -224,7 +208,7 @@
                                     'method' => 'DELETE',
                                     'onsubmit' => "return confirm('".trans("quickadmin.qa_are_you_sure")."');",
                                     'route' => ['admin.my_forms.destroy', $form->id])) !!}
-                                {!! Form::submit(trans('quickadmin.qa_delete'), array('class' => 'btn btn-xs btn-danger')) !!}
+                                {!! Form::submit(trans('quickadmin.qa_delete'), array('class' => 'btn btn-sm btn-danger')) !!}
                                 {!! Form::close() !!}
                                 @endif
                                 @endunless -->

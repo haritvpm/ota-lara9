@@ -40,12 +40,10 @@
 
     
 
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            @lang('quickadmin.qa_list')
-        </div>
+    <div class="">
+   
 
-        <div class="panel-body table-responsive">
+        <div class="">
             <table class="table table-bordered table-striped {{ count($users) > 0 ? 'datatable' : '' }} ">
                 <thead>
                     <tr>
@@ -74,14 +72,14 @@
                                 <td field-key='displayname' class="text-nowrap">{{ $user->displayname }}</td>
                                 <td class="text-nowrap">
                                     @can('user_view')
-                                    <a href="{{ route('admin.users.show',[$user->id]) }}" class="btn btn-xs btn-primary">@lang('quickadmin.qa_view')</a>
+                                    <a href="{{ route('admin.users.show',[$user->id]) }}" class="btn btn-sm btn-primary">@lang('quickadmin.qa_view')</a>
                                     @endcan
                                     @can('user_edit')
-                                    <a href="{{ route('admin.users.editsimple',[$user->id]) }}" class="btn btn-xs btn-success">SimpleEdit</a>
-                                    <a href="{{ route('admin.users.password_reset',[$user->id]) }}" class="btn btn-warning btn-xs" onclick="return confirm('Are you sure to reset password of {{$user->username}}?')">Reset PW</a>
+                                    <a href="{{ route('admin.users.editsimple',[$user->id]) }}" class="btn btn-sm btn-success">SimpleEdit</a>
+                                    <a href="{{ route('admin.users.password_reset',[$user->id]) }}" class="btn btn-warning btn-sm" onclick="return confirm('Are you sure to reset password of {{$user->username}}?')">Reset PW</a>
                                     
 
-                                    <a href="{{ route('admin.users.edit',[$user->id]) }}" class="btn btn-xs btn-info">@lang('quickadmin.qa_edit')</a>
+                                    <a href="{{ route('admin.users.edit',[$user->id]) }}" class="btn btn-sm btn-info">@lang('quickadmin.qa_edit')</a>
                                     @endcan
                                     
                                     @can('user_delete')
@@ -90,13 +88,13 @@
                                         'method' => 'DELETE',
                                         'onsubmit' => "return confirm('".trans("quickadmin.qa_are_you_sure")."');",
                                         'route' => ['admin.users.destroy', $user->id])) !!}
-                                    {!! Form::submit(trans('quickadmin.qa_delete'), array('class' => 'btn btn-xs btn-danger')) !!}
+                                    {!! Form::submit(trans('quickadmin.qa_delete'), array('class' => 'btn btn-sm btn-danger')) !!}
                                     {!! Form::close() !!}
                                     @endcan
 
                                     @can('user_edit')
                                     @if( $user->isSectionOfficer() || $user->isDSorAbove() )
-                                    <a href="{{ route('admin.users.create_dataentry',[$user->id]) }}" class="btn btn-default btn-xs">Create DE</a>
+                                    <a href="{{ route('admin.users.create_dataentry',[$user->id]) }}" class="btn btn-default btn-sm">Create DE</a>
                                     @endif
 
                                     @endcan
@@ -123,7 +121,7 @@
         <form action="{{url('admin/searches/download_user')}}" method="get" class="form-inline">
            Download User Data 
             <!-- <input class="form-control" type="submit" value="Filter" rel="filter"> -->
-            <button type="submit" class="btn btn-primary" rel="filter"><span class="glyphicon glyphicon-save"></span> </button>
+            <button type="submit" class="btn btn-primary" rel="filter"><i class="fas fa-fw  fa-download"></i> </button>
 
         </form>
 

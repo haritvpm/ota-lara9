@@ -22,8 +22,8 @@
 </h4>
 
 
-<div class="panel panel-default">
-    <div class="panel-heading">
+<div class="card p-2">
+    <div class="card-title">
        
     PA to MLA Form
    

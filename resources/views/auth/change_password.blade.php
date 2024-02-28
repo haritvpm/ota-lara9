@@ -13,14 +13,14 @@
 	@else
 		{!! Form::open(['method' => 'PATCH', 'route' => ['auth.change_password']]) !!}
 		<!-- If no success message in flash session show change password form  -->
-		<div class="panel panel-default">
-			<div class="panel-heading">
+		<div class="card p-2">
+			<div class="card-title">
 				@lang('quickadmin.qa_edit')
 			</div>
 
-			<div class="panel-body">
+			<div class="card-body">
 				<div class="row">
-					<div class="col-xs-12 form-group">
+					<div class="col-sm-12 form-group">
 						{!! Form::label('current_password', trans('quickadmin.qa_current_password'), ['class' => 'control-label']) !!}
 						{!! Form::password('current_password', ['class' => 'form-control', 'placeholder' => '']) !!}
 						<p class="help-block"></p>
@@ -33,7 +33,7 @@
 				</div>
 
 				<div class="row">
-					<div class="col-xs-12 form-group">
+					<div class="col-sm-12 form-group">
 						{!! Form::label('new_password', trans('quickadmin.qa_new_password'), ['class' => 'control-label']) !!}
 						{!! Form::password('new_password', ['class' => 'form-control', 'placeholder' => '']) !!}
 						<p class="help-block"></p>
@@ -46,7 +46,7 @@
 				</div>
 
 				<div class="row">
-					<div class="col-xs-12 form-group">
+					<div class="col-sm-12 form-group">
 						{!! Form::label('new_password_confirmation', trans('quickadmin.qa_password_confirm'), ['class' => 'control-label']) !!}
 						{!! Form::password('new_password_confirmation', ['class' => 'form-control', 'placeholder' => '']) !!}
 						<p class="help-block"></p>

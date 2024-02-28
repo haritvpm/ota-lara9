@@ -14,7 +14,7 @@
 
 
 <div>
-    <div class="panel-heading">
+    <div class="card-title">
         
      <p align="right" style="font-size:10px;"> No.{{ $form->id }}, Updated: 
         {{ date('d-m-Y', strtotime($form->updated_at)) }}, Printed: {{$printdate}} {{$form->MD5Clipped}}</p>

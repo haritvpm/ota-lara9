@@ -128,11 +128,21 @@ th{
    
   
 
+<div id="app">
 
-<div class="panel panel-default">
-  <div class="panel-heading">
-    <small>OT Duty Form </small>
 
+
+<my-modal></my-modal>
+@include('admin.my_forms2.punchingModal')
+
+
+<div class="card p-2">
+    <div class="card-title">
+    @if($form->overtime_slot == 'Sittings')
+    <small>Sitting-days Form </small>
+    @else
+    <small>Duty Form </small>
+    @endif  
 
     <div class = "pull-right">
         <small> Created,Updated : 
@@ -157,7 +167,18 @@ th{
 
                     <tr>
                         
-                 
+                        
+                        @if($form->overtime_slot == 'Sittings')
+                        <th>
+                        Period
+                        </th>
+                         <td>
+                        <small> From</small> {{$form->date_from}} <small>to</small> {{$form->date_to}}
+                        <span style="display:inline-block; width: 20;"></span>
+                         @lang('quickadmin.forms.fields.overtime-slot')
+                        <strong> {{ $form->overtime_slot }}</strong> 
+                         </td>
+                        @else
                             <th>
                            @lang('quickadmin.forms.fields.duty-date')
                            </th>
@@ -165,7 +186,8 @@ th{
                            {{ $form->duty_date }} ({{ $descriptionofday  ?? $daytype}})
                            
                             </td>
-                     
+                        @endif
+                
 
                        
                     </tr>
@@ -254,6 +276,18 @@ th{
                     <th>Sl.</th>
                     <th>PEN-Name</th>
                     <th>@lang('quickadmin.overtimes.fields.designation')</th>
+                    @if($form->overtime_slot == 'Sittings')
+                    <th class="text-center">Period from</th>
+                    <th class="text-center">Period to</th>
+                    <th class="text-center">Sitting days attended</th>
+                    
+                      <!-- @if( \Config::get('custom.check_attendance')) 
+                      <th>Remarks if any</th>
+                      @else
+                      <th>Leave/Late</th>
+                      @endif -->
+
+                    @else
                    
                     @if ($dayhaspunching)
                     <th class="text-center">Punch-In</th>
@@ -266,7 +300,7 @@ th{
                     <th>@lang('quickadmin.overtimes.fields.to')</th>
                     <th>OTs</th>
                     <th>No</th>
-                  
+                    @endif
 
 
                 </tr>
@@ -289,6 +323,7 @@ th{
                     </td>
                     <td field-key='designation' class="text-nowrap"><small>{{ $overtime->designation }}</small></td>
                    
+                    
                     @if ($dayhaspunching)
                     <td field-key='punchin' class="small text-center text-nowrap">
                      @if($overtime->punching) {{ date("h:i a", strtotime($overtime->punchin)) }} @endif
@@ -297,15 +332,29 @@ th{
                     @if($overtime->punching) {{ date("h:i a", strtotime($overtime->punchout)) }}  @endif
                     </td>
                     @endif
-                   
-
+                    @if($form->overtime_slot == 'Sittings')
+                    <td field-key='from' class="small text-center text-nowrap">{{ $overtime->from }}</td>
+                    <td field-key='to' class="small text-center text-nowrap">{{ $overtime->to }}</td>
+                    @else
                  
                     <td field-key='from' class=" text-nowrap">{{ date("h:i a", strtotime($overtime->from)) }}</td>
                     <td field-key='to' class=" text-nowrap">{{ date("h:i a", strtotime($overtime->to)) }}</td>
-                                    
+                    @endif
+
+                    @if($form->overtime_slot == 'Sittings')
+                    <td class="text-center" field-key='count'>{{ $overtime->count }}
+                    @if ($overtime?->punching)
+                    <button v-if="" class="btn btn-sm btn-dark"  @click.prevent="showSittingOTs('{{$overtime}}')"><i class="fas fa-fingerprint"></i> </button>
+                    @endif
+                    <a id="modalOpenBtn" hidden  href="#sittingotmodal" role="button" data-toggle="modal"><i class="fas fa-fingerprint"></i> </a>
+                    </td>
+                    <!-- <td field-key='worknature'> <small> {{ $overtime->worknature }}</small></td> -->
+                    @else
+                   
                     <td field-key='ots'> <small> {{ $overtime->slots }}</small></td> 
                     <td field-key='ots'> <small> {{ $overtime->count }}</small></td> 
-                  
+                   <!-- <td field-key='worknature'> <small> {{ $overtime->worknature ?? 'assly rel work'}}</small></td> -->
+                    @endif
 
 
                 </tr>
@@ -339,16 +388,16 @@ th{
     </div>
 </div>
 
-<div id="app">
+
 
     @if( Auth::user()->username == $form->owner)
        
        @if($cansubmittoaccounts || $canforward)
        
          
-         <div class="hidden-print checkbox checkbox-success">
-              <input id="checkbox2" type="checkbox" v-model="agreechecked">
-              <label for="checkbox2" >
+         <div class="hidden-print form-check checkbox-success">
+              <input class="form-check-input"  id="checkbox2" type="checkbox" v-model="agreechecked">
+              <label class="form-check-label" for="checkbox2" >
                 <p class="malfont"  v-html="approvaltext+' - <strong>{{Auth::user()->DispNameWithName}}</strong>'">
                  
                 </p>
@@ -363,9 +412,9 @@ th{
 
     @if($needsposting && !Auth::user()->isAdmin())
                 
-       <div class="hidden-print checkbox checkbox-danger">
-            <input id="checkbox3" type="checkbox" v-model="needspostingchecked">
-            <label for="checkbox3" >
+       <div class="hidden-print form-check checkbox-danger">
+            <input class="form-check-input"  id="checkbox3" type="checkbox" v-model="needspostingchecked">
+            <label class="form-check-label" for="checkbox3" >
               <p class="malfont"  v-html="approvalpostingcheckedtext+' - <strong>{{Auth::user()->DispNameWithName}}</strong>'">
                
               </p>
@@ -380,7 +429,7 @@ th{
     
 
     @if( strpos(Auth::user()->username,'oo.') !== 0)
-        @if($hasOnlySittings)
+        @if($hasOnlySittings || $form->overtime_slot == 'Sittings')
             <p><small>
            Note: Statement may be submitted by an officer not below the rank of <strong><i>Under Secretary</i></strong>
             </small></p>
@@ -398,7 +447,7 @@ th{
    <button class="btn btn-default hidden-print" onClick="window.print()">Print</button>
 
 
-    @if($form->creator == auth()->user()->username && !Auth::user()->isAdminorAudit())
+    @if($form->creator == auth()->user()->username && !Auth::user()->isAdminorAudit() && $form->overtime_slot != 'Sittings')
     
       <a href="{{ route('admin.my_forms2.create_copy',[$form->id]) }}" class="btn btn-default hidden-print">  Copy to New Form</a>
     
@@ -440,7 +489,7 @@ th{
 
          @if(!($form->form_no < 0))
            @if((Auth::user()->isDSorAbove() && 
-                    !$hasOnlySittings) || 
+                    !$hasOnlySittings && $form-> overtime_slot != 'Sittings') || 
                  Auth::user()->isAdmin())
              &nbsp;<button class="btn btn-default hidden-print" @click="ignoreClick(true)" data-toggle="tooltip" title="Withold this form indefinitely">
               <i class="fa fa-ban"></i>&nbsp;
@@ -478,7 +527,7 @@ th{
         @if($canforward)
           @if(!$cansubmittoaccounts)
           &nbsp;<button class="btn btn-danger pull-right hidden-print" @click="forwardClick('{{$usertitle}}')" data-toggle="tooltip" title="Send this form to a higher official for approval" id="btn_forward" :disabled="!agreechecked ||  ( needsposting && !needspostingchecked)"><i class="fa fa-mail-forward"></i>&nbsp;Forward</button>
-          @elseif(!$hasOnlySittings && $cansubmittoaccounts)
+          @elseif($form->overtime_slot != 'Sittings' && !$hasOnlySittings && $cansubmittoaccounts)
           &nbsp;<button class="btn btn-default hidden-print" @click="forwardClick('{{$usertitle}}')" data-toggle="tooltip" title="Send this form to a higher official for approval" id="btn_forward" :disabled="!agreechecked ||  ( needsposting && !needspostingchecked)"><i class="fa fa-mail-forward"></i>&nbsp;</button>
           @endif
         @endif
@@ -496,13 +545,8 @@ th{
  
 @stop
 
-
-
-
-
 @section('javascript') 
-
-<script type="text/javascript" src="{{ URL::asset('js/vue-sweetalert.js') }}"></script>
+@parent
 
 
 <script type="text/javascript">
@@ -561,6 +605,10 @@ th{
     var urlformsendonelevelback = "{{url('admin/my_forms2/sendonelevelback/')}}"
     var urlformignore = "{{url('admin/my_forms2/ignore/')}}"
     var urlredirect = "{{url('admin/my_forms2/')}}"
+    var urlajaxgetpunchsittings = "{{url('admin/punchings/ajaxgetpunchsittings')}}"
+
+
+
 </script>
 
 

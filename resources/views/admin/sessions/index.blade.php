@@ -12,12 +12,10 @@
 
     
 
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            @lang('quickadmin.qa_list')
-        </div>
+    <div class="">
+     
 
-        <div class="panel-body table-responsive">
+        <div class="">
             <table class="table table-bordered table-striped {{ count($sessions) > 0 ? 'datatable' : '' }} ">
                 <thead>
                     <tr>
@@ -52,10 +50,10 @@
                                 <td field-key='sittings_entry'>{{ $session->sittings_entry }}</td>
                                 <td>
                                     @can('session_view')
-                                    <a href="{{ route('admin.sessions.show',[$session->id]) }}" class="btn btn-xs btn-primary">@lang('quickadmin.qa_view')</a>
+                                    <a href="{{ route('admin.sessions.show',[$session->id]) }}" class="btn btn-sm btn-primary">@lang('quickadmin.qa_view')</a>
                                     @endcan
                                     @can('session_edit')
-                                    <a href="{{ route('admin.sessions.edit',[$session->id]) }}" class="btn btn-xs btn-info">@lang('quickadmin.qa_edit')</a>
+                                    <a href="{{ route('admin.sessions.edit',[$session->id]) }}" class="btn btn-sm btn-info">@lang('quickadmin.qa_edit')</a>
                                     @endcan
                                     
                                 </td>

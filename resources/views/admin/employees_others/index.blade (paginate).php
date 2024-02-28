@@ -12,10 +12,8 @@
 
     
 
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            @lang('quickadmin.qa_list')
-        </div>
+    <div class="card p-2">
+        
 
         <div class="panel-body table-responsive">
             <table class="table table-bordered table-striped {{ count($employees_others) > 0 ? 'datatable' : '' }} @can('employees_other_delete') dt-select @endcan">
@@ -64,10 +62,10 @@
                                 <td field-key='mobile'>{{ $employees_other->mobile }}</td>
                                                                 <td>
                                     @can('employees_other_view')
-                                    <a href="{{ route('admin.employees_others.show',[$employees_other->id]) }}" class="btn btn-xs btn-primary">@lang('quickadmin.qa_view')</a>
+                                    <a href="{{ route('admin.employees_others.show',[$employees_other->id]) }}" class="btn btn-sm btn-primary">@lang('quickadmin.qa_view')</a>
                                     @endcan
                                     @can('employees_other_edit')
-                                    <a href="{{ route('admin.employees_others.edit',[$employees_other->id]) }}" class="btn btn-xs btn-info">@lang('quickadmin.qa_edit')</a>
+                                    <a href="{{ route('admin.employees_others.edit',[$employees_other->id]) }}" class="btn btn-sm btn-info">@lang('quickadmin.qa_edit')</a>
                                     @endcan
                                     @can('employees_other_delete')
 {!! Form::open(array(
@@ -75,7 +73,7 @@
                                         'method' => 'DELETE',
                                         'onsubmit' => "return confirm('".trans("quickadmin.qa_are_you_sure")."');",
                                         'route' => ['admin.employees_others.destroy', $employees_other->id])) !!}
-                                    {!! Form::submit(trans('quickadmin.qa_delete'), array('class' => 'btn btn-xs btn-danger')) !!}
+                                    {!! Form::submit(trans('quickadmin.qa_delete'), array('class' => 'btn btn-sm btn-danger')) !!}
                                     {!! Form::close() !!}
                                     @endcan
                                 </td>

@@ -40,7 +40,7 @@
 			<label for="duty_date">Date</label>
 			 @{{ selectdaylabel }}		
 			  
-			<date-picker {{$readonly}} v-model="form.duty_date" @dp-change="onChange"
+			<date-picker {{$readonly}} v-model="form.duty_date" @dp-hide="onChange"
 					:config="configdate"
 					placeholder="Select date"
 					:required="true"
@@ -57,7 +57,8 @@
 	<div class="col-md-12 form-group ">
 		<table class="table  table-condensed">
 			<thead v-show="form.overtimes.length" >
-				<tr style="font-size: 12px; font-weight: bold">
+			
+				<tr class="text-center" style="font-size: 12px; font-weight: bold">
 					<th>No</th>
 					<th>PEN - Name</th>
 					<th>Designation</th>
@@ -73,7 +74,7 @@
 			</thead>
 			<tbody>
 				<tr v-for="(row, index) in form.overtimes" :class="{ info: index%2 }" >
-					<td style="width:1px;"> <small> 
+					<td class="text-center align-middle" style="width:1px;"> <small> 
 <button  class="btn btn-default" data-toggle="tooltip" title="Insert row" @click.prevent="insertElement(index+1);"> <span v-text="index+1"></span> </small> </button></td>
 					
 					<td>
@@ -92,17 +93,17 @@
 					</multiselect>
 					</td>
 
-					<td>
+					<td class="align-middle">
 					<div class="small"> @{{ row.designation }} </div> 
 					</td>
 					
 					
 					<td v-show="dayHasPunching" class="col-md-1">
-					<input  :name="'punchin[' + index + ']'" type="text" v-model="row.punchin" required class="form-control" :disabled="!dayHasPunching || !row.punching" :readonly="!allowPunchingEntry" autocomplete="off">
+					<input  :name="'punchin[' + index + ']'" type="text" v-model="row.punchin" required class="form-control" :disabled="!dayHasPunching || !row.punching" :readonly="!allowPunchingEntry || row.punchin_from_aebas" autocomplete="off">
 					</td>
 					
 					<td v-show="dayHasPunching" class="col-md-1">
-					<input  :name="'punchout[' + index + ']'" type="text" v-model="row.punchout" required class="form-control" :disabled="!dayHasPunching || !row.punching" :readonly="!allowPunchingEntry"  autocomplete="off">
+					<input  :name="'punchout[' + index + ']'" type="text" v-model="row.punchout" required class="form-control" :disabled="!dayHasPunching || !row.punching" :readonly="!allowPunchingEntry || row.punchout_from_aebas"  autocomplete="off">
 					</td>
 				
 
@@ -114,28 +115,31 @@
 					<input  :name="'to[' + index + ']'" type="text" v-model="row.to" required class="form-control"  autocomplete="off">
 					</td>
 					
-					<td class="text-center">
+					<td class="text-center align-middle">
 					
-					
-					<input v-if="slotoptions.includes('First')" type="checkbox"   :id="'Firstslot[' + index + ']'" value="First" v-model="row.slots">
-					<label v-if="slotoptions.includes('First')" :for="'Firstslot[' + index + ']'" >
+					<div class="form-check form-check-inline">
+					<input class="form-check-input"  v-if="slotoptions.includes('First')" type="checkbox"   :id="'Firstslot[' + index + ']'" value="First" v-model="row.slots">
+					<label class="form-check-label" v-if="slotoptions.includes('First')" :for="'Firstslot[' + index + ']'" >
 					<div v-html="firstOTLabel"></div>
 					</label>
-
-					<input v-if="slotoptions.includes('Second')" type="checkbox"   :id="'Secondslot[' + index + ']'" value="Second" v-model="row.slots">
-					<label v-if="slotoptions.includes('Second')" :for="'Secondslot[' + index + ']'">2<sup>nd</sup></label>
-
-					<input v-if="slotoptions.includes('Third') && !canShowAddlOT(row)" type="checkbox"   :id="'Thirdslot[' + index + ']'" value="Third" v-model="row.slots">
-					<label v-if="slotoptions.includes('Third') && !canShowAddlOT(row)" :for="'Thirdslot[' + index + ']'">3<sup>rd</sup></label>
-
-					<input v-if="slotoptions.includes('Additional') && canShowAddlOT(row)" type="checkbox"   :id="'Addlslot[' + index + ']'" value="Addl" v-model="row.slots">
-					<label v-if="slotoptions.includes('Additional') && canShowAddlOT(row)" :for="'Addlslot[' + index + ']'">Addl</label>
- 
+					</div>
+					<div class="form-check form-check-inline">
+					<input class="form-check-input" v-if="slotoptions.includes('Second')" type="checkbox"   :id="'Secondslot[' + index + ']'" value="Second" v-model="row.slots">
+					<label class="form-check-label" v-if="slotoptions.includes('Second')" :for="'Secondslot[' + index + ']'">2<sup>nd</sup></label>
+					</div>
+					<div class="form-check form-check-inline">
+					<input class="form-check-input" v-if="slotoptions.includes('Third') && !canShowAddlOT(row)" type="checkbox"   :id="'Thirdslot[' + index + ']'" value="Third" v-model="row.slots">
+					<label class="form-check-label" v-if="slotoptions.includes('Third') && !canShowAddlOT(row)" :for="'Thirdslot[' + index + ']'">3<sup>rd</sup></label>
+					</div>
+					<div class="form-check form-check-inline">
+					<input class="form-check-input" v-if="slotoptions.includes('Additional') && canShowAddlOT(row)" type="checkbox"   :id="'Addlslot[' + index + ']'" value="Addl" v-model="row.slots">
+					<label class="form-check-label"  v-if="slotoptions.includes('Additional') && canShowAddlOT(row)" :for="'Addlslot[' + index + ']'">Addl</label>
+					</div>
 				
 					</td>
 					
 					
-					<td style="width:1px;">  <button class="btn btn-danger"  @click.prevent="removeElement(index);" ><i class="fa fa-times"></i></button>
+					<td class="text-center align-middle" style="width:1px;">  <button class="btn btn-danger"  @click.prevent="removeElement(index);" ><i class="fa fa-times"></i></button>
 					
 
 					</td>
@@ -149,18 +153,18 @@
 		</table>
 
 		<div class="col-md-12 form-group">
-			<div class="row">
+			<div class=" clearfix">
 				<button type="button" class="btn btn-success btn-sm" @click.prevent="addRow"><i class="fa fa-plus"></i> Add row</button>
 				<!-- <button type="button" class="btn btn-primary btn-sm" @click.prevent="fetchPunching"><i class="fa fa-clock-o"></i> Get Punching Times</button> -->
 
 				
-				<!-- <a href="#" class="pull-right" v-show ="form.overtimes.length>1" @click="copyworknaturedown" >WorkNature</a> -->
-				<span v-show ="form.overtimes.length>1" class="pull-right">&nbsp;|&nbsp;</span>
+				<!-- <a href="#" class="float-right" v-show ="form.overtimes.length>1" @click="copyworknaturedown" >WorkNature</a> -->
+				<!-- <span v-show ="form.overtimes.length>1" class="float-right">&nbsp;|&nbsp;</span> -->
 				 <a href="#" class="pull-right" v-show ="form.overtimes.length>1" @click="copytimedown" >Time</a>
 
-				 <span v-show ="form.overtimes.length>1" class="pull-right">Copy from First Row:&nbsp;</span>
+				 <span v-show ="form.overtimes.length>1" class="float-right">Copy from First Row:&nbsp;</span>
 
-				 <!-- <span v-show ="form.overtimes.length>1" class="pull-right">Copy Time to Next Row: F4 | &nbsp;</span> -->
+				 <!-- <span v-show ="form.overtimes.length>1" class="float-right">Copy Time to Next Row: F4 | &nbsp;</span> -->
 
 			</div>
         </div>
@@ -169,11 +173,11 @@
         <div class="row">
 		<div class="col-md-12 form-group">
         		<label for="comment">Nature of work done: </label>
-        		<textarea class="form-control" rows="1" v-model="form.worknature" maxlength="65000" placeholder="" required></textarea>
+        		<input class="form-control form-control-sm" rows="1" v-model="form.worknature" maxlength="65000" placeholder="" required></input>
         	</div>
         	<div class="col-md-12 form-group">
         		<label for="comment">Remarks, if any: <small>(max 190 chars)</small></label>
-        		<textarea class="form-control" rows="1" v-model="form.remarks" maxlength="190" placeholder=""></textarea>
+        		<input class="form-control form-control-sm" rows="1" v-model="form.remarks" maxlength="190" placeholder=""></input>
         	</div>
         </div>	    
 

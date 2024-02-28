@@ -5,14 +5,14 @@
     
     {!! Form::model($overtimes_other, ['method' => 'PUT', 'route' => ['admin.overtimes_others.update', $overtimes_other->id]]) !!}
 
-    <div class="panel panel-default">
-        <div class="panel-heading">
+    <div class="card p-2">
+        <div class="card-title">
             @lang('quickadmin.qa_edit')
         </div>
 
-        <div class="panel-body">
+        <div class="card-body">
             <div class="row">
-                <div class="col-xs-12 form-group">
+                <div class="col-sm-12 form-group">
                     {!! Form::label('pen', trans('quickadmin.overtimes-others.fields.pen').'*', ['class' => 'control-label']) !!}
                     {!! Form::text('pen', old('pen'), ['class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
                     <p class="help-block"></p>
@@ -24,7 +24,7 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-xs-12 form-group">
+                <div class="col-sm-12 form-group">
                     {!! Form::label('designation', trans('quickadmin.overtimes-others.fields.designation').'*', ['class' => 'control-label']) !!}
                     {!! Form::text('designation', old('designation'), ['class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
                     <p class="help-block"></p>
@@ -37,7 +37,7 @@
             </div>
            
             <div class="row">
-                <div class="col-xs-12 form-group">
+                <div class="col-sm-12 form-group">
                     {!! Form::label('from', trans('quickadmin.overtimes-others.fields.from').'*', ['class' => 'control-label']) !!}
                     {!! Form::text('from', old('from'), ['class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
                     <p class="help-block"></p>
@@ -49,7 +49,7 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-xs-12 form-group">
+                <div class="col-sm-12 form-group">
                     {!! Form::label('to', trans('quickadmin.overtimes-others.fields.to').'*', ['class' => 'control-label']) !!}
                     {!! Form::text('to', old('to'), ['class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
                     <p class="help-block"></p>
@@ -61,7 +61,7 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-xs-12 form-group">
+                <div class="col-sm-12 form-group">
                     {!! Form::label('count', trans('quickadmin.overtimes-others.fields.count').'*', ['class' => 'control-label']) !!}
                     {!! Form::number('count', old('count'), ['class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
                     <p class="help-block"></p>
@@ -73,7 +73,7 @@
                 </div>
             </div>
              <div class="row">
-                <div class="col-xs-12 form-group">
+                <div class="col-sm-12 form-group">
                     {!! Form::label('rate', 'Rate', ['class' => 'control-label']) !!}
                     {!! Form::number('rate', old('rate'), ['class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
                     <p class="help-block"></p>
@@ -85,7 +85,7 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-xs-12 form-group">
+                <div class="col-sm-12 form-group">
                     {!! Form::label('worknature', trans('quickadmin.overtimes-others.fields.worknature').'', ['class' => 'control-label']) !!}
                     {!! Form::text('worknature', old('worknature'), ['class' => 'form-control', 'placeholder' => '']) !!}
                     <p class="help-block"></p>

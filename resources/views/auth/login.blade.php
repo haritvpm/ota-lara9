@@ -27,14 +27,12 @@ background: url("images/bg/pexels-jakub-novacek-924824.jpg") no-repeat center ce
 
 @section('content')
 <div class="bg"></div>
-    <div class="row">
-        <div class="col-md-4 col-md-offset-4">
-            <div class="panel panel-default">
-                <div class="panel-heading">{{ ucfirst(config('app.name')) }} - @lang('quickadmin.qa_login')
-
-                </div>
+    <div class="row justify-content-md-center">
+        <div class="col-md-4">
+            <div class="card p-2">
+              
                 
-                <div class="panel-body">
+                <div class="card-body">
                     
                     @if (count($errors) > 0)
                         <div class="alert alert-danger">
@@ -57,9 +55,9 @@ background: url("images/bg/pexels-jakub-novacek-924824.jpg") no-repeat center ce
                                value="{{ csrf_token() }}">
 
                         <div class="form-group">
-                            <label class="col-md-3 control-label">User ID</label>
+                            <label class="col-md-8 control-label">User ID</label>
 
-                            <div class="col-md-8">
+                            <div class="col-md-12">
                                 <input type="text"
                                        class="form-control"
                                        name="username"
@@ -68,9 +66,9 @@ background: url("images/bg/pexels-jakub-novacek-924824.jpg") no-repeat center ce
                         </div>
 
                         <div class="form-group">
-                            <label class="col-md-3 control-label">@lang('quickadmin.qa_password')</label>
+                            <label class="col-md-8 control-label">@lang('quickadmin.qa_password')</label>
 
-                            <div class="col-md-8">
+                            <div class="col-md-12">
                                 <input type="password"
                                        class="form-control"
                                        name="password" autocomplete="on">
@@ -114,35 +112,6 @@ background: url("images/bg/pexels-jakub-novacek-924824.jpg") no-repeat center ce
             </div>
         </div>
     </div>
-@php
-date_default_timezone_set('Asia/Kolkata');
-@endphp
-
-<nav style="max-height:.8em;background-color: transparent;border-width: 0px;" class="navbar navbar-default navbar-fixed-bottom">
-  <div class="container-fluid">
-    <p class="navbar-text pull-right">
-        Ph: 251-2422 &nbsp;&nbsp;
-        {{ date('l, M j  (d-m-y h:i a)')  }}
-    </p>
-    
-     <p class="navbar-text">
-      <small><span class="text-muted">
-                Last Updated: 24-11-22.&nbsp;
-                 @if(\Config::get('custom.vps_name'))
-                 @ {{\Config::get('custom.vps_name')}} &nbsp;
-                 @endif
-       </span>Recommended Browser: Firefox 25+. 
-       @if(config('app.debug'))
-        (debugmode)
-       @endif
-       
-       </small>
-    </p>
-
-   
-    
-  </div>
-</nav>
 
 
 @endsection

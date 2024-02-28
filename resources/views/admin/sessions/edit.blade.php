@@ -5,16 +5,16 @@
     
     {!! Form::model($session, ['method' => 'PUT', 'route' => ['admin.sessions.update', $session->id]]) !!}
 
-    <div class="panel panel-default">
-        <div class="panel-heading">
+    <div class="card p-2">
+        <div class="card-title">
             @lang('quickadmin.qa_edit')
         </div>
         @php
         $readonly = Auth::user()->isAdmin()  ? '' : 'readonly';
         @endphp
-        <div class="panel-body">
+        <div class="card-body">
             <div class="row">
-                <div class="col-xs-12 form-group">
+                <div class="col-sm-12 form-group">
                     {!! Form::label('name', trans('quickadmin.sessions.fields.name').'*', ['class' => 'control-label']) !!}
                     {!! Form::text('name', old('name'), ['class' => 'form-control', 'placeholder' => '', 'required' => '', $readonly]) !!}
                     <p class="help-block"></p>
@@ -27,7 +27,7 @@
             </div>
             
             <div class="row">
-                <div class="col-xs-12 form-group">
+                <div class="col-sm-12 form-group">
                     {!! Form::label('kla', trans('quickadmin.sessions.fields.kla').'*', ['class' => 'control-label']) !!}
                     {!! Form::number('kla', old('kla'), ['class' => 'form-control', 'placeholder' => '', 'required' => '', $readonly]) !!}
                     <p class="help-block"></p>
@@ -39,7 +39,7 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-xs-12 form-group">
+                <div class="col-sm-12 form-group">
                     {!! Form::label('session', trans('quickadmin.sessions.fields.session').'*', ['class' => 'control-label']) !!}
                     {!! Form::number('session', old('session'), ['class' => 'form-control', 'placeholder' => '', 'required' => '', $readonly]) !!}
                     <p class="help-block"></p>
@@ -51,7 +51,7 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-xs-12 form-group">
+                <div class="col-sm-12 form-group">
                     {!! Form::label('dataentry_allowed', trans('quickadmin.sessions.fields.dataentry-allowed').'*', ['class' => 'control-label']) !!}
                     {!! Form::select('dataentry_allowed', $enum_dataentry_allowed, old('dataentry_allowed'), ['class' => 'form-control ', 'required' => '', $readonly]) !!}
                     <p class="help-block"></p>
@@ -63,7 +63,7 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-xs-12 form-group">
+                <div class="col-sm-12 form-group">
                     {!! Form::label('show_in_datatable', trans('quickadmin.sessions.fields.show-in-datatable').'', ['class' => 'control-label']) !!}
                     {!! Form::select('show_in_datatable', $enum_show_in_datatable, old('show_in_datatable'), ['class' => 'form-control', $readonly]) !!}
                     <p class="help-block"></p>
@@ -76,9 +76,9 @@
             </div>
            
             <div class="row">
-                <div class="col-xs-12 form-group">
+                <div class="col-sm-12 form-group">
                     {!! Form::label('sittings_entry', trans('quickadmin.sessions.fields.sittings-entry').'', ['class' => 'control-label']) !!}
-                    {!! Form::select('sittings_entry', $enum_sittings_entry, old('sittings_entry'), ['class' => 'form-control select2']) !!}
+                    {!! Form::select('sittings_entry', $enum_sittings_entry, old('sittings_entry'), ['class' => 'form-control']) !!}
                     <p class="help-block"></p>
                     @if($errors->has('sittings_entry'))
                         <p class="help-block">
@@ -90,6 +90,7 @@
             
         </div>
     </div>
+    <a href="{{route('admin.sessions.index')}}" class="btn btn-default">Cancel</a>
 
     {!! Form::submit(trans('quickadmin.qa_update'), ['class' => 'btn btn-danger']) !!}
     {!! Form::close() !!}

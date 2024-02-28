@@ -1,87 +1,69 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 
 <head>
- 
+    
     @include('partials.head')
 
+
+    @yield('styles')
 </head>
 
-
-<!-- also change in layouts.app.blade -->
-@if(!\Config::get('custom.vps'))
-<body class="hold-transition skin-purple-light sidebar-mini {{ (  isset($collapse_sidebar) ? 'sidebar-collapse' : '') }} ">
-@else
-<body class="hold-transition skin-yellow sidebar-mini {{ (  isset($collapse_sidebar) ? 'sidebar-collapse' : '') }} ">
-@endif
-
-<div id="wrapper">
-
-@include('partials.topbar')
-@include('partials.sidebar')
-
-<!-- Content Wrapper. Contains page content -->
-    <div class="content-wrapper" >
-        <!-- Main content -->
-        <section class="content">
-            @if(isset($siteTitle))
-                <h3 class="page-title">
-                    {{ $siteTitle }}
-                </h3>
-            @endif
-
-            <div class="row">
-                <div class="col-md-12">
-               
-
-                    <div class="flash-message">
-                    @foreach (['danger', 'warning', 'success', 'info'] as $msg)
-                        @if(Session::has('message-' . $msg))
-                        <div class="alert alert-{{ $msg }} alert-dismissable hidden-print">
-                        <button type="button" class="close" data-dismiss="alert">&times;</button>	
-                        {{ Session::get('message-' . $msg) }}
-                        </div>
-                        @endif
-                        {{Session::forget('message-' . $msg)}}
-                    @endforeach
-                    
-                    </div>
-
-                    @if ($errors->count() > 0)
-                        <div class="alert alert-danger alert-dismissable hidden-print">
-                        <button type="button" class="close" data-dismiss="alert">&times;</button>
-                            <ul class="list-unstyled">
-                                @foreach($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
-
-                    @yield('content')
-
-                </div>
-            </div>
-        </section>
-
+<body class="sidebar-mini layout-fixed" style="height: auto;">
+    <div class="wrapper" >
+        <nav class="main-header navbar navbar-expand bg-white navbar-light border-bottom">
+            <!-- Left navbar links -->
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" data-widget="pushmenu" href="#"><i class="fa fa-bars"></i></a>
+                </li>
+            </ul>
+        <!-- Right navbar links -->
       
+                <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" data-widget="pushmenu" href="#"><i class="fa fa-user"></i>({{Auth::user()->DispNameWithName}})</a>
+                </li>
+                </ul>
+ 
+        </nav>
 
+        @include('partials.sidebar')
+        <div class="content-wrapper" style="min-height: 917px;">
+            <!-- Main content -->
+            <section class="content" style="padding-top: 20px">
+                @if(session('message'))
+                    <div class="row mb-2">
+                        <div class="col-lg-12">
+                            <div class="alert alert-success" role="alert">{{ session('message') }}</div>
+                        </div>
+                    </div>
+                @endif
+                @if($errors->count() > 0)
+                    <div class="alert alert-danger"  role="alert">
+                        <ul class="list-unstyled">
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+                @yield('content')
+            </section>
+            <!-- /.content -->
+        </div>
+
+        <form id="logoutform" action="{{ route('auth.logout') }}" method="POST" style="display: none;">
+            {{ csrf_field() }}
+        </form>
     </div>
 
-</div>
+   
 
-{!! Form::open(['route' => 'auth.logout', 'style' => 'display:none;', 'id' => 'logout']) !!}
-<button type="submit">Logout</button>
-{!! Form::close() !!}
-
-
-@include('partials.javascripts')
-
-
-
+    @yield('scripts')
+    @include('partials.javascripts')
+    @yield('javascript')
+ 
 </body>
-
-
-
 
 </html>

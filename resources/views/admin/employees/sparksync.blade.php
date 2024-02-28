@@ -5,14 +5,14 @@
 
     @if( $inputview == 0)
 
-    <div class="panel panel-default">
+    <div class="card p-2">
         {!! Form::open(['method' => 'POST', 'route' => ['admin.employees.sparksync']]) !!}
 
-           <div class="panel-body">
+           <div class="card-body">
             
             <div class="row">
 
-                <div class="col-xs-8 form-group">
+                <div class="col-sm-8 form-group">
                     {!! Form::label('sectt', 'Sectt', ['class' => 'control-label']) !!}
                     {!! Form::textarea('sectt', old('sectt'), ['class' => 'form-control ', 'placeholder' => '', 'required' => '']) !!}
                     <p class="help-block"></p>
@@ -23,7 +23,7 @@
                     @endif
                 </div>
              <!--    
-                 <div class="col-xs-6 form-group">
+                 <div class="col-sm-6 form-group">
                     {!! Form::label('hostel', 'Hostel', ['class' => 'control-label']) !!}
                     {!! Form::textarea('hostel', old('hostel'), ['class' => 'form-control ', 'placeholder' => '', 'required' => '']) !!}
                     <p class="help-block"></p>
@@ -36,7 +36,7 @@
             </div>
             
         </div>
-         <div class="panel-footer">
+         <div class="card-footer">
             <a href="{{route('admin.employees.index')}}" class="btn btn-default">Cancel</a>
               {!! Form::submit('Sync', ['class' => 'btn btn-danger']) !!}
               {!! Form::close() !!}

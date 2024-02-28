@@ -14,12 +14,118 @@ use App\Http\Controllers\Controller;
 use JavaScript;
 use Carbon\Carbon;
 use Auth;
-use PDF;
+use Yajra\DataTables\DataTables;
+
 
 use Illuminate\Support\Facades\Log; 
 
 class PunchingsController extends Controller
 {
+    
+    //the args are set in route file web.php
+    public function ajaxgetpunchsittings($session, $datefrom, $dateto, $pen, $aadhaarid)
+    {
+        // Log::info($datefrom);
+
+    $dateformatwithoutime = '!'.config('app.date_format'); //! to set time to zero
+    $datefrom = Carbon::createFromFormat($dateformatwithoutime, $datefrom)->format('Y-m-d');
+    $dateto = Carbon::createFromFormat($dateformatwithoutime, $dateto)->format('Y-m-d');
+
+   // Log::info($session);
+    // Calender::where('session_id', $session->id)
+     //get all sitting days between these two days
+    $sittingsInRange = Calender::with('session')
+                            ->whereHas('session', function($query)  use ($session) { 
+                                    $query->where('name', $session);
+                            })                         
+                            ->where('date', '>=', $datefrom)
+                            ->where('date', '<=', $dateto)
+                            ->where('day_type','Sitting day')->get(['date','day_type',"punching"]);
+
+//     Log::info($sittingsInRange);
+    
+    
+    $tmp = strpos($pen, '-');
+    if(false !== $tmp){
+        $pen = substr($pen, 0, $tmp);
+    }
+    // Log::info($pen);
+    // Log::info($aadhaarid);
+    $sittingsWithPunchok = 0; 
+    $sittingsWithNoPunching = 0; 
+    $dates = [];
+    foreach ($sittingsInRange as $day) {
+
+        $date = Carbon::createFromFormat($dateformatwithoutime, $day->date)->format('Y-m-d');
+        
+        $data = [
+            'applicable' => true,
+            'date' =>  $day->date, 
+            'punchin' => "",
+            'punchout' => "",
+        ];
+
+        //ignore pen if data from aebas and ignore aadhhar if data is from us saving
+        $query =  Punching::where('date',$date);
+        // $query->when( $day->punching == 'MANUALENTRY' && $pen  && strlen($pen) >= 5, function ($q)  use ($pen) {
+        //     return $q->where('pen',$pen);
+        // });
+        $query->when( /*  $day->punching == 'AEBAS' &&  */ $aadhaarid   && strlen($aadhaarid) >= 8, function ($q)  use ($aadhaarid){
+            return $q->where('aadhaarid',$aadhaarid);
+        });
+        
+        //->wherenotnull('punch_in') //prevent if only one column is available
+        //->wherenotnull('punch_out') 
+
+        $temp = $query->first(); 
+       
+        if($temp ){
+           $sittingsWithPunchok++; 
+           $data['punchin'] =  $temp['punch_in'];
+           $data['punchout'] =  $temp['punch_out'];
+        }
+
+        //check if user has entered first OT for that day.
+        $sit = \App\Overtime::with('form')
+                    ->wherehas( 'form', function($q) use( $date){
+                        $q->where( 'overtime_slot' , 'Multi' )
+                        ->where( 'duty_date', $date );
+                    })->where('pen', $pen )
+                    ->where('slots','like','%First%')
+                    ->first(); 
+
+
+        if( $day->punching !== 'AEBAS' ){
+        
+            $sittingsWithNoPunching++; 
+            $data['applicable'] =  false; //whether to count
+            $data['ot'] =  $sit ? "Entered in that day's form" : "Enter in OT Form";//'Punching excused Use DutyForm to enter for the day',
+        } 
+
+        //may be it was nopunching intitially, and user entered sit in multi and we changed the day type to aebas 
+        //in that case, do not include it in count
+        if($sit) {  //user has already entered sitting for that day
+            $sittingsWithNoPunching++; 
+            $data['applicable'] =  false; //whether to count
+            $data['ot'] =   "Entered in that day's form";//'Punching excused Use DutyForm to enter for the day',
+        
+        }
+
+
+        $dates[] = $data;
+
+     }
+               
+   
+    return [
+            'sittingsWithPunchok' => $sittingsWithPunchok,
+            // 'sittingsWithNoPunching' => $sittingsWithNoPunching,
+            'sittingsInRange' => $sittingsInRange->count(),
+            'dates' =>  $dates,
+           ];
+          
+    }
+
 
     //the args are set in route file web.php
     public function ajaxgetpunchtimes($date, $pen, $aadhaarid)
@@ -32,18 +138,23 @@ class PunchingsController extends Controller
     }
 
     $date = Carbon::createFromFormat(config('app.date_format'), $date)->format('Y-m-d');
+
+    $day = Calender::where('date',$date)->first();
        
-    $temp =  Punching::where('date',$date)  
-            ->where( function ($query) use ($pen, $aadhaarid) {
-                $query->where('pen',$pen) 
-                    ->orwhere('aadhaarid',$aadhaarid) ;
-            })
+    $query =  Punching::where('date',$date);
+    // $query->when ($day->punching == 'MANUALENTRY' && $pen != '' && strlen($pen) >= 5, function ($q)  use ($pen) {
+    //     return $q->where('pen',$pen);
+    // });
+     $query->when( /* $day->punching == 'AEBAS' &&  */ strlen($aadhaarid) >= 8, function ($q)  use ($aadhaarid){
+        return $q->where('aadhaarid',$aadhaarid);
+    });
+    
            // ->wherenotnull('punch_in') //prevent if only one column is available
            //  ->wherenotnull('punch_out') 
-             ->first(); 
+    $temp = $query->first(); 
     
     if($temp){
-        Log::info($temp);
+      //  Log::info($temp);
        
    
       return [
@@ -51,86 +162,80 @@ class PunchingsController extends Controller
             'punchout' => $temp['punch_out'],
             'creator' => $temp['creator'],
             'aadhaarid' => $temp['aadhaarid'],
+            'punchout_from_aebas'=> $temp['punchout_from_aebas'],
+            'punchin_from_aebas'=> $temp['punchin_from_aebas'],
+
             'id' => $temp['id']
         ];
     } else return [];
         
     }
 
+    private function validateDate($date, $format = 'Y-m-d')
+    {
+        $d = \DateTime::createFromFormat($format, $date);
+        // The Y ( 4 digits year ) returns TRUE for any integer with any number of digits so changing the comparison from == to === fixes the issue.
+        return $d && $d->format($format) === $date;
+    }
 
     public function index(Request $request)
     {
-        if (! Gate::allows('my_form_access')) {
-            return abort(401);
-        }
-        
-   
-        // $sessions = \App\Session::query();
+        // abort_if(Gate::denies('punching_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        // if( \Auth::user()->isAdmin() ){
-        //     $sessions =  $sessions->orderby('id','desc')->pluck('name');;
-        // }
-        // else{
-        //     $sessions =  $sessions->whereshowInDatatable('Yes')->orderby('id','desc')->pluck('name');
-        // }
-         
-        // if(!$request->filled('session'))
-        // {            
-        // 	return view('admin.punchings.index',compact('sessions'));
-        // }
+        if (request()->ajax()) {
+            //Log::info($request);
+            $query = Punching::query();
 
-        // $str_sessionfilter = null;                 
-        // $str_datefilter = null;
-        // $str_namefilter = null;
-        // $session = $request->query('session');
-        $datefilter=  $request->query('datefilter');
-        $namefilter=  $request->query('namefilter');
-
+             
+            if ($request->filled('datefilter')){
+                $date =  $request->query('datefilter');
             
-        // $punchings = Punching::where('session',$session);
-        $punchings = Punching::query();
-
-          
-        // if ($request->filled('session')){
-                  
-        //     $punchings = $punchings->where( 'session',$session);
-			               		
-
-        //     $str_sessionfilter = '&session='.$session;
-        // }
-        
-        if ($request->filled('datefilter')){
-    
-            $date = Carbon::createFromFormat(config('app.date_format'), $datefilter)->format('Y-m-d');
-                  
-            $punchings = $punchings->where( 'date',$date);
-			               		
+                if(!$this->validateDate( $date, 'Y-m-d')){
+                    $date = Carbon::createFromFormat(config('app.date_format'), $date)->format('Y-m-d');
+                }
+                    
+                $query = $query->where( 'date',$date);
+             }
+				
 
            // $str_datefilter = '&datefilter='.$datefilter;
-        } else {
-            $punchings = $punchings->where( 'date','0000-00-00');
-        }
-
         
-        if ($request->filled('namefilter')){
-                    
-            $punchings = $punchings->where( function ($query) use ($namefilter) {
-                $query->where('pen','like', '%' . $namefilter.'%' )
-                    ->orwhere('aadhaarid','like', '%' . $namefilter.'%' ) ;
+            
+           $query = $query->orderBy('date', 'DESC');
+
+
+            $table = Datatables::of($query);
+
+            $table->setRowAttr([
+                'data-entry-id' => '{{$id}}',
+            ]);
+           
+      
+             
+            $table->addColumn('actions', '&nbsp;')->rawColumns(['actions']);;
+            $table->editColumn('actions', function ($row) {
+                $gateKey  = 'punching_';
+                $routeKey = 'admin.punchings';
+
+                return view('actionsTemplate', compact('row', 'gateKey', 'routeKey'));
             });
-        
-        }
-        
-        $punchings =  $punchings->paginate(10)->appends($request->except('page'));
 
-        return view('admin.punchings.index',compact('punchings' ));
+
+            return $table->make(true);
+        }
+
+        return view('admin.punchings.index');
+
+
+        
     }
+
     public function create()
     {
         // abort_if(Gate::denies('punching_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
        // $forms = PunchingForm::pluck('creator', 'id')->prepend(trans('global.pleaseSelect'), '');
-
+       
         return view('admin.punchings.create');
     }
 
@@ -143,6 +248,8 @@ class PunchingsController extends Controller
 
     public function edit(Punching $punching)
     {
+
+
         // abort_if(Gate::denies('punching_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
       //  $forms = PunchingForm::pluck('creator', 'id')->prepend(trans('global.pleaseSelect'), '');
@@ -156,7 +263,15 @@ class PunchingsController extends Controller
     public function update(Request $request, Punching $punching)
     {
     
-        $punching->update($request->all());
+       
+        $punching->update(
+            [
+                'pen' => $request['pen'],
+                'punch_in' => !$punching->punchin_from_aebas ? $request['punch_in'] : $punching->punch_in,
+                'punch_out' =>  !$punching->punchout_from_aebas ?  $request['punch_out'] : $punching->punch_out,
+            ]
+
+        );
         $reportdate = Carbon::createFromFormat('Y-m-d', $punching->date)->format(config('app.date_format'));
 
         return redirect()->route('admin.punchings.index', ['datefilter'=> $reportdate]);
@@ -166,8 +281,7 @@ class PunchingsController extends Controller
     {
         // abort_if(Gate::denies('punching_show'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        $punching->load('form');
-
+      
         return view('admin.punchings.show', compact('punching'));
     }
 

@@ -3,8 +3,8 @@
 @section('content')
     <h3 class="page-title">@lang('quickadmin.forms-others.title')</h3>
 
-    <div class="panel panel-default">
-        <div class="panel-heading">
+    <div class="card p-2">
+        <div class="card-title">
             @lang('quickadmin.qa_view')
         </div>
 
@@ -96,10 +96,10 @@
 
                                                                 <td>
                                     @can('overtimes_other_view')
-                                    <a href="{{ route('admin.overtimes_others.show',[$overtimes_other->id]) }}" class="btn btn-xs btn-primary">@lang('quickadmin.qa_view')</a>
+                                    <a href="{{ route('admin.overtimes_others.show',[$overtimes_other->id]) }}" class="btn btn-sm btn-primary">@lang('quickadmin.qa_view')</a>
                                     @endcan
                                     @can('overtimes_other_edit')
-                                    <a href="{{ route('admin.overtimes_others.edit',[$overtimes_other->id]) }}" class="btn btn-xs btn-info">@lang('quickadmin.qa_edit')</a>
+                                    <a href="{{ route('admin.overtimes_others.edit',[$overtimes_other->id]) }}" class="btn btn-sm btn-info">@lang('quickadmin.qa_edit')</a>
                                     @endcan
                                     @can('overtimes_other_delete')
 {!! Form::open(array(
@@ -107,7 +107,7 @@
                                         'method' => 'DELETE',
                                         'onsubmit' => "return confirm('".trans("quickadmin.qa_are_you_sure")."');",
                                         'route' => ['admin.overtimes_others.destroy', $overtimes_other->id])) !!}
-                                    {!! Form::submit(trans('quickadmin.qa_delete'), array('class' => 'btn btn-xs btn-danger')) !!}
+                                    {!! Form::submit(trans('quickadmin.qa_delete'), array('class' => 'btn btn-sm btn-danger')) !!}
                                     {!! Form::close() !!}
                                     @endcan
                                 </td>

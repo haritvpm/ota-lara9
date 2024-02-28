@@ -1,9 +1,180 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	"use strict";
+/******/ 	var __webpack_modules__ = ({
+
+/***/ "./resources/assets/js/utils.js":
+/*!**************************************!*\
+  !*** ./resources/assets/js/utils.js ***!
+  \**************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "checkDatesAndOT": () => (/* binding */ checkDatesAndOT),
+/* harmony export */   "setEmployeeTypes": () => (/* binding */ setEmployeeTypes),
+/* harmony export */   "stringTimeToDate": () => (/* binding */ stringTimeToDate),
+/* harmony export */   "timePeriodIncludesPeriod": () => (/* binding */ timePeriodIncludesPeriod),
+/* harmony export */   "toHoursAndMinutes": () => (/* binding */ toHoursAndMinutes)
+/* harmony export */ });
+function setEmployeeTypes(row) {
+  if (!row.hasOwnProperty("designation") || !row.hasOwnProperty("category") || !row.hasOwnProperty("normal_office_hours")) {
+    console.error("setEmployeeTypes - not all Property set");
+  }
+  // console.log("setEmployeeTypes");
+  row.isPartime = row.designation.toLowerCase().indexOf("part time") != -1 || row.category.toLowerCase().indexOf("parttime") != -1 || row.designation.toLowerCase().indexOf("parttime") != -1 || row.normal_office_hours == 3; //ugly
+  row.isFulltime = row.category.toLowerCase().indexOf("fulltime") != -1 || row.normal_office_hours == 6;
+  row.isWatchnward = row.category.toLowerCase().indexOf("watch") != -1;
+  row.isNormal = !row.isPartime && !row.isFulltime && !row.isWatchnward;
+}
+function stringTimeToDate(sTimeWithSemicolonSeperator) {
+  var time = sTimeWithSemicolonSeperator.split(":").map(Number);
+  //warning: months in JS starts from 0
+  return Date.UTC(2000, 1, 1, time[0], time[1]);
+}
+;
+function timePeriodIncludesPeriod(from, to, fromReq, toReq) {
+  var datefrom = stringTimeToDate(from);
+  var dateto = stringTimeToDate(to);
+  var time800am = stringTimeToDate(fromReq);
+  var time530pm = stringTimeToDate(toReq);
+  return time800am >= datefrom && time530pm <= dateto;
+}
+function checkDatesAndOT(row, data) {
+  //we need to give some leeway. so commenting
+  var count = 0;
+  var total_ot_days = 0;
+  var naDays = 0;
+  for (var i = 0; i < data.dates.length; i++) {
+    // console.log(data.dates[i])
+
+    var punchin = data.dates[i].punchin;
+    var punchout = data.dates[i].punchout;
+    if (!data.dates[i].applicable) {
+      //no punching day. NIC server down. not aebas. either manualentry or nopunching
+      data.dates[i].ot = 'N/A. ' + data.dates[i].ot;
+      data.dates[i].otna = true;
+      naDays++;
+      continue;
+    }
+    data.dates[i].otna = false;
+    total_ot_days++;
+    if (!punchin || !punchout) {
+      //not punched
+      data.dates[i].ot = punchin || punchout ? 'Not Punched?' : 'Leave?';
+      continue;
+    }
+    data.dates[i].ot = 'NO';
+    if (row.isPartime) {
+      console.log('p');
+      if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "11:25")) {
+        data.dates[i].ot = 'YES';
+        count++;
+      } else {
+        data.dates[i].ot = 'No. (06:00 - 11:30)';
+      }
+    } else if (row.isFulltime) {
+      if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "16:25")) {
+        count++;
+        data.dates[i].ot = 'YES';
+      } else {
+        data.dates[i].ot = 'No. (06:00 - 4:30pm)';
+      }
+    } else if (row.isWatchnward) {
+      //no punching
+    } //all other employees for sitting days
+    else {
+      console.log('n');
+      if (timePeriodIncludesPeriod(punchin, punchout, "08:05", "17:25")) {
+        count++;
+        data.dates[i].ot = 'YES';
+      } else {
+        data.dates[i].ot = 'No. (08:00 - 5:30pm)';
+      }
+    }
+  }
+  return {
+    count: count,
+    modaldata: data.dates,
+    total_ot_days: total_ot_days,
+    naDays: naDays
+  };
+}
+function toHoursAndMinutes(totalMinutes) {
+  var hours = Math.floor(totalMinutes / 60);
+  var minutes = totalMinutes % 60;
+  if (hours) return "".concat(hours, ":").concat(padToTwoDigits(minutes), " hour");
+  return "".concat(minutes, " min");
+}
+function padToTwoDigits(num) {
+  return num.toString().padStart(2, '0');
+}
+
+/***/ })
+
+/******/ 	});
+/************************************************************************/
+/******/ 	// The module cache
+/******/ 	var __webpack_module_cache__ = {};
+/******/ 	
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/ 		// Check if module is in cache
+/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 		if (cachedModule !== undefined) {
+/******/ 			return cachedModule.exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = __webpack_module_cache__[moduleId] = {
+/******/ 			// no module.id needed
+/******/ 			// no module.loaded needed
+/******/ 			exports: {}
+/******/ 		};
+/******/ 	
+/******/ 		// Execute the module function
+/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
+/******/ 	
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/ 	
+/************************************************************************/
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__webpack_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__webpack_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/************************************************************************/
 var __webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
+(() => {
 /*!**************************************!*\
   !*** ./resources/assets/js/form2.js ***!
   \**************************************/
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _utils_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./utils.js */ "./resources/assets/js/utils.js");
 
 
 var _methods;
@@ -11,6 +182,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" =
 function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return _typeof(key) === "symbol" ? key : String(key); }
 function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (_typeof(res) !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
+
 var dateofdutyprefix = "Date of Duty";
 var def_time_start = "17:30";
 var def_time_end = "20:30";
@@ -87,23 +259,35 @@ var vm = new Vue({
     },
     isActive: function isActive() {},
     slotoptions: function slotoptions() {
-      if (this.form.duty_date.length == 0) return "";
-      if (!ispartimefulltime && !iswatchnward) {
+      if (this.form.duty_date.length == 0) return '';
+      //allow users to enter sitting with other OT if the NIC server was down for that day
+      //the normal sitting form shows only punched days
+      //we can in the future add an option for users to check days they were present in sitting form
+      //for now, this is a workaround
+
+      var isNoPunchingDay = this.form.duty_date && (calenderdaypunching[this.form.duty_date] === 'NOPUNCHING' || calenderdaypunching[this.form.duty_date] === 'MANUALENTRY');
+      if (!ispartimefulltime) {
         switch (calenderdaysmap[this.form.duty_date]) {
-          case "Sitting day":
-            return ["First", "Second", "Third"];
-          case "Prior holiday":
-          case "Holiday":
-            return ["First", "Second", "Third", "Additional"];
+          case 'Sitting day':
+            return isNoPunchingDay ? ['First', 'Second', 'Third'] : ['Second', 'Third'];
+          case 'Prior holiday':
+          case 'Holiday':
+            return ['First', 'Second', 'Third', 'Additional'];
           case undefined:
-            return "";
+            return '';
           default:
-            return ["First", "Second", "Third"];
+            return ['First', 'Second', 'Third'];
         }
       } else {
-        return ["First", "Second"];
+        switch (calenderdaysmap[this.form.duty_date]) {
+          case 'Sitting day':
+            return isNoPunchingDay ? ['First', 'Second'] : ['Second'];
+          default:
+            return ['First', 'Second'];
+        } //switch
       }
     },
+
     _daylenmultiplier: function _daylenmultiplier() {
       var _daylenmultiplier$thi;
       return this.form.duty_date ? (_daylenmultiplier$thi = daylenmultiplier[this.form.duty_date]) !== null && _daylenmultiplier$thi !== void 0 ? _daylenmultiplier$thi : 1.0 : 1.0;
@@ -113,7 +297,8 @@ var vm = new Vue({
     },
     allowPunchingEntry: function allowPunchingEntry() {
       //if date is not set, make punching true or copytonewform will have punching readonly
-      return this.form.duty_date ? calenderdaypunching[this.form.duty_date] === 'MANUALENTRY' : true;
+      var wholedayallow = this.form.duty_date ? calenderdaypunching[this.form.duty_date] === 'MANUALENTRY' : true;
+      return wholedayallow;
     }
   },
   watch: {},
@@ -149,12 +334,17 @@ var vm = new Vue({
       }
     },
     onChange: function onChange(e) {
-      if ((e === null || e === void 0 ? void 0 : e.type) != 'dp') return; //this func seems to be called twice on date change. this prevents that as the first call does not have that set
+      //if( e?.type != 'dp' ) return ; //this func seems to be called twice on date change. this prevents that as the first call does not have that set
 
       this.updateDateDependencies();
       if (this.form.duty_date != "" && this.form.duty_date != null) {
-        if (e.oldDate != e.date) {
+        //	if( e.oldDate != e.date )
+        {
           this.fetchPunching();
+          //clear all slots
+          for (var i = 0; i < this.form.overtimes.length; i++) {
+            this.form.overtimes[i].slots = [];
+          }
         }
       }
     },
@@ -252,10 +442,6 @@ var vm = new Vue({
     }
   }, _defineProperty(_methods, "limitText", function limitText(count) {
     return "and ".concat(count, " other ");
-  }), _defineProperty(_methods, "setEmployeeTypes", function setEmployeeTypes(row) {
-    row.isPartime = row.designation.toLowerCase().indexOf("part time") != -1;
-    row.isFulltime = row.category.toLowerCase().indexOf("fulltime") != -1;
-    row.isWatchnward = row.category.toLowerCase().indexOf("watch") != -1;
   }), _defineProperty(_methods, "changeSelect", function changeSelect(selectedOption, id) {
     var _this2 = this;
     //	console.log(this.form.overtimes)
@@ -277,7 +463,7 @@ var vm = new Vue({
         //if you add any new prop here, check to update in EmployeesController:ajaxfind,
         //MyFormsController:preparevariablesandGotoView in two locations for edit and copytonewform since we need these variables when we try to edit this
         //and also in loadpresetdata in this file itself
-        _this2.setEmployeeTypes(row);
+        (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.setEmployeeTypes)(row);
         //	console.log(row);
         if (0 == id) {
           //const { def_time_start, def_time_end } = this.getDefaultTimes(this.form.overtime_slot, row);
@@ -306,13 +492,14 @@ var vm = new Vue({
     if (row.pen == "" || !self.form.duty_date) return;
     //set punchtime if not set and available
     //reset for example if user selects another person after selecting a person with punchtime
-    // self.form.overtimes[id].allowpunch_edit=true;
     row.punchin = "";
     row.punchout = "";
     row.punching_id = null;
+    row.punchin_from_aebas = false;
+    row.punchout_from_aebas = false;
     if (self.dayHasPunching && row.punching) {
+      this.isProcessing = true;
       axios.get(urlajaxgetpunchtimes + "/" + self.form.duty_date + "/" + row.pen + "/" + row.aadhaarid).then(function (response) {
-        //console.log("got punch data");
         //console.log(response);
         if (response.data && response.data.hasOwnProperty("punchin") && response.data.hasOwnProperty("punchout")) {
           //console.log("set punch data");
@@ -320,12 +507,17 @@ var vm = new Vue({
           row.punchout = response.data.punchout;
           row.aadhaarid = response.data.aadhaarid;
           row.punching_id = response.data.id;
-
+          row.punchin_from_aebas = response.data.punchin_from_aebas == 1;
+          row.punchout_from_aebas = response.data.punchout_from_aebas == 1;
           //vue does not update time if we change date as it does not watch for array changes
           //https://v2.vuejs.org/v2/guide/reactivity#Change-Detection-Caveats
           Vue.set(_this3.form.overtimes, index, row);
         }
-      })["catch"](function (err) {});
+        _this3.isProcessing = false;
+      })["catch"](function (err) {
+        _this3.isProcessing = false;
+        Vue.set(_this3.form.overtimes, index, row);
+      });
     }
   }), _defineProperty(_methods, "checkDuplicates", function checkDuplicates() {
     var self = this;
@@ -340,16 +532,13 @@ var vm = new Vue({
       }
     }
     return true;
-  }), _defineProperty(_methods, "stringTimeToDate", function stringTimeToDate(sTimeWithSemicolonSeperator) {
-    var time = sTimeWithSemicolonSeperator.split(":").map(Number);
-    //warning: months in JS starts from 0
-    return Date.UTC(2000, 1, 1, time[0], time[1]);
   }), _defineProperty(_methods, "strTimesToDatesNormalized", function strTimesToDatesNormalized(from, to) {
-    var datefrom = this.stringTimeToDate(from);
-    var dateto = this.stringTimeToDate(to);
+    var normalize = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+    var datefrom = (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.stringTimeToDate)(from);
+    var dateto = (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.stringTimeToDate)(to);
 
     //time after 12 am ?
-    if (dateto <= datefrom) {
+    if (normalize && dateto <= datefrom) {
       dateto += 24 * 3600000;
     }
     return {
@@ -369,26 +558,17 @@ var vm = new Vue({
     }
     return true;
   }), _defineProperty(_methods, "checkSittingDayTimeIsAsPerGO", function checkSittingDayTimeIsAsPerGO(row, i) {
-    var _this4 = this;
-    //we need to give some leeway. so commenting
-    var timePeriodIncludesPeriod = function timePeriodIncludesPeriod(from, to, fromReq, toReq) {
-      var datefrom = _this4.stringTimeToDate(from);
-      var dateto = _this4.stringTimeToDate(to);
-      var time800am = _this4.stringTimeToDate(fromReq); // a flexy time of 5 mins eitherway
-      var time530pm = _this4.stringTimeToDate(toReq);
-      return time800am >= datefrom && time530pm <= dateto;
-    };
     if (row.isPartime) {
       //parttime emp
 
       if (this.hasFirst(row.slots)) {
-        if (!timePeriodIncludesPeriod(row.from, row.to, "06:05", "11:25")) {
+        if (!(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(row.from, row.to, "06:05", "11:25")) {
           this.myerrors.push("Row " + (i + 1) + ": Parttime employee - time should include 06:00 to 11:30 as per G.O on a sitting day");
           return false;
         }
       } else if (this.hasSecond(row.slots)) {
         //no need to strict time. let them decide for themselves. 2 to 4.30 is actual
-        if (!timePeriodIncludesPeriod(row.from, row.to, "14:05", "16:25")) {
+        if (!(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(row.from, row.to, "14:05", "16:25")) {
           this.myerrors.push("Row " + (i + 1) + ": Parttime employee - time should include 14:00 to 16:30 as per G.O on a sitting day");
           return false;
         }
@@ -398,7 +578,7 @@ var vm = new Vue({
     } else if (row.isFulltime) {
       if (this.hasFirst(row.slots)) {
         ////its acutally 4.30. no need to enforce ending time. have doubts regarding mla hostel.
-        if (!timePeriodIncludesPeriod(row.from, row.to, "06:05", "16:00")) {
+        if (!(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(row.from, row.to, "06:05", "16:00")) {
           this.myerrors.push("Row " + (i + 1) + ": Fulltime employee - time shall include 06:00 a.m. to 4.30 pm as per G.O on a sitting day");
           return false;
         }
@@ -407,7 +587,7 @@ var vm = new Vue({
     } else if (row.isWatchnward) {} //all other employees for sitting days
     else {
       if (this.hasFirst(row.slots)) {
-        if (!timePeriodIncludesPeriod(row.from, row.to, "08:05", "17:25")) {
+        if (!(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(row.from, row.to, "08:05", "17:25")) {
           this.myerrors.push("Row " + (i + 1) + ": For sitting OT, time should include 08:00 to 17:30 as per GO");
           return false;
         }
@@ -415,13 +595,14 @@ var vm = new Vue({
     }
     return true;
   }), _defineProperty(_methods, "checkIf2ndOTOverlapsWithOfficeHours", function checkIf2ndOTOverlapsWithOfficeHours(datefrom, dateto, sNormalStart, sNormalEnd) {
-    var time800am = this.stringTimeToDate(sNormalStart);
-    var time530pm = this.stringTimeToDate(sNormalEnd);
-    var isoverlap = time800am < dateto && time530pm > datefrom || time800am == datefrom || time530pm == dateto;
+    var time800am = (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.stringTimeToDate)(sNormalStart);
+    var time530pm = (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.stringTimeToDate)(sNormalEnd);
+    var isoverlap = time800am < dateto && time530pm > datefrom /*|| time800am == datefrom || time530pm == dateto*/;
+
     if (isoverlap) {
-      return false;
+      return true;
     }
-    return true;
+    return false;
   }), _defineProperty(_methods, "getDayTypes", function getDayTypes() {
     var isSittingDay = calenderdaysmap[this.form.duty_date] == "Sitting day";
     var isSittingOrWorkingDay = calenderdaysmap[this.form.duty_date].indexOf("oliday") == -1;
@@ -489,7 +670,7 @@ var vm = new Vue({
     var daytypedesc = "holiday";
     if (isSittingOrWorkingDay) {
       minothour_ideal = parseFloat(2.5);
-      minot_minutes = 140; //leeway
+      minot_minutes = 145; //leeway
       daytypedesc = "working day";
       if (isSittingDay) {
         daytypedesc = "sitting day";
@@ -500,7 +681,7 @@ var vm = new Vue({
     for (var i = 0; i < self.form.overtimes.length; i++) {
       var row = self.form.overtimes[i];
       //console.log(row);
-      this.setEmployeeTypes(row);
+      (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.setEmployeeTypes)(row);
       if (row.punching) {
         row.punchin = validateHhMm(row.punchin.trim());
         row.punchout = validateHhMm(row.punchout.trim());
@@ -519,15 +700,26 @@ var vm = new Vue({
 
       //make sure our times are according to G.O
       //note same form can have both part time and full time empl. amspkr office
+      var minscamebefore8am = 0; //only for us, not PT, FT for now
       if (isSittingDay) {
         if (!this.checkSittingDayTimeIsAsPerGO(row, i)) {
           return false;
         }
+        //if came before 8.00, adjust it to 2nd OT
+        //do it only if there is no sitting ot, because in that case, from will include before 8.00 am period
+        if (row.isNormal && row.punching && !this.hasFirst(row.slots)) {
+          var _this$strTimesToDates3 = this.strTimesToDatesNormalized(row.punchin, "08:00", false),
+            punchin = _this$strTimesToDates3.datefrom,
+            eightam = _this$strTimesToDates3.dateto;
+          minscamebefore8am = parseFloat((eightam - punchin) / 60000);
+          if (minscamebefore8am < 0) minscamebefore8am = 0;
+        }
       }
-      var _this$strTimesToDates3 = this.strTimesToDatesNormalized(row.from, row.to),
-        datefrom = _this$strTimesToDates3.datefrom,
-        dateto = _this$strTimesToDates3.dateto;
-      var otmins_actual = parseFloat((dateto - datefrom) / 60000);
+      //console.log('minscamebefore8am ' +minscamebefore8am )
+      var _this$strTimesToDates4 = this.strTimesToDatesNormalized(row.from, row.to),
+        datefrom = _this$strTimesToDates4.datefrom,
+        dateto = _this$strTimesToDates4.dateto;
+      var otmins_actual = parseFloat((dateto - datefrom) / 60000) + minscamebefore8am;
 
       //add totalhours needed
       var otmins_practical = minot_minutes * row.slots.length; //if three OT, 3 * 2.5
@@ -542,7 +734,8 @@ var vm = new Vue({
       //new validation after adding normal_office_hours
       var diff = otmins_actual - otmins_practical;
       if (diff < 0) {
-        this.myerrors.push("Row  ".concat(i + 1, " :Needs ").concat(othours_ideal, " hours for the selected OT(s) on a ").concat(daytypedesc, ". Diff=").concat(Math.abs(diff), " minutes"));
+        var humandiff = (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.toHoursAndMinutes)(Math.abs(diff));
+        this.myerrors.push("Row  ".concat(i + 1, " :Needs ").concat(othours_ideal, " hours for the selected OT(s) on a ").concat(daytypedesc, ". Diff=").concat(humandiff, " "));
         return false;
       }
 
@@ -570,23 +763,23 @@ var vm = new Vue({
           }
         }
       }
-      if (!row.isPartime && !row.isFulltime && !row.isWatchnward /*  && !isspeakeroffice */) {
+      if (row.isNormal) {
         if (isSittingDay || isWorkingDay) {
           //if there is second, third, but no first
           if (!this.hasFirst(row.slots) && row.slots.length) {
             var sNormalStart = "10:15";
             var sNormalStartWithGrace = "10:20";
             var sNormalEnd = "17:15";
-            var sNormalEndWithGrace = "17:10";
+            var sNormalEndWithGrace = sNormalEnd; //"17:10";
             if (isSittingDay) {
               sNormalStart = "08:00";
               sNormalStartWithGrace = "08:05";
               sNormalEnd = "17:30";
-              sNormalEndWithGrace = "17:25";
+              sNormalEndWithGrace = sNormalEnd; //"17:25";
             }
             //if this slot does not contain sitting ot on a sitting day and first ot on a working day show error
-            if (!this.checkIf2ndOTOverlapsWithOfficeHours(datefrom, dateto, sNormalStartWithGrace, sNormalEndWithGrace)) {
-              this.myerrors.push("Row ".concat(i + 1, " : 2nd/3rd OT cannot be between ").concat(sNormalStart, " and ").concat(sNormalEnd, " am on a ").concat(daytypedesc));
+            if (this.checkIf2ndOTOverlapsWithOfficeHours(datefrom, dateto, sNormalStartWithGrace, sNormalEndWithGrace)) {
+              this.myerrors.push("Row ".concat(i + 1, " : 2nd/3rd OT cannot be between ").concat(sNormalStart, " and ").concat(sNormalEnd, " on a ").concat(daytypedesc));
               return false;
             }
           }
@@ -595,6 +788,17 @@ var vm = new Vue({
         if (diff >= minot_minutes) {
           //this.myerrors.push(`Row ${i + 1} :Time left for another OT. If number of OT is correct, adjust from/to times accordingly`);
           //return false;
+        }
+      } else if (row.isPartime && isSittingDay) {
+        //if there is second, third, but no first
+        if (!this.hasFirst(row.slots) && row.slots.length) {
+          var _sNormalStart = "06:00";
+          var _sNormalEnd = "11:30";
+          //if this slot does not contain sitting ot on a sitting day 
+          if (this.checkIf2ndOTOverlapsWithOfficeHours(datefrom, dateto, _sNormalStart, _sNormalEnd)) {
+            this.myerrors.push("Row ".concat(i + 1, " : 2nd OT cannot be between ").concat(_sNormalStart, " and ").concat(_sNormalEnd, " on a ").concat(daytypedesc));
+            return false;
+          }
         }
       }
     }
@@ -834,6 +1038,7 @@ var vm = new Vue({
             employee_id: obj[key].employee_id,
             punching: obj[key].punching,
             normal_office_hours: obj[key].normal_office_hours,
+            aadhaarid: obj[key].aadhaarid,
             slots: []
           });
           index = self.form.overtimes.length - 1;
@@ -842,7 +1047,7 @@ var vm = new Vue({
       }
     }
   }), _defineProperty(_methods, "copytimedownonerow", function copytimedownonerow() {
-    console.log("copytimedownonerow");
+    //console.log("copytimedownonerow");
     for (var i = 0; i < this.form.overtimes.length - 1; i++) {
       if (this.form.overtimes[i].from != "" && this.form.overtimes[i].to != "" && this.form.overtimes[i + 1].from == "" && this.form.overtimes[i + 1].to == "") {
         this.form.overtimes[i + 1].from = this.form.overtimes[i].from;
@@ -881,5 +1086,7 @@ window.addEventListener("keydown", function (event) {
     event.preventDefault();
   }
 }, true);
+})();
+
 /******/ })()
 ;

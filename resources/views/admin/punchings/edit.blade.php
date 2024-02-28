@@ -9,11 +9,11 @@
 Editing will not affect already submitted OT forms, as they have their own fields. This will help autofetch for any new forms
     <div class="row">
         <div class="col-lg-12">
-            <div class="panel panel-default">
-                <div class="panel-heading">
+            <div class="card p-2">
+                <div class="card-title">
                     {{ trans('global.edit') }} {{ trans('cruds.punching.title_singular') }}
                 </div>
-                <div class="panel-body">
+                <div class="card-body">
                     <form method="POST" action="{{ route("admin.punchings.update", [$punching->id]) }}" enctype="multipart/form-data">
                         @method('PUT')
                         @csrf
@@ -63,8 +63,10 @@ Editing will not affect already submitted OT forms, as they have their own field
                             <span class="help-block">{{ trans('cruds.punching.fields.punch_out_helper') }}</span>
                         </div>
                        
+                     
 
                         <div class="form-group">
+                        <a href="{{route('admin.punchings.index',['datefilter' => $punching->date])}}" class="btn btn-default">Cancel</a>
                             <button class="btn btn-danger" type="submit">
                                 {{ trans('global.save') }}
                             </button>

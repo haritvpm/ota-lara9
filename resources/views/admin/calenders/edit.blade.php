@@ -5,14 +5,14 @@
     
     {!! Form::model($calender, ['method' => 'PUT', 'route' => ['admin.calenders.update', $calender->id]]) !!}
 
-    <div class="panel panel-default">
-        <div class="panel-heading">
+    <div class="card p-2">
+        <div class="card-title">
             @lang('quickadmin.qa_edit')
         </div>
 
-        <div class="panel-body">
+        <div class="card-body">
              <div class="row">
-                <div class="col-xs-12 form-group">
+                <div class="col-sm-12 form-group">
                     {!! Form::label('session_id', trans('quickadmin.calenders.fields.session').'*', ['class' => 'control-label']) !!}
                     {!! Form::select('session_id', $sessions, old('session_id'), ['class' => 'form-control ', 'required' => '']) !!}
                     <p class="help-block"></p>
@@ -24,7 +24,7 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-xs-12 form-group">
+                <div class="col-sm-12 form-group">
                     {!! Form::label('date', trans('quickadmin.calenders.fields.date').'*', ['class' => 'control-label']) !!}
                     {!! Form::text('date', old('date'), ['class' => 'form-control date', 'placeholder' => '', 'required' => '']) !!}
                     <p class="help-block"></p>
@@ -36,7 +36,7 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-xs-12 form-group">
+                <div class="col-sm-12 form-group">
                     {!! Form::label('day_type', trans('quickadmin.calenders.fields.day-type').'*', ['class' => 'control-label']) !!}
                     {!! Form::select('day_type', $enum_day_type, old('day_type'), ['class' => 'form-control ', 'required' => '']) !!}
                     <p class="help-block"></p>
@@ -48,7 +48,7 @@
                 </div>
             </div>
              <div class="row">
-                <div class="col-xs-12 form-group">
+                <div class="col-sm-12 form-group">
                     {!! Form::label('description',  'Description', ['class' => 'control-label']) !!}
                     {!! Form::text('description', old('description'), ['class' => 'form-control', 'placeholder' => '']) !!}
                     <p class="help-block"></p>
@@ -60,7 +60,7 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-xs-12 form-group">
+                <div class="col-sm-12 form-group">
                 <label for="daylength_multiplier">{{ trans('cruds.calender.fields.daylength_multiplier') }}</label>
                             <input class="form-control" type="number" name="daylength_multiplier" id="daylength_multiplier" value="{{ old('daylength_multiplier', $calender->daylength_multiplier) }}" step="0.01" max="1">
                             @if($errors->has('daylength_multiplier'))
@@ -70,7 +70,7 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-xs-12 form-group">
+                <div class="col-sm-12 form-group">
                    <label>Punching</label>
                             <select class="form-control" name="punching" id="punching">
                                 <option value disabled {{ old('punching', null) === null ? 'selected' : '' }}>{{ trans('global.pleaseSelect') }}</option>
@@ -88,6 +88,7 @@
             
         </div>
     </div>
+    <a href="{{route('admin.calenders.index')}}" class="btn btn-default">Cancel</a>
 
     {!! Form::submit(trans('quickadmin.qa_update'), ['class' => 'btn btn-danger']) !!}
     {!! Form::close() !!}
@@ -95,11 +96,11 @@
 
 @section('javascript')
     @parent
-    <script>
+    <!-- <script>
         $('.date').datepicker({
             autoclose: true,
             dateFormat: "{{ config('app.date_format_js') }}"
         });
-    </script>
+    </script> -->
 
 @stop

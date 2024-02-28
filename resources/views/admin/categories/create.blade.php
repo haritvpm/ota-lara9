@@ -4,11 +4,11 @@
 
     <div class="row">
         <div class="col-lg-12">
-            <div class="panel panel-default">
-                <div class="panel-heading">
+            <div class="card p-2">
+                <div class="card-title">
                     {{ trans('global.create') }} {{ trans('cruds.category.title_singular') }}
                 </div>
-                <div class="panel-body">
+                <div class="card-body">
                     <form method="POST" action="{{ route("admin.categories.store") }}" enctype="multipart/form-data">
                         @csrf
                         <div class="form-group {{ $errors->has('category') ? 'has-error' : '' }}">
