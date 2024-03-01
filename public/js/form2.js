@@ -65,7 +65,8 @@ function checkDatesAndOT(row, data) {
 
     var punchin = data.dates[i].punchin;
     var punchout = data.dates[i].punchout;
-    var pos = row.overtimesittings.indexOf(data.dates[i].date);
+    //if user has made all yes/no decisions, row.overtimesittings will not be null. it can be [] or [<dates>]
+    var pos = row.overtimesittings ? row.overtimesittings.indexOf(data.dates[i].date) : -2;
     if (punchin && punchout) {
       //punched
 
@@ -96,7 +97,7 @@ function checkDatesAndOT(row, data) {
       }
       data.dates[i].userdecision = false;
       total_nondecision_days++;
-      if (data.dates[i].ot != 'YES' && pos != -1) row.overtimesittings.splice(pos, 1); //remove from sel if it is NO
+      if (data.dates[i].ot != 'YES' && pos >= 0) row.overtimesittings.splice(pos, 1); //remove from sel if it is NO
       continue;
     }
 
@@ -105,7 +106,7 @@ function checkDatesAndOT(row, data) {
       data.dates[i].userdecision = false;
       data.dates[i].ot = punchin || punchout ? 'Not Punched?' : 'Leave?';
       total_nondecision_days++;
-      if (pos != -1) row.overtimesittings.splice(pos, 1); //remove from sel if it is NO
+      if (pos >= 0) row.overtimesittings.splice(pos, 1); //remove from sel if it is NO
       continue;
     }
 
@@ -134,15 +135,15 @@ function checkDatesAndOT(row, data) {
       }
     }
     if (data.dates[i].userdecision) {
-      data.dates[i].ot = 'NO';
+      data.dates[i].ot = pos == -2 ? '*' : 'NO'; //-2 if user not dtermined
       total_userdecision_days++;
-      if (pos != -1) {
+      if (pos >= 0) {
         data.dates[i].ot = 'YES';
         count++;
       }
     } else {
       total_nondecision_days++;
-      if (!data.dates[i].userdecision && pos != -1) row.overtimesittings.splice(pos, 1); //remove from sel if it is NO
+      if (!data.dates[i].userdecision && pos >= 0) row.overtimesittings.splice(pos, 1); //remove from sel if it is NO
     }
   }
 
