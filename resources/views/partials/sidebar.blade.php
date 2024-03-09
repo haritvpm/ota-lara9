@@ -175,7 +175,61 @@
             </ul>
             </li>
             @endcan
-           
+            @can('punching_management_access')
+                    <li class="nav-item has-treeview {{ request()->is("admin/punchings*") ? "menu-open" : "" }} {{ request()->is("admin/punching-traces*") ? "menu-open" : "" }} {{ request()->is("admin/devices*") ? "menu-open" : "" }} {{ request()->is("admin/govt-calendars*") ? "menu-open" : "" }}">
+                        <a class="nav-link nav-dropdown-toggle {{ request()->is("admin/punchings*") ? "active" : "" }} {{ request()->is("admin/punching-traces*") ? "active" : "" }} {{ request()->is("admin/devices*") ? "active" : "" }} {{ request()->is("admin/govt-calendars*") ? "active" : "" }}" href="#">
+                            <i class="fa-fw nav-icon fas fa-address-card">
+
+                            </i>
+                            <p>
+                                {{ trans('cruds.punchingManagement.title') }}
+                                <i class="right fa fa-fw fa-angle-left nav-icon"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href="{{ route("admin.punchings.index") }}" class="nav-link {{ request()->is("admin/punchings") || request()->is("admin/punchings/*") ? "active" : "" }}">
+                                        <i class="fa-fw nav-icon fas fa-cogs">
+
+                                        </i>
+                                        <p>
+                                            {{ trans('cruds.punching.title') }}
+                                        </p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ route("admin.punching-traces.index") }}" class="nav-link {{ request()->is("admin/punching-traces") || request()->is("admin/punching-traces/*") ? "active" : "" }}">
+                                        <i class="fa-fw nav-icon fas fa-cogs">
+
+                                        </i>
+                                        <p>
+                                            {{ trans('cruds.punchingTrace.title') }}
+                                        </p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ route("admin.devices.index") }}" class="nav-link {{ request()->is("admin/devices") || request()->is("admin/devices/*") ? "active" : "" }}">
+                                        <i class="fa-fw nav-icon fas fa-laptop">
+
+                                        </i>
+                                        <p>
+                                            {{ trans('cruds.device.title') }}
+                                        </p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ route("admin.govt-calendars.index") }}" class="nav-link {{ request()->is("admin/govt-calendars") || request()->is("admin/govt-calendars/*") ? "active" : "" }}">
+                                        <i class="fa-fw nav-icon fas fa-cogs">
+
+                                        </i>
+                                        <p>
+                                            {{ trans('cruds.govtCalendar.title') }}
+                                        </p>
+                                    </a>
+                                </li>
+                        </ul>
+                    </li>
+            @endcan
             @can('attendance_access')
             <li class="nav-item">
                     <a class="nav-link {{ request()->is("*punchings")  ? "active" : "" }}" href="{{ route('admin.punchings.index') }}">

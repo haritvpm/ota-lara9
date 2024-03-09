@@ -6,7 +6,7 @@ use Carbon\Carbon;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+//successattendance api
 class Punching extends Model
 {
     use HasFactory;
@@ -34,7 +34,13 @@ class Punching extends Model
         'aadhaarid',
         'creator',
         'punchin_from_aebas', 'punchout_from_aebas',
-       
+      
+        'in_device',
+        'in_time',
+        'out_device',
+        'out_time',
+        'at_type',
+
        // 'allowpunch_edit',
     ];
 

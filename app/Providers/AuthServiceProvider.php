@@ -32,76 +32,77 @@ class AuthServiceProvider extends ServiceProvider
 
         // Auth gates for: User management
         Gate::define('user_management_access', function ($user) {
-            return in_array($user->role_id, [1]);
+            return in_array($user->role_id, [9,1]);
         });
 
         // Auth gates for: Roles
         Gate::define('role_access', function ($user) {
-            return in_array($user->role_id, [1]);
+            return in_array($user->role_id, [9,1]);
         });
         Gate::define('role_create', function ($user) {
-            return in_array($user->role_id, [1]);
+            return in_array($user->role_id, [9,1]);
         });
         Gate::define('role_edit', function ($user) {
-            return in_array($user->role_id, [1]);
+            return in_array($user->role_id, [9,1]);
         });
         Gate::define('role_view', function ($user) {
-            return in_array($user->role_id, [1]);
+            return in_array($user->role_id, [9,1]);
         });
         Gate::define('role_delete', function ($user) {
-            return in_array($user->role_id, [1]);
+            return in_array($user->role_id, [9,1]);
         });
 
         // Auth gates for: Users
         Gate::define('user_access', function ($user) {
-            return in_array($user->role_id, [1]);
+            return in_array($user->role_id, [9,1]);
         });
         Gate::define('user_create', function ($user) {
-            return in_array($user->role_id, [1]);
+            return in_array($user->role_id, [9,1]);
         });
         Gate::define('user_edit', function ($user) {
-            return in_array($user->role_id, [1]);
+            return in_array($user->role_id, [9,1]);
         });
         Gate::define('user_view', function ($user) {
-            return in_array($user->role_id, [1]);
+            return in_array($user->role_id, [9,1]);
         });
         Gate::define('user_delete', function ($user) {
-            return in_array($user->role_id, [1]);
+            return in_array($user->role_id, [9,1]);
         });
 
         // Auth gates for: Designations
         Gate::define('designation_access', function ($user) {
-            return in_array($user->role_id, [1]);
+            return in_array($user->role_id, [9,1]);
         });
         Gate::define('designation_create', function ($user) {
-            return in_array($user->role_id, [1]);
+            return in_array($user->role_id, [9,1]);
         });
         Gate::define('designation_edit', function ($user) {
-            return in_array($user->role_id, [1]);
+            return in_array($user->role_id, [9,1]);
         });
         Gate::define('designation_view', function ($user) {
-            return in_array($user->role_id, [1]);
+            return in_array($user->role_id, [9,1]);
         });
         Gate::define('designation_delete', function ($user) {
-            return in_array($user->role_id, [1]);
+            return in_array($user->role_id, [9,1]);
         });
 
 
         // Auth gates for: Employees
+        //6=services
         Gate::define('employee_access', function ($user) {
-            return in_array($user->role_id, [1, 2]);
+            return in_array($user->role_id, [9,1, 2,6]);
         });
         Gate::define('employee_create', function ($user) {
-            return in_array($user->role_id, [1, 2]);
+            return in_array($user->role_id, [9,1, 2]);
         });
         Gate::define('employee_edit', function ($user) {
-            return in_array($user->role_id, [1, 2]);
+            return in_array($user->role_id, [9,1, 2]);
         });
         Gate::define('employee_view', function ($user) {
-            return in_array($user->role_id, [1, 2]);
+            return in_array($user->role_id, [9,1, 2,6]);
         });
         Gate::define('employee_delete', function ($user) {
-            return in_array($user->role_id, [1]);
+            return in_array($user->role_id, [9,1]);
         });
 
         // Auth gates for: Sessions
@@ -157,19 +158,19 @@ class AuthServiceProvider extends ServiceProvider
 
         // Auth gates for: Routing
         Gate::define('routing_access', function ($user) {
-            return in_array($user->role_id, [1]);
+            return in_array($user->role_id, [9,1]);
         });
         Gate::define('routing_create', function ($user) {
-            return in_array($user->role_id, [1]);
+            return in_array($user->role_id, [9,1]);
         });
         Gate::define('routing_edit', function ($user) {
-            return in_array($user->role_id, [1]);
+            return in_array($user->role_id, [9,1]);
         });
         Gate::define('routing_view', function ($user) {
-            return in_array($user->role_id, [1]);
+            return in_array($user->role_id, [9,1]);
         });
         Gate::define('routing_delete', function ($user) {
-            return in_array($user->role_id, [1]);
+            return in_array($user->role_id, [9,1]);
         });
 
         // Auth gates for: Forms
@@ -369,9 +370,26 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('category_delete', function ($user) {
             return in_array($user->role_id, [1]);
         });
-        
 
+        //punching admin
+        //8  = it cell
+        //6=services
+        //9= superadmin basically hari
+        Gate::define('punching_management_access', function ($user) {
+            return in_array($user->role_id, [6,9,8]);
+        });
+        Gate::define('punching_trace_access', function ($user) {
+            return in_array($user->role_id, [6,9,8]);
+        });
+        Gate::define('device_access', function ($user) {
+            return in_array($user->role_id, [6,9,8]);
+        });
+        Gate::define('govt_calendar_edit', function ($user) {
+            return in_array($user->role_id, [6,9,8]);
+        });
+        Gate::define('govt_calendar_access', function ($user) {
+            return in_array($user->role_id, [2,6,9,8]);
+        });
        
-
     }
 }

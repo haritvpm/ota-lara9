@@ -221,9 +221,21 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
     Route::resource('punchings', 'Admin\PunchingsController');
    
     
-
     Route::post('csv_parse', 'Admin\CsvImportController@parse')->name('csv_parse');
     Route::post('csv_process', 'Admin\CsvImportController@process')->name('csv_process');
     Route::post('attendances/parse-csv-import', 'Admin\AttendancesController@parseCsvImportCustom')->name('attendances.parseCsvImportCustom');
+
+
+    ////////////////////
+     // Punching Trace
+     Route::resource('punching-traces', 'Admin\PunchingTraceController', ['except' => ['create', 'store', 'edit', 'update', 'show', 'destroy']]);
+
+     // Device
+     
+     Route::resource('devices', 'Admin\DeviceController');
+ 
+     // Govt Calendar
+     Route::resource('govt-calendars', 'Admin\GovtCalendarController', ['except' => ['create', 'store', 'destroy']]);
+ 
     
 });
