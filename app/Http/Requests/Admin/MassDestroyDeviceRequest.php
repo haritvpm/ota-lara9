@@ -11,7 +11,7 @@ class MassDestroyDeviceRequest extends FormRequest
 {
     public function authorize()
     {
-        abort_if(Gate::denies('device_delete'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('device_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         return true;
     }

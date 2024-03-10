@@ -11,7 +11,7 @@ class UpdateDeviceRequest extends FormRequest
 {
     public function authorize()
     {
-        return Gate::allows('device_edit');
+        return Gate::allows('device_access');
     }
 
     public function rules()

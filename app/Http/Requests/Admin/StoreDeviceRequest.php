@@ -11,7 +11,7 @@ class StoreDeviceRequest extends FormRequest
 {
     public function authorize()
     {
-        return Gate::allows('device_create');
+        return Gate::allows('device_access');
     }
 
     public function rules()

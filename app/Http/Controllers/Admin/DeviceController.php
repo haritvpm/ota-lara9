@@ -24,7 +24,7 @@ class DeviceController extends Controller
 
     public function create()
     {
-        abort_if(Gate::denies('device_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('device_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         return view('admin.devices.create');
     }
@@ -38,7 +38,7 @@ class DeviceController extends Controller
 
     public function edit(Device $device)
     {
-        abort_if(Gate::denies('device_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('device_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         return view('admin.devices.edit', compact('device'));
     }
@@ -52,14 +52,14 @@ class DeviceController extends Controller
 
     public function show(Device $device)
     {
-        abort_if(Gate::denies('device_show'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('device_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         return view('admin.devices.show', compact('device'));
     }
 
     public function destroy(Device $device)
     {
-        abort_if(Gate::denies('device_delete'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('device_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $device->delete();
 

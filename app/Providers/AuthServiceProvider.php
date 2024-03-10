@@ -384,6 +384,8 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('device_access', function ($user) {
             return in_array($user->role_id, [6,9,8]);
         });
+
+        
         Gate::define('govt_calendar_edit', function ($user) {
             return in_array($user->role_id, [6,9,8]);
         });
