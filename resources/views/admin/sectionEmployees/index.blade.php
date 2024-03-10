@@ -36,6 +36,9 @@
                             {{ trans('cruds.sectionEmployee.fields.employee') }}
                         </th>
                         <th>
+                            {{ trans('cruds.employee.fields.designation') }}
+                        </th>
+                        <th>
                             {{ trans('cruds.employee.fields.aadhaarid') }}
                         </th>
                         <th>
@@ -63,6 +66,9 @@
                             </td>
                             <td>
                                 {{ $sectionEmployee->employee->name ?? '' }}
+                            </td>
+                            <td>
+                                {{ $sectionEmployee->employee->designation->designation ?? '' }}
                             </td>
                             <td>
                                 {{ $sectionEmployee->employee->aadhaarid ?? '' }}

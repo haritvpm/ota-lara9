@@ -255,7 +255,7 @@
                             @can('officer_employee_access')
                                 <li class="nav-item">
                                     <a href="{{ route("admin.officer-employees.index") }}" class="nav-link {{ request()->is("admin/officer-employees") || request()->is("admin/officer-employees/*") ? "active" : "" }}">
-                                        <i class="fa-fw nav-icon fas fa-user">
+                                        <i class="fa-fw nav-icon fas fa-user-plus">
 
                                         </i>
                                         <p>
@@ -267,7 +267,7 @@
                             @can('officer_mapping_access')
                                 <li class="nav-item">
                                     <a href="{{ route("admin.officer-mappings.index") }}" class="nav-link {{ request()->is("admin/officer-mappings") || request()->is("admin/officer-mappings/*") ? "active" : "" }}">
-                                        <i class="fa-fw nav-icon fas fa-at">
+                                        <i class="fa-fw nav-icon fas fa-link">
 
                                         </i>
                                         <p>
