@@ -15,7 +15,6 @@ class Device extends Model
     protected $dates = [
         'created_at',
         'updated_at',
-        'deleted_at',
     ];
 
     protected $fillable = [
@@ -24,7 +23,6 @@ class Device extends Model
         'entry_name',
         'created_at',
         'updated_at',
-        'deleted_at',
     ];
 
     protected function serializeDate(DateTimeInterface $date)

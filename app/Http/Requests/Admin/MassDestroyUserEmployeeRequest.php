@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Admin;
 
-use App\PunchingTrace;
+use App\UserEmployee;
 use Gate;
 use Illuminate\Foundation\Http\FormRequest;
 use Symfony\Component\HttpFoundation\Response;
 
-class MassDestroyPunchingTraceRequest extends FormRequest
+class MassDestroyUserEmployeeRequest extends FormRequest
 {
     public function authorize()
     {
-        abort_if(Gate::denies('punching_trace_delete'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('user_employee_delete'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         return true;
     }
@@ -20,7 +20,7 @@ class MassDestroyPunchingTraceRequest extends FormRequest
     {
         return [
             'ids'   => 'required|array',
-            'ids.*' => 'exists:punching_traces,id',
+            'ids.*' => 'exists:user_employees,id',
         ];
     }
 }

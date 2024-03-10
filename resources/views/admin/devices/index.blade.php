@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('layouts.app')
 @section('content')
 @can('device_create')
     <div style="margin-bottom: 10px;" class="row">

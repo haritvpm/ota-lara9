@@ -237,5 +237,35 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
      // Govt Calendar
      Route::resource('govt-calendars', 'Admin\GovtCalendarController', ['except' => ['create', 'store', 'destroy']]);
  
+       // Section
+    Route::delete('sections/destroy', 'Admin\SectionController@massDestroy')->name('sections.massDestroy');
+    Route::post('sections/parse-csv-import', 'Admin\SectionController@parseCsvImport')->name('sections.parseCsvImport');
+    Route::post('sections/process-csv-import', 'Admin\SectionController@processCsvImport')->name('sections.processCsvImport');
+    Route::resource('sections', 'Admin\SectionController');
+
+    // Section Employee
+    Route::delete('section-employees/destroy', 'Admin\SectionEmployeeController@massDestroy')->name('section-employees.massDestroy');
+    Route::post('section-employees/parse-csv-import', 'Admin\SectionEmployeeController@parseCsvImport')->name('section-employees.parseCsvImport');
+    Route::post('section-employees/process-csv-import', 'Admin\SectionEmployeeController@processCsvImport')->name('section-employees.processCsvImport');
+    Route::resource('section-employees', 'Admin\SectionEmployeeController');
+
+    // User Employee
+    Route::delete('user-employees/destroy', 'Admin\UserEmployeeController@massDestroy')->name('user-employees.massDestroy');
+    Route::post('user-employees/parse-csv-import', 'Admin\UserEmployeeController@parseCsvImport')->name('user-employees.parseCsvImport');
+    Route::post('user-employees/process-csv-import', 'Admin\UserEmployeeController@processCsvImport')->name('user-employees.processCsvImport');
+    Route::resource('user-employees', 'Admin\UserEmployeeController');
+
+    // Officer Mapping
+    Route::delete('officer-mappings/destroy', 'Admin\OfficerMappingController@massDestroy')->name('officer-mappings.massDestroy');
+    Route::post('officer-mappings/parse-csv-import', 'Admin\OfficerMappingController@parseCsvImport')->name('officer-mappings.parseCsvImport');
+    Route::post('officer-mappings/process-csv-import', 'Admin\OfficerMappingController@processCsvImport')->name('officer-mappings.processCsvImport');
+    Route::resource('officer-mappings', 'Admin\OfficerMappingController');
+
+
+    // Officer Employee
+    Route::delete('officer-employees/destroy', 'Admin\OfficerEmployeeController@massDestroy')->name('officer-employees.massDestroy');
+    Route::post('officer-employees/parse-csv-import', 'Admin\OfficerEmployeeController@parseCsvImport')->name('officer-employees.parseCsvImport');
+    Route::post('officer-employees/process-csv-import', 'Admin\OfficerEmployeeController@processCsvImport')->name('officer-employees.processCsvImport');
+    Route::resource('officer-employees', 'Admin\OfficerEmployeeController');
     
 });

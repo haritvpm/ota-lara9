@@ -59,7 +59,7 @@ class User extends Authenticatable
     }
     public function isAdminorAudit() 
     {
-       return $this->role_id == 1 || $this->role_id == 5;
+       return $this->role_id == 1 || $this->role_id == 5 || $this->role_id == 8 || $this->role_id == 9;
     }
     public function isAudit() 
     {
@@ -89,9 +89,38 @@ class User extends Authenticatable
     {
         return $query->where('role_id', '=', 7);
     }
-     public function scopeOtherDeptUsers($query)
+    public function scopeOtherDeptUsers($query)
     {
         return $query->where('role_id', '=', 3);
+    }
+    public function scopeWithoutDataEntryLevel($query)
+    {
+        return $query->wherenot( 'username', 'like','od.%')->wherenot( 'username', 'like','de.%');
+       
+    }
+    public function scopeSections($query)
+    {
+        return $query->where( 'username', 'like','sn.%')->where('role_id', '=', 2)->wherenot('role_id', 7);
+       
+    }
+    public function scopeUSorAboveOfficers($query)
+    {
+        return $query->where('role_id', '=', 2)->wherenot('role_id', 7)->wherenot( 'username', 'like','oo.%')
+        ->wherenot( 'username', 'like','od.%')->wherenot( 'username', 'like','de.%')->wherenot( 'username', 'like','sn.%');
+       
+    }
+    public function scopeOfficers($query)
+    {
+        return $query->where('role_id', '=', 2)->wherenot('role_id', 7)
+        ->wherenot( 'username', 'like','od.%')->wherenot( 'username', 'like','de.%');
+       
+    }
+    public function scopeDSorAboveOfficers($query)
+    {
+        return $query->where('role_id', '=', 2)->wherenot('role_id', 7)->wherenot( 'username', 'like','oo.%')
+        ->wherenot( 'username', 'like','od.%')->wherenot( 'username', 'like','de.%')->wherenot( 'username', 'like','sn.%')
+        ->wherenot( 'username', 'like','us.%');
+       
     }
     public function isServices() 
     {

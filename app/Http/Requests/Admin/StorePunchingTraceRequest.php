@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Admin;
 
 use App\PunchingTrace;
 use Gate;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Response;
 
-class UpdatePunchingTraceRequest extends FormRequest
+class StorePunchingTraceRequest extends FormRequest
 {
     public function authorize()
     {
-        return Gate::allows('punching_trace_edit');
+        return Gate::allows('punching_trace_create');
     }
 
     public function rules()

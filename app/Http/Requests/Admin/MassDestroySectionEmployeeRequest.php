@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Admin;
 
-use App\GovtCalendar;
+use App\SectionEmployee;
 use Gate;
 use Illuminate\Foundation\Http\FormRequest;
 use Symfony\Component\HttpFoundation\Response;
 
-class MassDestroyGovtCalendarRequest extends FormRequest
+class MassDestroySectionEmployeeRequest extends FormRequest
 {
     public function authorize()
     {
-        abort_if(Gate::denies('govt_calendar_delete'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('section_employee_delete'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         return true;
     }
@@ -20,7 +20,7 @@ class MassDestroyGovtCalendarRequest extends FormRequest
     {
         return [
             'ids'   => 'required|array',
-            'ids.*' => 'exists:govt_calendars,id',
+            'ids.*' => 'exists:section_employees,id',
         ];
     }
 }

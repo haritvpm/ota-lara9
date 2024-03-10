@@ -390,6 +390,72 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('govt_calendar_access', function ($user) {
             return in_array($user->role_id, [2,6,9,8]);
         });
+
+        Gate::define('section_access', function ($user) {
+            return in_array($user->role_id, [6,9,8]);
+        });
+        Gate::define('section_employee_access', function ($user) {
+            return in_array($user->role_id, [6,9,8]);
+        });
+        Gate::define('officer_mapping_access', function ($user) {
+            return in_array($user->role_id, [6,9,8]);
+        });
+        Gate::define('user_employee_access', function ($user) {
+            return in_array($user->role_id, [6,9,8]);
+        });
+        
+        Gate::define('section_create', function ($user) {
+            return in_array($user->role_id, [6,9,8]);
+        });
+        Gate::define('section_edit', function ($user) {
+            return in_array($user->role_id, [6,9,8]);
+        });
+        Gate::define('section_delete', function ($user) {
+            return in_array($user->role_id, [6,9,8]);
+        });
        
+        Gate::define('section_employee_create', function ($user) {
+            return in_array($user->role_id, [6,9,8]);
+        });
+       
+        Gate::define('section_employee_edit', function ($user) {
+            return in_array($user->role_id, [6,9,8]);
+        });
+        Gate::define('section_employee_delete', function ($user) {
+            return in_array($user->role_id, [6,9,8]);
+        });
+      
+        Gate::define('user_employee_create', function ($user) {
+            return in_array($user->role_id, [6,9,8]);
+        });
+       
+        Gate::define('user_employee_edit', function ($user) {
+            return in_array($user->role_id, [6,9,8]);
+        });
+        Gate::define('user_employee_delete', function ($user) {
+            return in_array($user->role_id, [6,9,8]);
+        });
+        Gate::define('officer_mapping_create', function ($user) {
+            return in_array($user->role_id, [6,9,8]);
+        });
+       
+        Gate::define('officer_mapping_edit', function ($user) {
+            return in_array($user->role_id, [6,9,8]);
+        });
+        Gate::define('officer_mapping_delete', function ($user) {
+            return in_array($user->role_id, [6,9,8]);
+        });
+        Gate::define('officer_employee_access', function ($user) {
+            return in_array($user->role_id, [6,9,8]);
+        }); 
+        Gate::define('officer_employee_create', function ($user) {
+            return in_array($user->role_id, [6,9,8]);
+        }); 
+        Gate::define('officer_employee_edit', function ($user) {
+            return in_array($user->role_id, [6,9,8]);
+        }); 
+        Gate::define('officer_employee_delete', function ($user) {
+            return in_array($user->role_id, [6,9,8]);
+        }); 
     }
 }
