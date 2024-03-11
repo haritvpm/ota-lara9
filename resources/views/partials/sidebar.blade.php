@@ -1,6 +1,6 @@
 <!-- @inject('request', 'Illuminate\Http\Request') -->
 <!-- Left side column. contains the sidebar -->
-<aside class="main-sidebar  sidebar-dark-primary elevation-4" style="min-height: 917px;">
+<aside class="main-sidebar  sidebar-dark-primary elevation-4">
 <a href="#" class="brand-link">
         <span class="brand-text font-weight-light">OvertimeAllowanceApp</span>
     </a>
@@ -292,7 +292,7 @@
 
                     </li>
             @endcan
-            @can('attendance_access')
+            <!-- @can('attendance_access')
             <li class="nav-item">
                     <a class="nav-link {{ request()->is("*punchings")  ? "active" : "" }}" href="{{ route('admin.punchings.index') }}">
                     <i class="fas fa-fw  fa fa-id-card  nav-icon"></i>
@@ -302,17 +302,44 @@
                     </a>
             </li>
             
-            <!-- <li class="nav-item">
+             <li class="nav-item">
                     <a class="nav-link {{ request()->is("*attendances")  ? "active" : "" }}" href="{{ route('admin.attendances.index') }}">
                     <i class="fas fa-fw  fa fa-id-card nav-icon"></i>
                         <p>
                         @lang('quickadmin.attendance.title')
                         </p>
                     </a>
-                </li> -->
+                </li> 
            
-            @endcan
-        
+            @endcan -->
+            @can('attendance_access')
+                    <li class="nav-item has-treeview {{ request()->is("admin/punching-registers*") ? "menu-open" : "" }}">
+                        <a class="nav-link nav-dropdown-toggle {{ request()->is("admin/punching-registers*") ? "active" : "" }}" href="#">
+                            <i class="fa-fw nav-icon far fa-calendar-check">
+
+                            </i>
+                            <p>
+                                {{ trans('cruds.attendance.title') }}
+                                <i class="right fa fa-fw fa-angle-left nav-icon"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            @can('punching_register_access')
+                                <li class="nav-item">
+                                    <a href="{{ route("admin.punching-registers.index") }}" class="nav-link {{ request()->is("admin/punching-registers") || request()->is("admin/punching-registers/*") ? "active" : "" }}">
+                                        <i class="fa-fw nav-icon fas fa-cogs">
+
+                                        </i>
+                                        <p>
+                                            {{ trans('cruds.punchingRegister.title') }}
+                                        </p>
+                                    </a>
+                                </li>
+                            @endcan
+                        </ul>
+                    </li>
+                @endcan
+
         
             
             @can('user_management_access')

@@ -48,7 +48,7 @@ class EmployeesController extends Controller
             }
 
 
-            if(\Auth::user()->isAdmin())
+            if(\Auth::user()->isAdminorITAdmin())
             {
 
             }
@@ -117,7 +117,7 @@ class EmployeesController extends Controller
 
         $empwithnocategory = '';
         $empswithduplicatedesigdisplay = [];
-        if(\Auth::user()->isAdmin())
+        if(\Auth::user()->isAdminorITAdmin())
         {
            $empwithnocategory = Employee::select('pen')->where('categories_id',null)
            //->where('category', '<>', 'Relieved')

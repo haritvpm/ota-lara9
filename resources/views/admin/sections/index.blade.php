@@ -53,7 +53,7 @@
                                 {{ $section->name ?? '' }}
                             </td>
                             <td>
-                                {{ $section->officer->name ?? '' }}
+                                {{ $section->officer->name ?? '' }} ( {{ $section->officer->username ?? '' }})
                             </td>
                             <td>
                                 @can('section_show')

@@ -2,7 +2,7 @@
 
 @section('content')
 
-@if(!auth()->user()->isAudit() && !auth()->user()->isServices())
+@if(!auth()->user()->isAudit() && !auth()->user()->isServices() && !auth()->user()->isITAdmin())
 
 
 <div id="app">
@@ -26,7 +26,7 @@
 </blockquote>
 
 @if( \Config::get('custom.show_legsectt'))
-@if(auth()->user()->isAdmin() || !auth()->user()->isOD())
+@if(auth()->user()->isAdmin() || !auth()->user()->isOD() )
  <div class="row">
    
     <div class="col">
@@ -201,7 +201,7 @@
 
 
 @if( \Config::get('custom.show_legsectt'))
-@if(!auth()->user()->isAdmin() && !auth()->user()->isOD() && !auth()->user()->isServices() )
+@if(!auth()->user()->isAdmin() && !auth()->user()->isOD() && !auth()->user()->isServices() && !auth()->user()->isITAdmin() )
   <p>
   View orders regarding overtime allowance<br>
   <a href="<?=URL::to('admin/goview/go.pdf')?>"  target="_blank" > GO(MS) <b>123/2016/Leg</b> dtd 20-01-2016</a><br>

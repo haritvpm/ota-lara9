@@ -25,4 +25,6 @@ mix.js('resources/assets/js/app.js', 'public/js')
    .js('resources/assets/js/form_other_show.js', 'public/js')
    .js('resources/assets/js/employee_index.js', 'public/js')
    .js('resources/assets/js/attendance_index.js', 'public/js')
+   .js('resources/assets/js/punching-register.js', 'public/js')
+  
    .sass('resources/assets/sass/app.scss', 'public/css');

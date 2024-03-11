@@ -268,4 +268,9 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
     Route::post('officer-employees/process-csv-import', 'Admin\OfficerEmployeeController@processCsvImport')->name('officer-employees.processCsvImport');
     Route::resource('officer-employees', 'Admin\OfficerEmployeeController');
     
+     // Punching Register
+     Route::post('punching-registers/process', 'Admin\PunchingRegisterController@process')->name('punching-registers.process');
+     Route::resource('punching-registers', 'Admin\PunchingRegisterController', ['except' => ['destroy']]);
+
+
 });

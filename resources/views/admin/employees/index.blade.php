@@ -68,7 +68,7 @@ table.ajaxTable tr.dtrg-level-0 td {
 
 
 
- @if(\Auth::user()->isAdmin())
+ @if(\Auth::user()->isAdminorITAdmin())
  
  <h5>Change Designation of Employee on Promotion/Reversion</h5>
      <div   id="app">
@@ -102,12 +102,12 @@ table.ajaxTable tr.dtrg-level-0 td {
 
  <br>
  <!-- prevent user changing employee details -->
-  @if(\Auth::user()->isAdmin())
+  @if(\Auth::user()->isAdminorITAdmin())
 
     <div class="">
        
         <div class="">
-            <table class="table table-borderless table-sm table-striped ajaxTable"> 
+            <table class="table table-borderless table-sm table-striped ajaxTable" style="width: 100%;"> 
              
                 <thead>
                     <tr>

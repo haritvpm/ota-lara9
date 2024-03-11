@@ -27,7 +27,7 @@ class UsersController extends Controller
 
         $nodisplnameusers = null;
 
-        if(auth()->user()->isAdmin()){
+        if(auth()->user()->isAdminorITAdmin()){
             $nodisplnameusers = User::wherenull('displayname'               )
                 ->where('username','not like', 'de.%')
                 ->where(function($query)

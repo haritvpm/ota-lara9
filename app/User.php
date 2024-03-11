@@ -52,10 +52,17 @@ class User extends Authenticatable
     {
         return $this->hasOne('\App\Routing');
     }
-
+    public function isITAdmin() 
+    {
+       return $this->role_id == 8;
+    }
     public function isAdmin() 
     {
-       return $this->role_id == 1;
+       return $this->role_id == 1 || $this->role_id == 9;
+    }
+    public function isAdminorITAdmin() 
+    {
+       return $this->role_id == 1 || $this->role_id == 9 || $this->role_id == 8;;
     }
     public function isAdminorAudit() 
     {

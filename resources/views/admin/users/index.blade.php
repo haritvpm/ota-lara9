@@ -4,7 +4,7 @@
 @section('content')
     <h3 class="page-title">@lang('quickadmin.users.title')</h3>
 
-    @if( auth()->user()->isAdmin())
+    @if( auth()->user()->isAdminorITAdmin())
     <p>
     <strong>US, DS with no displaynames:</strong> <br> 
     
@@ -115,7 +115,7 @@
 
 <!-- users -->
 
-
+@if( auth()->user()->isAdmin())
 <div>
         
         <form action="{{url('admin/searches/download_user')}}" method="get" class="form-inline">
@@ -132,7 +132,7 @@
         <button type="submit" class="btn btn-danger" >Dump</button>
                                  
 </form>
-
+@endif
 @stop
 
 @section('javascript') 
