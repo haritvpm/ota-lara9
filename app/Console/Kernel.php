@@ -30,6 +30,10 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('fetch:attendancetracetoday')
             ->hourly();
+
+        $schedule->command('fetch:attendanceyesterday')
+                ->twiceDaily(8, 10);	//Run the task daily at 8:00 & 10:00
+
     }
 
     /**
