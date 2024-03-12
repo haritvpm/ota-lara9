@@ -339,7 +339,7 @@ class AuthServiceProvider extends ServiceProvider
 
          // Auth gates for: Attendance
         Gate::define('attendance_access', function ($user) {
-            return in_array($user->role_id, [2,8,9]);
+            return in_array($user->role_id, [8,9]);
         });
         Gate::define('attendance_create', function ($user) {
             return in_array($user->role_id, [2,8,9]);
