@@ -370,7 +370,6 @@ class EmployeesController extends Controller
         $employee = new Employee ($request->all());
 
         //admins does not save added by
-       // if(\Auth::user()->role_id != 1)
         {
             $employee['added_by'] = \Auth::user()->username;
         }
