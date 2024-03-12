@@ -22,7 +22,9 @@
                         </tr>
                         <tr>
                             <th>@lang('quickadmin.users.fields.role')</th>
-                            <td field-key='role'>{{ $user->role->title ?? '' }}</td>
+                            <td field-key='role'> @foreach($user->roles as $key => $roles)
+                                <span class="label label-info">{{ $roles->title }}</span>
+                            @endforeach</td>
                         </tr>
                         <tr>
                             <th>@lang('quickadmin.users.fields.username')</th>

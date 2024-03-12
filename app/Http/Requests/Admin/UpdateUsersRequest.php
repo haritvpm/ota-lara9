@@ -12,7 +12,7 @@ class UpdateUsersRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        return Gate::allows('user_edit');
     }
 
     /**
@@ -26,7 +26,13 @@ class UpdateUsersRequest extends FormRequest
             
             'name' => 'required',
             'email' => 'email',
-            'role_id' => 'required',
+            'roles.*' => [
+                'integer',
+            ],
+            'roles' => [
+                'required',
+                'array',
+            ],
             'username' => 'min:2|required|unique:users,username,'.$this->route('user'),
         ];
     }

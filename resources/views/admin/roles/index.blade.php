@@ -1,74 +1,96 @@
 @inject('request', 'Illuminate\Http\Request')
 @extends('layouts.app')
-
 @section('content')
-    <h3 class="page-title">@lang('quickadmin.roles.title')</h3>
-    @can('role_create')
-    <p>
-        <a href="{{ route('admin.roles.create') }}" class="btn btn-success">@lang('quickadmin.qa_add_new')</a>
-        
-    </p>
-    @endcan
+@can('role_create')
+    <div style="margin-bottom: 10px;" class="row">
+        <div class="col-lg-12">
+            <a class="btn btn-success" href="{{ route('admin.roles.create') }}">
+                {{ trans('global.add') }} {{ trans('cruds.role.title_singular') }}
+            </a>
+        </div>
+    </div>
+@endcan
+<div class="card">
+    <div class="card-header">
+        {{ trans('cruds.role.title_singular') }} {{ trans('global.list') }}
+    </div>
 
-    
-
-    <div class="">
-       
-
-        <div class="">
-            <table class="table table-bordered table-striped {{ count($roles) > 0 ? 'datatable' : '' }} ">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class=" table table-bordered table-striped table-hover datatable ">
                 <thead>
                     <tr>
-                       
+                        <th width="10">
 
-                        <th>@lang('quickadmin.roles.fields.title')</th>
-                        <th>Role Id</th>
-                                                <th>&nbsp;</th>
-
+                        </th>
+                        <th>
+                            {{ trans('cruds.role.fields.id') }}
+                        </th>
+                        <th>
+                            {{ trans('cruds.role.fields.title') }}
+                        </th>
+                        <th>
+                            {{ trans('cruds.role.fields.permissions') }}
+                        </th>
+                        <th>
+                            &nbsp;
+                        </th>
                     </tr>
                 </thead>
-                
                 <tbody>
-                    @if (count($roles) > 0)
-                        @foreach ($roles as $role)
-                            <tr data-entry-id="{{ $role->id }}">
-                              
-                                <td field-key='title'>{{ $role->title }}</td>
-                                <td field-key='id'>{{ $role->id }}</td>
-                                                                <td>
-                                    @can('role_view')
-                                    <a href="{{ route('admin.roles.show',[$role->id]) }}" class="btn btn-sm btn-primary">@lang('quickadmin.qa_view')</a>
-                                    @endcan
-                                    @can('role_edit')
-                                    <a href="{{ route('admin.roles.edit',[$role->id]) }}" class="btn btn-sm btn-info">@lang('quickadmin.qa_edit')</a>
-                                    @endcan
-                                    @can('role_delete')
-{!! Form::open(array(
-                                        'style' => 'display: inline-block;',
-                                        'method' => 'DELETE',
-                                        'onsubmit' => "return confirm('".trans("quickadmin.qa_are_you_sure")."');",
-                                        'route' => ['admin.roles.destroy', $role->id])) !!}
-                                    {!! Form::submit(trans('quickadmin.qa_delete'), array('class' => 'btn btn-sm btn-danger')) !!}
-                                    {!! Form::close() !!}
-                                    @endcan
-                                </td>
+                    @foreach($roles as $key => $role)
+                        <tr data-entry-id="{{ $role->id }}">
+                            <td>
 
-                            </tr>
-                        @endforeach
-                    @else
-                        <tr>
-                            <td colspan="6">@lang('quickadmin.qa_no_entries_in_table')</td>
+                            </td>
+                            <td>
+                                {{ $role->id ?? '' }}
+                            </td>
+                            <td>
+                                {{ $role->title ?? '' }}
+                            </td>
+                            <td>
+                                @foreach($role->permissions as $key => $item)
+                                    <span class="badge badge-info">{{ $item->title }}</span>
+                                @endforeach
+                            </td>
+                            <td>
+                                @can('role_show')
+                                    <a class="btn btn-xs btn-primary" href="{{ route('admin.roles.show', $role->id) }}">
+                                        {{ trans('global.view') }}
+                                    </a>
+                                @endcan
+
+                                @can('role_edit')
+                                    <a class="btn btn-xs btn-info" href="{{ route('admin.roles.edit', $role->id) }}">
+                                        {{ trans('global.edit') }}
+                                    </a>
+                                @endcan
+
+                                @can('role_delete')
+                                    <form action="{{ route('admin.roles.destroy', $role->id) }}" method="POST" onsubmit="return confirm('{{ trans('global.areYouSure') }}');" style="display: inline-block;">
+                                        <input type="hidden" name="_method" value="DELETE">
+                                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                        <input type="submit" class="btn btn-xs btn-danger" value="{{ trans('global.delete') }}">
+                                    </form>
+                                @endcan
+
+                            </td>
+
                         </tr>
-                    @endif
+                    @endforeach
                 </tbody>
             </table>
         </div>
     </div>
-@stop
+</div>
 
-@section('javascript') 
-    <script>
-      
 
-    </script>
+
+@endsection
+@section('javascript')
+@parent
+<script>
+ 
+</script>
 @endsection

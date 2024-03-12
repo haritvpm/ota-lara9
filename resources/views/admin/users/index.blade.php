@@ -67,7 +67,12 @@
 
                                 <td field-key='name' class="text-nowrap">{{ $user->getAttributes()['name'] }}</td>
                                 <!-- <td field-key='email'>{{ $user->email }}</td> -->
-                                <td field-key='role'>{{ $user->role->title ?? '' }}</td>
+                                <td field-key='role'>
+                                @foreach($user->roles as $key => $item)
+                                    <span class="badge badge-info">{{ $item->title }}</span>
+                                @endforeach
+
+                                </td>
                                 <td field-key='username' class="text-nowrap">{{ $user->username }}</td>
                                 <td field-key='displayname' class="text-nowrap">{{ $user->displayname }}</td>
                                 <td class="text-nowrap">

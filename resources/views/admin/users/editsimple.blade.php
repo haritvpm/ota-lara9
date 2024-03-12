@@ -60,19 +60,7 @@
                     @endif
                 </div>
             </div>
-            <div class="row">
-                <div class="col-sm-12 form-group">
-                    {!! Form::label('role_id', trans('quickadmin.users.fields.role').'*', ['class' => 'control-label']) !!}
-                   
-                    {!! Form::text('role_id',  old('role_id'), ['class' => 'form-control', 'readonly' => 'true', 'required' => '']) !!}
-                    <p class="help-block"></p>
-                    @if($errors->has('role_id'))
-                        <p class="help-block">
-                            {{ $errors->first('role_id') }}
-                        </p>
-                    @endif
-                </div>
-            </div>
+           
             
         </div>
     </div>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\User;
+use App\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use App\Http\Controllers\Controller;
@@ -22,7 +23,7 @@ class UsersController extends Controller
     public function index()
     {
         if (! Gate::allows('user_access')) {
-            return abort(401);
+         //   return abort(401);
         }
 
         $nodisplnameusers = null;
@@ -99,7 +100,7 @@ class UsersController extends Controller
 
 
 
-        $query = User::query(); 
+        $query = User::with(['roles']); 
       
 
         $query->when($nolegsecttusers == false, function ($q) {
@@ -123,7 +124,7 @@ class UsersController extends Controller
             return abort(401);
         }
         
-        $roles = \App\Role::get()->pluck('title', 'id')->prepend(trans('quickadmin.qa_please_select'), '');
+        $roles = Role::pluck('title', 'id');
 
        
         return view('admin.users.create', compact('roles'));
@@ -144,6 +145,7 @@ class UsersController extends Controller
             return abort(401);
         }
         $user = User::create($request->all());
+        $user->roles()->sync($request->input('roles', []));
 
         $route = null;
 
@@ -226,9 +228,11 @@ class UsersController extends Controller
             return abort(401);
         }
         
-        $roles = \App\Role::get()->pluck('title', 'id')->prepend(trans('quickadmin.qa_please_select'), '');
+        $roles = Role::pluck('title', 'id');
+
 
         $user = User::findOrFail($id);
+        $user->load('roles');
 
         return view('admin.users.edit', compact('user', 'roles'));
     }
@@ -239,10 +243,12 @@ class UsersController extends Controller
             return abort(401);
         }
         
-        $roles = \App\Role::get()->pluck('title', 'id')->prepend(trans('quickadmin.qa_please_select'), '');
+        $roles = Role::pluck('title', 'id');
+
 
         $user = User::findOrFail($id);
-       
+        $user->load('roles');
+
         return view('admin.users.editsimple', compact('user', 'roles'));
     }
 
@@ -260,6 +266,7 @@ class UsersController extends Controller
         }
         $user = User::findOrFail($id);
         $user->update($request->all());
+        $user->roles()->sync($request->input('roles', []));
 
         //if this is JS or AS or SS, update their de. title too
 
@@ -363,6 +370,7 @@ class UsersController extends Controller
         $roles = \App\Role::get()->pluck('title', 'id')->prepend(trans('quickadmin.qa_please_select'), '');$routings = \App\Routing::where('user_id', $id)->get();
 
         $user = User::findOrFail($id);
+        $user->load('roles');
 
         return view('admin.users.show', compact('user', 'routings'));
     }

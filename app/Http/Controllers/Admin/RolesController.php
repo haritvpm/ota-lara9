@@ -1,156 +1,90 @@
 <?php
 
 namespace App\Http\Controllers\Admin;
-
+use App\Permission;
 use App\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\StoreRolesRequest;
-use App\Http\Requests\Admin\UpdateRolesRequest;
-use Yajra\DataTables\DataTables;
+use App\Http\Requests\Admin\StoreRoleRequest;
+use App\Http\Requests\Admin\UpdateRoleRequest;
+
+
+use Symfony\Component\HttpFoundation\Response;
 
 class RolesController extends Controller
 {
-    /**
-     * Display a listing of Role.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
-        if (! Gate::allows('role_access')) {
-            return abort(401);
-        }
+       // abort_if(Gate::denies('role_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-
-        $roles = Role::all();
+        $roles = Role::with(['permissions'])->get();
 
         return view('admin.roles.index', compact('roles'));
     }
 
-    /**
-     * Show the form for creating new Role.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {
-        if (! Gate::allows('role_create')) {
-            return abort(401);
-        }
-        return view('admin.roles.create');
+        abort_if(Gate::denies('role_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+
+        $permissions = Permission::pluck('title', 'id');
+
+        return view('admin.roles.create', compact('permissions'));
     }
 
-    /**
-     * Store a newly created Role in storage.
-     *
-     * @param  \App\Http\Requests\StoreRolesRequest  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(StoreRolesRequest $request)
+    public function store(StoreRoleRequest $request)
     {
-        if (! Gate::allows('role_create')) {
-            return abort(401);
-        }
         $role = Role::create($request->all());
-
-
+        $role->permissions()->sync($request->input('permissions', []));
 
         return redirect()->route('admin.roles.index');
     }
 
-
-    /**
-     * Show the form for editing Role.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
+    public function edit(Role $role)
     {
-        if (! Gate::allows('role_edit')) {
-            return abort(401);
-        }
-        $role = Role::findOrFail($id);
+        abort_if(Gate::denies('role_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        return view('admin.roles.edit', compact('role'));
+        $permissions = Permission::pluck('title', 'id');
+
+        $role->load('permissions');
+
+        return view('admin.roles.edit', compact('permissions', 'role'));
     }
 
-    /**
-     * Update Role in storage.
-     *
-     * @param  \App\Http\Requests\UpdateRolesRequest  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(UpdateRolesRequest $request, $id)
+    public function update(UpdateRoleRequest $request, Role $role)
     {
-        if (! Gate::allows('role_edit')) {
-            return abort(401);
-        }
-        $role = Role::findOrFail($id);
         $role->update($request->all());
-
-
+        $role->permissions()->sync($request->input('permissions', []));
 
         return redirect()->route('admin.roles.index');
     }
 
-
-    /**
-     * Display Role.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
+    public function show(Role $role)
     {
-        if (! Gate::allows('role_view')) {
-            return abort(401);
-        }
-        $users = \App\User::where('role_id', $id)->get();
+        abort_if(Gate::denies('role_show'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        $role = Role::findOrFail($id);
+        $role->load('permissions');
 
-        return view('admin.roles.show', compact('role', 'users'));
+        return view('admin.roles.show', compact('role'));
     }
 
-
-    /**
-     * Remove Role from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
+    public function destroy(Role $role)
     {
-        if (! Gate::allows('role_delete')) {
-            return abort(401);
-        }
-        $role = Role::findOrFail($id);
+        abort_if(Gate::denies('role_delete'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+
         $role->delete();
 
-        return redirect()->route('admin.roles.index');
+        return back();
     }
 
-    /**
-     * Delete all selected Role at once.
-     *
-     * @param Request $request
-     */
-    public function massDestroy(Request $request)
+    public function massDestroy(MassDestroyRoleRequest $request)
     {
-        if (! Gate::allows('role_delete')) {
-            return abort(401);
-        }
-        if ($request->input('ids')) {
-            $entries = Role::whereIn('id', $request->input('ids'))->get();
+        $roles = Role::find(request('ids'));
 
-            foreach ($entries as $entry) {
-                $entry->delete();
-            }
+        foreach ($roles as $role) {
+          //  $role->delete();
         }
+
+        return response(null, Response::HTTP_NO_CONTENT);
     }
-
 }

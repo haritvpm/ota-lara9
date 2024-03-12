@@ -34,18 +34,13 @@ class User extends Authenticatable
     }
     
 
-    /**
-     * Set to null if empty
-     * @param $input
-     */
-    public function setRoleIdAttribute($input)
+    public function getIsAdminAttribute()
     {
-        $this->attributes['role_id'] = $input ? $input : null;
+        return $this->roles()->where('id', 1)->exists();
     }
-    
-    public function role()
+    public function roles()
     {
-        return $this->belongsTo(Role::class, 'role_id');
+        return $this->belongsToMany(Role::class);
     }
     
     public function routing()
@@ -54,19 +49,25 @@ class User extends Authenticatable
     }
     public function isITAdmin() 
     {
-       return $this->role_id == 8;
+       return $this->roles()->where('id', 8)->exists();
+      
     }
     public function isAdmin() 
     {
-       return $this->role_id == 1 || $this->role_id == 9;
+      // return $this->role_id == 1 || $this->role_id == 9;
+       return $this->roles()->wherein('id', [1,9])->exists();
+
     }
     public function isAdminorITAdmin() 
     {
-       return $this->role_id == 1 || $this->role_id == 9 || $this->role_id == 8;;
+      // return $this->role_id == 1 || $this->role_id == 9 || $this->role_id == 8;;
+       return $this->roles()->wherein('id', [1,9,8])->exists();
     }
     public function isAdminorAudit() 
     {
-       return $this->role_id == 1 || $this->role_id == 5 || $this->role_id == 8 || $this->role_id == 9;
+     //  return $this->role_id == 1 || $this->role_id == 5 || $this->role_id == 8 || $this->role_id == 9;
+     return $this->roles()->wherein('id', [1,9])->exists();
+
     }
     public function isAudit() 
     {
@@ -74,7 +75,9 @@ class User extends Authenticatable
     }
     public function isSimpleUser() 
     {
-       return $this->role_id == 2;
+      // return $this->role_id == 2;
+       return $this->roles()->where('id', 2)->exists();
+
     }
     public function scopeSimpleUsers($query)
     {

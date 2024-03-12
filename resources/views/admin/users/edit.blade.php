@@ -76,16 +76,22 @@
                 
             </div>
             <div class="row">
-                <div class="col-sm-12 form-group">
-                    {!! Form::label('role_id', trans('quickadmin.users.fields.role').'*', ['class' => 'control-label']) !!}
-                    {!! Form::select('role_id', $roles, old('role_id'), ['class' => 'form-control', 'required' => '']) !!}
-                    <p class="help-block"></p>
-                    @if($errors->has('role_id'))
-                        <p class="help-block">
-                            {{ $errors->first('role_id') }}
-                        </p>
-                    @endif
+            <div class="form-group">
+                <label class="required" for="roles">{{ trans('cruds.user.fields.roles') }}</label>
+                <div style="padding-bottom: 4px">
+                    <span class="btn btn-info btn-xs select-all" style="border-radius: 0">{{ trans('global.select_all') }}</span>
+                    <span class="btn btn-info btn-xs deselect-all" style="border-radius: 0">{{ trans('global.deselect_all') }}</span>
                 </div>
+                <select class="form-control select2 {{ $errors->has('roles') ? 'is-invalid' : '' }}" name="roles[]" id="roles" multiple required>
+                    @foreach($roles as $id => $role)
+                        <option value="{{ $id }}" {{ (in_array($id, old('roles', [])) || $user->roles->contains($id)) ? 'selected' : '' }}>{{ $role }}</option>
+                    @endforeach
+                </select>
+                @if($errors->has('roles'))
+                    <span class="text-danger">{{ $errors->first('roles') }}</span>
+                @endif
+                <span class="help-block">{{ trans('cruds.user.fields.roles_helper') }}</span>
+            </div>
             </div>
             <div class="row">
                 <div class="col-sm-12 form-group">

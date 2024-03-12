@@ -28,6 +28,10 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
     
     Route::get('/goview/{file}', 'HomeController@goview');
     
+     // Permissions
+     Route::delete('permissions/destroy', 'Admin\PermissionsController@massDestroy')->name('permissions.massDestroy');
+     Route::resource('permissions', 'Admin\PermissionsController');
+
     Route::resource('roles', 'Admin\RolesController');
     Route::post('roles_mass_destroy', ['uses' => 'Admin\RolesController@massDestroy', 'as' => 'roles.mass_destroy']);
     

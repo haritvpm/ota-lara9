@@ -26,9 +26,8 @@ class AuthServiceProvider extends ServiceProvider
     public function boot()
     {
         // $this->registerPolicies();
-
+/*
         $user = \Auth::user();
-
 
         // Auth gates for: User management
         Gate::define('user_management_access', function ($user) {
@@ -475,5 +474,6 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('officer_employee_delete', function ($user) {
             return in_array($user->role_id, [6,9,8]);
         }); 
+        */
     }
 }

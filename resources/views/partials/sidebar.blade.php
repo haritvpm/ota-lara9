@@ -343,7 +343,7 @@
         
             
             @can('user_management_access')
-             <li class="nav-item has-treeview {{ request()->is("*admin/routings*") ? "menu-open" : "" }} {{ request()->is("admin/roles*") ? "menu-open" : "" }} {{ request()->is("admin/users*") ? "menu-open" : "" }}">
+             <li class="nav-item has-treeview {{ request()->is("*admin/routings*") ? "menu-open" : "" }} {{ request()->is("admin/roles*") ? "menu-open" : "" }} {{ request()->is("admin/users*") ? "menu-open" : "" }} {{ request()->is("admin/permissions*") ? "menu-open" : "" }}">
                         <a class="nav-link nav-dropdown-toggle" href="#">
                             <i class="fa-fw nav-icon fas fa-user-circle">
 
@@ -381,7 +381,18 @@
                     </li>
              
                 @endcan
-              
+                @can('permission_access')
+                                <li class="nav-item">
+                                    <a href="{{ route("admin.permissions.index") }}" class="nav-link {{ request()->is("admin/permissions") || request()->is("admin/permissions/*") ? "active" : "" }}">
+                                        <i class="fa-fw nav-icon fas fa-unlock-alt">
+
+                                        </i>
+                                        <p>
+                                            {{ trans('cruds.permission.title') }}
+                                        </p>
+                                    </a>
+                                </li>
+                            @endcan
                 @can('routing_access')
                 <li class="nav-item">
                         <a href="{{ route("admin.routings.index") }}" class="nav-link {{ request()->is("*admin/routings*") ? "active" : "" }}">
