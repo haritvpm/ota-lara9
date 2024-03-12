@@ -307,7 +307,9 @@ class PunchingsController extends Controller
     {
         $apikey =  env('AEBAS_KEY');
         $offset = 0;
-        $count = 500;
+       
+        $islocal_test = true;
+        $count =  $islocal_test  ? 10000: 500;
       
         // should be in format 2024-02-11
         $reportdate = Carbon::createFromFormat(config('app.date_format'), $reportdate)->format('Y-m-d');
@@ -315,11 +317,10 @@ class PunchingsController extends Controller
        
        //if this date is not in calender, do nothing
         $calenderdate = Calender::where('date', $reportdate )->first();
-        if(! $calenderdate ){
-            \Session::flash('message-success', 'No such date in calender'  );
-            return view('admin.punchings.index');
-
-        }
+       // if(! $calenderdate ){
+        //    \Session::flash('message-success', 'No such date in calender'  );
+        //    return view('admin.punchings.index');
+       // }
 
      
 
@@ -329,7 +330,9 @@ class PunchingsController extends Controller
             
             
             $url = "https://basreports.attendance.gov.in/api/unibasglobal/api/attendance/offset/{$offset}/count/{$count}/reportdate/{$reportdate}/apikey/{$apikey}";
-            // $url = 'http://localhost:3000/data';
+            
+            if ($islocal_test) $url = 'http://localhost:3000/data';
+
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
             ])->withOptions([
@@ -357,13 +360,20 @@ class PunchingsController extends Controller
                 //org_emp_code from api can be klaid, mobilenumber or empty. 
                 $org_emp_code = $dataItem['org_emp_code'];
                 $attendanceId = $dataItem['emp_id'];
+                if('0000-00-00 00:00:00' == $dataItem['in_time'])  $dataItem['in_time'] = null;
+                if('0000-00-00 00:00:00' == $dataItem['out_time'])  $dataItem['out_time'] = null;
                 
                 //date-aadhaarid-pen composite keys wont work if we give null. so something to pen
                 //punchout date can be diff to punchin date, not sure
                 if($dateIn && $intime && $dateOut && $outtime && ($dateIn === $dateOut)){
                     $matchThese = ['aadhaarid' => $attendanceId ,'date'=> $dateIn];
-                    $vals = ['punch_in'=> $intime,'punch_out'=> $outtime, 'pen'=>'-', 'punchin_from_aebas' => true, 'punchout_from_aebas'=> true];
+                    $vals = ['punch_in'=> $intime,'punch_out'=> $outtime, 'pen'=>'-', 'punchin_from_aebas' => true, 
+                            'punchout_from_aebas'=>     true ,'in_device' => $dataItem['in_device_id'], 'in_time'=> $dataItem['in_time'],
+                            'out_device'=>  $dataItem['out_device_id'], 'out_time'=> $dataItem['out_time'],
+                            'at_type'=> $dataItem['at_type']];
+
                     if($org_emp_code != '')  $vals['pen'] = $org_emp_code;
+                    
                   
                     $punch = Punching::updateOrCreate($matchThese,$vals);
                 }
@@ -372,7 +382,8 @@ class PunchingsController extends Controller
                    // $date = Carbon::createFromFormat('Y-m-d', $dateIn)->format(config('app.date_format'));
                    //org_emp_code can be null. since empty can cause unique constraint violations, dont allow
                     $matchThese = ['aadhaarid' =>$attendanceId ,'date'=> $dateIn];
-                    $vals = ['punch_in'=> $intime,'pen'=>'-', 'punchin_from_aebas' => true, 'punchout_from_aebas'=> false];
+                    $vals = ['punch_in'=> $intime,'pen'=>'-', 'punchin_from_aebas' => true, 'punchout_from_aebas'=> false,
+                            'in_device' => $dataItem['in_device_id'],'in_time'=> $dataItem['in_time'],'out_device'=>  $dataItem['out_device_id'],'out_time'=> $dataItem['out_time'], 'at_type'=> $dataItem['at_type']];
 
                     if($org_emp_code != '') $vals['pen'] = $org_emp_code;
                     
@@ -383,11 +394,16 @@ class PunchingsController extends Controller
                 if($dateOut && $outtime){
                    // $date = Carbon::createFromFormat('Y-m-d', $dateOut)->format(config('app.date_format'));
                     $matchThese = ['aadhaarid' =>$attendanceId,'date'=> $dateOut];
-                    $vals = ['punch_out'=> $outtime,'pen'=>'-', 'punchin_from_aebas' => false, 'punchout_from_aebas'=> true];
+                    $vals = ['punch_out'=> $outtime,'pen'=>'-', 'punchin_from_aebas' => false, 'punchout_from_aebas'=> true ,
+                            'in_device' => $dataItem['in_device_id'], 'in_time'=> $dataItem['in_time'],
+                            'out_device'=> $dataItem['out_device_id'], 'out_time'=> $dataItem['out_time'], 'at_type'=> $dataItem['at_type']];
                     if($org_emp_code != '')  $vals['pen'] = $org_emp_code;
                     
                     $punch = Punching::updateOrCreate($matchThese,$vals);
                    
+                } else {
+                    \Log::info('found punching fetch edge case');
+                    
                 }
                 $insertedcount++;
 
@@ -404,7 +420,7 @@ class PunchingsController extends Controller
            
         }
 
-        if( $insertedcount ){
+        if( $calenderdate && $insertedcount ){
             $calenderdate->update( [ 'punching' => 'AEBAS']);
 
             //$lastfetch = Setting::firstOrCreate( ['name' => 'lastfetch'], 

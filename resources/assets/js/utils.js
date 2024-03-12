@@ -62,20 +62,22 @@ export function  checkDatesAndOT(row, data){
     if( punchin && punchout  ){ //punched
 
       if (row.isPartime) {
-        if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "11:25")) {
+        if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "11:25") || 
+            timePeriodIncludesPeriod(punchin, punchout, "07:05", "12:25")) {
           data.dates[i].ot = 'YES'
           count++;
         } else{
-          data.dates[i].ot = 'No. (06:00 - 11:30)'
+          data.dates[i].ot = 'No. (6/7 am - 11:30/12:30)'
         }
       }
       else if (row.isFulltime) {
   
-         if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "16:25")) { 
+         if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "16:25") || 
+             timePeriodIncludesPeriod(punchin, punchout, "07:05", "17:25")) { 
             count++;
             data.dates[i].ot = 'YES'
           } else{
-            data.dates[i].ot = 'No. (06:00 - 4:30pm)'
+            data.dates[i].ot = 'No. (6/7 am - 4:30pm/5:30pm)'
           }
       }    
       else if (row.isWatchnward) {
@@ -110,20 +112,22 @@ export function  checkDatesAndOT(row, data){
     data.dates[i].userdecision = false 
 
     if (row.isPartime) {
-      if (sittingAllowableForNonAebasDay(punchin, punchout, "06:05", "11:25")) {
+      if (sittingAllowableForNonAebasDay(punchin, punchout, "06:05", "11:25") || 
+          sittingAllowableForNonAebasDay(punchin, punchout, "07:05", "12:25")) {
         data.dates[i].userdecision = true 
        
       } else{
-        data.dates[i].ot = 'No. (06:00 - 11:30)'
+        data.dates[i].ot = 'No. (6/7 - 11:30/12:30)'
       }
     }
     else if (row.isFulltime) {
 
-       if (sittingAllowableForNonAebasDay(punchin, punchout, "06:05", "16:25")) { 
+       if (sittingAllowableForNonAebasDay(punchin, punchout, "06:05", "16:25") || 
+          sittingAllowableForNonAebasDay(punchin, punchout, "07:05", "17:25")) { 
           data.dates[i].userdecision = true 
         
         } else{
-          data.dates[i].ot = 'No. (06:00 - 4:30pm)'
+          data.dates[i].ot = 'No. (6/7 - 4:30pm/5:30pm)'
         }
     }    
     else if (row.isWatchnward) {
