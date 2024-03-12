@@ -1,5 +1,5 @@
 <?php
-
+/*
 $factory->defineAs(App\User::class, 'admin', function () {
     static $password;
     return [
@@ -32,4 +32,4 @@ $factory->defineAs(App\Role::class, 'simple', function () {
         'id' => 2,
         'title' => 'Simple user',
     ];
-});
+});*/

@@ -1,6 +1,6 @@
 <?php
 use Illuminate\Support\Str;
-
+/*
 $factory->define(App\User::class, function (Faker\Generator $faker) {
     return [
         "name" => $faker->name,
@@ -11,3 +11,5 @@ $factory->define(App\User::class, function (Faker\Generator $faker) {
         "username" => $faker->name,
     ];
 });
+
+*/

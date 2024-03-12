@@ -188,11 +188,11 @@ class UsersController extends Controller
                     'email' => 'admin@admin.com', 
                     'username' => 'de.'.$user->username, 
                     'displayname' => 'Asst',
-                    'role_id' => 2,
+                  //  'role_id' => 2,
                     'password' => 'password'
                 ]
             );
-                        
+            $userdataentry->roles()->sync(2);  
 
             $userdataentry->routing()->create(
                 [
