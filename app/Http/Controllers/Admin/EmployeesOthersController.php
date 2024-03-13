@@ -205,7 +205,6 @@ class EmployeesOthersController extends Controller
         $employees_other = new EmployeesOther ($request->all());
 
         //admins does not save added by
-       // if(\Auth::user()->role_id != 1)
         {
             $employees_other['added_by'] = \Auth::user()->username;
         }

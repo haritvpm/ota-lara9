@@ -56,35 +56,29 @@ class User extends Authenticatable
     }
     public function isAdmin() 
     {
-      // return $this->role_id == 1 || $this->role_id == 9;
        return $this->roles()->wherein('id', [1,9])->exists();
 
     }
     public function isAdminorITAdmin() 
     {
-      // return $this->role_id == 1 || $this->role_id == 9 || $this->role_id == 8;;
        return $this->roles()->wherein('id', [1,9,8])->exists();
     }
     public function isAdminorAudit() 
     {
-     //  return $this->role_id == 1 || $this->role_id == 5 || $this->role_id == 8 || $this->role_id == 9;
-     return $this->roles()->wherein('id', [1,9])->exists();
+     return $this->roles()->wherein('id', [1,9,5,8])->exists();
 
     }
     public function isAudit() 
     {
-     //  return $this->role_id == 5;
        return $this->roles()->where('id', 5)->exists();
     }
     public function isSimpleUser() 
     {
-      // return $this->role_id == 2;
        return $this->roles()->where('id', 2)->exists();
 
     }
     public function scopeSimpleUsers($query)
     {
-       // return $query->where('role_id', '=', 2);
        return $query->whereHas('roles', function ($q) {
              $q->where('id', 2);
         });
@@ -93,8 +87,7 @@ class User extends Authenticatable
     
     public function scopeNotSimpleAndHiddenUsers($query)
     {
-        // return $query->where('role_id', '<>', 2)//simple user
-        //          ->where('role_id', '<>', 7);  //hidden
+      
 
         return $query->whereHas('roles', function ($q) {
                  $q->wherenotin('id', [2,7]);//simple user
@@ -103,8 +96,7 @@ class User extends Authenticatable
     }
      public function scopeSimpleOrHiddenUsers($query)
     {
-        // return $query->where('role_id', '=', 2)//simple user
-       //           ->orwhere('role_id', '=', 7);  //hidden
+       
          return $query->whereHas('roles', function ($q) {
                 $q->wherein('id', [2,7]);//simple user
                 //hidden
@@ -113,14 +105,12 @@ class User extends Authenticatable
 
      public function scopeHiddenUsers($query)
     {
-       // return $query->where('role_id', '=', 7);
        return $query->whereHas('roles', function ($q) {
              $q->where('id', 7);       //hidden
          });
     }
     public function scopeOtherDeptUsers($query)
     {
-      //  return $query->where('role_id', '=', 3);
          return $query->whereHas('roles', function ($q) {
              $q->where('id', 3);   
          });
@@ -132,28 +122,29 @@ class User extends Authenticatable
     }
     public function scopeSections($query)
     {
-        return $query->where( 'username', 'like','sn.%')->where('role_id', '=', 2)->wherenot('role_id', 7);
+        return $query->where( 'username', 'like','sn.%')
+        ->whereHas('roles', function ($q) {
+            $q->where('id', 2)->wherenot('id', 7);   
+        });
        
     }
     public function scopeUSorAboveOfficers($query)
     {
-       /* return $query->where('role_id', '=', 2)->wherenot('role_id', 7)->wherenot( 'username', 'like','oo.%')
-        ->wherenot( 'username', 'like','od.%')->wherenot( 'username', 'like','de.%')->wherenot( 'username', 'like','sn.%');
-        */
-
+      
         return $query->whereHas('roles', function ($q) {
             $q->where('id', 2)->wherenot('id', 7);   
         })
         ->wherenot( 'username', 'like','oo.%')
-        ->wherenot( 'username', 'like','od.%')->wherenot( 'username', 'like','de.%')->wherenot( 'username', 'like','sn.%');
+        ->wherenot( 'username', 'like','od.%')
+        ->wherenot( 'username', 'like','de.%')
+        ->wherenot( 'username', 'like','sn.%');
 
        
        
     }
     public function scopeOfficers($query)
     {
-       /* return $query->where('role_id', '=', 2)->wherenot('role_id', 7)
-        ->wherenot( 'username', 'like','od.%')->wherenot( 'username', 'like','de.%');*/
+       
 
         return $query->whereHas('roles', function ($q) {
             $q->where('id', 2)->wherenot('id', 7);   
@@ -173,26 +164,21 @@ class User extends Authenticatable
     }
     public function isServices() 
     {
-     //  return $this->role_id == 6;
        return $this->roles()->where('id', 6)->exists();
 
     }
     public function isOD() 
     {
-      // return $this->role_id == 3;
       return $this->roles()->where('id', 3)->exists();
 
     }
     public function isHidden() 
     {
-       //return $this->role_id == 7;
        return $this->roles()->where('id', 7)->exists();
-
     }
     public function hasPunching() 
     {
-       
-                  
+                         
         if( false !== strpos( $this->username, 'oo.dyspkr' ) 
             ){
                 return false ;        
@@ -269,9 +255,8 @@ class User extends Authenticatable
     {
     
         //we can ignore users like other departments 
-        $myrole =  $this->role_id;
-        $result = \App\User::whereHas('roles', function ($q) use($myrole) {
-            $q->where('id', $myrole);
+        $result = \App\User::whereHas('roles', function ($q)  {
+            $q->where('id', 2);
         })
             ->where('username', 'not like', 'de.%') 
             //->where('name', 'not like', '%hidden%') //just change the role to something else
@@ -293,9 +278,9 @@ class User extends Authenticatable
     {
    
         //we can ignore users like other departments 
-        $myrole =  $this->role_id;
-        $result = \App\User::whereHas('roles', function ($q) use($myrole) {
-            $q->where('id', $myrole);
+  
+        $result = \App\User::whereHas('roles', function ($q) {
+            $q->where('id', 2);
             })
             ->where('username', 'not like', 'de.%')
             ->where('username', 'not like', 'sn.%') 

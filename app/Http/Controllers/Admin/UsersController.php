@@ -188,7 +188,6 @@ class UsersController extends Controller
                     'email' => 'admin@admin.com', 
                     'username' => 'de.'.$user->username, 
                     'displayname' => 'Asst',
-                  //  'role_id' => 2,
                     'password' => 'password'
                 ]
             );
