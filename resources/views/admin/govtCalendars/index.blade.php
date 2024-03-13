@@ -8,7 +8,7 @@
 
     <div class="card-body">
         <div class="table-responsive">
-            <table class=" table table-bordered table-striped table-hover datatable datatable-GovtCalendar">
+            <table class="table table-bordered table-striped table-hover datatable datatable-GovtCalendar">
                 <thead>
                     <tr>
                         <th width="10">
@@ -26,9 +26,9 @@
                         <th>
                             {{ trans('cruds.govtCalendar.fields.restrictedholidaystatus') }}
                         </th>
-                        <th>
+                        <!-- <th>
                             {{ trans('cruds.govtCalendar.fields.bankholidaystatus') }}
-                        </th>
+                        </th> -->
                         <th>
                             {{ trans('cruds.govtCalendar.fields.festivallist') }}
                         </th>
@@ -73,9 +73,9 @@
                             <td>
                                 {{ $govtCalendar->restrictedholidaystatus ?? '' }}
                             </td>
-                            <td>
+                            <!-- <td>
                                 {{ $govtCalendar->bankholidaystatus ?? '' }}
-                            </td>
+                            </td> -->
                             <td>
                                 {{ $govtCalendar->festivallist ?? '' }}
                             </td>

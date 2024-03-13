@@ -22,21 +22,27 @@ var vm = new Vue({
          
       },
        computed: {
-                  configdate:  function() {
-                      var self = this
-                                        
-                      return {
-                          //dateFormat: 'd-m-Y',
-                          //enable: calenderdays2[self.form.session]
-  
-                          //
-                        format: 'DD-MM-YYYY',
-                        useCurrent: true,
-                        showTodayButton : true,
-                        maxDate : new Date(),
- 
-                      }
-                  },
+          configdate:  function() {
+              var self = this
+                                
+              return {
+                  //dateFormat: 'd-m-Y',
+                  //enable: calenderdays2[self.form.session]
+
+                  //
+                format: 'DD-MM-YYYY',
+                useCurrent: true,
+                showTodayButton : true,
+                maxDate : new Date(),
+
+              }
+          },
+          section_employees_selected : function() {
+            var self = this
+           
+            return this.section_employees.filter( s => s.id == self.section || self.section=='*' )
+           
+        },
       },
      
         // define methods under the `methods` object

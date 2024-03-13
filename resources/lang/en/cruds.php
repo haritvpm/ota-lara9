@@ -72,7 +72,7 @@ return [
         ],
     ],
     'punching' => [
-        'title'          => 'Punching',
+        'title'          => 'SuccessPunching',
         'title_singular' => 'Punching',
         'fields'         => [
             'id'                => 'ID',
@@ -109,8 +109,8 @@ return [
         ],
     ],
     'punchingManagement' => [
-        'title'          => 'Punching Management',
-        'title_singular' => 'Punching Management',
+        'title'          => 'Punching',
+        'title_singular' => 'Punching',
     ],
     'punchingTrace' => [
         'title'          => 'Punching Trace',
@@ -170,9 +170,9 @@ return [
             'id_helper'                                  => ' ',
             'date'                                       => 'Date',
             'date_helper'                                => ' ',
-            'govtholidaystatus'                          => 'Govtholidaystatus',
+            'govtholidaystatus'                          => 'Holiday',
             'govtholidaystatus_helper'                   => ' ',
-            'restrictedholidaystatus'                    => 'Restrictedholidaystatus',
+            'restrictedholidaystatus'                    => 'RH',
             'restrictedholidaystatus_helper'             => ' ',
             'bankholidaystatus'                          => 'Bankholidaystatus',
             'bankholidaystatus_helper'                   => ' ',

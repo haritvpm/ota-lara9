@@ -31,6 +31,12 @@ var vm = new Vue({
         showTodayButton: true,
         maxDate: new Date()
       };
+    },
+    section_employees_selected: function section_employees_selected() {
+      var self = this;
+      return this.section_employees.filter(function (s) {
+        return s.id == self.section || self.section == '*';
+      });
     }
   },
   // define methods under the `methods` object

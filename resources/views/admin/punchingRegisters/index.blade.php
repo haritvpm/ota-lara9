@@ -83,7 +83,7 @@
                 <tbody>
                   
                      
-                        <tr v-for="(row, index) in section_employees" >
+                        <tr v-for="(row, index) in section_employees_selected" >
                             <td>
                             @{{ row.section_or_offfice.name }}
                             </td>
