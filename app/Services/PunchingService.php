@@ -212,7 +212,7 @@ class PunchingService
        // \DB::transaction(function() use ( $reportdate, $jsonData) {
            
         
-                $dataItem = $jsonData[$i];
+               // $dataItem = $jsonData[$i];
                 $attendanceId = $dataItem['emp_id'];
                 //find employee 
                 $emp = Employee::where('aadhaarid',  $attendanceId)->first();
@@ -281,7 +281,7 @@ class PunchingService
             }else if ($apinum == (14 + 9)) {
                 
                 $url = "https://basreports.attendance.gov.in/api/unibasglobal/api/detailsbydistrictid/districtid/00581/offset/{$offset}/count/{$count}/apikey/{$apikey}";
-                $returnkey = "detailsbydistrictid";
+                $returnkey = "DeviceDetailsDistrictId";
             }
 
 
