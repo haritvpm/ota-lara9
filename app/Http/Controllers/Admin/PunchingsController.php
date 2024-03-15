@@ -309,7 +309,7 @@ class PunchingsController extends Controller
         };
 
         $headers = [
-            'Cache-Control'       => 'must-revalidate, post-check=0, pre-check=0',   'Content-type'        => 'text/csv',   'Content-Disposition' => "attachment; filename={$returnkey}.csv",   'Expires'             => '0',   'Pragma'              => 'public'
+            'Cache-Control'       => 'must-revalidate, post-check=0, pre-check=0',   'Content-type'        => 'text/csv',   'Content-Disposition' => "attachment; filename=api-{$apinum}.csv",   'Expires'             => '0',   'Pragma'              => 'public'
         ];
 
         return response()->stream($callback, 200, $headers);

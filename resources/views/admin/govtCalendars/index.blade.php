@@ -3,8 +3,21 @@
 
 <div class="card">
     <div class="card-header">
-        {{ trans('cruds.govtCalendar.title_singular') }} {{ trans('global.list') }}
-    </div>
+
+    <form action="{{url('admin/govt-calendars/updatemonth')}}" method="post" id="filter" class="form-inline">
+    @csrf
+
+        <div class="form-group">                                
+        <textarea id="jsonfromgovtsite" name="jsonfromgovtsite" rows="2" cols="50" placeholder="sync with reponse json from https://www.kerala.gov.in/showcalendar/<month>. click next to get month's data"></textarea>
+
+        <button type="submit" class="btn btn-danger" rel="filter"><i class="fa fa-refresh" aria-hidden="true"></i></button>
+Sync
+        </div>
+    </form>
+
+    <!-- <a href="{{ route('admin.govt-calendars.fetch') }}" class="btn btn-warning"><i class="fa fa-refresh" aria-hidden="true"></i>CurrentYear Sync</a> -->
+
+</div>
 
     <div class="card-body">
         <div class="table-responsive">
