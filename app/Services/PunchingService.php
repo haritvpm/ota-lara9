@@ -4,6 +4,8 @@ namespace App\Services;
 use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
 use Auth;
+use App\GovtCalendar;
+use App\PunchingTrace;
 use App\Punching;
 use App\Calender;
 use App\Employee;
@@ -304,9 +306,10 @@ class PunchingService
             $jsonData = $response->json();
             $jsonData = $jsonData ? $jsonData[$returnkey] : [];
             $data = array_merge($data, $jsonData);
+
+
             //if reached end of data, break
             if (count($jsonData) < $count) {
-
                 break;
             }
         }
@@ -314,4 +317,113 @@ class PunchingService
         return $data;
     }
 
+    public function fetchTodayTrace($fetchdate = null)
+    {
+       $apikey =  env('AEBAS_KEY');
+
+       $offset = 0;
+       $count = 2000; //make it to 500 in prod
+
+      
+        // should be in format 2024-02-11
+        $reportdate = Carbon::now()->format('Y-m-d'); //today
+        $returnkey = "attendancetodaytrace";
+        if(!$fetchdate){
+          $returnkey = "attendancetrace";
+          $reportdate = $fetchdate;
+        }
+
+
+        //check calender for this date's count.
+
+        $calender = GovtCalendar::where('date',$reportdate)->first();
+        if($calender){
+            if( $calender->attendance_today_trace_fetched){
+                $offset = $calender->attendance_today_trace_rows_fetched; 
+            }
+        } else {
+            $calender = new GovtCalendar();
+            $calender->date = $reportdate;
+            $calender->attendance_today_trace_fetched = 0;
+            $calender->attendance_today_trace_rows_fetched = 0;
+            $calender->save();
+        }
+        $insertedcount = 0;
+
+        for (; ; $offset += $count) {
+
+            $url = "https://basreports.attendance.gov.in/api/unibasglobal/api/attendancetodaytrace/offset/{$offset}/count/{$count}/apikey/{$apikey}";
+            
+            if($fetchdate){
+                $url = "https://basreports.attendance.gov.in/api/unibasglobal/api/trace/offset/{$offset}/count/{$count}/reportdate/{$reportdate}/apikey/{$apikey}";
+            }
+            // $url = 'http://localhost:3000/data';
+            Log::info($url);
+            $response = Http::withHeaders([
+                'Access-Control-Allow-Origin' => '*',
+                'Content-Type' => 'application/json',
+            ])->withOptions([
+                'verify' => false,
+            ])->get($url);
+
+
+            if ($response->status() !== 200) {
+              //  \Session::flash('message-danger',  $response->status());
+                Log::error('Response for fetchAPI:' . $response->status());
+                return ;
+                //break;
+            }
+            $jsonData = $response->json();
+            $jsonData = $jsonData ? $jsonData[$returnkey] : [];
+
+            $datatoinsert = [];
+            for ($i = 0; $i < count($jsonData); $i++) {
+                //ignore errors
+                if(  $jsonData['attendance_type'] != 'E' && $jsonData['auth_status'] == 'Y'  ){
+                 $datatoinsert[] = $this->processTrace($reportdate, $jsonData[$i]);
+                }
+            }
+
+            //All databases except SQL Server require the columns in the second argument of the upsert method to have a "primary" or "unique" index. In addition, the MySQL database driver ignores the second argument of the upsert method and always uses the "primary" and "unique" indexes of the table to detect existing records.
+            PunchingTrace::upsert($datatoinsert, ['aadhaarid', 'att_date', 'att_time']);      
+
+            
+            $insertedcount += count($jsonData);
+            Log::info('Newly fetched rows:' . $insertedcount);
+          
+
+            //if reached end of data, break
+            if (count($jsonData) < $count) {
+
+                break;
+            }
+        }
+        $totalrowsindb  = PunchingTrace::where('att_date',$reportdate)->count(); 
+        
+        $calender->update([
+
+            'attendance_today_trace_fetched' => 1,
+            'attendance_today_trace_rows_fetched' => $totalrowsindb,// $calender->attendance_today_trace_rows_fetched+$insertedcount,
+            'attendancetodaytrace_lastfetchtime' => Carbon::now(),
+
+        ]);
+        
+    }
+
+    private function processTrace($date, $traceItem)
+    {
+        assert($date === $traceItem['att_date']);
+      
+        $trace = [];
+        $trace['aadhaarid']= $traceItem['emp_id'];
+        $trace['device']= $traceItem['device_id'];
+        $trace['attendance_type']= $traceItem['attendance_type'];
+        $trace['auth_status']= $traceItem['auth_status'];
+        $trace['err_code']= $traceItem['err_code'];
+        $trace['att_date']= $traceItem['att_date'];
+        $trace['att_time']= $traceItem['att_time'];
+       
+        return $trace;
+       // $trace->save();
+    }
 }

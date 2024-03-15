@@ -25,14 +25,27 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')
-        //          ->hourly();
 
+//every 5 minutes between 9:30-17:30.        
+//30-59/5 9 * * * script.sh
+// */5 10-16 * * * script.sh
+// 0-30/5 17 * * * script.sh
         $schedule->command('fetch:attendancetracetoday')
-            ->hourly();
+            ->cron('0,6,15 8 * * *'); //for sabha days at different minutes at 8 am
+        
+        $schedule->command('fetch:attendancetracetoday')
+            ->cron('15-59/5 10 * * *'); //every five min between 10:15 to 11
+        
+        $schedule->command('fetch:attendancetracetoday')
+            ->cron('0 11-17 * * *'); //hourly from  11 to 17
+        
+        
+
+        $schedule->command('fetch:attendancetraceyesterday')
+            ->cron('0 8,10 * * *'); //will the server be up at 8 am?
 
         $schedule->command('fetch:attendanceyesterday')
-                ->twiceDaily(8, 10);	//Run the task daily at 8:00 & 10:00
+                ->cron('2 8,10 * * *');	//Run the task daily at 8:02 & 10:02
 
     }
 

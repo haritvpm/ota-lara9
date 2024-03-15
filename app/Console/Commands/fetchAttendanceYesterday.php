@@ -3,6 +3,8 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use App\Services\PunchingService;
+use Carbon\Carbon;
 
 class fetchAttendanceYesterday extends Command
 {
@@ -17,7 +19,7 @@ class fetchAttendanceYesterday extends Command
      *
      * @var string
      */
-    protected $description = 'Fetches successful attendance and trace for yesterday';
+    protected $description = 'Fetches successful attendance and trace for yesterday using api5';
 
     /**
      * Execute the console command.
