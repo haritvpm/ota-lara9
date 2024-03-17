@@ -13,6 +13,12 @@ use App\User;
 
 class PunchingService
 {
+    function validateDate($date, $format = 'Y-m-d')
+    {
+        $d = DateTime::createFromFormat($format, $date);
+        return $d && $d->format($format) == $date;
+    }
+
     public function fetchSuccessAttendance($reportdate)
     {
         
@@ -23,13 +29,21 @@ class PunchingService
         $count =  $islocal_test  ? 10000 : 500;
 
         // should be in format 2024-02-11
-        $reportdate = Carbon::createFromFormat(config('app.date_format'), $reportdate)->format('Y-m-d');
-
+        if (!$this->validateDate($reportdate)) {
+            //date is in dd-mm-yy 
+            $reportdate = Carbon::createFromFormat(config('app.date_format'), $reportdate)->format('Y-m-d');
+        }
 
         $insertedcount = 0;
         $pen_to_aadhaarid = [];
 
-        for ($offset = 0;; $offset += $count) {
+        $govtcalender = $this->getGovtCalender($reportdate); 
+        if( $govtcalender->success_attendance_fetched){
+            $offset = $govtcalender->success_attendance_rows_fetched; 
+        
+        }
+
+        for (;; $offset += $count) {
 
 
             $url = "https://basreports.attendance.gov.in/api/unibasglobal/api/attendance/offset/{$offset}/count/{$count}/reportdate/{$reportdate}/apikey/{$apikey}";
@@ -132,12 +146,17 @@ class PunchingService
         $calenderdate = Calender::where('date', $reportdate)->first();
         if ($calenderdate && $insertedcount) {
             $calenderdate->update(['punching' => 'AEBAS']);
-
-            //$lastfetch = Setting::firstOrCreate( ['name' => 'lastfetch'], 
-            //  ['value' => Carbon::now() ]);
-            //$lastfetch->value = Carbon::now();
-            // $lastfetch->save();
         }
+
+        $totalrowsindb  = PunchingTrace::where('date',$reportdate)->count(); 
+        
+        $govtcalender->update([
+
+            'success_attendance_fetched' =>  $calender->success_attendance_fetched+1,
+            'success_attendance_rows_fetched' => $totalrowsindb,
+            'success_attendance_lastfetchtime' => Carbon::now(),
+
+        ]);
 
         if (count($pen_to_aadhaarid)) {
             //Update our employee db with aadhaarid from api
@@ -317,6 +336,30 @@ class PunchingService
         return $data;
     }
 
+    private function getGovtCalender($reportdate)
+    {
+        $calender = GovtCalendar::where('date',$reportdate)->first();
+        if($calender){
+            if( $calender->attendance_today_trace_fetched){
+                $offset = $calender->attendance_today_trace_rows_fetched; 
+            }
+        } else {
+            $calender = new GovtCalendar();
+            $calender->date = $reportdate;
+
+            $calender->attendance_today_trace_fetched = 0;
+            $calender->attendance_today_trace_rows_fetched = 0;
+
+
+            $calender->success_attendance_fetched = 0;
+            $calender->success_attendance_rows_fetched = 0;
+
+            $calender->save();
+        }
+
+        return  $calender;
+    }
+  
     public function fetchTodayTrace($fetchdate = null)
     {
        $apikey =  env('AEBAS_KEY');
@@ -328,26 +371,24 @@ class PunchingService
         // should be in format 2024-02-11
         $reportdate = Carbon::now()->format('Y-m-d'); //today
         $returnkey = "attendancetodaytrace";
-        if(!$fetchdate){
+        if($fetchdate){
           $returnkey = "attendancetrace";
-          $reportdate = $fetchdate;
+        // should be in format 2024-02-11
+            if (!$this->validateDate($fetchdate)) {
+            //date is in dd-mm-yy 
+             $reportdate = Carbon::createFromFormat(config('app.date_format'), $fetchdate)->format('Y-m-d');
+            }
         }
 
 
         //check calender for this date's count.
 
-        $calender = GovtCalendar::where('date',$reportdate)->first();
-        if($calender){
-            if( $calender->attendance_today_trace_fetched){
-                $offset = $calender->attendance_today_trace_rows_fetched; 
-            }
-        } else {
-            $calender = new GovtCalendar();
-            $calender->date = $reportdate;
-            $calender->attendance_today_trace_fetched = 0;
-            $calender->attendance_today_trace_rows_fetched = 0;
-            $calender->save();
+        $govtcalender = $this->getGovtCalender($reportdate); 
+        if( $govtcalender->attendance_today_trace_fetched){
+            $offset = $govtcalender->attendance_today_trace_rows_fetched; 
+        
         }
+       
         $insertedcount = 0;
 
         for (; ; $offset += $count) {
@@ -379,7 +420,8 @@ class PunchingService
             $datatoinsert = [];
             for ($i = 0; $i < count($jsonData); $i++) {
                 //ignore errors
-                if(  $jsonData['attendance_type'] != 'E' && $jsonData['auth_status'] == 'Y'  ){
+                //if(  $jsonData['attendance_type'] != 'E' && $jsonData['auth_status'] == 'Y'  )
+                {
                  $datatoinsert[] = $this->processTrace($reportdate, $jsonData[$i]);
                 }
             }
@@ -389,7 +431,7 @@ class PunchingService
 
             
             $insertedcount += count($jsonData);
-            Log::info('Newly fetched rows:' . $insertedcount);
+          
           
 
             //if reached end of data, break
@@ -398,11 +440,14 @@ class PunchingService
                 break;
             }
         }
+        
+        Log::info('Newly fetched rows:' . $insertedcount);
+
         $totalrowsindb  = PunchingTrace::where('att_date',$reportdate)->count(); 
         
-        $calender->update([
+        $govtcalender->update([
 
-            'attendance_today_trace_fetched' => 1,
+            'attendance_today_trace_fetched' =>  $govtcalender->attendance_today_trace_fetched+1,
             'attendance_today_trace_rows_fetched' => $totalrowsindb,// $calender->attendance_today_trace_rows_fetched+$insertedcount,
             'attendancetodaytrace_lastfetchtime' => Carbon::now(),
 

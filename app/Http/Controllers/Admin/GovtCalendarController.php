@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
+use App\Services\PunchingService;
 
 class GovtCalendarController extends Controller
 {
@@ -77,8 +78,9 @@ class GovtCalendarController extends Controller
 
 
     }
+
     //not working. seems some cookie issue. try postman
-    public function fetchApi(Request $request)
+    public function fetchFromGovtSite(Request $request)
     {
        // abort_if(Gate::denies('govt_calendar_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
@@ -130,10 +132,23 @@ dd($calendars);
 
 
         }
-        return view('admin.govtCalendars.index', compact('govtCalendars'));
+        return redirect()->back();
+    }
 
 
+    //fetch both success and trace for this day. 
+    //now only fetching trace. todo successattendance after moving OT calender functionality to here
+    public function fetchApi(Request $request)
+    {
+        $reportdate = $request->query('reportdate');
+     
+        if(!$reportdate)   return redirect()->back();
 
+        \Log::info("fetch attendance trace !. " .  $reportdate);
+        (new PunchingService())->fetchTodayTrace($reportdate);
+
+
+        return redirect()->back();
     }
 
     

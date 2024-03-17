@@ -4,18 +4,37 @@
 <div class="card">
     <div class="card-header">
 
-    <form action="{{url('admin/govt-calendars/updatemonth')}}" method="post" id="filter" class="form-inline">
-    @csrf
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#calenderModal" data-whatever="@getbootstrap"><i class="fa fa-refresh" aria-hidden="true"></i>Upload with Govt Calender </button>
 
-        <div class="form-group">                                
+<div class="modal fade" id="calenderModal" tabindex="-1" role="dialog" aria-labelledby="calenderModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="calenderModalLabel">Paste From API Response for a month</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+      <form action="{{url('admin/govt-calendars/updatemonth')}}" method="post" id="filter" class="form-inline">
+      @csrf
+      <div class="form-group">                                
         <textarea id="jsonfromgovtsite" name="jsonfromgovtsite" rows="2" cols="50" placeholder="sync with reponse json from https://www.kerala.gov.in/showcalendar/<month>. click next to get month's data"></textarea>
-
-        <button type="submit" class="btn btn-danger" rel="filter"><i class="fa fa-refresh" aria-hidden="true"></i></button>
-Sync
         </div>
-    </form>
+     
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </div>
+      </form>
+    </div>
+  </div>
+</div>
 
-    <!-- <a href="{{ route('admin.govt-calendars.fetch') }}" class="btn btn-warning"><i class="fa fa-refresh" aria-hidden="true"></i>CurrentYear Sync</a> -->
+
+
+
 
 </div>
 
@@ -93,7 +112,8 @@ Sync
                                 {{ $govtCalendar->festivallist ?? '' }}
                             </td>
                             <td>
-                                {{ $govtCalendar->success_attendance_fetched ?? '' }}
+                                {{ $govtCalendar->success_attendance_fetched ? 'YES' :'NO' }}
+                                
                             </td>
                             <td>
                                 {{ $govtCalendar->success_attendance_lastfetchtime ?? '' }}
@@ -102,7 +122,7 @@ Sync
                                 {{ $govtCalendar->success_attendance_rows_fetched ?? '' }}
                             </td>
                             <td>
-                                {{ $govtCalendar->attendance_today_trace_fetched ?? '' }}
+                                {{ $govtCalendar->attendance_today_trace_fetched ? 'YES' :'NO' }}
                             </td>
                             <td>
                                 {{ $govtCalendar->attendancetodaytrace_lastfetchtime ?? '' }}
@@ -121,6 +141,10 @@ Sync
                                     <a class="btn btn-xs btn-info" href="{{ route('admin.govt-calendars.edit', $govtCalendar->id) }}">
                                         {{ trans('global.edit') }}
                                     </a>
+
+                                    <a href="{{ route('admin.govt-calendars.fetch',$govtCalendar->date ) }}"  class="btn btn-sm btn-danger"><i class="fa fa-refresh" aria-hidden="true"></i>Fetch</a>
+
+
                                 @endcan
 
 

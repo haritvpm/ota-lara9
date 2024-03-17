@@ -12,7 +12,7 @@
             @csrf
             <div class="form-group">
                 <label for="date">{{ trans('cruds.govtCalendar.fields.date') }}</label>
-                <input class="form-control date {{ $errors->has('date') ? 'is-invalid' : '' }}" type="text" name="date" id="date" value="{{ old('date', $govtCalendar->date) }}">
+                <input readonly class="form-control date {{ $errors->has('date') ? 'is-invalid' : '' }}" type="text" name="date" id="date" value="{{ old('date', $govtCalendar->date) }}">
                 @if($errors->has('date'))
                     <span class="text-danger">{{ $errors->first('date') }}</span>
                 @endif
@@ -50,7 +50,7 @@
                 @endif
                 <span class="help-block">{{ trans('cruds.govtCalendar.fields.festivallist_helper') }}</span>
             </div>
-            <div class="form-group">
+           <!--  <div class="form-group">
                 <label for="success_attendance_fetched">{{ trans('cruds.govtCalendar.fields.success_attendance_fetched') }}</label>
                 <input class="form-control {{ $errors->has('success_attendance_fetched') ? 'is-invalid' : '' }}" type="number" name="success_attendance_fetched" id="success_attendance_fetched" value="{{ old('success_attendance_fetched', $govtCalendar->success_attendance_fetched) }}" step="1">
                 @if($errors->has('success_attendance_fetched'))
@@ -97,7 +97,7 @@
                     <span class="text-danger">{{ $errors->first('attendance_today_trace_rows_fetched') }}</span>
                 @endif
                 <span class="help-block">{{ trans('cruds.govtCalendar.fields.attendance_today_trace_rows_fetched_helper') }}</span>
-            </div>
+            </div> -->
             <div class="form-group">
                 <button class="btn btn-danger" type="submit">
                     {{ trans('global.save') }}
