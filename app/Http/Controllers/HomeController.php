@@ -38,7 +38,6 @@ class HomeController extends Controller
 
             $m->to('harirs@gmail.com', 'Hari')->subject('Your Reminder!');
         });*/
-
         if(\Auth::check()){
             if(\Auth::user()->isHidden() && !auth()->user()->isAdmin()) { 
                 \Auth::logout();

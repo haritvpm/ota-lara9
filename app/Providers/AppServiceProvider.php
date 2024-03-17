@@ -39,6 +39,10 @@ class AppServiceProvider extends ServiceProvider
         if ($this->app->environment('local', 'testing')) {
            // $this->app->register(DuskServiceProvider::class);
         }
+//injecting ExampleDependantService into SyncProfile service
+        // $this->app->bind(SyncProfile::class, function (Application $app) {
+        //     return new SyncProfile($app->make(ExampleDependantService::class));
+        // });
 
     }
 }

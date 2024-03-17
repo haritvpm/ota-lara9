@@ -10,12 +10,19 @@ use App\Punching;
 use App\Calender;
 use App\Employee;
 use App\User;
+use App\Services\EmployeeService;
 
 class PunchingService
 {
+    private EmployeeService $employeeService;
+    public function __construct(EmployeeService $employeeService)
+    {
+        $this->employeeService = $employeeService;
+    }
+
     function validateDate($date, $format = 'Y-m-d')
     {
-        $d = DateTime::createFromFormat($format, $date);
+        $d = \DateTime::createFromFormat($format, $date);
         return $d && $d->format($format) == $date;
     }
 
@@ -132,9 +139,6 @@ class PunchingService
                     $pen_to_aadhaarid[$org_emp_code] = $attendanceId;
                 }
 
-                if($punch){
-                    $this->makePunchingRegister($reportdate, $dataItem, $punch);
-                }
             }
             //if reached end of data, break
             if (count($jsonData) <  $count) {
@@ -158,6 +162,10 @@ class PunchingService
 
         ]);
 
+        if($insertedcount){
+            $this->makePunchingRegister($reportdate);
+        }
+        
         if (count($pen_to_aadhaarid)) {
             //Update our employee db with aadhaarid from api
             //since org_emp_code can be empty or even mobile number, make sure this is our pen
@@ -217,39 +225,31 @@ class PunchingService
         }
     }
 
-    private function makePunchingRegister($reportdate, $dataItem, $punch )
+    private function makePunchingRegister($reportdate )
     {
+        $success_punchs = Punching::where('date',$reportdate )->get();
 
+        foreach ($success_punchs as $dataItem) {
         /*
-          'date',
+        'date',
         'employee_id',
         'punchin_id',
         'duration',
         'flexi',
         'grace_min',
         'extra_min',
-        */
+    */
+            //find employee 
+            $emp = Employee::where('aadhaarid',  $dataItem->emp_id)->first();
+            if(!$emp) continue;
+            $duration = "0";
 
-       // \DB::transaction(function() use ( $reportdate, $jsonData) {
-           
-        
-               // $dataItem = $jsonData[$i];
-                $attendanceId = $dataItem['emp_id'];
-                //find employee 
-                $emp = Employee::where('aadhaarid',  $attendanceId)->first();
-                if(!$emp) continue;
-                $duration = "0";
-
-                if($dataItem['at_type'] == 'C'){
-                    $datein = Carbon::parse($dataItem['in_time']);
-                    $dateout = Carbon::parse($dataItem['out_time']);
-
-                    $duration = $dateout->diff($datein)->format('%H:%i:%s');
-                }
-                
-
-        
-       // });
+            if($dataItem['at_type'] == 'C'){
+                $datein = Carbon::parse($dataItem->in_time);
+                $dateout = Carbon::parse($dataItem->out_time);
+                $duration = $dateout->diff($datein)->format('%H:%i:%s');
+            }
+        }
 
     }
 
@@ -422,7 +422,8 @@ class PunchingService
                 //ignore errors
                 //if(  $jsonData['attendance_type'] != 'E' && $jsonData['auth_status'] == 'Y'  )
                 {
-                 $datatoinsert[] = $this->processTrace($reportdate, $jsonData[$i]);
+                 assert($reportdate === $jsonData[$i]['att_date']);
+                 $datatoinsert[] = $this->mapTraceToDBFields($reportdate, $jsonData[$i]);
                 }
             }
 
@@ -439,6 +440,7 @@ class PunchingService
 
                 break;
             }
+            
         }
         
         Log::info('Newly fetched rows:' . $insertedcount);
@@ -455,10 +457,9 @@ class PunchingService
         
     }
 
-    private function processTrace($date, $traceItem)
+    private function mapTraceToDBFields($traceItem)
     {
-        assert($date === $traceItem['att_date']);
-      
+            
         $trace = [];
         $trace['aadhaarid']= $traceItem['emp_id'];
         $trace['device']= $traceItem['device_id'];

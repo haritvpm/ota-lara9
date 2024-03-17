@@ -2,7 +2,7 @@
 
 @can($gateKey.'view')
     <a href="{{ route($routeKey.'.show', $row->id ) }}"
-       class="btn btn-sm btn-primary"><i class="fas fa-eye"></i></a>
+       class="btn btn-sm btn-dark"><i class="fas fa-eye"></i></a>
 @endcan
 @can($gateKey.'edit')
     <a href="{{ route($routeKey.'.edit', $row->id) }}" class="btn btn-sm btn-info"><i class="fas fa-edit"></i></a>

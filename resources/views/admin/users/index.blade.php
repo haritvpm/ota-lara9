@@ -74,10 +74,10 @@
 
                                 </td>
                                 <td field-key='username' class="text-nowrap">{{ $user->username }}</td>
-                                <td field-key='displayname' class="text-nowrap">{{ $user->displayname }}</td>
-                                <td class="text-nowrap">
+                                <td field-key='displayname' class="small">{{ $user->displayname }}</td>
+                                <td class="">
                                     @can('user_view')
-                                    <a href="{{ route('admin.users.show',[$user->id]) }}" class="btn btn-sm btn-primary">@lang('quickadmin.qa_view')</a>
+                                    <a href="{{ route('admin.users.show',[$user->id]) }}" class="btn btn-sm btn-dark"><i class="fas fa-eye"></i></a>
                                     @endcan
                                     @can('user_edit')
                                     <a href="{{ route('admin.users.editsimple',[$user->id]) }}" class="btn btn-sm btn-success">SimpleEdit</a>
@@ -93,7 +93,7 @@
                                         'method' => 'DELETE',
                                         'onsubmit' => "return confirm('".trans("quickadmin.qa_are_you_sure")."');",
                                         'route' => ['admin.users.destroy', $user->id])) !!}
-                                    {!! Form::submit(trans('quickadmin.qa_delete'), array('class' => 'btn btn-sm btn-danger')) !!}
+                                        {!! Form::button('<i class="fas fa-trash-alt"></i>', ['type' => 'submit', 'class' => 'btn btn-danger btn-sm'] ) !!}
                                     {!! Form::close() !!}
                                     @endcan
 

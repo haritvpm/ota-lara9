@@ -8,6 +8,8 @@ return [
     'vps' => env('VPS',FALSE),
     'vps_name' => env('VPS_NAME'),
     'check_attendance' => env('CHECK_ATTENDANCE', FALSE),
+
+   
 ];
 
 
