@@ -1,3 +1,17 @@
+export const REG_08_05 = "08:05";
+export const REG_17_25 = "17:25";
+
+export const PT_06_05 = "06:05";
+export const PT_11_25 = "11:25";
+
+export const PT_HOSTEL_07_05 = "07:05";
+export const PT_HOSTEL_12_25 = "12:25";
+
+export const FT_06_05 = "06:05";
+export const FT_16_25 ="16:15";
+
+export const FT_HOSTEL_07_05 = "07:05";
+export const FT_HOSTEL_17_25 = "17:15";
 
 export function setEmployeeTypes(row) {
     if( !row.hasOwnProperty("designation") || !row.hasOwnProperty("category") || !row.hasOwnProperty("normal_office_hours") ){
@@ -62,8 +76,8 @@ export function  checkDatesAndOT(row, data){
     if( punchin && punchout  ){ //punched
 
       if (row.isPartime) {
-        if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "11:25") || 
-            timePeriodIncludesPeriod(punchin, punchout, "07:05", "12:25")) {
+        if (timePeriodIncludesPeriod(punchin, punchout, PT_06_05, PT_11_25) || 
+            timePeriodIncludesPeriod(punchin, punchout, PT_HOSTEL_07_05, PT_HOSTEL_12_25)) {
           data.dates[i].ot = 'YES'
           count++;
         } else{
@@ -72,8 +86,8 @@ export function  checkDatesAndOT(row, data){
       }
       else if (row.isFulltime) {
   
-         if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "16:25") || 
-             timePeriodIncludesPeriod(punchin, punchout, "07:05", "17:25")) { 
+         if (timePeriodIncludesPeriod(punchin, punchout, FT_06_05, FT_16_25) || 
+             timePeriodIncludesPeriod(punchin, punchout, FT_HOSTEL_07_05, FT_HOSTEL_17_25)) { 
             count++;
             data.dates[i].ot = 'YES'
           } else{
@@ -85,7 +99,7 @@ export function  checkDatesAndOT(row, data){
       } //all other employees for sitting days
       else {
 
-          if (timePeriodIncludesPeriod(punchin, punchout, "08:05", "17:25")) {
+          if (timePeriodIncludesPeriod(punchin, punchout, REG_08_05, REG_17_25)) {
             count++;
             data.dates[i].ot = 'YES'
           }else{
@@ -112,8 +126,8 @@ export function  checkDatesAndOT(row, data){
     data.dates[i].userdecision = false 
 
     if (row.isPartime) {
-      if (sittingAllowableForNonAebasDay(punchin, punchout, "06:05", "11:25") || 
-          sittingAllowableForNonAebasDay(punchin, punchout, "07:05", "12:25")) {
+      if (sittingAllowableForNonAebasDay(punchin, punchout, PT_06_05, PT_11_25) || 
+          sittingAllowableForNonAebasDay(punchin, punchout, PT_HOSTEL_07_05, PT_HOSTEL_12_25)) {
         data.dates[i].userdecision = true 
        
       } else{
@@ -122,8 +136,8 @@ export function  checkDatesAndOT(row, data){
     }
     else if (row.isFulltime) {
 
-       if (sittingAllowableForNonAebasDay(punchin, punchout, "06:05", "16:25") || 
-          sittingAllowableForNonAebasDay(punchin, punchout, "07:05", "17:25")) { 
+       if (sittingAllowableForNonAebasDay(punchin, punchout, FT_06_05, FT_16_25) || 
+          sittingAllowableForNonAebasDay(punchin, punchout, FT_HOSTEL_07_05, FT_HOSTEL_17_25)) { 
           data.dates[i].userdecision = true 
         
         } else{
@@ -134,7 +148,7 @@ export function  checkDatesAndOT(row, data){
       //no punching
     } //all other employees for sitting days
     else {
-        if (sittingAllowableForNonAebasDay(punchin, punchout, "08:05", "17:25")) {
+        if (sittingAllowableForNonAebasDay(punchin, punchout, REG_08_05, REG_17_25)) {
           data.dates[i].userdecision = true 
       
         }else{

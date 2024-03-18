@@ -10,6 +10,16 @@
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "FT_06_05": () => (/* binding */ FT_06_05),
+/* harmony export */   "FT_16_25": () => (/* binding */ FT_16_25),
+/* harmony export */   "FT_HOSTEL_07_05": () => (/* binding */ FT_HOSTEL_07_05),
+/* harmony export */   "FT_HOSTEL_17_25": () => (/* binding */ FT_HOSTEL_17_25),
+/* harmony export */   "PT_06_05": () => (/* binding */ PT_06_05),
+/* harmony export */   "PT_11_25": () => (/* binding */ PT_11_25),
+/* harmony export */   "PT_HOSTEL_07_05": () => (/* binding */ PT_HOSTEL_07_05),
+/* harmony export */   "PT_HOSTEL_12_25": () => (/* binding */ PT_HOSTEL_12_25),
+/* harmony export */   "REG_08_05": () => (/* binding */ REG_08_05),
+/* harmony export */   "REG_17_25": () => (/* binding */ REG_17_25),
 /* harmony export */   "checkDatesAndOT": () => (/* binding */ checkDatesAndOT),
 /* harmony export */   "setEmployeeTypes": () => (/* binding */ setEmployeeTypes),
 /* harmony export */   "sittingAllowableForNonAebasDay": () => (/* binding */ sittingAllowableForNonAebasDay),
@@ -17,6 +27,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "timePeriodIncludesPeriod": () => (/* binding */ timePeriodIncludesPeriod),
 /* harmony export */   "toHoursAndMinutes": () => (/* binding */ toHoursAndMinutes)
 /* harmony export */ });
+var REG_08_05 = "08:05";
+var REG_17_25 = "17:25";
+var PT_06_05 = "06:05";
+var PT_11_25 = "11:25";
+var PT_HOSTEL_07_05 = "07:05";
+var PT_HOSTEL_12_25 = "12:25";
+var FT_06_05 = "06:05";
+var FT_16_25 = "16:15";
+var FT_HOSTEL_07_05 = "07:05";
+var FT_HOSTEL_17_25 = "17:15";
 function setEmployeeTypes(row) {
   if (!row.hasOwnProperty("designation") || !row.hasOwnProperty("category") || !row.hasOwnProperty("normal_office_hours")) {
     console.error("setEmployeeTypes - not all Property set");
@@ -71,14 +91,14 @@ function checkDatesAndOT(row, data) {
       //punched
 
       if (row.isPartime) {
-        if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "11:25") || timePeriodIncludesPeriod(punchin, punchout, "07:05", "12:25")) {
+        if (timePeriodIncludesPeriod(punchin, punchout, PT_06_05, PT_11_25) || timePeriodIncludesPeriod(punchin, punchout, PT_HOSTEL_07_05, PT_HOSTEL_12_25)) {
           data.dates[i].ot = 'YES';
           count++;
         } else {
           data.dates[i].ot = 'No. (6/7 am - 11:30/12:30)';
         }
       } else if (row.isFulltime) {
-        if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "16:25") || timePeriodIncludesPeriod(punchin, punchout, "07:05", "17:25")) {
+        if (timePeriodIncludesPeriod(punchin, punchout, FT_06_05, FT_16_25) || timePeriodIncludesPeriod(punchin, punchout, FT_HOSTEL_07_05, FT_HOSTEL_17_25)) {
           count++;
           data.dates[i].ot = 'YES';
         } else {
@@ -88,7 +108,7 @@ function checkDatesAndOT(row, data) {
         //no punching
       } //all other employees for sitting days
       else {
-        if (timePeriodIncludesPeriod(punchin, punchout, "08:05", "17:25")) {
+        if (timePeriodIncludesPeriod(punchin, punchout, REG_08_05, REG_17_25)) {
           count++;
           data.dates[i].ot = 'YES';
         } else {
@@ -113,13 +133,13 @@ function checkDatesAndOT(row, data) {
     //non aebasday, check if user has not punched incorrectly when server was failing
     data.dates[i].userdecision = false;
     if (row.isPartime) {
-      if (sittingAllowableForNonAebasDay(punchin, punchout, "06:05", "11:25") || sittingAllowableForNonAebasDay(punchin, punchout, "07:05", "12:25")) {
+      if (sittingAllowableForNonAebasDay(punchin, punchout, PT_06_05, PT_11_25) || sittingAllowableForNonAebasDay(punchin, punchout, PT_HOSTEL_07_05, PT_HOSTEL_12_25)) {
         data.dates[i].userdecision = true;
       } else {
         data.dates[i].ot = 'No. (6/7 - 11:30/12:30)';
       }
     } else if (row.isFulltime) {
-      if (sittingAllowableForNonAebasDay(punchin, punchout, "06:05", "16:25") || sittingAllowableForNonAebasDay(punchin, punchout, "07:05", "17:25")) {
+      if (sittingAllowableForNonAebasDay(punchin, punchout, FT_06_05, FT_16_25) || sittingAllowableForNonAebasDay(punchin, punchout, FT_HOSTEL_07_05, FT_HOSTEL_17_25)) {
         data.dates[i].userdecision = true;
       } else {
         data.dates[i].ot = 'No. (6/7 - 4:30pm/5:30pm)';
@@ -128,7 +148,7 @@ function checkDatesAndOT(row, data) {
       //no punching
     } //all other employees for sitting days
     else {
-      if (sittingAllowableForNonAebasDay(punchin, punchout, "08:05", "17:25")) {
+      if (sittingAllowableForNonAebasDay(punchin, punchout, REG_08_05, REG_17_25)) {
         data.dates[i].userdecision = true;
       } else {
         data.dates[i].ot = 'No. (08:00 - 5:30pm)';

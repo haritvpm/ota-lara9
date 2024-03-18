@@ -1,6 +1,6 @@
 "use strict";
 import {toHoursAndMinutes, timePeriodIncludesPeriod, stringTimeToDate, setEmployeeTypes } from './utils.js';
-
+import {REG_08_05, REG_17_25} from './utils.js';
 const dateofdutyprefix = "Date of Duty";
 
 var def_time_start = "17:30";
@@ -462,8 +462,8 @@ var vm = new Vue({
         
 				if (this.hasFirst(row.slots)) {
 
-					if (!timePeriodIncludesPeriod(row.from, row.to, "06:05", "11:25") && 
-						!timePeriodIncludesPeriod(row.from, row.to, "07:05", "12:25")) { //hostel
+					if (!timePeriodIncludesPeriod(row.from, row.to, PT_06_05, PT_11_25) && 
+						!timePeriodIncludesPeriod(row.from, row.to, PT_HOSTEL_07_05, PT_HOSTEL_12_25)) { //hostel
 						this.myerrors.push("Row " + (i + 1) + ": Parttime employee - time should include 06:00/7.00 to 11:30/12.30 on a sitting day");
 						return false;
 					}
@@ -484,8 +484,8 @@ var vm = new Vue({
 				if (this.hasFirst(row.slots)) {
 
 					////its acutally 4.30. no need to enforce ending time. have doubts regarding mla hostel.
-					if (!timePeriodIncludesPeriod(row.from, row.to, "06:05", "16:15") &&
-						!timePeriodIncludesPeriod(row.from, row.to, "07:05", "17:15") ) { 
+					if (!timePeriodIncludesPeriod(row.from, row.to, FT_06_05, FT_16_25) &&
+						!timePeriodIncludesPeriod(row.from, row.to, FT_HOSTEL_07_05, FT_HOSTEL_17_25) ) { 
 						this.myerrors.push("Row " + (i + 1) + ": Fulltime employee - time shall include 6/7 a.m. to 4.30/5.30 pm on a sitting day");
 						return false;
 					}
@@ -498,7 +498,7 @@ var vm = new Vue({
 			
 				if( this.hasFirst(row.slots)){
 
-					if (!timePeriodIncludesPeriod(row.from, row.to, "08:05", "17:25")) {
+					if (!timePeriodIncludesPeriod(row.from, row.to,REG_08_05, REG_17_25)) {
 						this.myerrors.push("Row " + (i + 1) + ": For sitting OT, time should include 08:00 to 17:30 as per GO");
 						return false;
 					}
