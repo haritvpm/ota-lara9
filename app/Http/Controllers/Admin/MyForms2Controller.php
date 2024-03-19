@@ -1328,14 +1328,14 @@ class MyForms2Controller extends Controller
                 //check time from
                
                 if($isNormal){
-                    [$fromReq, $toReq] = $strtimes_totimestamps( config('constants.reg_emp.sit_ot_in_max'),  config('constants.reg_emp.sit_ot_out_min'));
+                    [$fromReq, $toReq] = $strtimes_totimestamps( config('constants.reg_sit_08_05'),  config('constants.reg_sit_17_25'));
                     if( $punch_in <= $fromReq && $punch_out >= $toReq){
                         $sittingsWithTimeSatisfied++; 
                     }
                 } else  if($isPartime){
                    
-                    [$fromReq, $toReq] = $strtimes_totimestamps(  config('constants.pt_emp.sit_ot_in_max'),  config('constants.pt_emp.sit_ot_out_min'));
-                    [$fromReqhostel, $toReqhostel] = $strtimes_totimestamps( config('constants.pt_emp_hostel.sit_ot_in_max'),   config('constants.pt_emp_hostel.sit_ot_out_min'));
+                    [$fromReq, $toReq] = $strtimes_totimestamps(  config('constants.pt_sit_6am'),  config('constants.pt_sit_11_30am'));
+                    [$fromReqhostel, $toReqhostel] = $strtimes_totimestamps( config('constants.pt_hostel_sit_7am'),   config('constants.pt_hostel_sit_1230pm'));
                     if( $punch_in <= $fromReq && $punch_out >= $toReq){
                         $sittingsWithTimeSatisfied++; 
                     } else  if( $punch_in <= $fromReqhostel && $punch_out >= $toReqhostel){
@@ -1343,9 +1343,9 @@ class MyForms2Controller extends Controller
                     }
 
                 }  else  if($isFulltime){
-                    [$fromReq, $toReq] = $strtimes_totimestamps( config('constants.ft_emp.sit_ot_in_max'),   config('constants.ft_emp.sit_ot_out_min')); //its 4.25 actually. can enforce later
-                    [$fromReqhostel, $toReqhostel] = $strtimes_totimestamps(  config('constants.ft_emp_hostel.sit_ot_in_max'),  
-                    config('constants.ft_emp_hostel.sit_ot_out_min')); //its 5.25 actually. 
+                    [$fromReq, $toReq] = $strtimes_totimestamps( config('constants.ft_sit_6am'),   config('constants.ft_sit_430pm')); //its 4.25 actually. can enforce later
+                    [$fromReqhostel, $toReqhostel] = $strtimes_totimestamps(  config('constants.ft_hostel_sit_7am'),  
+                    config('constants.ft_hostel_sit_5pm')); //its 5.25 actually. 
                     if( $punch_in <= $fromReq && $punch_out >= $toReq){
                         $sittingsWithTimeSatisfied++; 
                     } else   if( $punch_in <= $fromReqhostel && $punch_out >= $toReqhostel){
@@ -1373,20 +1373,20 @@ class MyForms2Controller extends Controller
             // NON AEBAS day.
 
             if($isNormal){
-                if($punchingtimesnotincorrect( config('constants.reg_emp.sit_ot_in_max'),  config('constants.reg_emp.sit_ot_out_min'),  $temp['punch_in'], $temp['punch_out'])){
+                if($punchingtimesnotincorrect( config('constants.reg_sit_08_05'),  config('constants.reg_sit_17_25'),  $temp['punch_in'], $temp['punch_out'])){
                     $sittingsWithUserDecision++; 
                 }
             } else  if($isPartime){
-                if($punchingtimesnotincorrect(  config('constants.pt_emp.sit_ot_in_max'),   config('constants.pt_emp.sit_ot_out_min'),  $temp['punch_in'], $temp['punch_out'])){
+                if($punchingtimesnotincorrect(  config('constants.pt_sit_6am'),   config('constants.pt_sit_11_30am'),  $temp['punch_in'], $temp['punch_out'])){
                     $sittingsWithUserDecision++; 
-                } else  if($punchingtimesnotincorrect( config('constants.pt_emp_hostel.sit_ot_in_max'),   config('constants.pt_emp_hostel.sit_ot_out_min'),  $temp['punch_in'], $temp['punch_out'])){
+                } else  if($punchingtimesnotincorrect( config('constants.pt_hostel_sit_7am'),   config('constants.pt_hostel_sit_1230pm'),  $temp['punch_in'], $temp['punch_out'])){
                     $sittingsWithUserDecision++; 
                 }
             } else  if($isFulltime){
-                 if($punchingtimesnotincorrect( config('constants.ft_emp.sit_ot_in_max'),   config('constants.ft_emp.sit_ot_out_min'), $temp['punch_in'], $temp['punch_out'])){ //its 4.25 actually. 
+                 if($punchingtimesnotincorrect( config('constants.ft_sit_6am'),   config('constants.ft_sit_430pm'), $temp['punch_in'], $temp['punch_out'])){ //its 4.25 actually. 
                     $sittingsWithUserDecision++; 
-                } else  if($punchingtimesnotincorrect(  config('constants.ft_emp_hostel.sit_ot_in_max'),  
-                config('constants.ft_emp_hostel.sit_ot_out_min'), $temp['punch_in'], $temp['punch_out'])){ //its 5.25 actually. 
+                } else  if($punchingtimesnotincorrect(  config('constants.ft_hostel_sit_7am'),  
+                config('constants.ft_hostel_sit_5pm'), $temp['punch_in'], $temp['punch_out'])){ //its 5.25 actually. 
                     $sittingsWithUserDecision++; 
                 } 
             } 
