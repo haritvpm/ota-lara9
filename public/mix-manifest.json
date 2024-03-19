@@ -12,5 +12,6 @@
     "/js/form_other_show.js": "/js/form_other_show.js",
     "/js/employee_index.js": "/js/employee_index.js",
     "/js/attendance_index.js": "/js/attendance_index.js",
+    "/js/punching-register.js": "/js/punching-register.js",
     "/css/app.css": "/css/app.css"
 }

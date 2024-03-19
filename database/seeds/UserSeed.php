@@ -19,7 +19,7 @@ class UserSeed extends Seeder
         ];
 
         foreach ($items as $item) {
-            \App\User::create($item);
+          //  \App\User::create($item);
         }
     }
 }

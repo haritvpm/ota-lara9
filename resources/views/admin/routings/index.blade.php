@@ -21,6 +21,7 @@
                     <tr>
                        
                         <th>@lang('quickadmin.routing.fields.user')</th>
+                     
                         <th>@lang('quickadmin.routing.fields.route')</th>
                         <th>@lang('quickadmin.routing.fields.last-forwarded-to')</th>
                                                 <th>&nbsp;</th>
@@ -34,15 +35,19 @@
                             <tr data-entry-id="{{ $routing->id }}">
                               
 
-                                <td field-key='user'>{{ $routing->user->username ?? '' }}</td>
-                                <td field-key='route'>{{ $routing->route }}</td>
+                                <td field-key='user'>{{ $routing->user->username ?? '' }} ({{ $routing->user->name ?? '' }})</td>
+                            
+                                <td field-key='route'>{{ $routing->route }} </td>
                                 <td field-key='last_forwarded_to'>{{ $routing->last_forwarded_to }}</td>
                                                                 <td>
                                     @can('routing_view')
-                                    <a href="{{ route('admin.routings.show',[$routing->id]) }}" class="btn btn-sm btn-primary">@lang('quickadmin.qa_view')</a>
+                                    <a href="{{ route('admin.routings.show',[$routing->id]) }}" class="btn btn-sm btn-primary">
+                                        @lang('quickadmin.qa_view')
+
+                                    </a>
                                     @endcan
                                     @can('routing_edit')
-                                    <a href="{{ route('admin.routings.edit',[$routing->id]) }}" class="btn btn-sm btn-info">@lang('quickadmin.qa_edit')</a>
+                                    <a href="{{ route('admin.routings.edit',[$routing->id]) }}" class="btn btn-sm btn-info"><i class="fas fa-edit"></i></a>
                                     @endcan
                                     @can('routing_delete')
 {!! Form::open(array(

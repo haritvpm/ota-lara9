@@ -65,23 +65,24 @@ function checkDatesAndOT(row, data) {
 
     var punchin = data.dates[i].punchin;
     var punchout = data.dates[i].punchout;
-    var pos = row.overtimesittings.indexOf(data.dates[i].date);
+    //if user has made all yes/no decisions, row.overtimesittings will not be null. it can be [] or [<dates>]
+    var pos = row.overtimesittings ? row.overtimesittings.indexOf(data.dates[i].date) : -2;
     if (punchin && punchout) {
       //punched
 
       if (row.isPartime) {
-        if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "11:25")) {
+        if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "11:25") || timePeriodIncludesPeriod(punchin, punchout, "07:05", "12:25")) {
           data.dates[i].ot = 'YES';
           count++;
         } else {
-          data.dates[i].ot = 'No. (06:00 - 11:30)';
+          data.dates[i].ot = 'No. (6/7 am - 11:30/12:30)';
         }
       } else if (row.isFulltime) {
-        if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "16:25")) {
+        if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "16:25") || timePeriodIncludesPeriod(punchin, punchout, "07:05", "17:25")) {
           count++;
           data.dates[i].ot = 'YES';
         } else {
-          data.dates[i].ot = 'No. (06:00 - 4:30pm)';
+          data.dates[i].ot = 'No. (6/7 am - 4:30pm/5:30pm)';
         }
       } else if (row.isWatchnward) {
         //no punching
@@ -96,7 +97,7 @@ function checkDatesAndOT(row, data) {
       }
       data.dates[i].userdecision = false;
       total_nondecision_days++;
-      if (data.dates[i].ot != 'YES' && pos != -1) row.overtimesittings.splice(pos, 1); //remove from sel if it is NO
+      if (data.dates[i].ot != 'YES' && pos >= 0) row.overtimesittings.splice(pos, 1); //remove from sel if it is NO
       continue;
     }
 
@@ -105,23 +106,23 @@ function checkDatesAndOT(row, data) {
       data.dates[i].userdecision = false;
       data.dates[i].ot = punchin || punchout ? 'Not Punched?' : 'Leave?';
       total_nondecision_days++;
-      if (pos != -1) row.overtimesittings.splice(pos, 1); //remove from sel if it is NO
+      if (pos >= 0) row.overtimesittings.splice(pos, 1); //remove from sel if it is NO
       continue;
     }
 
     //non aebasday, check if user has not punched incorrectly when server was failing
     data.dates[i].userdecision = false;
     if (row.isPartime) {
-      if (sittingAllowableForNonAebasDay(punchin, punchout, "06:05", "11:25")) {
+      if (sittingAllowableForNonAebasDay(punchin, punchout, "06:05", "11:25") || sittingAllowableForNonAebasDay(punchin, punchout, "07:05", "12:25")) {
         data.dates[i].userdecision = true;
       } else {
-        data.dates[i].ot = 'No. (06:00 - 11:30)';
+        data.dates[i].ot = 'No. (6/7 - 11:30/12:30)';
       }
     } else if (row.isFulltime) {
-      if (sittingAllowableForNonAebasDay(punchin, punchout, "06:05", "16:25")) {
+      if (sittingAllowableForNonAebasDay(punchin, punchout, "06:05", "16:25") || sittingAllowableForNonAebasDay(punchin, punchout, "07:05", "17:25")) {
         data.dates[i].userdecision = true;
       } else {
-        data.dates[i].ot = 'No. (06:00 - 4:30pm)';
+        data.dates[i].ot = 'No. (6/7 - 4:30pm/5:30pm)';
       }
     } else if (row.isWatchnward) {
       //no punching
@@ -134,15 +135,15 @@ function checkDatesAndOT(row, data) {
       }
     }
     if (data.dates[i].userdecision) {
-      data.dates[i].ot = 'NO';
+      data.dates[i].ot = pos == -2 ? '*' : 'NO'; //-2 if user not dtermined
       total_userdecision_days++;
-      if (pos != -1) {
+      if (pos >= 0) {
         data.dates[i].ot = 'YES';
         count++;
       }
     } else {
       total_nondecision_days++;
-      if (!data.dates[i].userdecision && pos != -1) row.overtimesittings.splice(pos, 1); //remove from sel if it is NO
+      if (!data.dates[i].userdecision && pos >= 0) row.overtimesittings.splice(pos, 1); //remove from sel if it is NO
     }
   }
 
@@ -233,12 +234,6 @@ function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" =
 function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return _typeof(key) === "symbol" ? key : String(key); }
 function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (_typeof(res) !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
 
 ///detect brwowser
@@ -296,6 +291,22 @@ var vm = new Vue({
       }
     }
   },
+  computed: {
+    yesModalDays: function yesModalDays() {
+      return this.modaldata.filter(function (x) {
+        return x.ot == 'YES';
+      }).map(function (x) {
+        return x.date;
+      });
+    },
+    yesAndNodaysModalDays: function yesAndNodaysModalDays() {
+      return this.modaldata.filter(function (x) {
+        return x.ot == 'YES' || x.ot == 'NO' || x.userdecision == false;
+      }).map(function (x) {
+        return x.date;
+      });
+    }
+  },
   // define methods under the `methods` object
   methods: {
     modalClosed: function modalClosed() {},
@@ -325,12 +336,8 @@ var vm = new Vue({
           _this.modaldata_fixedOT = count;
           _this.modaldata_row = row;
           _this.modaldata_totalOTDays = total_nondecision_days + total_userdecision_days;
-          var yesdays = _this.modaldata.filter(function (x) {
-            return x.ot == 'YES' && x.userdecision == false;
-          }).map(function (x) {
-            return x.date;
-          });
-          _this.modaldata_seldays = _toConsumableArray(new Set([].concat(_toConsumableArray(yesdays), _toConsumableArray(row.overtimesittings))));
+          //let yesdays = this.modaldata.filter( x => x.ot == 'YES' && x.userdecision == false ).map( x => x.date )
+          //this.modaldata_seldays = [ ...new Set([ ...yesdays , ...row.overtimesittings])]
           document.getElementById('modalOpenBtn').click();
         }
       })["catch"](function (err) {});

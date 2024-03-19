@@ -31,7 +31,18 @@ class Employee extends Model
     {
         $this->attributes['designation_id'] = $input ? $input : null;
     }
-    
+    public function scopeProperlyFilled($query)
+    {
+        return $query->wherenotnull('pen')->wherenotnull('aadhaarid');
+       
+    }
+    public function scopeActive($query)
+    {
+        return $query->where('category', '<>', 'Relieved');
+       
+    }
+  
+
     public function designation()
     {
         return $this->belongsTo(Designation::class, 'designation_id');
@@ -44,8 +55,12 @@ class Employee extends Model
     }
 
     public function getPENNameAttribute()
-{
-    return $this->pen . ' - ' . $this->name;
-}
+    {
+        return $this->pen . ' - ' . $this->name;
+    }
+    public function getAadharrPenNameDesigAttribute()
+    {
+       return  $this->aadhaarid . '/' . $this->pen . ': ' . $this->name . ' (' . $this->designation->designation . ')';
+    }
     
 }

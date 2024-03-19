@@ -24,7 +24,7 @@ var vm = new Vue({
     modaldata_fixedOT: 0,
     modaldata_row:null,
     modaldata_totalOTDays:0,
-    modaldata_seldays:[],
+    //modaldata_seldays:[],
     modaldata_showonly: false
   },
 
@@ -72,6 +72,12 @@ var vm = new Vue({
     isActive: function () {
 
     },
+    yesModalDays: function () {
+      return this.modaldata.filter( x => x.ot == 'YES').map( x => x.date )
+    },
+    yesAndNodaysModalDays: function () {
+      return this.modaldata.filter( x => x.ot == 'YES' ||  x.ot == 'NO' || x.userdecision==false ).map( x => x.date )
+    },
 
   },
 
@@ -108,7 +114,8 @@ var vm = new Vue({
 		//	console.log(i)
     //reset count to zero
     this.form.overtimes[index].count = ""
-    this.form.overtimes[index].overtimesittings=[]
+    
+    this.form.overtimes[index].overtimesittings=null
     this.getSittingOTs(index)
 		
 		},
@@ -134,7 +141,7 @@ var vm = new Vue({
         aadhaarid: null,
         punching: true, //by default everyone ha punching
         isProcessing: false,
-        overtimesittings: [], //days user has worked 
+        overtimesittings: null, //days user has worked. important to set null which means user has not selected yes/no for manualentry days
       });
 
       this.pen_names = []; //clear previos selection from dropdown
@@ -196,7 +203,8 @@ var vm = new Vue({
       // console.log(this.modaldata_seldays)  
      
       let yesdays = this.modaldata.filter( x => x.ot == 'YES' && x.userdecision == false ).map( x => x.date )
-      this.modaldata_row.overtimesittings = [ ...new Set([...yesdays, ...this.modaldata_seldays])]
+      let userseldays = this.modaldata.filter( x => x.ot == 'YES' && x.userdecision == true ).map( x => x.date )
+      this.modaldata_row.overtimesittings = [ ...new Set([...yesdays, ...userseldays])]
       this.modaldata_row.count = this.modaldata_row.overtimesittings.length
       // console.log(this.modaldata_row.overtimesittings)  
       
@@ -253,12 +261,12 @@ var vm = new Vue({
                   self.modaldata_fixedOT = count;
                   self.modaldata = modaldata
                   self.modaldata_totalOTDays =  total_nondecision_days + total_userdecision_days;
-                  let yesdays = modaldata.filter( x => x.ot == 'YES' && x.userdecision == false ).map( x => x.date )
+                  //let yesdays = modaldata.filter( x => x.ot == 'YES' && x.userdecision == false ).map( x => x.date )
                   //overtimesittings stores prev selected days/ find only those days from the period
                   //if user changes perod without userdecision and then backagain, this will be lost.
                   //but if user sets and then opens again, we need this
-                  let temp =  row.overtimesittings.filter( date => modaldata.map(d=>d.date).indexOf( date ) != -1 )
-                  self.modaldata_seldays =  [ ...new Set([...yesdays,...temp])]
+                  //let temp =  row.overtimesittings.filter( date => modaldata.map(d=>d.date).indexOf( date ) != -1 )
+                 // self.modaldata_seldays =  [ ...new Set([...yesdays,...temp])]
                   document.getElementById('modalOpenBtn').click()
 
                }
@@ -306,7 +314,7 @@ var vm = new Vue({
 					row.employee_id = desig.employee_id;
           row.isProcessing= false;
           row.count= "";
-          row.overtimesittings=[];
+          row.overtimesittings=null;
 
           setEmployeeTypes(row);
           self.getSittingOTs(id)

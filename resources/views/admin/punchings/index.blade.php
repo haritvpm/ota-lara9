@@ -60,7 +60,10 @@
                         <th>
                             {{ trans('cruds.punching.fields.pen') }}
                         </th>
-                      
+                        <th>
+                        {{ trans('cruds.punching.fields.at_type') }}
+                    </th>
+
                         <th>
                             &nbsp;
                         </th>
@@ -125,7 +128,7 @@ $(document).ready(function () {
                 {data: 'punch_out', name: 'punch_out'},
                 {data: 'aadhaarid', name: 'aadhaarid'},
                 {data: 'pen', name: 'pen'},
-
+                { data: 'at_type', name: 'at_type' },
             
               
                 {data: 'actions', name: 'actions', searchable: false, sortable: false}

@@ -4,7 +4,7 @@
 	      <div class="modal-content">
 	        <div class="modal-header">
 	          
-            <h5 class="modal-title" >SittingDays OT - @{{modaldata_row?.pen}} </h5>
+            <h5 class="modal-title" >@{{modaldata_row?.pen}} (@{{modaldata_row?.designation}}) </h5>
 
 	          <button type="button" class="close"   data-dismiss="modal">&times;</button>
 	        </div>
@@ -29,8 +29,10 @@
               @{{ item.ot }}
               </td>
               <td v-else class="align middle" >
-                  <input type="checkbox"  v-model="modaldata_seldays" :value="item.date"  :id="item.date">
-                  <label :for="item.date">Yes</label>
+                  <input type="radio"  value="NO" v-model="item.ot" :id="`no${item.date}`">
+                  <label :for="`no${item.date}`">NO</label>
+                  <input type="radio" value="YES" v-model="item.ot" :id="`yes${item.date}`">
+                  <label :for="`yes${item.date}`">Yes</label>
                 <!-- <input type="checkbox"  :value="item.date" v-model="modaldata_seldays"> -->
                 <!-- <label >Yes</label> -->
               </td>
@@ -41,8 +43,11 @@
           </table>
           </div>
 	        <div class="modal-footer d-flex justify-content-between ">
-            Total OT: @{{modaldata_seldays.length}} / @{{modaldata_totalOTDays}}
-	          <button type="button" class="btn btn-danger"  @click="modalClosed" data-dismiss="modal">OK</button>
+            Total OT: @{{yesModalDays.length}} / @{{modaldata_totalOTDays}}
+           <!-- <div> -->
+	          <button type="button" class="btn btn-danger" :disabled="yesAndNodaysModalDays.length != modaldata.length" @click="modalClosed" data-dismiss="modal">OK</button>
+            <!-- <button type="button" class="btn btn-secondary" v-show="yesAndNodaysModalDays.length != modaldata.length"   data-dismiss="modal">Close</button> -->
+            <!-- </div> -->
 	        </div>
 	      </div>
 	    </div>

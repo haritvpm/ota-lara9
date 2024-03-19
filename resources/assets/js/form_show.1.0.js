@@ -71,6 +71,16 @@ var vm = new Vue({
         }
 
     },
+    computed: {
+       
+        yesModalDays: function () {
+          return this.modaldata.filter( x => x.ot == 'YES').map( x => x.date )
+        },
+        yesAndNodaysModalDays: function () {
+          return this.modaldata.filter( x => x.ot == 'YES' ||  x.ot == 'NO' || x.userdecision==false ).map( x => x.date )
+        },
+    
+      },
     // define methods under the `methods` object
     methods: {
         modalClosed: function(){
@@ -97,8 +107,8 @@ var vm = new Vue({
                             this.modaldata_fixedOT = count;
                             this.modaldata_row = row ;
                             this.modaldata_totalOTDays = total_nondecision_days+total_userdecision_days;
-                            let yesdays = this.modaldata.filter( x => x.ot == 'YES' && x.userdecision == false ).map( x => x.date )
-                            this.modaldata_seldays = [ ...new Set([ ...yesdays , ...row.overtimesittings])]
+                            //let yesdays = this.modaldata.filter( x => x.ot == 'YES' && x.userdecision == false ).map( x => x.date )
+                            //this.modaldata_seldays = [ ...new Set([ ...yesdays , ...row.overtimesittings])]
                             document.getElementById('modalOpenBtn').click()
                      
       

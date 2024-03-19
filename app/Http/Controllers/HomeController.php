@@ -51,10 +51,7 @@ class HomeController extends Controller
         //verify if we have entered data correctly
         if( auth()->user()->isAdmin() )
         {
-            /*$users_with_no_route  = array();
-            $users = \App\User::with("routing")
-                            ->where('role_id','2')
-                            ->get()->except('admin');*/
+          
 
             $users_with_no_route  = \App\User::whereDoesntHave("routing")->SimpleUsers()
                             ->pluck('username')->except('admin');

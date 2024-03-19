@@ -65,23 +65,24 @@ function checkDatesAndOT(row, data) {
 
     var punchin = data.dates[i].punchin;
     var punchout = data.dates[i].punchout;
-    var pos = row.overtimesittings.indexOf(data.dates[i].date);
+    //if user has made all yes/no decisions, row.overtimesittings will not be null. it can be [] or [<dates>]
+    var pos = row.overtimesittings ? row.overtimesittings.indexOf(data.dates[i].date) : -2;
     if (punchin && punchout) {
       //punched
 
       if (row.isPartime) {
-        if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "11:25")) {
+        if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "11:25") || timePeriodIncludesPeriod(punchin, punchout, "07:05", "12:25")) {
           data.dates[i].ot = 'YES';
           count++;
         } else {
-          data.dates[i].ot = 'No. (06:00 - 11:30)';
+          data.dates[i].ot = 'No. (6/7 am - 11:30/12:30)';
         }
       } else if (row.isFulltime) {
-        if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "16:25")) {
+        if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "16:25") || timePeriodIncludesPeriod(punchin, punchout, "07:05", "17:25")) {
           count++;
           data.dates[i].ot = 'YES';
         } else {
-          data.dates[i].ot = 'No. (06:00 - 4:30pm)';
+          data.dates[i].ot = 'No. (6/7 am - 4:30pm/5:30pm)';
         }
       } else if (row.isWatchnward) {
         //no punching
@@ -96,7 +97,7 @@ function checkDatesAndOT(row, data) {
       }
       data.dates[i].userdecision = false;
       total_nondecision_days++;
-      if (data.dates[i].ot != 'YES' && pos != -1) row.overtimesittings.splice(pos, 1); //remove from sel if it is NO
+      if (data.dates[i].ot != 'YES' && pos >= 0) row.overtimesittings.splice(pos, 1); //remove from sel if it is NO
       continue;
     }
 
@@ -105,23 +106,23 @@ function checkDatesAndOT(row, data) {
       data.dates[i].userdecision = false;
       data.dates[i].ot = punchin || punchout ? 'Not Punched?' : 'Leave?';
       total_nondecision_days++;
-      if (pos != -1) row.overtimesittings.splice(pos, 1); //remove from sel if it is NO
+      if (pos >= 0) row.overtimesittings.splice(pos, 1); //remove from sel if it is NO
       continue;
     }
 
     //non aebasday, check if user has not punched incorrectly when server was failing
     data.dates[i].userdecision = false;
     if (row.isPartime) {
-      if (sittingAllowableForNonAebasDay(punchin, punchout, "06:05", "11:25")) {
+      if (sittingAllowableForNonAebasDay(punchin, punchout, "06:05", "11:25") || sittingAllowableForNonAebasDay(punchin, punchout, "07:05", "12:25")) {
         data.dates[i].userdecision = true;
       } else {
-        data.dates[i].ot = 'No. (06:00 - 11:30)';
+        data.dates[i].ot = 'No. (6/7 - 11:30/12:30)';
       }
     } else if (row.isFulltime) {
-      if (sittingAllowableForNonAebasDay(punchin, punchout, "06:05", "16:25")) {
+      if (sittingAllowableForNonAebasDay(punchin, punchout, "06:05", "16:25") || sittingAllowableForNonAebasDay(punchin, punchout, "07:05", "17:25")) {
         data.dates[i].userdecision = true;
       } else {
-        data.dates[i].ot = 'No. (06:00 - 4:30pm)';
+        data.dates[i].ot = 'No. (6/7 - 4:30pm/5:30pm)';
       }
     } else if (row.isWatchnward) {
       //no punching
@@ -134,15 +135,15 @@ function checkDatesAndOT(row, data) {
       }
     }
     if (data.dates[i].userdecision) {
-      data.dates[i].ot = 'NO';
+      data.dates[i].ot = pos == -2 ? '*' : 'NO'; //-2 if user not dtermined
       total_userdecision_days++;
-      if (pos != -1) {
+      if (pos >= 0) {
         data.dates[i].ot = 'YES';
         count++;
       }
     } else {
       total_nondecision_days++;
-      if (!data.dates[i].userdecision && pos != -1) row.overtimesittings.splice(pos, 1); //remove from sel if it is NO
+      if (!data.dates[i].userdecision && pos >= 0) row.overtimesittings.splice(pos, 1); //remove from sel if it is NO
     }
   }
 
@@ -624,8 +625,9 @@ var vm = new Vue({
         //parttime emp
 
         if (this.hasFirst(row.slots)) {
-          if (!(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(row.from, row.to, "06:05", "11:25")) {
-            this.myerrors.push("Row " + (i + 1) + ": Parttime employee - time should include 06:00 to 11:30 as per G.O on a sitting day");
+          if (!(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(row.from, row.to, "06:05", "11:25") && !(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(row.from, row.to, "07:05", "12:25")) {
+            //hostel
+            this.myerrors.push("Row " + (i + 1) + ": Parttime employee - time should include 06:00/7.00 to 11:30/12.30 on a sitting day");
             return false;
           }
         } else if (this.hasSecond(row.slots)) {
@@ -640,8 +642,8 @@ var vm = new Vue({
       } else if (row.isFulltime) {
         if (this.hasFirst(row.slots)) {
           ////its acutally 4.30. no need to enforce ending time. have doubts regarding mla hostel.
-          if (!(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(row.from, row.to, "06:05", "16:00")) {
-            this.myerrors.push("Row " + (i + 1) + ": Fulltime employee - time shall include 06:00 a.m. to 4.30 pm as per G.O on a sitting day");
+          if (!(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(row.from, row.to, "06:05", "16:15") && !(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(row.from, row.to, "07:05", "17:15")) {
+            this.myerrors.push("Row " + (i + 1) + ": Fulltime employee - time shall include 6/7 a.m. to 4.30/5.30 pm on a sitting day");
             return false;
           }
         }

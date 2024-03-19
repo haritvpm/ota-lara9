@@ -65,23 +65,24 @@ function checkDatesAndOT(row, data) {
 
     var punchin = data.dates[i].punchin;
     var punchout = data.dates[i].punchout;
-    var pos = row.overtimesittings.indexOf(data.dates[i].date);
+    //if user has made all yes/no decisions, row.overtimesittings will not be null. it can be [] or [<dates>]
+    var pos = row.overtimesittings ? row.overtimesittings.indexOf(data.dates[i].date) : -2;
     if (punchin && punchout) {
       //punched
 
       if (row.isPartime) {
-        if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "11:25")) {
+        if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "11:25") || timePeriodIncludesPeriod(punchin, punchout, "07:05", "12:25")) {
           data.dates[i].ot = 'YES';
           count++;
         } else {
-          data.dates[i].ot = 'No. (06:00 - 11:30)';
+          data.dates[i].ot = 'No. (6/7 am - 11:30/12:30)';
         }
       } else if (row.isFulltime) {
-        if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "16:25")) {
+        if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "16:25") || timePeriodIncludesPeriod(punchin, punchout, "07:05", "17:25")) {
           count++;
           data.dates[i].ot = 'YES';
         } else {
-          data.dates[i].ot = 'No. (06:00 - 4:30pm)';
+          data.dates[i].ot = 'No. (6/7 am - 4:30pm/5:30pm)';
         }
       } else if (row.isWatchnward) {
         //no punching
@@ -96,7 +97,7 @@ function checkDatesAndOT(row, data) {
       }
       data.dates[i].userdecision = false;
       total_nondecision_days++;
-      if (data.dates[i].ot != 'YES' && pos != -1) row.overtimesittings.splice(pos, 1); //remove from sel if it is NO
+      if (data.dates[i].ot != 'YES' && pos >= 0) row.overtimesittings.splice(pos, 1); //remove from sel if it is NO
       continue;
     }
 
@@ -105,23 +106,23 @@ function checkDatesAndOT(row, data) {
       data.dates[i].userdecision = false;
       data.dates[i].ot = punchin || punchout ? 'Not Punched?' : 'Leave?';
       total_nondecision_days++;
-      if (pos != -1) row.overtimesittings.splice(pos, 1); //remove from sel if it is NO
+      if (pos >= 0) row.overtimesittings.splice(pos, 1); //remove from sel if it is NO
       continue;
     }
 
     //non aebasday, check if user has not punched incorrectly when server was failing
     data.dates[i].userdecision = false;
     if (row.isPartime) {
-      if (sittingAllowableForNonAebasDay(punchin, punchout, "06:05", "11:25")) {
+      if (sittingAllowableForNonAebasDay(punchin, punchout, "06:05", "11:25") || sittingAllowableForNonAebasDay(punchin, punchout, "07:05", "12:25")) {
         data.dates[i].userdecision = true;
       } else {
-        data.dates[i].ot = 'No. (06:00 - 11:30)';
+        data.dates[i].ot = 'No. (6/7 - 11:30/12:30)';
       }
     } else if (row.isFulltime) {
-      if (sittingAllowableForNonAebasDay(punchin, punchout, "06:05", "16:25")) {
+      if (sittingAllowableForNonAebasDay(punchin, punchout, "06:05", "16:25") || sittingAllowableForNonAebasDay(punchin, punchout, "07:05", "17:25")) {
         data.dates[i].userdecision = true;
       } else {
-        data.dates[i].ot = 'No. (06:00 - 4:30pm)';
+        data.dates[i].ot = 'No. (6/7 - 4:30pm/5:30pm)';
       }
     } else if (row.isWatchnward) {
       //no punching
@@ -134,15 +135,15 @@ function checkDatesAndOT(row, data) {
       }
     }
     if (data.dates[i].userdecision) {
-      data.dates[i].ot = 'NO';
+      data.dates[i].ot = pos == -2 ? '*' : 'NO'; //-2 if user not dtermined
       total_userdecision_days++;
-      if (pos != -1) {
+      if (pos >= 0) {
         data.dates[i].ot = 'YES';
         count++;
       }
     } else {
       total_nondecision_days++;
-      if (!data.dates[i].userdecision && pos != -1) row.overtimesittings.splice(pos, 1); //remove from sel if it is NO
+      if (!data.dates[i].userdecision && pos >= 0) row.overtimesittings.splice(pos, 1); //remove from sel if it is NO
     }
   }
 
@@ -260,7 +261,7 @@ var vm = new Vue({
     modaldata_fixedOT: 0,
     modaldata_row: null,
     modaldata_totalOTDays: 0,
-    modaldata_seldays: [],
+    //modaldata_seldays:[],
     modaldata_showonly: false
   },
   created: function created() {
@@ -298,7 +299,21 @@ var vm = new Vue({
         })
       };
     },
-    isActive: function isActive() {}
+    isActive: function isActive() {},
+    yesModalDays: function yesModalDays() {
+      return this.modaldata.filter(function (x) {
+        return x.ot == 'YES';
+      }).map(function (x) {
+        return x.date;
+      });
+    },
+    yesAndNodaysModalDays: function yesAndNodaysModalDays() {
+      return this.modaldata.filter(function (x) {
+        return x.ot == 'YES' || x.ot == 'NO' || x.userdecision == false;
+      }).map(function (x) {
+        return x.date;
+      });
+    }
   },
   watch: {},
   methods: (_methods = {
@@ -325,7 +340,7 @@ var vm = new Vue({
       //	console.log(i)
       //reset count to zero
       this.form.overtimes[index].count = "";
-      this.form.overtimes[index].overtimesittings = [];
+      this.form.overtimes[index].overtimesittings = null;
       this.getSittingOTs(index);
     },
     addRow: function addRow() {
@@ -349,7 +364,7 @@ var vm = new Vue({
         punching: true,
         //by default everyone ha punching
         isProcessing: false,
-        overtimesittings: [] //days user has worked 
+        overtimesittings: null //days user has worked. important to set null which means user has not selected yes/no for manualentry days
       });
 
       this.pen_names = []; //clear previos selection from dropdown
@@ -398,7 +413,12 @@ var vm = new Vue({
       }).map(function (x) {
         return x.date;
       });
-      this.modaldata_row.overtimesittings = _toConsumableArray(new Set([].concat(_toConsumableArray(yesdays), _toConsumableArray(this.modaldata_seldays))));
+      var userseldays = this.modaldata.filter(function (x) {
+        return x.ot == 'YES' && x.userdecision == true;
+      }).map(function (x) {
+        return x.date;
+      });
+      this.modaldata_row.overtimesittings = _toConsumableArray(new Set([].concat(_toConsumableArray(yesdays), _toConsumableArray(userseldays))));
       this.modaldata_row.count = this.modaldata_row.overtimesittings.length;
       // console.log(this.modaldata_row.overtimesittings)  
 
@@ -456,20 +476,12 @@ var vm = new Vue({
             self.modaldata_fixedOT = count;
             self.modaldata = modaldata;
             self.modaldata_totalOTDays = total_nondecision_days + total_userdecision_days;
-            var yesdays = modaldata.filter(function (x) {
-              return x.ot == 'YES' && x.userdecision == false;
-            }).map(function (x) {
-              return x.date;
-            });
+            //let yesdays = modaldata.filter( x => x.ot == 'YES' && x.userdecision == false ).map( x => x.date )
             //overtimesittings stores prev selected days/ find only those days from the period
             //if user changes perod without userdecision and then backagain, this will be lost.
             //but if user sets and then opens again, we need this
-            var temp = row.overtimesittings.filter(function (date) {
-              return modaldata.map(function (d) {
-                return d.date;
-              }).indexOf(date) != -1;
-            });
-            self.modaldata_seldays = _toConsumableArray(new Set([].concat(_toConsumableArray(yesdays), _toConsumableArray(temp))));
+            //let temp =  row.overtimesittings.filter( date => modaldata.map(d=>d.date).indexOf( date ) != -1 )
+            // self.modaldata_seldays =  [ ...new Set([...yesdays,...temp])]
             document.getElementById('modalOpenBtn').click();
           }
         }
@@ -507,7 +519,7 @@ var vm = new Vue({
         row.employee_id = desig.employee_id;
         row.isProcessing = false;
         row.count = "";
-        row.overtimesittings = [];
+        row.overtimesittings = null;
         (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.setEmployeeTypes)(row);
         self.getSittingOTs(id);
       }
