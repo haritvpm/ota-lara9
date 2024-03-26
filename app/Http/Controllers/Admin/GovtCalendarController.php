@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
 use App\Services\PunchingService;
+use App\Jobs\AebasFetch;
 
 class GovtCalendarController extends Controller
 {
@@ -145,11 +146,33 @@ dd($calendars);
         if(!$reportdate)   return redirect()->back();
 
         \Log::info("fetch attendance trace !. " .  $reportdate);
-        (new PunchingService())->fetchTodayTrace($reportdate);
+       // (new PunchingService())->fetchTodayTrace($reportdate);
 
 
         return redirect()->back();
     }
-
     
+    public function fetchmonth(Request $request)
+    {
+        
+        \Log::info("fetchmonth attendance trace !. " );
+       // (new PunchingService())->fetchTodayTrace($reportdate);
+       $today = today(); 
+       $dates = []; 
+   
+       for($i=1; $i < $today->daysInMonth + 1; ++$i) {
+           $date = Carbon::createFromDate($today->year, $today->month, $i)->format('Y-m-d');
+           //AebasFetch::dispatch($date)->delay(now()->addMinutes($i));
+
+           //dont forget to set queue driver in env
+           //QUEUE_CONNECTION=database
+          // $job = (new AebasFetch($date))->delay(Carbon::now()->addMinutes($i));
+ 
+          // $this->dispatch($job);
+          AebasFetch::dispatch($date)
+          ->delay(now()->addMinutes($i));
+       }
+
+        return redirect()->back();
+    }
 }

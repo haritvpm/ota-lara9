@@ -240,6 +240,8 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
  
      // Govt Calendar
      Route::post('govt-calendars/updatemonth', 'Admin\GovtCalendarController@updatemonth')->name('govt-calendars.updatemonth');
+     Route::post('govt-calendars/fetchmonth', 'Admin\GovtCalendarController@fetchmonth')->name('govt-calendars.fetchmonth');
+
      Route::get('govt-calendars/fetch/{reportdate}', 'Admin\GovtCalendarController@fetchApi')->name('govt-calendars.fetch');
      Route::resource('govt-calendars', 'Admin\GovtCalendarController', ['except' => ['create', 'store', 'destroy']]);
  

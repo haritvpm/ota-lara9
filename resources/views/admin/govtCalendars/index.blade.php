@@ -33,6 +33,11 @@
 </div>
 
 
+<form action="{{url('admin/govt-calendars/fetchmonth')}}" method="post" id="filter" class="form-inline">
+      @csrf
+      <button type="submit" class="btn btn-primary">FetchMonth</button>
+
+      </form>
 
 
 

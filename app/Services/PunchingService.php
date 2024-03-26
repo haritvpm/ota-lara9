@@ -365,7 +365,7 @@ class PunchingService
        $apikey =  env('AEBAS_KEY');
 
        $offset = 0;
-       $count = 2000; //make it to 500 in prod
+       $count = 3000; //make it to 500 in prod
 
       
         // should be in format 2024-02-11

@@ -8,7 +8,8 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Pagination\Paginator; 
 use App\Services\EmployeeService;
 use App\Services\PunchingService;
-use App\Services\Punc;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Support\Facades\RateLimiter;
 
 
 class AppServiceProvider extends ServiceProvider
@@ -27,6 +28,10 @@ class AppServiceProvider extends ServiceProvider
         Paginator::defaultSimpleView('vendor.pagination.default');
 
         Paginator::useBootstrap();
+
+        // RateLimiter::for('fetchaebas', function ($job) {
+        //     return Limit::perMinute(1)->by($job->user->id);
+        // });
 
     }
 
