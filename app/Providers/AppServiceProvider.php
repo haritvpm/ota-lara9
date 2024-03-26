@@ -6,6 +6,9 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 //use Laravel\Dusk\DuskServiceProvider;
 use Illuminate\Pagination\Paginator; 
+use App\Services\EmployeeService;
+use App\Services\PunchingService;
+use App\Services\Punc;
 
 
 class AppServiceProvider extends ServiceProvider
@@ -39,10 +42,15 @@ class AppServiceProvider extends ServiceProvider
         if ($this->app->environment('local', 'testing')) {
            // $this->app->register(DuskServiceProvider::class);
         }
+
+
 //injecting ExampleDependantService into SyncProfile service
         // $this->app->bind(SyncProfile::class, function (Application $app) {
         //     return new SyncProfile($app->make(ExampleDependantService::class));
         // });
+          $this->app->bind(PunchingService::class, function (Application $app) {
+            return new PunchingService($app->make(EmployeeService::class));
+        });
 
     }
 }

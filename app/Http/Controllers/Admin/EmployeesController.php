@@ -120,7 +120,7 @@ class EmployeesController extends Controller
         if(\Auth::user()->isAdminorITAdmin())
         {
            $empwithnocategory = Employee::select('pen')->where('categories_id',null)
-           //->where('category', '<>', 'Relieved')
+           ->where('category', '<>', 'Relieved')
            ->pluck('pen')->implode(',');
         
 

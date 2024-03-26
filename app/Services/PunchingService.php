@@ -14,11 +14,11 @@ use App\Services\EmployeeService;
 
 class PunchingService
 {
-    private EmployeeService $employeeService;
-    public function __construct(EmployeeService $employeeService)
-    {
-        $this->employeeService = $employeeService;
-    }
+    // private EmployeeService $employeeService;
+    // public function __construct(EmployeeService $employeeService)
+    // {
+    //     $this->employeeService = $employeeService;
+    // }
 
     function validateDate($date, $format = 'Y-m-d')
     {
@@ -307,7 +307,7 @@ class PunchingService
 
 
             // $url = 'http://localhost:3000/data';
-            Log::info($url);
+            \Log::info($url);
             $response = Http::withHeaders([
                 'Access-Control-Allow-Origin' => '*',
                 'Content-Type' => 'application/json',
@@ -399,7 +399,7 @@ class PunchingService
                 $url = "https://basreports.attendance.gov.in/api/unibasglobal/api/trace/offset/{$offset}/count/{$count}/reportdate/{$reportdate}/apikey/{$apikey}";
             }
             // $url = 'http://localhost:3000/data';
-            Log::info($url);
+            \Log::info($url);
             $response = Http::withHeaders([
                 'Access-Control-Allow-Origin' => '*',
                 'Content-Type' => 'application/json',
@@ -443,7 +443,7 @@ class PunchingService
             
         }
         
-        Log::info('Newly fetched rows:' . $insertedcount);
+        \Log::info('Newly fetched rows:' . $insertedcount);
 
         $totalrowsindb  = PunchingTrace::where('att_date',$reportdate)->count(); 
         

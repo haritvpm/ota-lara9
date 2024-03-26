@@ -2,7 +2,7 @@
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
-
+use Illuminate\Support\Facades\Gate;
 class UpdateUsersRequest extends FormRequest
 {
     /**
