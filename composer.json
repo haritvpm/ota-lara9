@@ -8,23 +8,23 @@
     "license": "MIT",
     "type": "project",
     "require": {
-        "php": "^8.0.2",
-        "barryvdh/laravel-dompdf": "^2.0.0",
-        "doctrine/dbal": "^3.5",
+        "php": "^8.1",
+        "barryvdh/laravel-dompdf": "^2.1.1",
         "guzzlehttp/guzzle": "^7.2",
         "laracasts/utilities": "^3.0",
-        "laravel/framework": "^9.19",
-        "laravel/tinker": "^2.7",
-        "laravel/ui": "^4.1",
+        "laravel/framework": "^10.0",
+        "laravel/tinker": "^2.8",
+        "laravel/sanctum": "^3.2",
+        "laravel/ui": "^4.2",
         "laravelcollective/html": "^6.3.0",
         "league/csv": "^9.0",
         "nuovo/spreadsheet-reader": "^0.5.11",
         "spatie/laravel-backup": "^8.1",
         "usmanhalalit/laracsv": "^2.1",
-        "yajra/laravel-datatables-oracle": "^9.19"
+        "yajra/laravel-datatables-oracle": "^10.3.1"
     },
     "require-dev": {
-        "spatie/laravel-ignition": "^1.0",
+        "spatie/laravel-ignition": "^2.0",
         "fakerphp/faker": "^1.9.1",
         "mockery/mockery": "0.9.*",
         "phpunit/phpunit": "^9.5.10"
