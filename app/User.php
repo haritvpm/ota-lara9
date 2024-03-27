@@ -17,9 +17,11 @@ use Hash;
  * @property string $remember_token
  * @property string $username
 */
+use Laravel\Sanctum\HasApiTokens;
+
 class User extends Authenticatable
 {
-    use Notifiable;
+    use HasApiTokens, Notifiable;
     protected $fillable = ['name', 'email', 'password', 'remember_token', 'username', 'displayname'];
     
     

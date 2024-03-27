@@ -1,6 +1,10 @@
 <?php
 
+Route::post('login', 'Api\\AuthController@login');
+
 Route::group(['prefix' => '/v1', 'namespace' => 'Api\V1', 'as' => 'api.', 'middleware' => ['auth:sanctum']], function () {
+
+
 
         Route::resource('designations', 'DesignationsController', ['except' => ['create', 'edit']]);
 

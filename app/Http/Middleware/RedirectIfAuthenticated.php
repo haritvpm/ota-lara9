@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 
 class RedirectIfAuthenticated
 {
@@ -14,11 +15,24 @@ class RedirectIfAuthenticated
      * @param  \Closure  $next
      * @param  string|null  $guard
      * @return mixed
-     */
-    public function handle($request, Closure $next, $guard = null)
+    */
+    // public function handle($request, Closure $next, $guard = null)
+    // {
+    //     if (Auth::guard($guard)->check()) {
+    //         return redirect('/admin/home');
+    //     }
+
+    //     return $next($request);
+    // }
+
+    public function handle(Request $request, Closure $next, ...$guards)
     {
-        if (Auth::guard($guard)->check()) {
-            return redirect('/admin/home');
+        $guards = empty($guards) ? [null] : $guards;
+
+        foreach ($guards as $guard) {
+            if (Auth::guard($guard)->check()) {
+                return redirect('/admin/home');
+            }
         }
 
         return $next($request);
