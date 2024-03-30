@@ -1,10 +1,24 @@
 <?php
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\AuthController;
 
-Route::post('login', 'Api\\AuthController@login');
+Route::group([
+        'middleware' => 'api',
+        'prefix' => 'auth'
+    ], function ($router) {
+        Route::post('login', [AuthController::class,'login']);
+        Route::get('me', [AuthController::class,'me']);
+      //  Route::post('login', [AuthController::class, 'login']);
+        Route::post('logout', [AuthController::class, 'logout']);
+        Route::post('refresh', [AuthController::class, 'refresh']);
+     //   Route::post('me', [AuthController::class, 'me']);
 
-Route::group(['prefix' => '/v1', 'namespace' => 'Api\V1', 'as' => 'api.', 'middleware' => ['auth:sanctum']], function () {
+    });
 
 
+Route::group(['namespace' => 'Api\V1', 'as' => 'api.', 'middleware' => ['auth:api']], function () {
+
+ 
 
         Route::resource('designations', 'DesignationsController', ['except' => ['create', 'edit']]);
 

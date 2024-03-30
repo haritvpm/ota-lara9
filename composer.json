@@ -19,6 +19,7 @@
         "laravelcollective/html": "^6.3.0",
         "league/csv": "^9.0",
         "nuovo/spreadsheet-reader": "^0.5.11",
+        "php-open-source-saver/jwt-auth": "^2.2",
         "spatie/laravel-backup": "^8.1",
         "usmanhalalit/laracsv": "^2.1",
         "yajra/laravel-datatables-oracle": "^10.3.1"
