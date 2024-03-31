@@ -61,8 +61,7 @@ class AuthController extends Controller
 
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login','register','refresh','logout']]);
-
+        $this->middleware('auth:api', ['except' => ['login', 'register', 'refresh', 'logout']]);
     }
 
     public function login(Request $request)
@@ -83,29 +82,30 @@ class AuthController extends Controller
 
         $user =  Auth::guard('api')->user();
         return response()->json([
-                'status' => 'success',
-                'user' => $user,
-                'access_token' => $token,
-                'refresh_token' => '',
-                'type' => 'bearer',
-                 
+            'status' => 'success',
+            'user' => $user,
+            'access_token' => $token,
+            'refresh_token' =>$token,
+            'type' => 'bearer',
 
-            ]);
 
-            // return response()->json([
-            //     'status' => 'success',
-            //     'user' => $user,
-            //     'authorisation' => [
-            //         'access_token' => $token,
-            //         'type' => 'bearer',
-            //        // 'expires_in' => auth()->factory()->getTTL() * 60
+        ]);
 
-            //     ]
-            // ]);
+        // return response()->json([
+        //     'status' => 'success',
+        //     'user' => $user,
+        //     'authorisation' => [
+        //         'access_token' => $token,
+        //         'type' => 'bearer',
+        //        // 'expires_in' => auth()->factory()->getTTL() * 60
+
+        //     ]
+        // ]);
 
     }
 
-    public function register(Request $request){
+    public function register(Request $request)
+    {
         $request->validate([
             'name' => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users',
@@ -123,10 +123,10 @@ class AuthController extends Controller
             'status' => 'success',
             'message' => 'User created successfully',
             'user' => $user,
-            'authorisation' => [
-                'token' => $token,
-                'type' => 'bearer',
-            ]
+            'access_token' => $token,
+            'refresh_token' => $token,
+             'type' => 'bearer',
+            
         ]);
     }
 
@@ -141,31 +141,36 @@ class AuthController extends Controller
 
     public function refresh()
     {
+       $token =  Auth::guard('api')->refresh();
         return response()->json([
             'status' => 'success',
-            'user' => Auth::guard('api')->user(),
-            'authorisation' => [
-                'token' => Auth::guard('api')->refresh(),
-                'type' => 'bearer',
-            ]
+            //'user' => Auth::guard('api')->user(),
+            'access_token' => $token,
+            'refresh_token' => $token,
+            'type' => 'bearer',
+            
         ]);
     }
 
     public function me(Request $request)
     {
-        $user = Auth::user();
+        $user = User::with(['roles', 'roles.permissions'])->find(Auth::id());
 
-      return response()->json([
-        'id' =>  $user->id,
-        'name' =>$user->name,
-        'username' =>$user->username,
-        'email' =>$user->email,
-        'avatar' =>'',
-        'roles' => '',
-        'permissions' => '',
+        $permList = collect();
+        foreach ($user->roles as $role) {
+            foreach ($role->permissions as $p) {
+                $permList->add($p->title);
+            }
+        }
 
-
-    ]);
-
+        return response()->json([
+            'id' =>  $user->id,
+            'name' => $user->name,
+            'username' => $user->username,
+            'email' => $user->email,
+            'avatar' => '',
+            'roles' =>  $user->roles->pluck('title'),
+            'permissions' => $permList->unique()  ,
+        ]);
     }
 }
