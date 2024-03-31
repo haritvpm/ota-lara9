@@ -72,7 +72,7 @@ class AuthController extends Controller
         ]);
         $credentials = $request->only('username', 'password');
 
-        $token = auth('api')->attempt($credentials);
+        $token = Auth::guard('api')->attempt($credentials);
         if (!$token) {
             return response()->json([
                 'status' => 'error',
@@ -80,14 +80,14 @@ class AuthController extends Controller
             ], 401);
         }
 
-        $user =  auth('api')->user();
+        $user =  Auth::guard('api')->user();
         return response()->json([
             'status' => 'success',
             'user' => $user,
             'access_token' => $token,
             'refresh_token' =>$token,
             'type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 600
+            'expires_in' => auth('api')->factory()->getTTL() * 600
 
         ]);
 
@@ -151,14 +151,14 @@ class AuthController extends Controller
        }
 
 
-       $token =  auth('api')->refresh();
+       $token =  Auth::guard('api')->refresh();
         return response()->json([
             'status' => 'success',
-            //'user' => auth('api')->user(),
+            //'user' => Auth::guard('api')->user(),
             'access_token' => $token,
             'refresh_token' => $token,
             'type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 600
+            'expires_in' =>auth('api')->factory()->getTTL() * 600
 
             
         ]);

@@ -53,9 +53,9 @@ class AppServiceProvider extends ServiceProvider
         // $this->app->bind(SyncProfile::class, function (Application $app) {
         //     return new SyncProfile($app->make(ExampleDependantService::class));
         // });
-          $this->app->bind(PunchingService::class, function (Application $app) {
-            return new PunchingService($app->make(EmployeeService::class));
-        });
+        //   $this->app->bind(PunchingService::class, function (Application $app) {
+        //     return new PunchingService($app->make(EmployeeService::class));
+        // });
 
     }
 }

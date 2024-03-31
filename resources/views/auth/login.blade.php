@@ -50,6 +50,8 @@ background: url("images/bg/pexels-jakub-novacek-924824.jpg") no-repeat center ce
                           role="form"
                           method="POST"
                           action="{{ url('login') }}">
+                          @csrf
+
                         <input type="hidden"
                                name="_token"
                                value="{{ csrf_token() }}">
