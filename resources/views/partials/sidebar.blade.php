@@ -29,13 +29,14 @@
                         </p>
                     </a>
                 </li>
-            @endcan
-            @can('pa2mlaform_access')
+              
               <li class="nav-item">
-                    <a class="nav-link {{ request()->is("*my_forms")  ? "active" : "" }}" href="{{ route('admin.my_forms.index') }}">
+                    
+                  
+                 <a href="{{ route("admin.my_forms.index") }}" class="nav-link {{ request()->is("admin/my_forms") || request()->is("admin/my_forms/*") ? "active" : "" }}">
                     <i class="fa-fw nav-icon far fa-copy"></i>
                         <p>
-                       Old forms
+                        Old forms
                         </p>
                     </a>
                 </li>

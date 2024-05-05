@@ -771,7 +771,7 @@ var vm = new Vue({
       //check time diff
       for (var i = 0; i < self.form.overtimes.length; i++) {
         var row = self.form.overtimes[i];
-        if (row.punching && self.dayHasPunching) minot_minutes -= isSittingOrWorkingDay ? 5 : 10; //corrected to allow leeway 
+        if (row.punching && self.dayHasPunching) minot_minutes -= isSittingOrWorkingDay ? 5 : 5; //corrected to allow leeway 
 
         (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.setEmployeeTypes)(row);
         if (row.punching) {

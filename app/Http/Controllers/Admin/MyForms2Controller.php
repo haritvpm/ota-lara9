@@ -317,7 +317,14 @@ class MyForms2Controller extends Controller
     {
         $enum_overtime_slot = Form::$enum_overtime_slot;
 
-        $q = \App\Session::with('calender')->whereDataentryAllowed('Yes'); 
+        $q = \App\Session::with('calender')
+        ->where(function ($q) {
+            $q->where('kla','>', 15)
+            ->orWhere(function ($q) {
+                $q->where('kla', 15)
+                ->Where('session','>=', 10);
+            });
+        })->whereDataentryAllowed('Yes'); 
             
       
         $q = $q->latest();

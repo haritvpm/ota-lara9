@@ -37,13 +37,13 @@ th{
   
 
 <div  style="margin-left: 20px; margin-right: 20px;">
-    <div class="card-title">
+    <div class="panel-heading">
      <!-- <span  style="color: green" >Sl.No  <strong>{{$index}}</strong> </span>  :   -->
        
 
     </div>
 
-    <div class="card-body">
+    <div class="panel-body">
         <div class="row">
             <div class="col-md-12">
                 <table class="table table-responsive table-condensed table-fit">

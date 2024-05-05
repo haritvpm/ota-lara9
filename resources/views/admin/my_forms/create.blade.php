@@ -2,7 +2,6 @@
 
     <style>
         [v-cloak] { display:none; }
-
     </style>
 
 @section('content')
@@ -12,12 +11,10 @@
 
     @if(count($sessions) > 0)
 
-    <div class="card p-2" id="app">
-        <div class="card-title">
-            @lang('quickadmin.qa_create')
-        </div>
+    <div class="" id="app">
+     
 
-        <div class="card-body">
+        <div class="">
         
 
             <?php
@@ -28,7 +25,7 @@
  
          </div>
 
-        <div class="card-footer">
+        <div class="panel-footer">
             <a href="{{route('admin.my_forms.index')}}" class="btn btn-default">Cancel</a>
             <button class="btn btn-primary" @click.prevent="create" :disabled="isProcessing"><i class="fa fa-save"></i> Save <i  v-show="isProcessing" class="fa fa-spinner fa-spin"></i></button>
 
@@ -78,19 +75,16 @@
 
     <script type="text/javascript">
 
-    var urlajaxpen = "{{url('admin/employees/ajaxfind')}}"
+    var urlajaxpen = "{{url('admin/employees/ajaxfindold')}}"
     var urlformsubmit = "{{url('admin/my_forms/')}}"
     var urlformsucessredirect = "{{url('admin/my_forms/')}}"
     var urlpresetsubmit = "{{url('admin/presets/')}}"
     var urlajaxpresets = "{{url('admin/presets/ajaxfind')}}"
-    var urlajaxgetpunchtimes = "{{url('admin/punchings/ajaxgetpunchtimes')}}"
     
     
-    
-    var calenderdaypunching = {!! $data['calenderdaypunching'] !!};
-    var daylenmultiplier = {!! $data['daylenmultiplier'] !!};
+
     var calenderdaysmap = {!! $data['calenderdaysmap'] !!};
-    // var designations = {! $data['designations'] !};
+    var designations = {!! $data['designations'] !!};
     Vue.component('Multiselect', VueMultiselect.default);
     // Vue.component('flat-pickr', VueFlatpickr.default);
     Vue.use(VueSweetAlert.default)
@@ -107,7 +101,6 @@
             duty_date: '',
             overtime_slot: '',
             remarks : '',
-            worknature: '',
             overtimes: [/* {
                 pen: "",
                 designation: "",

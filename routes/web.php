@@ -65,6 +65,7 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
    
    
     Route::get('employees/ajaxfind/{q}',array('as'=>'employees.ajax','uses'=>'Admin\EmployeesController@ajaxfind'));
+    Route::get('employees/ajaxfindold/{q}',array('as'=>'employees.ajaxol','uses'=>'Admin\EmployeesController@ajaxfindold'));
 
 
     Route::post('employees/updatedesig', 'Admin\EmployeesController@updatedesig');

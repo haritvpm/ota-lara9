@@ -219,11 +219,18 @@
                             </td>
                             @endif
 
+
                             <td class="text-center">
+
+                            @if($form->overtime_slot == 'Multi' )
                                 <a href="{{ route('admin.my_forms2.show',[$form->id]) }}">
                                  {{ $overtime->count }}
-
                                 </a>   
+                                @else
+                              
+                                 {{ $overtime->count }}
+                                 
+                                @endif
                                                    
                             </td>
                             <!-- <td >₹ {{ $overtime->rate }}</td> -->
@@ -268,11 +275,11 @@
 
 <!-- 
 cannot trust form no, as a user might have started a form, but waited long to submit it. so submit date is the key. -->
-
+<hr>
 
 @if( \Auth::user()->isAdmin() )
 
-<div class="card p-2" id="app1">
+<div class="card p-2 " id="app1">
     <div class="card-title">
         Overtime Data
     </div>

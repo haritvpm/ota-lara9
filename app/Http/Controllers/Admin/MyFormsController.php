@@ -34,7 +34,15 @@ class MyFormsController extends Controller
         //$session_array = \App\Session::whereDataentryAllowed('Yes')->pluck('name');
 
         
-        $session_array = \App\Session::whereshowInDatatable('Yes')->latest()->pluck('name');
+        $session_array = \App\Session::
+                    where(function($query){
+                        $query->where('kla', '< 15')
+                              ->orwhere( function($q){
+                                $q->where('kla', 15)
+                                  ->where('session','<=',9);
+                              });
+                    })
+                    ->whereshowInDatatable('Yes')->latest()->pluck('name');
 
         if(auth()->user()->isAudit()){
             $session_array = \App\Session::latest()->pluck('name');
@@ -326,7 +334,14 @@ class MyFormsController extends Controller
     {
         $enum_overtime_slot = Form::$enum_overtime_slot;
 
-        $q = \App\Session::with('calender')->whereDataentryAllowed('Yes'); 
+        $q = \App\Session::with('calender') 
+            ->where(function($query){
+            $query->where('kla', '< 15')
+                  ->orwhere( function($q){
+                    $q->where('kla', 15)
+                      ->where('session','<=',9);
+                  });
+        })->whereDataentryAllowed('Yes'); 
         
       
         if( $issitting && \Config::get('custom.check_attendance')){
@@ -353,8 +368,6 @@ class MyFormsController extends Controller
         $latest_session = $sessions->first();
          
         $calenderdaysmap = [];
-        $calenderdaypunching = [];
-        $daylenmultiplier = [];
         $calenderdays2 = array();
      
         foreach ($session_array as $session) {
@@ -363,23 +376,19 @@ class MyFormsController extends Controller
                        
             if(!$issitting)
             {
-                $daysall->where( function ($query) {
-                    $query->wherenot('punching','AEBAS_FETCH_PENDING') 
-                        ->orwherenull('punching') ;
-                })->where('date', '<=', date('Y-m-d'));
-                
-                $days = $daysall->get();
+                $daysall->where('date', '<=', date('Y-m-d'));
+                $days = $daysall->get(['date','day_type']);
             }
             else{
-                $days = $daysall->where( 'day_type','Sitting day')->get();
+                $days = $daysall->where( 'day_type','Sitting day')->get(['date','day_type']);
             }
 
             
             foreach ($days as $day) {
               
-                $calenderdaypunching[$day['date']] = $day['punching'] ?? 'NOPUNCHING';
                 $calenderdaysmap[$day['date']] = $day['day_type'];
-                $daylenmultiplier[$day['date']] = $day['daylength_multiplier'] ?? 1.0;
+
+
 
                 $calenderdays2[$session->name][] = $day['date'];    
             }
@@ -433,14 +442,13 @@ class MyFormsController extends Controller
             $ispartimefulltime = 1;            
         }
 
-       // $designations = \App\Designation::orderby('designation','asc')->get(['designation'])->pluck('designation');
+        $designations = \App\Designation::orderby('designation','asc')
+                    ->get(['designation'])->pluck('designation');
 
         $data["calenderdaysmap"] = json_encode($calenderdaysmap);
-      //  $data["designations"] = json_encode($designations); //we no longer allow user to set deisg, it is auto selected
+        $data["designations"] = json_encode($designations);
         $data["calenderdays2"] = json_encode($calenderdays2);
-        $data["calenderdaypunching"] = json_encode($calenderdaypunching);
-        
-        $data["daylenmultiplier"] = json_encode($daylenmultiplier);
+
 
         $presets = \App\Preset::
                   where('user_id',\Auth::user()->id)
@@ -457,22 +465,16 @@ class MyFormsController extends Controller
         $autoloadpens = null;
 
         if($id_to_copy != null){
-            $formtocopy = Form::with(['created_by','overtimes','overtimes.employee.categories','overtimes.employee.designation'])->findOrFail($id_to_copy);
+            $formtocopy = Form::with(['created_by','overtimes'])->findOrFail($id_to_copy);
             
             $autoloadpens = $formtocopy->overtimes()->get();
             
             $autoloadpens = $autoloadpens->mapWithKeys(function ($item) {
-               
-                return [$item['pen'] .'-' . $item['name'] => 
-                [
-                    'desig' => $item['designation'],
-                    'category' =>  $item?->employee?->categories?->category,
-                    'employee_id' => $item?->employee?->id,
-                    'punching'   => ($item?->employee?->categories?->punching ?? true) && ($item?->employee?->designation?->punching ?? true),
-                    'normal_office_hours' =>   $item?->employee?->designation?->normal_office_hours,
-                ]
-            ];
-                
+                if($item['name'] == null)
+                    return [$item['pen'] => $item['designation']];
+                else {
+                    return [$item['pen'] .'-' . $item['name'] =>  $item['designation']];
+                }
             });
             
         }
@@ -494,17 +496,12 @@ class MyFormsController extends Controller
         if(!$issitting){
             if($id)
             {
-                $form = Form::with(['created_by','overtimes','overtimes.employee.categories','overtimes.employee.designation'])->findOrFail($id);
+                $form = Form::with(['created_by','overtimes'])->findOrFail($id);
 
-                $form->overtimes->transform(function ($item) use ($form) {
+                $form->overtimes->transform(function ($item) {
                     if($item['name'] != null){
                         $item['pen'] = $item['pen'] . '-' . $item['name'];
-                       // $item['allowpunch_edit'] = $item['punching_id'] == null; //otherwise it will be disabled on edit
-
                     }
-                    $item['category'] = $item?->employee?->categories?->category;
-                    $item['normal_office_hours'] = $item?->employee?->designation?->normal_office_hours;
-                    
                     return $item;
                                    
                 });
@@ -597,8 +594,7 @@ class MyFormsController extends Controller
         $designations = $collection->pluck('designation');
 
         $rates = \App\Designation::wherein ('designation', $designations )->pluck('rate','designation');
-        $calender_day = \App\Calender::where('date', $date)->first();
-        //$isHolidey = str_contains($calender_day->day_type,'oliday');
+       
        //\Log::info(print_r($rates, true));
       
        
@@ -638,7 +634,7 @@ class MyFormsController extends Controller
         $rates = \App\Designation::wherein ('designation', $designations )->pluck('rate','designation');
      
         $overtimes = $collection->transform(function($overtime)  
-                                            use ($res, $request,$date, &$myerrors,$formid,$rates,$calender_day) 
+                                            use ($res, $request,$date, &$myerrors,$formid,$rates) 
         {
             $pen = $overtime['pen'];
             $tmp = strpos($pen, '-');
@@ -666,8 +662,12 @@ class MyFormsController extends Controller
                                     ->where('id', '!=', $formid); //skip this item if on update
                         })->get();
             */
-         
-           
+
+
+            
+            /*$res_for_thisslot = $emp->reject(function($element) use ($request) {
+                return stripos($element->form->overtime_slot, $request['overtime_slot']) === false;
+            });*/
 
             ///////////
             $res_for_thisslot = $emp->reject(function($element) use ($request) {
@@ -684,7 +684,18 @@ class MyFormsController extends Controller
                  array_push($myerrors, 'Already entered ' . $request['overtime_slot'] . ' OT on this day for '  .  $empslot->implode(','));
                  return null;
             }
-                
+
+            //this is to prevent DS and above getting more than 3 OTs including additional OT
+/*
+            $emp =  \App\Overtime::with('form')
+                    ->where('pen', 'like' , $pen . '%')
+                    ->whereHas('form', function($query)  use ($request,$date,$formid) { 
+                        $query->where('duty_date', $date)
+                              ->where('session', $request['session'])
+                              ->where('id', '!=', $formid); //skip this item if on update;
+                    })->get();
+            */
+                  
                         
             if( $emp->count() >= 3  )
             {
@@ -695,36 +706,31 @@ class MyFormsController extends Controller
 
             }
 
-            $strtimes_totimestamps = function ( $from, $to )  {
-              $timefrom = strtotime($from);   $timeto = strtotime($to);
-               if($timeto <= $timefrom){  $timeto += 24*60*60; }
-               return [ $timefrom,$timeto ];
-            };
+            $timefrom_comp = strtotime($overtime['from']);
+            $timeto_comp = strtotime($overtime['to']);
 
-            //time of this form
-            //$timefrom_comp = strtotime($overtime['from']);
-           // $timeto_comp = strtotime($overtime['to']);
+            if($timeto_comp <= $timefrom_comp){
+                    $timeto_comp += 24*60*60;
+                }
 
-           // if($timeto_comp <= $timefrom_comp){
-           //         $timeto_comp += 24*60*60;
-           // }
-           [$timefrom_comp, $timeto_comp] = $strtimes_totimestamps( $overtime['from'], $overtime['to']);
 
-            //check overlap with other OTS of this day for this employee
             foreach ($emp as $e) {
-                //$timefrom = strtotime($e['from']);
-                //$timeto = strtotime(  $e['to']);
-                //if($timeto <= $timefrom){
-                //    $timeto += 24*60*60;
-               // }
-                [$timefrom, $timeto] = $strtimes_totimestamps($e['from'], $e['to']);
+                $timefrom = strtotime($e['from']);
+                $timeto = strtotime(  $e['to']);
+                if($timeto <= $timefrom){
+                    $timeto += 24*60*60;
+                }
 
-                /*
-                 $isoverlap = ($timefrom > $timefrom_comp && $timefrom < $timeto_comp) ||  ($timefrom_comp > $timefrom && $timefrom_comp < $timeto) || 
-                   ( $timefrom == $timefrom_comp ||  $timeto  ==  $timeto_comp ) ;
-                */
-                $isoverlap = (($timefrom < $timeto_comp) && ($timeto > $timefrom_comp)) || 
-                              ($timefrom == $timefrom_comp) ||  ($timeto == $timeto_comp) ;
+/*
+                 $isoverlap = ($timefrom > $timefrom_comp && $timefrom < $timeto_comp) ||
+                   ($timefrom_comp > $timefrom && $timefrom_comp < $timeto) || 
+                   ( $timefrom == $timefrom_comp || 
+                    $timeto  ==  $timeto_comp )
+                   ;
+                   */
+                    $isoverlap = (($timefrom < $timeto_comp) && ($timeto > $timefrom_comp)) || 
+                    ($timefrom == $timefrom_comp) || 
+                    ($timeto == $timeto_comp) ;
 
                 if($isoverlap){
                      //list($pen, $name) = array_map('trim', explode("-", $overtime['pen']));
@@ -734,29 +740,6 @@ class MyFormsController extends Controller
 
             } 
            
-            //check if time is the minimum recommended
-            /* incomplete. grace time of 10 min for whole day. instead allow for each OT
-            $normal_office_hours = $overtime['normal_office_hours'];
-          //  dd( $normal_office_hours);
-         
-            $needed_mins_forthisOT = $calender_day->isHoliday ? 180 : 150;
-            if( $request['overtime_slot'] === 'First' ){
-                $needed_mins_forthisOT += $normal_office_hours*60* $calender_day->daylength_multiplier;
-            }
-
-            $mins_forthisOT = ceil(abs($timeto_comp - $timefrom_comp) / 60);
-           
-           // array_push($myerrors,$mins_forthisOT .'-' .$needed_mins_forthisOT );
-       
-            if( $mins_forthisOT <  $needed_mins_forthisOT){
-                //check grace time by adding times for all OTs.
-                $total_time_allotherOTs = $emp->sum(function ($ot) use($strtimes_totimestamps) {
-                    [$timefrom_thisOT, $timeto_thisOT] = $strtimes_totimestamps( $ot['from'],$ot['to']);
-                    return ceil(abs($timeto_thisOT - $timefrom_thisOT) / 60);
-                });
-            }
-            */
-
 
             {
                         
@@ -769,11 +752,7 @@ class MyFormsController extends Controller
                     'worknature'    => $overtime['worknature'] ?? '',
                     'count'         => '1',
                     'rate'          => $rates[$overtime['designation']],
-                    'punching'       => $overtime['punching'],
-                    'punchin'       => $overtime['punchin'],
-                    'punchout'       => $overtime['punchout'],
-                    'punching_id'    => $overtime['punching_id'] ?? null,
-                    'employee_id' => $overtime['employee_id'],
+                    
                     ]);
 
             }
@@ -832,7 +811,6 @@ class MyFormsController extends Controller
                 'duty_date'  => $request['duty_date'],
                 'overtime_slot' => $request['overtime_slot'],
                 'remarks' => $request['remarks'],
-                'worknature'    => $request['worknature'],
             ]);
 
             $form->overtimes()->saveMany($overtimes);

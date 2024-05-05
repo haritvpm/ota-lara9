@@ -211,6 +211,37 @@ class EmployeesController extends Controller
         return view('admin.employees.index', compact('employees'));
     }
     */
+    //before punching
+    public function ajaxfindold($search)
+    {
+       
+      $temp =  Employee::with('designation')
+                ->wherehas( 'designation', function($q){
+                    $q->wherenotin('designation', ['Personal Assistant to MLA']);
+                })
+             ->where('category','<>','Staff - Admin Data Entry')
+             ->where('category','<>','Relieved')  
+             ->where('pen','not like','TMP%') 
+             ->Where(function ($query) use ($search) {
+                $query->where('pen', 'like', '%' . $search . '%')
+                ->orWhere('name', 'like', '%' . $search . '%');
+            })->orderby('name','asc')->get()->take(30);
+            //})->orderby('name','asc')->pluck('name','pen')->take(100);
+                        
+
+
+        $combined = $temp->mapWithKeys(function ($item) {
+            return [ $item->pen . '-' . $item->name => $item->designation->designation];
+        });
+               
+
+        return [
+            'pen_names' => $combined->keys(),
+            'pen_names_to_desig' => $combined
+        ];
+        
+    }
+
 
     public function ajaxfind($search)
     {
