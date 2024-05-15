@@ -186,9 +186,9 @@ var vm = new Vue({
 
 		onChange: function (e) {
 			//if( e?.type != 'dp' ) return ; //this func seems to be called twice on date change. this prevents that as the first call does not have that set
-			
 			this.updateDateDependencies()
 			if (this.form.duty_date != "" && this.form.duty_date != null) {
+				console.log('onchange2')
 			
 			//	if( e.oldDate != e.date )
 				{
@@ -249,6 +249,7 @@ var vm = new Vue({
 
 		
 		fetchPunching: function () {
+			console.log('fetchPunching')
 			for (let i = 0; i < this.form.overtimes.length; i++) { 
 				this.fetchPunchingTimeForRow(i)
 			
@@ -376,9 +377,12 @@ var vm = new Vue({
 		},
 		//this can be used to update punching times if we chage calender dates after entering/loading employees.
 		fetchPunchingTimeForRow(index) {
+
 			var self = this;
 			let row = self.form.overtimes[index];
 			if(row.pen == "" || !self.form.duty_date) return;
+			console.log(row)
+
 			//set punchtime if not set and available
 			//reset for example if user selects another person after selecting a person with punchtime
 			 row.punchin = "";
@@ -610,21 +614,24 @@ var vm = new Vue({
 
 			const { isSittingDay, isSittingOrWorkingDay, isWorkingDay, isHoliDay } = this.getDayTypes();
 
-			let minothour_ideal = parseFloat(3);
-			let minot_minutes = 180; //corrected to allow leeway 
-			var daytypedesc = "holiday";
-			if (isSittingOrWorkingDay) {
-        		minothour_ideal = parseFloat(2.5);
-				minot_minutes = 150;
-				
-				daytypedesc = "working day";
-				if (isSittingDay) {
-					daytypedesc = "sitting day";
-				}
-			}
-
+		
 			//check time diff
 			for (var i = 0; i < self.form.overtimes.length; i++) {
+
+				let minothour_ideal = parseFloat(3);
+				let minot_minutes = 180; //corrected to allow leeway 
+				var daytypedesc = "holiday";
+				if (isSittingOrWorkingDay) {
+					minothour_ideal = parseFloat(2.5);
+					minot_minutes = 150;
+					
+					daytypedesc = "working day";
+					if (isSittingDay) {
+						daytypedesc = "sitting day";
+					}
+				}
+
+
 				var row = self.form.overtimes[i];
 				
 				if(row.punching && self.dayHasPunching)  minot_minutes -= isSittingOrWorkingDay ? 5 : 5; //corrected to allow leeway 
