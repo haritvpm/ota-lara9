@@ -999,13 +999,13 @@ var vm = new Vue({
 			//var worknature = self.presets_default["default_worknature"];
 
 			if (this.form.overtime_slot != "") {
-				timefrom = def_time_start;
-				timeto = def_time_end;
+				//timefrom = def_time_start;
+				//timeto = def_time_end;
 			}
 
 			if (self.form.overtimes.length > 0) {
-				timefrom = self.form.overtimes[0].from;
-				timeto = self.form.overtimes[0].to;
+				//timefrom = self.form.overtimes[0].from;
+				//timeto = self.form.overtimes[0].to;
 				//worknature = self.form.overtimes[0].worknature;
 			}
 
