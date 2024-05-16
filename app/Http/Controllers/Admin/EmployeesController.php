@@ -276,7 +276,7 @@ class EmployeesController extends Controller
                     'desig_normal_office_hours' =>  $item->designation->normal_office_hours,
                   //  'desig_punching' =>  $item->designation->punching,
                   //  'category_punching' => $item->categories->punching,
-                    'punching' =>   ($item?->categories?->punching?? true) && ($item->designation->punching ?? true) && $item->punching &&  \Auth::user()->hasPunching(),
+                    'punching' =>   ($item?->categories?->punching ?? true) && ($item->designation->punching ?? true) && $item->punching &&  \Auth::user()->hasPunching(),
                     'category' =>  $item?->categories?->category,
                     'employee_id' =>  $item->id,
                     'aadhaarid' =>  $item->aadhaarid,
