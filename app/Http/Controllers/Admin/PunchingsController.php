@@ -463,7 +463,7 @@ class PunchingsController extends Controller
 
         $apikey =  env('AEBAS_KEY');
         $offset = 0;
-        $count = 2000;
+        $count = 500;
         $apinum = $request->query('apinum');
         $reportdate = $request->query('reportdate', '01-01-2000');
 
@@ -512,8 +512,8 @@ class PunchingsController extends Controller
                 $returnkey = "orgshift";
             }else if ($apinum == (14 + 9)) {
                 
-                $url = "https://basreports.attendance.gov.in/api/unibasglobal/api/detailsbydistrictid/districtid/581/offset/{$offset}/count/{$count}/apikey/{$apikey}";
-                $returnkey = "detailsbydistrictid";
+                $url = "https://basreports.attendance.gov.in/api/unibasglobal/api/detailsbydistrictid/districtid/00581/offset/{$offset}/count/{$count}/apikey/{$apikey}";
+                $returnkey = "DeviceDetailsDistrictId";
             }
 
 

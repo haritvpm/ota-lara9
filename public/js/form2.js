@@ -390,9 +390,10 @@ var vm = new Vue({
     },
     onChange: function onChange(e) {
       //if( e?.type != 'dp' ) return ; //this func seems to be called twice on date change. this prevents that as the first call does not have that set
-
       this.updateDateDependencies();
       if (this.form.duty_date != "" && this.form.duty_date != null) {
+        console.log('onchange2');
+
         //	if( e.oldDate != e.date )
         {
           this.fetchPunching();
@@ -431,6 +432,7 @@ var vm = new Vue({
     // },
 
     fetchPunching: function fetchPunching() {
+      console.log('fetchPunching');
       for (var i = 0; i < this.form.overtimes.length; i++) {
         this.fetchPunchingTimeForRow(i);
       }
@@ -549,6 +551,8 @@ var vm = new Vue({
       var self = this;
       var row = self.form.overtimes[index];
       if (row.pen == "" || !self.form.duty_date) return;
+      console.log(row);
+
       //set punchtime if not set and available
       //reset for example if user selects another person after selecting a person with punchtime
       row.punchin = "";
@@ -756,22 +760,22 @@ var vm = new Vue({
         isSittingOrWorkingDay = _this$getDayTypes.isSittingOrWorkingDay,
         isWorkingDay = _this$getDayTypes.isWorkingDay,
         isHoliDay = _this$getDayTypes.isHoliDay;
-      var minothour_ideal = parseFloat(3);
-      var minot_minutes = 180; //corrected to allow leeway 
-      var daytypedesc = "holiday";
-      if (isSittingOrWorkingDay) {
-        minothour_ideal = parseFloat(2.5);
-        minot_minutes = 150;
-        daytypedesc = "working day";
-        if (isSittingDay) {
-          daytypedesc = "sitting day";
-        }
-      }
 
       //check time diff
       for (var i = 0; i < self.form.overtimes.length; i++) {
+        var minothour_ideal = parseFloat(3);
+        var minot_minutes = 180; //corrected to allow leeway 
+        var daytypedesc = "holiday";
+        if (isSittingOrWorkingDay) {
+          minothour_ideal = parseFloat(2.5);
+          minot_minutes = 150;
+          daytypedesc = "working day";
+          if (isSittingDay) {
+            daytypedesc = "sitting day";
+          }
+        }
         var row = self.form.overtimes[i];
-        if (row.punching && self.dayHasPunching) minot_minutes -= isSittingOrWorkingDay ? 5 : 10; //corrected to allow leeway 
+        if (row.punching && self.dayHasPunching) minot_minutes -= isSittingOrWorkingDay ? 5 : 5; //corrected to allow leeway 
 
         (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.setEmployeeTypes)(row);
         if (row.punching) {
@@ -1105,15 +1109,14 @@ var vm = new Vue({
       //var worknature = self.presets_default["default_worknature"];
 
       if (this.form.overtime_slot != "") {
-        timefrom = def_time_start;
-        timeto = def_time_end;
+        //timefrom = def_time_start;
+        //timeto = def_time_end;
       }
       if (self.form.overtimes.length > 0) {
-        timefrom = self.form.overtimes[0].from;
-        timeto = self.form.overtimes[0].to;
+        //timefrom = self.form.overtimes[0].from;
+        //timeto = self.form.overtimes[0].to;
         //worknature = self.form.overtimes[0].worknature;
       }
-
       for (var key in obj) {
         if (obj.hasOwnProperty(key)) {
           //we can either clear items or we check for duplicates

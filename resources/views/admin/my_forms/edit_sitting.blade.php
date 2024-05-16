@@ -14,8 +14,8 @@
     <input type="hidden" name="_token" value="{{ csrf_token() }}">
 
 
-    <div class="card p-2" id="app">
-        <div class="card-title">
+    <div class="panel panel-default" id="app">
+        <div class="panel-heading">
             Edit
 
             <div class = "pull-right">
@@ -27,7 +27,7 @@
         </div>
                 
 
-        <div class="card-body">
+        <div class="panel-body">
         
             <div class="row">
                 <div class="col-md-4 form-group">           
@@ -47,7 +47,7 @@
  
         </div>
 
-        <div class="card-footer">
+        <div class="panel-footer">
             <a href="{{ URL::previous() }}" class="btn btn-default">Cancel</a>
             <button class="btn btn-primary" @click.prevent="update" :disabled="isProcessing"><i class="fa fa-save"></i> Save <i  v-show="isProcessing" class="fa fa-spinner fa-spin"></i></button>
              <small>&nbsp; (click Cancel if you have not made any changes)</small>

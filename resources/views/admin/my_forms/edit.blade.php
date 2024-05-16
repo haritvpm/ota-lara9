@@ -14,8 +14,8 @@
     <input type="hidden" name="_token" value="{{ csrf_token() }}">
 
 
-    <div class="card p-2" id="app">
-        <div class="card-title">
+    <div class="panel panel-default" id="app">
+        <div class="panel-heading">
             Edit
 
              <div class = "pull-right">
@@ -26,7 +26,7 @@
         </div>
                 
 
-        <div class="card-body">
+        <div class="panel-body">
         
 
             <div class="row">
@@ -47,7 +47,7 @@
  
         </div>
 
-        <div class="card-footer">
+        <div class="panel-footer">
             <a href="{{ URL::previous() }}" class="btn btn-default">Cancel</a>
             <button class="btn btn-primary" @click.prevent="update" :disabled="isProcessing"><i class="fa fa-save"></i> Save <i  v-show="isProcessing" class="fa fa-spinner fa-spin"></i></button>
             <small>&nbsp; (click Cancel if you have not made any changes)</small>
@@ -95,12 +95,9 @@
     var urlajaxpen = "{{url('admin/employees/ajaxfind')}}"
     var urlformsubmit = "{{url('admin/my_forms/')}}"
     var urlformsucessredirect = "{{url('admin/my_forms/')}}"
-    var urlajaxgetpunchtimes = "{{url('admin/punchings/ajaxgetpunchtimes')}}"
         
-    var calenderdaypunching = {!! $data['calenderdaypunching'] !!};
-    var daylenmultiplier = {!! $data['daylenmultiplier'] !!};
     var calenderdaysmap = {!! $data['calenderdaysmap'] !!};
-    // var designations = {! $data['designations'] !};
+    var designations = {!! $data['designations'] !!};
     Vue.component('Multiselect', VueMultiselect.default);
     // Vue.component('flat-pickr', VueFlatpickr.default);
     

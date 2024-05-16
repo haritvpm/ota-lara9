@@ -15,12 +15,12 @@
     @if(count($sessions) > 0)
     
   
-    <div class="card p-2" id="app">
-        <div class="card-title">
+    <div class="panel panel-default" id="app">
+        <div class="panel-heading">
             @lang('quickadmin.qa_create')
         </div>
 
-        <div class="card-body">
+        <div class="panel-body">
         
             <?php
             $readonly = "";
@@ -30,7 +30,7 @@
  
          </div>
 
-        <div class="card-footer">
+        <div class="panel-footer">
             <a href="{{route('admin.my_forms.index')}}" class="btn btn-default">Cancel</a>
             <button class="btn btn-primary" @click.prevent="create" :disabled="isProcessing"><i class="fa fa-save"></i> Save<i  v-show="isProcessing" class="fa fa-spinner fa-spin"></i></button>
 
@@ -95,7 +95,7 @@
 
     <script type="text/javascript">
 
-    var urlajaxpen = "{{url('admin/employees/ajaxfind')}}"
+    var urlajaxpen = "{{url('admin/employees/ajaxfindold')}}"
     var urlformsubmit = "{{url('admin/my_forms/store_sitting')}}"
     var urlformsucessredirect = "{{url('admin/my_forms/')}}"
     var urlajaxpresets = "{{url('admin/presets/ajaxfind')}}"
