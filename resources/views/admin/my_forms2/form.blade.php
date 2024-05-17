@@ -72,8 +72,8 @@
 			</thead>
 			<tbody>
 				<tr v-for="(row, index) in form.overtimes" :class="{ info: index%2 }" >
-					<td class="text-center align-middle" style="width:1px;"> <small> 
-<button  class="btn btn-default" data-toggle="tooltip" title="Insert row" @click.prevent="insertElement(index+1);"> <span v-text="index+1"></span> </small> </button></td>
+					<td class="text-center align-middle" style="width:1px;" > <small> 
+<button  class="btn" v-bind:class="row.punching ? 'btn-default' : 'btn-warning' "   data-toggle="tooltip" title="Insert row" @click.prevent="insertElement(index+1);"> <span v-text="index+1"></span> </small> </button></td>
 					
 					<td>
 					<multiselect :name="'name[' + index + ']'" v-model= "row.pen" :id=index  :ref="'field-'+index"  placeholder= "Type to search" 
@@ -105,11 +105,16 @@
 					</td>
 				
 
-					<td class="col-md-2">
+					<td class="col-md-3">
 					<div class="input-group">
-					<input  :name="'from[' + index + ']'" type="text" v-model="row.from" required class="form-control"  autocomplete="off">
-					<input  :name="'to[' + index + ']'" type="text" v-model="row.to" required class="form-control"  autocomplete="off">
+					<input  :name="'from[' + index + ']'" type="text"  v-on:keyup.alt.up="addTime('from',row)"  v-on:keyup.alt.down="subTime('from',row)" v-on:keyup.alt.67="copyPunchFrom(row)" v-model="row.from" required class="form-control"  autocomplete="off">
+					
+					<input  :name="'to[' + index + ']'" type="text" v-on:keyup.alt.up="addTime('to',row)"  v-on:keyup.alt.down="subTime('to',row)"   v-on:keyup.alt.67="copyPunchTo(row)" v-model="row.to" required class="form-control"  autocomplete="off">
+						<div class="input-group-append">
+							<span class="input-group-text">@{{getTimeDiff(row)}}</span>
+						</div>
 					</div>
+					
 					</td>
 					
 					<td class="col-md-2 text-center align-middle">
@@ -159,7 +164,7 @@
 				<!-- <span v-show ="form.overtimes.length>1" class="float-right">&nbsp;|&nbsp;</span> -->
 				 <a href="#" class="pull-right" v-show ="form.overtimes.length>1" @click="copytimedown" >Time</a>
 
-				 <span v-show ="form.overtimes.length>1" class="float-right">Copy from First Row:&nbsp;</span>
+				 <span v-show ="form.overtimes.length>1" class="float-right">Copy Punch Times:&nbsp;</span>
 
 				 <!-- <span v-show ="form.overtimes.length>1" class="float-right">Copy Time to Next Row: F4 | &nbsp;</span> -->
 

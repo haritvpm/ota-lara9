@@ -15,7 +15,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "sittingAllowableForNonAebasDay": () => (/* binding */ sittingAllowableForNonAebasDay),
 /* harmony export */   "stringTimeToDate": () => (/* binding */ stringTimeToDate),
 /* harmony export */   "timePeriodIncludesPeriod": () => (/* binding */ timePeriodIncludesPeriod),
-/* harmony export */   "toHoursAndMinutes": () => (/* binding */ toHoursAndMinutes)
+/* harmony export */   "toHoursAndMinutes": () => (/* binding */ toHoursAndMinutes),
+/* harmony export */   "toHoursAndMinutesBare": () => (/* binding */ toHoursAndMinutesBare)
 /* harmony export */ });
 function setEmployeeTypes(row) {
   if (!row.hasOwnProperty("designation") || !row.hasOwnProperty("category") || !row.hasOwnProperty("normal_office_hours")) {
@@ -159,6 +160,12 @@ function toHoursAndMinutes(totalMinutes) {
   var minutes = totalMinutes % 60;
   if (hours) return "".concat(hours, ":").concat(padToTwoDigits(minutes), " hour");
   return "".concat(minutes, " min");
+}
+function toHoursAndMinutesBare(totalMinutes) {
+  var hours = Math.floor(totalMinutes / 60);
+  var minutes = totalMinutes % 60;
+  if (hours) return "".concat(hours, ":").concat(padToTwoDigits(minutes));
+  return "0:".concat(minutes);
 }
 function padToTwoDigits(num) {
   return num.toString().padStart(2, '0');
@@ -360,9 +367,11 @@ var vm = new Vue({
   methods: {
     copytimedown: function copytimedown() {
       if (this.form.overtimes.length > 1) {
-        for (var i = 1; i < this.form.overtimes.length; i++) {
-          this.form.overtimes[i].from = this.form.overtimes[0].from;
-          this.form.overtimes[i].to = this.form.overtimes[0].to;
+        for (var i = 0; i < this.form.overtimes.length; i++) {
+          if (this.form.overtimes[i].from == "" || this.form.overtimes[i].to == "") {
+            this.form.overtimes[i].from = this.form.overtimes[i].punchin;
+            this.form.overtimes[i].to = this.form.overtimes[i].punchout;
+          }
         }
       }
     },
@@ -471,6 +480,15 @@ var vm = new Vue({
         this.form.overtimes.splice(index, 1);
         this.myerrors = [];
       }
+    },
+    getTimeDiff: function getTimeDiff(row) {
+      if ((row === null || row === void 0 ? void 0 : row.from) == "" || (row === null || row === void 0 ? void 0 : row.to) == "") {
+        return "";
+      }
+      var _this$strTimesToDates = this.strTimesToDatesNormalized(row.from, row.to),
+        datefrom = _this$strTimesToDates.datefrom,
+        dateto = _this$strTimesToDates.dateto;
+      return (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.toHoursAndMinutesBare)((dateto - datefrom) / 60000);
     },
     limitText: function limitText(count) {
       return "and ".concat(count, " more");
@@ -613,12 +631,12 @@ var vm = new Vue({
     },
     checkTimeWithinPunchingTime: function checkTimeWithinPunchingTime(row) {
       if (!row.punching) return true;
-      var _this$strTimesToDates = this.strTimesToDatesNormalized(row.from, row.to),
-        datefrom = _this$strTimesToDates.datefrom,
-        dateto = _this$strTimesToDates.dateto;
-      var _this$strTimesToDates2 = this.strTimesToDatesNormalized(row.punchin, row.punchout),
-        datepunchin = _this$strTimesToDates2.datefrom,
-        datepunchout = _this$strTimesToDates2.dateto;
+      var _this$strTimesToDates2 = this.strTimesToDatesNormalized(row.from, row.to),
+        datefrom = _this$strTimesToDates2.datefrom,
+        dateto = _this$strTimesToDates2.dateto;
+      var _this$strTimesToDates3 = this.strTimesToDatesNormalized(row.punchin, row.punchout),
+        datepunchin = _this$strTimesToDates3.datefrom,
+        datepunchout = _this$strTimesToDates3.dateto;
       if (datepunchin > datefrom || datepunchout < dateto) {
         return false;
       }
@@ -801,9 +819,9 @@ var vm = new Vue({
             return false;
           }
         }
-        var _this$strTimesToDates3 = this.strTimesToDatesNormalized(row.from, row.to),
-          datefrom = _this$strTimesToDates3.datefrom,
-          dateto = _this$strTimesToDates3.dateto;
+        var _this$strTimesToDates4 = this.strTimesToDatesNormalized(row.from, row.to),
+          datefrom = _this$strTimesToDates4.datefrom,
+          dateto = _this$strTimesToDates4.dateto;
         var otmins_actual = parseFloat((dateto - datefrom) / 60000);
 
         //add totalhours needed
@@ -1152,45 +1170,75 @@ var vm = new Vue({
     //loadpresetdata
     copytimedownonerow: function copytimedownonerow() {
       //console.log("copytimedownonerow");
-      for (var i = 0; i < this.form.overtimes.length - 1; i++) {
-        if (this.form.overtimes[i].from != "" && this.form.overtimes[i].to != "" && this.form.overtimes[i + 1].from == "" && this.form.overtimes[i + 1].to == "") {
-          this.form.overtimes[i + 1].from = this.form.overtimes[i].from;
-          this.form.overtimes[i + 1].to = this.form.overtimes[i].to;
-          break;
+      for (var i = 0; i < this.form.overtimes.length; i++) {
+        if (this.form.overtimes[i].from == "" || this.form.overtimes[i].to == "") {
+          this.form.overtimes[i].from = this.form.overtimes[i].punchin;
+          this.form.overtimes[i].to = this.form.overtimes[i].punchout;
         }
       }
+    },
+    copyPunchFrom: function copyPunchFrom(row) {
+      if (row.from == "") {
+        row.from = row.punchin;
+      }
+    },
+    copyPunchTo: function copyPunchTo(row) {
+      if (row.to == "") {
+        //row.from = row.punchin;
+        row.to = row.punchout;
+      }
+    },
+    subTime: function subTime(field, row) {
+      var time = row[field];
+      if (time == "") return;
+      var momentObj = moment(time, ["HH:mm", "h:mm A"]);
+      row[field] = momentObj.subtract(150, "minutes").format("HH:mm");
+    },
+    addTime: function addTime(field, row) {
+      var time = row[field];
+      if (time == "") return;
+      var momentObj = moment(time, ["HH:mm", "h:mm A"]);
+      row[field] = momentObj.add(150, "minutes").format("HH:mm");
     }
   } //methods
 }); //vue
+/*
+window.addEventListener(
+	"keydown",
+	function (event) {
+		if (event.defaultPrevented) {
+			return; // Should do nothing if the default action has been cancelled
+		}
 
-window.addEventListener("keydown", function (event) {
-  if (event.defaultPrevented) {
-    return; // Should do nothing if the default action has been cancelled
-  }
+		var handled = false;
+		if (event.key !== undefined) {
+			// Handle the event with KeyboardEvent.key and set handled true.
+			if (event.key == "F4") {
+				vm.copytimedownonerow();
 
-  var handled = false;
-  if (event.key !== undefined) {
-    // Handle the event with KeyboardEvent.key and set handled true.
-    if (event.key == "F4") {
-      vm.copytimedownonerow();
-      handled = true;
-    } else if (event.key == "`") {
-      //tilde
+				handled = true;
+			} else if (event.key == "`") {
+				//tilde
 
-      vm.addRow();
-      handled = true;
-    }
-  } else if (event.keyIdentifier !== undefined) {
-    //alert(event.keyIdentifier);
-    // Handle the event with KeyboardEvent.keyIdentifier and set handled true.
-  } else if (event.keyCode !== undefined) {
-    // Handle the event with KeyboardEvent.keyCode and set handled true.
-  }
-  if (handled) {
-    // Suppress "double action" if event handled
-    event.preventDefault();
-  }
-}, true);
+				vm.addRow();
+
+				handled = true;
+			}
+		} else if (event.keyIdentifier !== undefined) {
+			//alert(event.keyIdentifier);
+			// Handle the event with KeyboardEvent.keyIdentifier and set handled true.
+		} else if (event.keyCode !== undefined) {
+			// Handle the event with KeyboardEvent.keyCode and set handled true.
+		}
+
+		if (handled) {
+			// Suppress "double action" if event handled
+			event.preventDefault();
+		}
+	},
+	true
+);
+*/
 })();
 
 /******/ })()

@@ -171,7 +171,12 @@ export function toHoursAndMinutes(totalMinutes) {
   if( hours ) return `${hours}:${padToTwoDigits(minutes)} hour`;
   return `${minutes} min`;
 }
-
+export function toHoursAndMinutesBare(totalMinutes) {
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if( hours ) return `${hours}:${padToTwoDigits(minutes)}`;
+  return `0:${minutes}`;
+}
 function padToTwoDigits(num) {
   return num.toString().padStart(2, '0');
 }

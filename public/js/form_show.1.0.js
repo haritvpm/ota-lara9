@@ -15,7 +15,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "sittingAllowableForNonAebasDay": () => (/* binding */ sittingAllowableForNonAebasDay),
 /* harmony export */   "stringTimeToDate": () => (/* binding */ stringTimeToDate),
 /* harmony export */   "timePeriodIncludesPeriod": () => (/* binding */ timePeriodIncludesPeriod),
-/* harmony export */   "toHoursAndMinutes": () => (/* binding */ toHoursAndMinutes)
+/* harmony export */   "toHoursAndMinutes": () => (/* binding */ toHoursAndMinutes),
+/* harmony export */   "toHoursAndMinutesBare": () => (/* binding */ toHoursAndMinutesBare)
 /* harmony export */ });
 function setEmployeeTypes(row) {
   if (!row.hasOwnProperty("designation") || !row.hasOwnProperty("category") || !row.hasOwnProperty("normal_office_hours")) {
@@ -159,6 +160,12 @@ function toHoursAndMinutes(totalMinutes) {
   var minutes = totalMinutes % 60;
   if (hours) return "".concat(hours, ":").concat(padToTwoDigits(minutes), " hour");
   return "".concat(minutes, " min");
+}
+function toHoursAndMinutesBare(totalMinutes) {
+  var hours = Math.floor(totalMinutes / 60);
+  var minutes = totalMinutes % 60;
+  if (hours) return "".concat(hours, ":").concat(padToTwoDigits(minutes));
+  return "0:".concat(minutes);
 }
 function padToTwoDigits(num) {
   return num.toString().padStart(2, '0');
