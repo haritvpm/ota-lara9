@@ -90,7 +90,7 @@
                 </li>
             @endcan
 
-            @can('user_management_access')
+            @can('employee_management_access')
             <li class="nav-item has-treeview {{ request()->is("*admin/employees*") ? "menu-open" : "" }} {{ request()->is("admin/designations*") ? "menu-open" : "" }} {{ request()->is("admin/categories*") ? "menu-open" : "" }}">
                         <a class="nav-link nav-dropdown-toggle" href="#">
                             <i class="fa-fw nav-icon fas fa-users ">

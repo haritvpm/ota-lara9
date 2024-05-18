@@ -1,5 +1,5 @@
 "use strict";
-import {toHoursAndMinutes, timePeriodIncludesPeriod, stringTimeToDate, setEmployeeTypes } from './utils.js';
+import {toHoursAndMinutes,toHoursAndMinutesBare, timePeriodIncludesPeriod, stringTimeToDate, setEmployeeTypes } from './utils.js';
 
 const dateofdutyprefix = "Date of Duty";
 
@@ -147,9 +147,11 @@ var vm = new Vue({
 	methods: {
 		copytimedown: function () {
 			if (this.form.overtimes.length > 1) {
-				for (var i = 1; i < this.form.overtimes.length; i++) {
-					this.form.overtimes[i].from = this.form.overtimes[0].from;
-					this.form.overtimes[i].to = this.form.overtimes[0].to;
+				for (var i = 0; i < this.form.overtimes.length; i++) {
+					if( this.form.overtimes[i].from == "" || this.form.overtimes[i].to == "" ){
+						this.form.overtimes[i].from = this.form.overtimes[i].punchin;
+						this.form.overtimes[i].to = this.form.overtimes[i].punchout;
+					}
 				}
 			}
 		},
@@ -296,7 +298,14 @@ var vm = new Vue({
 				this.myerrors = [];
 			}
 		},
+		getTimeDiff(row){
+			if (row?.from == "" || row?.to == "") {
+				return "";
+			}
+			const { datefrom, dateto } = this.strTimesToDatesNormalized(row.from, row.to)
+			return toHoursAndMinutesBare((dateto - datefrom) / 60000)
 
+		},
 		limitText(count) {
 			return `and ${count} more`;
 		},
@@ -1049,22 +1058,45 @@ var vm = new Vue({
 
 		copytimedownonerow() {
 			//console.log("copytimedownonerow");
-			for (var i = 0; i < this.form.overtimes.length - 1; i++) {
-				if (
-					this.form.overtimes[i].from != "" &&
-					this.form.overtimes[i].to != "" &&
-					this.form.overtimes[i + 1].from == "" &&
-					this.form.overtimes[i + 1].to == ""
-				) {
-					this.form.overtimes[i + 1].from = this.form.overtimes[i].from;
-					this.form.overtimes[i + 1].to = this.form.overtimes[i].to;
-					break;
+			for (var i = 0; i < this.form.overtimes.length ; i++) {
+			
+				if(this.form.overtimes[i].from == "" || this.form.overtimes[i].to == "") {
+					this.form.overtimes[i].from = this.form.overtimes[i].punchin;
+					this.form.overtimes[i].to = this.form.overtimes[i].punchout;
 				}
+				
+				
 			}
 		},
+		copyPunchFrom: function (row) {
+			if(row.from == "" ) {
+				row.from = row.punchin;
+			}
+			
+		},
+		copyPunchTo: function (row) {
+			if(row.to == "") {
+				//row.from = row.punchin;
+				row.to = row.punchout;
+			}
+		},
+		subTime: function (field,row){
+			let time = row[field]
+			if(time == "") return
+			var momentObj = moment(time, ["HH:mm", "h:mm A"]);
+			row[field] = momentObj.subtract(150, "minutes").format("HH:mm");
+
+		},
+		addTime: function (field,row){
+			let time = row[field]
+			if(time == "") return
+			var momentObj = moment(time, ["HH:mm", "h:mm A"]);
+			row[field] = momentObj.add(150, "minutes").format("HH:mm");
+
+		}
 	}, //methods
 }); //vue
-
+/*
 window.addEventListener(
 	"keydown",
 	function (event) {
@@ -1100,3 +1132,4 @@ window.addEventListener(
 	},
 	true
 );
+*/

@@ -313,9 +313,11 @@ class PunchingsController extends Controller
         //    \Session::flash('message-success', 'No such date in calender'  );
         //    return view('admin.punchings.index');
         // }
+        
+        $count_of_existing = Punching::where('date', $reportdate)->count() ?? 0;
 
 
-
+        $errors = 0;
         $insertedcount = 0;
         $pen_to_aadhaarid = [];
         for ($offset = 0;; $offset += $count) {
@@ -333,6 +335,7 @@ class PunchingsController extends Controller
 
             if ($response->status() !== 200) {
                 \Session::flash('message-danger',  $response->status());
+                $errors++;
                 break;
             }
             $jsonData = $response->json();
@@ -450,9 +453,9 @@ class PunchingsController extends Controller
                 }
             }
         }
+        $newcount = Punching::where('date', $reportdate)->count() - $count_of_existing;
 
-
-        \Session::flash('message-success', "Fetched\Processed: {$insertedcount} records for {$reportdate}");
+        \Session::flash('message-success', "Fetched: {$insertedcount}, New: {$newcount}, for {$reportdate} with {$errors} errors");
 
         return view('admin.calenders.index');
     }

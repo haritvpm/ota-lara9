@@ -15,7 +15,7 @@
     <div class="">
       
         <div class="">
-            <table class="table table-bordered table-striped ajaxTable @can('employees_other_delete') dt-select @endcan">
+            <table class="table table-bordered table-striped ajaxTable @can('employees_other_delete') dt-select @endcan" style="width: 100%;">
                 <thead>
                     <tr>
                         @can('employees_other_delete')

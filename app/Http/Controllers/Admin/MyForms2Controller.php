@@ -692,7 +692,7 @@ class MyForms2Controller extends Controller
           //  dd( $normal_office_hours);
          
             $needed_mins_forthisOT = $calender_day->isHoliday ? 180 : 150;
-            if( $request['overtime_slot'] === 'First' ){
+            if( str_contains($overtime['slot'],'First') ){
                 $needed_mins_forthisOT += $normal_office_hours*60* $calender_day->daylength_multiplier;
             }
 
