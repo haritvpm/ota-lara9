@@ -314,7 +314,7 @@ class PunchingsController extends Controller
         //    return view('admin.punchings.index');
         // }
         
-        $count_of_existing = Punching::where('date', $reportdate)->count();
+        $count_of_existing = Punching::where('date', $reportdate)->count() ?? 0;
 
 
         $errors = 0;
