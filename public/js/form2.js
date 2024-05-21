@@ -72,24 +72,25 @@ function checkDatesAndOT(row, data) {
       //punched
 
       if (row.isPartime) {
-        if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "11:25") || timePeriodIncludesPeriod(punchin, punchout, "07:05", "12:25")) {
+        if (timePeriodIncludesPeriod(punchin, punchout, "06:10", "11:30") || timePeriodIncludesPeriod(punchin, punchout, "07:10", "12:30")) {
           data.dates[i].ot = 'YES';
           count++;
         } else {
           data.dates[i].ot = 'No. (6/7 am - 11:30/12:30)';
         }
       } else if (row.isFulltime) {
-        if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "16:25") || timePeriodIncludesPeriod(punchin, punchout, "07:05", "17:25")) {
+        console.log(punchin, punchout);
+        if (timePeriodIncludesPeriod(punchin, punchout, "07:10", "16:30") || timePeriodIncludesPeriod(punchin, punchout, "07:10", "17:25")) {
           count++;
           data.dates[i].ot = 'YES';
         } else {
-          data.dates[i].ot = 'No. (6/7 am - 4:30pm/5:30pm)';
+          data.dates[i].ot = 'No. (7 am - 4:30pm/5:30pm)';
         }
       } else if (row.isWatchnward) {
         //no punching
       } //all other employees for sitting days
       else {
-        if (timePeriodIncludesPeriod(punchin, punchout, "08:05", "17:25")) {
+        if (timePeriodIncludesPeriod(punchin, punchout, "08:10", "17:30")) {
           count++;
           data.dates[i].ot = 'YES';
         } else {
@@ -114,22 +115,22 @@ function checkDatesAndOT(row, data) {
     //non aebasday, check if user has not punched incorrectly when server was failing
     data.dates[i].userdecision = false;
     if (row.isPartime) {
-      if (sittingAllowableForNonAebasDay(punchin, punchout, "06:05", "11:25") || sittingAllowableForNonAebasDay(punchin, punchout, "07:05", "12:25")) {
+      if (sittingAllowableForNonAebasDay(punchin, punchout, "06:10", "11:30") || sittingAllowableForNonAebasDay(punchin, punchout, "07:10", "12:30")) {
         data.dates[i].userdecision = true;
       } else {
         data.dates[i].ot = 'No. (6/7 - 11:30/12:30)';
       }
     } else if (row.isFulltime) {
-      if (sittingAllowableForNonAebasDay(punchin, punchout, "06:05", "16:25") || sittingAllowableForNonAebasDay(punchin, punchout, "07:05", "17:25")) {
+      if (sittingAllowableForNonAebasDay(punchin, punchout, "07:10", "16:30") || sittingAllowableForNonAebasDay(punchin, punchout, "07:10", "17:30")) {
         data.dates[i].userdecision = true;
       } else {
-        data.dates[i].ot = 'No. (6/7 - 4:30pm/5:30pm)';
+        data.dates[i].ot = 'No. (7 - 4:30pm/5:30pm)';
       }
     } else if (row.isWatchnward) {
       //no punching
     } //all other employees for sitting days
     else {
-      if (sittingAllowableForNonAebasDay(punchin, punchout, "08:05", "17:25")) {
+      if (sittingAllowableForNonAebasDay(punchin, punchout, "08:10", "17:30")) {
         data.dates[i].userdecision = true;
       } else {
         data.dates[i].ot = 'No. (08:00 - 5:30pm)';
@@ -488,6 +489,9 @@ var vm = new Vue({
       var _this$strTimesToDates = this.strTimesToDatesNormalized(row.from, row.to),
         datefrom = _this$strTimesToDates.datefrom,
         dateto = _this$strTimesToDates.dateto;
+      if (!datefrom || !dateto) {
+        return "";
+      }
       return (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.toHoursAndMinutesBare)((dateto - datefrom) / 60000);
     },
     limitText: function limitText(count) {
@@ -647,14 +651,14 @@ var vm = new Vue({
         //parttime emp
 
         if (this.hasFirst(row.slots)) {
-          if (!(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(row.from, row.to, "06:05", "11:25") && !(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(row.from, row.to, "07:05", "12:25")) {
+          if (!(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(row.from, row.to, "06:10", "11:30") && !(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(row.from, row.to, "07:10", "12:30")) {
             //hostel
             this.myerrors.push("Row " + (i + 1) + ": Parttime employee - time should include 06:00/7.00 to 11:30/12.30 on a sitting day");
             return false;
           }
         } else if (this.hasSecond(row.slots)) {
           //no need to strict time. let them decide for themselves. 2 to 4.30 is actual
-          if (!(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(row.from, row.to, "14:05", "16:25")) {
+          if (!(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(row.from, row.to, "14:00", "16:30")) {
             this.myerrors.push("Row " + (i + 1) + ": Parttime employee - time should include 14:00 to 16:30 as per G.O on a sitting day");
             return false;
           }
@@ -664,8 +668,8 @@ var vm = new Vue({
       } else if (row.isFulltime) {
         if (this.hasFirst(row.slots)) {
           ////its acutally 4.30. no need to enforce ending time. have doubts regarding mla hostel.
-          if (!(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(row.from, row.to, "06:05", "16:15") && !(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(row.from, row.to, "07:05", "17:15")) {
-            this.myerrors.push("Row " + (i + 1) + ": Fulltime employee - time shall include 6/7 a.m. to 4.30/5.30 pm on a sitting day");
+          if (!(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(row.from, row.to, "07:10", "16:30") && !(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(row.from, row.to, "07:10", "17:30")) {
+            this.myerrors.push("Row " + (i + 1) + ": Fulltime employee - time shall include 7 a.m. to 4.30/5.30 pm on a sitting day");
             return false;
           }
         }
@@ -673,7 +677,7 @@ var vm = new Vue({
       } else if (row.isWatchnward) {} //all other employees for sitting days
       else {
         if (this.hasFirst(row.slots)) {
-          if (!(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(row.from, row.to, "08:05", "17:25")) {
+          if (!(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(row.from, row.to, "08:10", "17:30")) {
             this.myerrors.push("Row " + (i + 1) + ": For sitting OT, time should include 08:00 to 17:30 as per GO");
             return false;
           }

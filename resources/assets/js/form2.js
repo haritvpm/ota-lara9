@@ -303,6 +303,9 @@ var vm = new Vue({
 				return "";
 			}
 			const { datefrom, dateto } = this.strTimesToDatesNormalized(row.from, row.to)
+			if (!datefrom || !dateto) {
+				return "";
+			}
 			return toHoursAndMinutesBare((dateto - datefrom) / 60000)
 
 		},
@@ -475,8 +478,8 @@ var vm = new Vue({
         
 				if (this.hasFirst(row.slots)) {
 
-					if (!timePeriodIncludesPeriod(row.from, row.to, "06:05", "11:25") && 
-						!timePeriodIncludesPeriod(row.from, row.to, "07:05", "12:25")) { //hostel
+					if (!timePeriodIncludesPeriod(row.from, row.to, "06:10", "11:30") && 
+						!timePeriodIncludesPeriod(row.from, row.to, "07:10", "12:30")) { //hostel
 						this.myerrors.push("Row " + (i + 1) + ": Parttime employee - time should include 06:00/7.00 to 11:30/12.30 on a sitting day");
 						return false;
 					}
@@ -484,7 +487,7 @@ var vm = new Vue({
 				} else if (this.hasSecond(row.slots)) {
 
 					//no need to strict time. let them decide for themselves. 2 to 4.30 is actual
-					if (!timePeriodIncludesPeriod(row.from, row.to, "14:05", "16:25")) {
+					if (!timePeriodIncludesPeriod(row.from, row.to, "14:00", "16:30")) {
 						this.myerrors.push("Row " + (i + 1) + ": Parttime employee - time should include 14:00 to 16:30 as per G.O on a sitting day");
 						return false;
 					}
@@ -497,9 +500,9 @@ var vm = new Vue({
 				if (this.hasFirst(row.slots)) {
 
 					////its acutally 4.30. no need to enforce ending time. have doubts regarding mla hostel.
-					if (!timePeriodIncludesPeriod(row.from, row.to, "06:05", "16:15") &&
-						!timePeriodIncludesPeriod(row.from, row.to, "07:05", "17:15") ) { 
-						this.myerrors.push("Row " + (i + 1) + ": Fulltime employee - time shall include 6/7 a.m. to 4.30/5.30 pm on a sitting day");
+					if (!timePeriodIncludesPeriod(row.from, row.to, "07:10", "16:30") &&
+						!timePeriodIncludesPeriod(row.from, row.to, "07:10", "17:30") ) { 
+						this.myerrors.push("Row " + (i + 1) + ": Fulltime employee - time shall include 7 a.m. to 4.30/5.30 pm on a sitting day");
 						return false;
 					}
 
@@ -511,7 +514,7 @@ var vm = new Vue({
 			
 				if( this.hasFirst(row.slots)){
 
-					if (!timePeriodIncludesPeriod(row.from, row.to, "08:05", "17:25")) {
+					if (!timePeriodIncludesPeriod(row.from, row.to, "08:10", "17:30")) {
 						this.myerrors.push("Row " + (i + 1) + ": For sitting OT, time should include 08:00 to 17:30 as per GO");
 						return false;
 					}

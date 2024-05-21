@@ -167,6 +167,10 @@ class MyForms2Controller extends Controller
                 $forms->where( 'overtime_slot' , '!=', 'Sittings' );    
             }
             else
+            if($overtime_slot == 'Sittings'){
+                $forms->where( 'overtime_slot' , '=', 'Sittings' );    
+            }
+            else
             if($overtime_slot == 'Withheld'){
                 $forms->where( 'form_no' , '<=', 0 );    
             }
@@ -1346,13 +1350,13 @@ class MyForms2Controller extends Controller
                 //check time from
                
                 if($isNormal){
-                    [$fromReq, $toReq] = $strtimes_totimestamps( "08:05",  "17:25");
+                    [$fromReq, $toReq] = $strtimes_totimestamps( "08:10",  "17:30");
                     if( $punch_in <= $fromReq && $punch_out >= $toReq){
                         $sittingsWithTimeSatisfied++; 
                     }
                 } else  if($isPartime){
-                    [$fromReq, $toReq] = $strtimes_totimestamps( "06:05",  "11:25");
-                    [$fromReqhostel, $toReqhostel] = $strtimes_totimestamps( "07:05",  "12:25");
+                    [$fromReq, $toReq] = $strtimes_totimestamps( "06:10",  "11:30");
+                    [$fromReqhostel, $toReqhostel] = $strtimes_totimestamps( "07:10",  "12:30");
                     if( $punch_in <= $fromReq && $punch_out >= $toReq){
                         $sittingsWithTimeSatisfied++; 
                     } else  if( $punch_in <= $fromReqhostel && $punch_out >= $toReqhostel){
@@ -1360,8 +1364,8 @@ class MyForms2Controller extends Controller
                     }
 
                 }  else  if($isFulltime){
-                    [$fromReq, $toReq] = $strtimes_totimestamps( "06:05",  "16:00"); //its 4.25 actually. can enforce later
-                    [$fromReqhostel, $toReqhostel] = $strtimes_totimestamps( "07:05",  "17:00"); //its 5.25 actually. 
+                    [$fromReq, $toReq] = $strtimes_totimestamps( "07:10",  "16:30"); //its 4.25 actually. can enforce later
+                    [$fromReqhostel, $toReqhostel] = $strtimes_totimestamps( "07:10",  "17:30"); //its 5.25 actually. 
                     if( $punch_in <= $fromReq && $punch_out >= $toReq){
                         $sittingsWithTimeSatisfied++; 
                     } else   if( $punch_in <= $fromReqhostel && $punch_out >= $toReqhostel){
@@ -1389,19 +1393,19 @@ class MyForms2Controller extends Controller
             // NON AEBAS day.
 
             if($isNormal){
-                if($punchingtimesnotincorrect( "08:05",  "17:25",  $temp['punch_in'], $temp['punch_out'])){
+                if($punchingtimesnotincorrect( "08:10",  "17:30",  $temp['punch_in'], $temp['punch_out'])){
                     $sittingsWithUserDecision++; 
                 }
             } else  if($isPartime){
-                if($punchingtimesnotincorrect( "06:05",  "11:25",  $temp['punch_in'], $temp['punch_out'])){
+                if($punchingtimesnotincorrect( "06:10",  "11:30",  $temp['punch_in'], $temp['punch_out'])){
                     $sittingsWithUserDecision++; 
-                } else  if($punchingtimesnotincorrect( "07:05",  "12:25",  $temp['punch_in'], $temp['punch_out'])){
+                } else  if($punchingtimesnotincorrect( "07:10",  "12:30",  $temp['punch_in'], $temp['punch_out'])){
                     $sittingsWithUserDecision++; 
                 }
             } else  if($isFulltime){
-                 if($punchingtimesnotincorrect( "06:05",  "16:00", $temp['punch_in'], $temp['punch_out'])){ //its 4.25 actually. 
+                 if($punchingtimesnotincorrect( "07:10",  "16:30", $temp['punch_in'], $temp['punch_out'])){ //its 4.25 actually. 
                     $sittingsWithUserDecision++; 
-                } else  if($punchingtimesnotincorrect( "07:05",  "17:00", $temp['punch_in'], $temp['punch_out'])){ //its 5.25 actually. 
+                } else  if($punchingtimesnotincorrect( "07:10",  "17:00", $temp['punch_in'], $temp['punch_out'])){ //its 5.25 actually. 
                     $sittingsWithUserDecision++; 
                 } 
             } 

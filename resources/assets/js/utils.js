@@ -62,8 +62,8 @@ export function  checkDatesAndOT(row, data){
     if( punchin && punchout  ){ //punched
 
       if (row.isPartime) {
-        if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "11:25") || 
-            timePeriodIncludesPeriod(punchin, punchout, "07:05", "12:25")) {
+        if (timePeriodIncludesPeriod(punchin, punchout, "06:10", "11:30") || 
+            timePeriodIncludesPeriod(punchin, punchout, "07:10", "12:30")) {
           data.dates[i].ot = 'YES'
           count++;
         } else{
@@ -71,13 +71,13 @@ export function  checkDatesAndOT(row, data){
         }
       }
       else if (row.isFulltime) {
-  
-         if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "16:25") || 
-             timePeriodIncludesPeriod(punchin, punchout, "07:05", "17:25")) { 
+  console.log(punchin, punchout)
+         if (timePeriodIncludesPeriod(punchin, punchout, "07:10", "16:30") || 
+             timePeriodIncludesPeriod(punchin, punchout, "07:10", "17:25")) { 
             count++;
             data.dates[i].ot = 'YES'
           } else{
-            data.dates[i].ot = 'No. (6/7 am - 4:30pm/5:30pm)'
+            data.dates[i].ot = 'No. (7 am - 4:30pm/5:30pm)'
           }
       }    
       else if (row.isWatchnward) {
@@ -85,7 +85,7 @@ export function  checkDatesAndOT(row, data){
       } //all other employees for sitting days
       else {
 
-          if (timePeriodIncludesPeriod(punchin, punchout, "08:05", "17:25")) {
+          if (timePeriodIncludesPeriod(punchin, punchout, "08:10", "17:30")) {
             count++;
             data.dates[i].ot = 'YES'
           }else{
@@ -112,8 +112,8 @@ export function  checkDatesAndOT(row, data){
     data.dates[i].userdecision = false 
 
     if (row.isPartime) {
-      if (sittingAllowableForNonAebasDay(punchin, punchout, "06:05", "11:25") || 
-          sittingAllowableForNonAebasDay(punchin, punchout, "07:05", "12:25")) {
+      if (sittingAllowableForNonAebasDay(punchin, punchout, "06:10", "11:30") || 
+          sittingAllowableForNonAebasDay(punchin, punchout, "07:10", "12:30")) {
         data.dates[i].userdecision = true 
        
       } else{
@@ -122,19 +122,19 @@ export function  checkDatesAndOT(row, data){
     }
     else if (row.isFulltime) {
 
-       if (sittingAllowableForNonAebasDay(punchin, punchout, "06:05", "16:25") || 
-          sittingAllowableForNonAebasDay(punchin, punchout, "07:05", "17:25")) { 
+       if (sittingAllowableForNonAebasDay(punchin, punchout, "07:10", "16:30") || 
+          sittingAllowableForNonAebasDay(punchin, punchout, "07:10", "17:30")) { 
           data.dates[i].userdecision = true 
         
         } else{
-          data.dates[i].ot = 'No. (6/7 - 4:30pm/5:30pm)'
+          data.dates[i].ot = 'No. (7 - 4:30pm/5:30pm)'
         }
     }    
     else if (row.isWatchnward) {
       //no punching
     } //all other employees for sitting days
     else {
-        if (sittingAllowableForNonAebasDay(punchin, punchout, "08:05", "17:25")) {
+        if (sittingAllowableForNonAebasDay(punchin, punchout, "08:10", "17:30")) {
           data.dates[i].userdecision = true 
       
         }else{
