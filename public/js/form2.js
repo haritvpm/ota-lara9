@@ -29,16 +29,19 @@ function setEmployeeTypes(row) {
   row.isNormal = !row.isPartime && !row.isFulltime && !row.isWatchnward;
 }
 function stringTimeToDate(sTimeWithSemicolonSeperator) {
+  if (!sTimeWithSemicolonSeperator) return null;
   var time = sTimeWithSemicolonSeperator.split(":").map(Number);
   //warning: months in JS starts from 0
   return Date.UTC(2000, 1, 1, time[0], time[1]);
 }
 ;
 function timePeriodIncludesPeriod(from, to, fromReq, toReq) {
+  if (!from || !to) return false;
   var datefrom = stringTimeToDate(from);
   var dateto = stringTimeToDate(to);
   var time800am = stringTimeToDate(fromReq);
   var time530pm = stringTimeToDate(toReq);
+  if (!datefrom || !dateto) return false;
   return time800am >= datefrom && time530pm <= dateto;
 }
 //check if punchin or out if available, fails
@@ -367,7 +370,7 @@ var vm = new Vue({
   watch: {},
   methods: {
     copytimedown: function copytimedown() {
-      if (this.form.overtimes.length > 1) {
+      if (this.form.overtimes.length >= 1) {
         for (var i = 0; i < this.form.overtimes.length; i++) {
           if (this.form.overtimes[i].from == "" || this.form.overtimes[i].to == "") {
             this.form.overtimes[i].from = this.form.overtimes[i].punchin;
@@ -486,12 +489,16 @@ var vm = new Vue({
       if ((row === null || row === void 0 ? void 0 : row.from) == "" || (row === null || row === void 0 ? void 0 : row.to) == "") {
         return "";
       }
+      if (!(row !== null && row !== void 0 && row.from) || !(row !== null && row !== void 0 && row.to)) {
+        return "";
+      }
       var _this$strTimesToDates = this.strTimesToDatesNormalized(row.from, row.to),
         datefrom = _this$strTimesToDates.datefrom,
         dateto = _this$strTimesToDates.dateto;
       if (!datefrom || !dateto) {
         return "";
       }
+      console.log(datefrom, dateto);
       return (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.toHoursAndMinutesBare)((dateto - datefrom) / 60000);
     },
     limitText: function limitText(count) {

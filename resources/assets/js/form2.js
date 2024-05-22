@@ -146,7 +146,8 @@ var vm = new Vue({
 
 	methods: {
 		copytimedown: function () {
-			if (this.form.overtimes.length > 1) {
+			if (this.form.overtimes.length >= 1) 
+				{
 				for (var i = 0; i < this.form.overtimes.length; i++) {
 					if( this.form.overtimes[i].from == "" || this.form.overtimes[i].to == "" ){
 						this.form.overtimes[i].from = this.form.overtimes[i].punchin;
@@ -302,10 +303,16 @@ var vm = new Vue({
 			if (row?.from == "" || row?.to == "") {
 				return "";
 			}
+			
+			if (!row?.from || !row?.to ) {
+				return "";
+			}
+
 			const { datefrom, dateto } = this.strTimesToDatesNormalized(row.from, row.to)
 			if (!datefrom || !dateto) {
 				return "";
 			}
+			console.log(datefrom, dateto)
 			return toHoursAndMinutesBare((dateto - datefrom) / 60000)
 
 		},

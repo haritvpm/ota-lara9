@@ -29,16 +29,19 @@ function setEmployeeTypes(row) {
   row.isNormal = !row.isPartime && !row.isFulltime && !row.isWatchnward;
 }
 function stringTimeToDate(sTimeWithSemicolonSeperator) {
+  if (!sTimeWithSemicolonSeperator) return null;
   var time = sTimeWithSemicolonSeperator.split(":").map(Number);
   //warning: months in JS starts from 0
   return Date.UTC(2000, 1, 1, time[0], time[1]);
 }
 ;
 function timePeriodIncludesPeriod(from, to, fromReq, toReq) {
+  if (!from || !to) return false;
   var datefrom = stringTimeToDate(from);
   var dateto = stringTimeToDate(to);
   var time800am = stringTimeToDate(fromReq);
   var time530pm = stringTimeToDate(toReq);
+  if (!datefrom || !dateto) return false;
   return time800am >= datefrom && time530pm <= dateto;
 }
 //check if punchin or out if available, fails
