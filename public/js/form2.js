@@ -901,24 +901,27 @@ var vm = new Vue({
             //if(row.punching && self.dayHasPunching) { otmins_onsitday_includingsitOT -= 10 }
             otmins_practical += otmins_onsitday_includingsitOT * this._daylenmultiplier;
             othours_ideal += 9.5 * this._daylenmultiplier;
-          } else if (is11thOrLater && row.punching && self.dayHasPunching) {
-            //if is11thOrLater we need to see if they are eligible for sitting OT. if so, make sure second ot starts from 5.30/5.40 pm if grace used
+          } else
+            //no overlap user has entered time from 5.30
+            if (is11thOrLater && row.punching && self.dayHasPunching) {
+              //if is11thOrLater we need to see if they are eligible for sitting OT. if so, make sure second ot starts from 5.30/5.40 pm if grace used
 
-            var _eligibleForSitOT2 = _eligibleForSitOT(row, datefrom, dateto),
-              _eligibleForSitOT = _eligibleForSitOT2.eligibleForSitOT,
-              graceMin = _eligibleForSitOT2.graceMin;
-            //if they are eligible for sit OT, 'from' need to start from 5.30+grace
-            if (_eligibleForSitOT) {
-              var grace = graceMin;
-              if (grace > 0) {
-                //if they are eligible for sit OT, 'from' need to start from 5.30+grace
-                var otstartstarttime_req = moment(datefrom).add(grace, 'minutes');
-                if (otstartstarttime_req.isBefore(moment(datefrom))) {
-                  this.myerrors.push("Row  ".concat(i + 1, " :OT needs to start from ").concat(otstartstarttime_req.format('HH:mm'), " on a sitting day"));
+              var _eligibleForSitOT2 = _eligibleForSitOT(row, datefrom, dateto),
+                _eligibleForSitOT = _eligibleForSitOT2.eligibleForSitOT,
+                graceMin = _eligibleForSitOT2.graceMin;
+              //if they are eligible for sit OT, 'from' need to start from 5.30+grace
+              if (_eligibleForSitOT) {
+                var grace = graceMin;
+                if (grace > 0) {
+                  //if they are eligible for sit OT, 'from' need to start from 5.30+grace
+                  var momentfrom = moment(datefrom);
+                  var otstartstarttime_req = moment((0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.stringTimeToDate)('17:30')).add(grace, 'minutes');
+                  if (momentfrom.isBefore(otstartstarttime_req)) {
+                    this.myerrors.push("Row  ".concat(i + 1, " :OT needs to start from ").concat(otstartstarttime_req.format('HH:mm'), " on a sitting day"));
+                  }
                 }
               }
             }
-          }
         }
         console.log('otmins_needed: ' + otmins_practical);
         //new validation after adding normal_office_hours

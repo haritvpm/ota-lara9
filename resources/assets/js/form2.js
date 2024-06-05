@@ -710,7 +710,7 @@ var vm = new Vue({
 						otmins_practical +=  otmins_onsitday_includingsitOT*this._daylenmultiplier;
 						othours_ideal +=  9.5 * this._daylenmultiplier;
 					}
-					else
+					else //no overlap user has entered time from 5.30
 					if(is11thOrLater && row.punching && self.dayHasPunching){
 						//if is11thOrLater we need to see if they are eligible for sitting OT. if so, make sure second ot starts from 5.30/5.40 pm if grace used
 						
@@ -720,8 +720,9 @@ var vm = new Vue({
 							let grace = graceMin
 							if(grace > 0){
 								//if they are eligible for sit OT, 'from' need to start from 5.30+grace
-								let otstartstarttime_req = moment(datefrom).add(grace, 'minutes')
-								if(otstartstarttime_req.isBefore(moment(datefrom))){
+								const momentfrom = moment(datefrom)
+								const otstartstarttime_req = moment(stringTimeToDate('17:30')).add(grace, 'minutes')
+								if(momentfrom.isBefore(otstartstarttime_req)){
 									this.myerrors.push(`Row  ${i + 1} :OT needs to start from ${otstartstarttime_req.format('HH:mm')} on a sitting day`);
 								}
 							}
