@@ -170,6 +170,38 @@ export function  checkDatesAndOT(row, data){
  }
 
 }
+export function eligibleForSitOT(row, datefrom, dateto)
+{
+   // Convert punch-in and punch-out times to Date objects
+   const punchInTime = new Date(`1970-01-01T${row.punchin}:00`);
+   const punchOutTime = new Date(`1970-01-01T${row.punchout}:00`);
+   
+   // Define the base punch-in time (8:00 AM), maximum allowed punch-in time (8:10 AM) and base punch-out time (5:30 PM)
+   const basePunchInTime = new Date('1970-01-01T08:00:00');
+   const maxPunchInTime = new Date('1970-01-01T08:10:00');
+   const basePunchOutTime = new Date('1970-01-01T17:30:00');
+   
+   // Check if punch-in time is after 8:10 AM or punch-out time is before 5:25 PM
+  if (punchInTime > maxPunchInTime || punchOutTime < basePunchOutTime) {
+    return {eligibleForSitOT: false, graceMin: 0};
+  }
+
+    // Check if punch-in time is before or at 8:00 AM
+    if (punchInTime <= basePunchInTime) {
+      // In this case, punch-out time only needs to be 5:30 PM or later
+      return {eligibleForSitOT: punchOutTime >= basePunchOutTime, graceMin: 0};
+    }
+  
+   // Calculate the extra minutes after 8:00 AM
+   const extraMinutes = (punchInTime - basePunchInTime) / (1000 * 60);
+   
+   // Calculate the required punch-out time
+   const requiredPunchOutTime = new Date(basePunchOutTime.getTime() + extraMinutes * 60 * 1000);
+   
+   // Check if the actual punch-out time is after or equal to the required punch-out time
+   return {eligibleForSitOT: punchOutTime >= requiredPunchOutTime, graceMin: extraMinutes};
+
+}
 
 export function toHoursAndMinutes(totalMinutes) {
   const hours = Math.floor(totalMinutes / 60);

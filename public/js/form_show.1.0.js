@@ -11,6 +11,7 @@
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "checkDatesAndOT": () => (/* binding */ checkDatesAndOT),
+/* harmony export */   "eligibleForSitOT": () => (/* binding */ eligibleForSitOT),
 /* harmony export */   "setEmployeeTypes": () => (/* binding */ setEmployeeTypes),
 /* harmony export */   "sittingAllowableForNonAebasDay": () => (/* binding */ sittingAllowableForNonAebasDay),
 /* harmony export */   "stringTimeToDate": () => (/* binding */ stringTimeToDate),
@@ -157,6 +158,45 @@ function checkDatesAndOT(row, data) {
     modaldata: data.dates,
     total_nondecision_days: total_nondecision_days,
     total_userdecision_days: total_userdecision_days
+  };
+}
+function eligibleForSitOT(row, datefrom, dateto) {
+  // Convert punch-in and punch-out times to Date objects
+  var punchInTime = new Date("1970-01-01T".concat(row.punchin, ":00"));
+  var punchOutTime = new Date("1970-01-01T".concat(row.punchout, ":00"));
+
+  // Define the base punch-in time (8:00 AM), maximum allowed punch-in time (8:10 AM) and base punch-out time (5:30 PM)
+  var basePunchInTime = new Date('1970-01-01T08:00:00');
+  var maxPunchInTime = new Date('1970-01-01T08:10:00');
+  var basePunchOutTime = new Date('1970-01-01T17:30:00');
+
+  // Check if punch-in time is after 8:10 AM or punch-out time is before 5:25 PM
+  if (punchInTime > maxPunchInTime || punchOutTime < basePunchOutTime) {
+    return {
+      eligibleForSitOT: false,
+      graceMin: 0
+    };
+  }
+
+  // Check if punch-in time is before or at 8:00 AM
+  if (punchInTime <= basePunchInTime) {
+    // In this case, punch-out time only needs to be 5:30 PM or later
+    return {
+      eligibleForSitOT: punchOutTime >= basePunchOutTime,
+      graceMin: 0
+    };
+  }
+
+  // Calculate the extra minutes after 8:00 AM
+  var extraMinutes = (punchInTime - basePunchInTime) / (1000 * 60);
+
+  // Calculate the required punch-out time
+  var requiredPunchOutTime = new Date(basePunchOutTime.getTime() + extraMinutes * 60 * 1000);
+
+  // Check if the actual punch-out time is after or equal to the required punch-out time
+  return {
+    eligibleForSitOT: punchOutTime >= requiredPunchOutTime,
+    graceMin: extraMinutes
   };
 }
 function toHoursAndMinutes(totalMinutes) {

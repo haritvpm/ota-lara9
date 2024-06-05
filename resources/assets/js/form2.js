@@ -1,5 +1,5 @@
 "use strict";
-import {toHoursAndMinutes,toHoursAndMinutesBare, timePeriodIncludesPeriod, stringTimeToDate, setEmployeeTypes } from './utils.js';
+import {eligibleForSitOT, toHoursAndMinutes,toHoursAndMinutesBare, timePeriodIncludesPeriod, stringTimeToDate, setEmployeeTypes } from './utils.js';
 
 const dateofdutyprefix = "Date of Duty";
 
@@ -35,7 +35,7 @@ var vm = new Vue({
 		pen_names_to_desig: [],
 		presets: presets,
 		presets_default: presets_default,
-		
+		is11thOrLater : false,
 		configtime: {
 
 
@@ -166,7 +166,7 @@ var vm = new Vue({
 		sessionchanged: function () {
 			//alert(this.form.session);
 
-			//alert(JSON.stringify((calenderdays2[this.form.session])));
+			alert(JSON.stringify((calenderdays2[this.form.session])));
 			//this.configdate.enabledDates =  Object.keys(calenderdaysmap)
 			this.myerrors = [];
 
@@ -203,6 +203,11 @@ var vm = new Vue({
 					}
 									
 				}
+
+				//if dutydate is after 2024-06-01, then it is 11th or later
+				const dutydate = moment(this.form.duty_date, "DD-MM-YYYY")
+				this.is11thOrLater = dutydate.isAfter("2024-06-01")
+				console.log('is11thOrLater: ' + this.is11thOrLater)
 								
 			}
 		},
@@ -653,7 +658,7 @@ var vm = new Vue({
 
 				var row = self.form.overtimes[i];
 				
-				if(row.punching && self.dayHasPunching)  minot_minutes -= isSittingOrWorkingDay ? 5 : 5; //corrected to allow leeway 
+				//if(row.punching && self.dayHasPunching)  minot_minutes -= isSittingOrWorkingDay ? 5 : 5; //corrected to allow leeway 
 
 				setEmployeeTypes(row);
 				if (row.punching) {
@@ -701,10 +706,28 @@ var vm = new Vue({
 					const {overlap, checkingPeriod } = this.overlapsWithOfficeHoursForNormalEmpl(datefrom, dateto, isSittingDay, isWorkingDay)
 					if(overlap){ //if there is overlap, we check the fulltime instead of just from 5.30
 						let otmins_onsitday_includingsitOT = 570
-						if(row.punching && self.dayHasPunching) { otmins_onsitday_includingsitOT -= 10 }
+						//if(row.punching && self.dayHasPunching) { otmins_onsitday_includingsitOT -= 10 }
 						otmins_practical +=  otmins_onsitday_includingsitOT*this._daylenmultiplier;
 						othours_ideal +=  9.5 * this._daylenmultiplier;
 					}
+					else
+					if(is11thOrLater && row.punching && self.dayHasPunching){
+						//if is11thOrLater we need to see if they are eligible for sitting OT. if so, make sure second ot starts from 5.30/5.40 pm if grace used
+						
+						const {eligibleForSitOT, graceMin} = eligibleForSitOT(row, datefrom, dateto)
+						//if they are eligible for sit OT, 'from' need to start from 5.30+grace
+						if(eligibleForSitOT){
+							let grace = graceMin
+							if(grace > 0){
+								//if they are eligible for sit OT, 'from' need to start from 5.30+grace
+								let otstartstarttime_req = moment(datefrom).add(grace, 'minutes')
+								if(otstartstarttime_req.isBefore(moment(datefrom))){
+									this.myerrors.push(`Row  ${i + 1} :OT needs to start from ${otstartstarttime_req.format('HH:mm')} on a sitting day`);
+								}
+							}
+						}
+					}
+
 				}
 				console.log('otmins_needed: ' + otmins_practical);
 				//new validation after adding normal_office_hours

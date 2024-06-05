@@ -11,6 +11,7 @@
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "checkDatesAndOT": () => (/* binding */ checkDatesAndOT),
+/* harmony export */   "eligibleForSitOT": () => (/* binding */ eligibleForSitOT),
 /* harmony export */   "setEmployeeTypes": () => (/* binding */ setEmployeeTypes),
 /* harmony export */   "sittingAllowableForNonAebasDay": () => (/* binding */ sittingAllowableForNonAebasDay),
 /* harmony export */   "stringTimeToDate": () => (/* binding */ stringTimeToDate),
@@ -159,6 +160,45 @@ function checkDatesAndOT(row, data) {
     total_userdecision_days: total_userdecision_days
   };
 }
+function eligibleForSitOT(row, datefrom, dateto) {
+  // Convert punch-in and punch-out times to Date objects
+  var punchInTime = new Date("1970-01-01T".concat(row.punchin, ":00"));
+  var punchOutTime = new Date("1970-01-01T".concat(row.punchout, ":00"));
+
+  // Define the base punch-in time (8:00 AM), maximum allowed punch-in time (8:10 AM) and base punch-out time (5:30 PM)
+  var basePunchInTime = new Date('1970-01-01T08:00:00');
+  var maxPunchInTime = new Date('1970-01-01T08:10:00');
+  var basePunchOutTime = new Date('1970-01-01T17:30:00');
+
+  // Check if punch-in time is after 8:10 AM or punch-out time is before 5:25 PM
+  if (punchInTime > maxPunchInTime || punchOutTime < basePunchOutTime) {
+    return {
+      eligibleForSitOT: false,
+      graceMin: 0
+    };
+  }
+
+  // Check if punch-in time is before or at 8:00 AM
+  if (punchInTime <= basePunchInTime) {
+    // In this case, punch-out time only needs to be 5:30 PM or later
+    return {
+      eligibleForSitOT: punchOutTime >= basePunchOutTime,
+      graceMin: 0
+    };
+  }
+
+  // Calculate the extra minutes after 8:00 AM
+  var extraMinutes = (punchInTime - basePunchInTime) / (1000 * 60);
+
+  // Calculate the required punch-out time
+  var requiredPunchOutTime = new Date(basePunchOutTime.getTime() + extraMinutes * 60 * 1000);
+
+  // Check if the actual punch-out time is after or equal to the required punch-out time
+  return {
+    eligibleForSitOT: punchOutTime >= requiredPunchOutTime,
+    graceMin: extraMinutes
+  };
+}
 function toHoursAndMinutes(totalMinutes) {
   var hours = Math.floor(totalMinutes / 60);
   var minutes = totalMinutes % 60;
@@ -274,6 +314,7 @@ var vm = new Vue({
     pen_names_to_desig: [],
     presets: presets,
     presets_default: presets_default,
+    is11thOrLater: false,
     configtime: {
       format: "HH:mm",
       stepping: 15
@@ -389,7 +430,7 @@ var vm = new Vue({
     sessionchanged: function sessionchanged() {
       //alert(this.form.session);
 
-      //alert(JSON.stringify((calenderdays2[this.form.session])));
+      alert(JSON.stringify(calenderdays2[this.form.session]));
       //this.configdate.enabledDates =  Object.keys(calenderdaysmap)
       this.myerrors = [];
 
@@ -415,6 +456,11 @@ var vm = new Vue({
             this.form.overtimes[i].slots = [];
           }
         }
+
+        //if dutydate is after 2024-06-01, then it is 11th or later
+        var dutydate = moment(this.form.duty_date, "DD-MM-YYYY");
+        this.is11thOrLater = dutydate.isAfter("2024-06-01");
+        console.log('is11thOrLater: ' + this.is11thOrLater);
       }
     },
     updateDateDependencies: function updateDateDependencies() {
@@ -804,7 +850,8 @@ var vm = new Vue({
           }
         }
         var row = self.form.overtimes[i];
-        if (row.punching && self.dayHasPunching) minot_minutes -= isSittingOrWorkingDay ? 5 : 5; //corrected to allow leeway 
+
+        //if(row.punching && self.dayHasPunching)  minot_minutes -= isSittingOrWorkingDay ? 5 : 5; //corrected to allow leeway 
 
         (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.setEmployeeTypes)(row);
         if (row.punching) {
@@ -851,11 +898,26 @@ var vm = new Vue({
           if (overlap) {
             //if there is overlap, we check the fulltime instead of just from 5.30
             var otmins_onsitday_includingsitOT = 570;
-            if (row.punching && self.dayHasPunching) {
-              otmins_onsitday_includingsitOT -= 10;
-            }
+            //if(row.punching && self.dayHasPunching) { otmins_onsitday_includingsitOT -= 10 }
             otmins_practical += otmins_onsitday_includingsitOT * this._daylenmultiplier;
             othours_ideal += 9.5 * this._daylenmultiplier;
+          } else if (is11thOrLater && row.punching && self.dayHasPunching) {
+            //if is11thOrLater we need to see if they are eligible for sitting OT. if so, make sure second ot starts from 5.30/5.40 pm if grace used
+
+            var _eligibleForSitOT2 = _eligibleForSitOT(row, datefrom, dateto),
+              _eligibleForSitOT = _eligibleForSitOT2.eligibleForSitOT,
+              graceMin = _eligibleForSitOT2.graceMin;
+            //if they are eligible for sit OT, 'from' need to start from 5.30+grace
+            if (_eligibleForSitOT) {
+              var grace = graceMin;
+              if (grace > 0) {
+                //if they are eligible for sit OT, 'from' need to start from 5.30+grace
+                var otstartstarttime_req = moment(datefrom).add(grace, 'minutes');
+                if (otstartstarttime_req.isBefore(moment(datefrom))) {
+                  this.myerrors.push("Row  ".concat(i + 1, " :OT needs to start from ").concat(otstartstarttime_req.format('HH:mm'), " on a sitting day"));
+                }
+              }
+            }
           }
         }
         console.log('otmins_needed: ' + otmins_practical);
