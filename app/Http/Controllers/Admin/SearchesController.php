@@ -260,13 +260,15 @@ cannot trust form id, as a user might have started a form, but waited long to su
 
         $overtimes = Overtime::with('form')
                      ->wherehas( 'form', function($q) use ($session){
-                           $q->where('session',$session);
+                           $q->where('session',$session)
+                           ->where('form_no', '>=', 0)
+                           ->where('owner', 'admin');
                              
             
                      }); 
         //if(!env('APP_DEBUG'))
         {
-            $overtimes = $overtimes->where('form_no', '>=', 0)->where('owner', 'admin'); //submitted to us
+         //   $overtimes = $overtimes->where('form_no', '>=', 0)->where('owner', 'admin'); //submitted to us
 
         }
 
