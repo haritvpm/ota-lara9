@@ -10,8 +10,9 @@
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "addMinutes": () => (/* binding */ addMinutes),
 /* harmony export */   "checkDatesAndOT": () => (/* binding */ checkDatesAndOT),
-/* harmony export */   "eligibleForSitOT": () => (/* binding */ eligibleForSitOT),
+/* harmony export */   "eligibleForSitOTCheck": () => (/* binding */ eligibleForSitOTCheck),
 /* harmony export */   "setEmployeeTypes": () => (/* binding */ setEmployeeTypes),
 /* harmony export */   "sittingAllowableForNonAebasDay": () => (/* binding */ sittingAllowableForNonAebasDay),
 /* harmony export */   "stringTimeToDate": () => (/* binding */ stringTimeToDate),
@@ -36,6 +37,9 @@ function stringTimeToDate(sTimeWithSemicolonSeperator) {
   return Date.UTC(2000, 1, 1, time[0], time[1]);
 }
 ;
+function addMinutes(date, minutes) {
+  return date + minutes * 60000;
+}
 function timePeriodIncludesPeriod(from, to, fromReq, toReq) {
   if (!from || !to) return false;
   var datefrom = stringTimeToDate(from);
@@ -76,7 +80,7 @@ function checkDatesAndOT(row, data) {
       //punched
 
       if (row.isPartime) {
-        if (timePeriodIncludesPeriod(punchin, punchout, "06:10", "11:30") || timePeriodIncludesPeriod(punchin, punchout, "07:10", "12:30")) {
+        if (eligibleForSitOTCheck(punchin, punchout, "06:00", "11:30").eligibleForSitOT || eligibleForSitOTCheck(punchin, punchout, "07:00", "12:30").eligibleForSitOT) {
           data.dates[i].ot = 'YES';
           count++;
         } else {
@@ -84,7 +88,7 @@ function checkDatesAndOT(row, data) {
         }
       } else if (row.isFulltime) {
         console.log(punchin, punchout);
-        if (timePeriodIncludesPeriod(punchin, punchout, "07:10", "16:30") || timePeriodIncludesPeriod(punchin, punchout, "07:10", "17:25")) {
+        if (eligibleForSitOTCheck(punchin, punchout, "07:00", "16:30").eligibleForSitOT || eligibleForSitOTCheck(punchin, punchout, "07:00", "17:25").eligibleForSitOT) {
           count++;
           data.dates[i].ot = 'YES';
         } else {
@@ -94,11 +98,14 @@ function checkDatesAndOT(row, data) {
         //no punching
       } //all other employees for sitting days
       else {
-        if (timePeriodIncludesPeriod(punchin, punchout, "08:10", "17:30")) {
+        var _eligibleForSitOTChec = eligibleForSitOTCheck(punchin, punchout, "08:00", "17:30"),
+          eligibleForSitOT = _eligibleForSitOTChec.eligibleForSitOT,
+          graceMin = _eligibleForSitOTChec.graceMin;
+        if (eligibleForSitOT) {
           count++;
           data.dates[i].ot = 'YES';
         } else {
-          data.dates[i].ot = 'No. (08:00 - 5:30pm)';
+          data.dates[i].ot = "No. ".concat(addMinutesToStringTime('08:00', graceMin), "-").concat(addMinutesToStringTime('17:30', graceMin));
         }
       }
       data.dates[i].userdecision = false;
@@ -160,15 +167,19 @@ function checkDatesAndOT(row, data) {
     total_userdecision_days: total_userdecision_days
   };
 }
-function eligibleForSitOT(row, datefrom, dateto) {
+function eligibleForSitOTCheck(punchin_str, punchout_str) {
+  var req_punchin_str = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '08:00';
+  var req_punchout_str = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : '17:30';
+  var grace_allowed = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 10;
   // Convert punch-in and punch-out times to Date objects
-  var punchInTime = new Date("1970-01-01T".concat(row.punchin, ":00"));
-  var punchOutTime = new Date("1970-01-01T".concat(row.punchout, ":00"));
+  var punchInTime = new Date("1970-01-01T".concat(punchin_str, ":00"));
+  var punchOutTime = new Date("1970-01-01T".concat(punchout_str, ":00"));
 
   // Define the base punch-in time (8:00 AM), maximum allowed punch-in time (8:10 AM) and base punch-out time (5:30 PM)
-  var basePunchInTime = new Date('1970-01-01T08:00:00');
-  var maxPunchInTime = new Date('1970-01-01T08:10:00');
-  var basePunchOutTime = new Date('1970-01-01T17:30:00');
+  var basePunchInTime = new Date("1970-01-01T".concat(req_punchin_str, ":00")); //new Date('1970-01-01T08:00:00');
+  //const maxPunchInTime = new Date('1970-01-01T08:10:00');
+  var maxPunchInTime = new Date(basePunchInTime.getTime() + grace_allowed * 60000);
+  var basePunchOutTime = new Date("1970-01-01T".concat(req_punchout_str, ":00")); //new Date('1970-01-01T17:30:00');
 
   // Check if punch-in time is after 8:10 AM or punch-out time is before 5:25 PM
   if (punchInTime > maxPunchInTime || punchOutTime < basePunchOutTime) {
@@ -213,6 +224,13 @@ function toHoursAndMinutesBare(totalMinutes) {
 }
 function padToTwoDigits(num) {
   return num.toString().padStart(2, '0');
+}
+function addMinutesToStringTime(time_str, minutes) {
+  var time = time_str.split(":").map(Number);
+  var totalMinutes = time[0] * 60 + time[1] + minutes;
+  var hours = Math.floor(totalMinutes / 60);
+  var newMinutes = totalMinutes % 60;
+  return "".concat(hours, ":").concat(padToTwoDigits(newMinutes));
 }
 
 /***/ })
@@ -880,6 +898,9 @@ var vm = new Vue({
         var _this$strTimesToDates4 = this.strTimesToDatesNormalized(row.from, row.to),
           datefrom = _this$strTimesToDates4.datefrom,
           dateto = _this$strTimesToDates4.dateto;
+        //const momentfrom = moment(datefrom)
+        //console.log('momentfrom: ' + momentfrom.format('HH:mm'))
+
         var otmins_actual = parseFloat((dateto - datefrom) / 60000);
 
         //add totalhours needed
@@ -903,21 +924,32 @@ var vm = new Vue({
             othours_ideal += 9.5 * this._daylenmultiplier;
           } else
             //no overlap user has entered time from 5.30
-            if (is11thOrLater && row.punching && self.dayHasPunching) {
+            if (self.is11thOrLater && row.punching && self.dayHasPunching) {
               //if is11thOrLater we need to see if they are eligible for sitting OT. if so, make sure second ot starts from 5.30/5.40 pm if grace used
 
-              var _eligibleForSitOT2 = _eligibleForSitOT(row, datefrom, dateto),
-                _eligibleForSitOT = _eligibleForSitOT2.eligibleForSitOT,
-                graceMin = _eligibleForSitOT2.graceMin;
+              var _eligibleForSitOTChec = (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.eligibleForSitOTCheck)(row.punchin, row.punchout),
+                eligibleForSitOT = _eligibleForSitOTChec.eligibleForSitOT,
+                graceMin = _eligibleForSitOTChec.graceMin;
               //if they are eligible for sit OT, 'from' need to start from 5.30+grace
-              if (_eligibleForSitOT) {
+              if (eligibleForSitOT) {
                 var grace = graceMin;
                 if (grace > 0) {
                   //if they are eligible for sit OT, 'from' need to start from 5.30+grace
-                  var momentfrom = moment(datefrom);
-                  var otstartstarttime_req = moment((0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.stringTimeToDate)('17:30')).add(grace, 'minutes');
-                  if (momentfrom.isBefore(otstartstarttime_req)) {
-                    this.myerrors.push("Row  ".concat(i + 1, " :OT needs to start from ").concat(otstartstarttime_req.format('HH:mm'), " on a sitting day"));
+                  //console.log('row.from: ' + row.from)
+                  var momentfrom = moment.utc(datefrom);
+                  //const otstartstarttime_req = moment(stringTimeToDate('17:30')).add(grace, 'minutes')
+                  var otstartstarttime_req = (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.addMinutes)((0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.stringTimeToDate)('17:30'), grace);
+                  var momentfromreq = moment.utc(otstartstarttime_req);
+
+                  //user will be claiming sitting OT later (auto calculated)
+                  //so we need to make sure they are eligible for sitting OT
+                  //if sit OT can be claimed, it will be from 5.30+grace. so dont allow second OT to start before that
+
+                  console.log('momentfromreq: ' + momentfromreq.format('DD/MM/YYYY HH:mm'));
+                  console.log('momentfrom: ' + momentfrom.format('DD/MM/YYYY HH:mm'));
+                  if (momentfrom.isBefore(momentfromreq)) {
+                    this.myerrors.push("Row  ".concat(i + 1, " :OT needs to start from ").concat(momentfromreq.format('HH:mm'), " on a sitting day"));
+                    return false;
                   }
                 }
               }
@@ -978,7 +1010,9 @@ var vm = new Vue({
           //if there is second, third, but no first
           if (!this.hasFirst(row.slots) && row.slots.length) {
             var sNormalStart = "06:00";
-            var sNormalEnd = "11:30";
+            var sNormalEnd = "14:00"; //"11:30";
+            //PT can be from 6-11:30 or 7-12:30
+            //their 2nd OT is from 2-4.30. so dont allow them to enter whole period. only after 12.30
             //if this slot does not contain sitting ot on a sitting day 
             if (this.timePeriodsOverlap(datefrom, dateto, sNormalStart, sNormalEnd)) {
               this.myerrors.push("Row ".concat(i + 1, " : 2nd OT cannot be between ").concat(sNormalStart, " and ").concat(sNormalEnd, " on a ").concat(daytypedesc));

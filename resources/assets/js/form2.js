@@ -1,5 +1,5 @@
 "use strict";
-import {eligibleForSitOT, toHoursAndMinutes,toHoursAndMinutesBare, timePeriodIncludesPeriod, stringTimeToDate, setEmployeeTypes } from './utils.js';
+import {addMinutes, eligibleForSitOTCheck, toHoursAndMinutes,toHoursAndMinutesBare, timePeriodIncludesPeriod, stringTimeToDate, setEmployeeTypes } from './utils.js';
 
 const dateofdutyprefix = "Date of Duty";
 
@@ -690,6 +690,8 @@ var vm = new Vue({
 
 				}
 				const {datefrom, dateto }= this.strTimesToDatesNormalized(row.from, row.to)
+				//const momentfrom = moment(datefrom)
+				//console.log('momentfrom: ' + momentfrom.format('HH:mm'))
 
 				var otmins_actual = parseFloat((dateto - datefrom) / 60000) ;
 
@@ -711,19 +713,31 @@ var vm = new Vue({
 						othours_ideal +=  9.5 * this._daylenmultiplier;
 					}
 					else //no overlap user has entered time from 5.30
-					if(is11thOrLater && row.punching && self.dayHasPunching){
+					if(self.is11thOrLater && row.punching && self.dayHasPunching){
 						//if is11thOrLater we need to see if they are eligible for sitting OT. if so, make sure second ot starts from 5.30/5.40 pm if grace used
 						
-						const {eligibleForSitOT, graceMin} = eligibleForSitOT(row, datefrom, dateto)
+						const {eligibleForSitOT, graceMin} = eligibleForSitOTCheck(row.punchin, row.punchout)
 						//if they are eligible for sit OT, 'from' need to start from 5.30+grace
 						if(eligibleForSitOT){
 							let grace = graceMin
 							if(grace > 0){
 								//if they are eligible for sit OT, 'from' need to start from 5.30+grace
-								const momentfrom = moment(datefrom)
-								const otstartstarttime_req = moment(stringTimeToDate('17:30')).add(grace, 'minutes')
-								if(momentfrom.isBefore(otstartstarttime_req)){
-									this.myerrors.push(`Row  ${i + 1} :OT needs to start from ${otstartstarttime_req.format('HH:mm')} on a sitting day`);
+								//console.log('row.from: ' + row.from)
+								const momentfrom = moment.utc(datefrom)
+								//const otstartstarttime_req = moment(stringTimeToDate('17:30')).add(grace, 'minutes')
+								const otstartstarttime_req = addMinutes (stringTimeToDate('17:30'), grace)
+								const momentfromreq = moment.utc(otstartstarttime_req)
+
+								//user will be claiming sitting OT later (auto calculated)
+								//so we need to make sure they are eligible for sitting OT
+								//if sit OT can be claimed, it will be from 5.30+grace. so dont allow second OT to start before that
+
+								
+								console.log('momentfromreq: ' + momentfromreq.format('DD/MM/YYYY HH:mm'))
+								console.log('momentfrom: ' + momentfrom.format('DD/MM/YYYY HH:mm'))
+								if(momentfrom.isBefore(momentfromreq)){
+									this.myerrors.push(`Row  ${i + 1} :OT needs to start from ${ momentfromreq.format('HH:mm')} on a sitting day`);
+									return false;
 								}
 							}
 						}
@@ -787,7 +801,9 @@ var vm = new Vue({
 						//if there is second, third, but no first
 						if ( !this.hasFirst(row.slots) &&  row.slots.length) {
 							let sNormalStart = "06:00";
-							let sNormalEnd = "11:30";
+							let sNormalEnd = "14:00";//"11:30";
+							//PT can be from 6-11:30 or 7-12:30
+							//their 2nd OT is from 2-4.30. so dont allow them to enter whole period. only after 12.30
 							//if this slot does not contain sitting ot on a sitting day 
 							if (
 								this.timePeriodsOverlap(datefrom, dateto, sNormalStart, sNormalEnd)) {

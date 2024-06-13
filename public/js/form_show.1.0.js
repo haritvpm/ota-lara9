@@ -10,8 +10,9 @@
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "addMinutes": () => (/* binding */ addMinutes),
 /* harmony export */   "checkDatesAndOT": () => (/* binding */ checkDatesAndOT),
-/* harmony export */   "eligibleForSitOT": () => (/* binding */ eligibleForSitOT),
+/* harmony export */   "eligibleForSitOTCheck": () => (/* binding */ eligibleForSitOTCheck),
 /* harmony export */   "setEmployeeTypes": () => (/* binding */ setEmployeeTypes),
 /* harmony export */   "sittingAllowableForNonAebasDay": () => (/* binding */ sittingAllowableForNonAebasDay),
 /* harmony export */   "stringTimeToDate": () => (/* binding */ stringTimeToDate),
@@ -36,6 +37,9 @@ function stringTimeToDate(sTimeWithSemicolonSeperator) {
   return Date.UTC(2000, 1, 1, time[0], time[1]);
 }
 ;
+function addMinutes(date, minutes) {
+  return date + minutes * 60000;
+}
 function timePeriodIncludesPeriod(from, to, fromReq, toReq) {
   if (!from || !to) return false;
   var datefrom = stringTimeToDate(from);
@@ -76,7 +80,7 @@ function checkDatesAndOT(row, data) {
       //punched
 
       if (row.isPartime) {
-        if (timePeriodIncludesPeriod(punchin, punchout, "06:10", "11:30") || timePeriodIncludesPeriod(punchin, punchout, "07:10", "12:30")) {
+        if (eligibleForSitOTCheck(punchin, punchout, "06:00", "11:30").eligibleForSitOT || eligibleForSitOTCheck(punchin, punchout, "07:00", "12:30").eligibleForSitOT) {
           data.dates[i].ot = 'YES';
           count++;
         } else {
@@ -84,7 +88,7 @@ function checkDatesAndOT(row, data) {
         }
       } else if (row.isFulltime) {
         console.log(punchin, punchout);
-        if (timePeriodIncludesPeriod(punchin, punchout, "07:10", "16:30") || timePeriodIncludesPeriod(punchin, punchout, "07:10", "17:25")) {
+        if (eligibleForSitOTCheck(punchin, punchout, "07:00", "16:30").eligibleForSitOT || eligibleForSitOTCheck(punchin, punchout, "07:00", "17:25").eligibleForSitOT) {
           count++;
           data.dates[i].ot = 'YES';
         } else {
@@ -94,11 +98,14 @@ function checkDatesAndOT(row, data) {
         //no punching
       } //all other employees for sitting days
       else {
-        if (timePeriodIncludesPeriod(punchin, punchout, "08:10", "17:30")) {
+        var _eligibleForSitOTChec = eligibleForSitOTCheck(punchin, punchout, "08:00", "17:30"),
+          eligibleForSitOT = _eligibleForSitOTChec.eligibleForSitOT,
+          graceMin = _eligibleForSitOTChec.graceMin;
+        if (eligibleForSitOT) {
           count++;
           data.dates[i].ot = 'YES';
         } else {
-          data.dates[i].ot = 'No. (08:00 - 5:30pm)';
+          data.dates[i].ot = "No. ".concat(addMinutesToStringTime('08:00', graceMin), "-").concat(addMinutesToStringTime('17:30', graceMin));
         }
       }
       data.dates[i].userdecision = false;
@@ -160,15 +167,19 @@ function checkDatesAndOT(row, data) {
     total_userdecision_days: total_userdecision_days
   };
 }
-function eligibleForSitOT(row, datefrom, dateto) {
+function eligibleForSitOTCheck(punchin_str, punchout_str) {
+  var req_punchin_str = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '08:00';
+  var req_punchout_str = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : '17:30';
+  var grace_allowed = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 10;
   // Convert punch-in and punch-out times to Date objects
-  var punchInTime = new Date("1970-01-01T".concat(row.punchin, ":00"));
-  var punchOutTime = new Date("1970-01-01T".concat(row.punchout, ":00"));
+  var punchInTime = new Date("1970-01-01T".concat(punchin_str, ":00"));
+  var punchOutTime = new Date("1970-01-01T".concat(punchout_str, ":00"));
 
   // Define the base punch-in time (8:00 AM), maximum allowed punch-in time (8:10 AM) and base punch-out time (5:30 PM)
-  var basePunchInTime = new Date('1970-01-01T08:00:00');
-  var maxPunchInTime = new Date('1970-01-01T08:10:00');
-  var basePunchOutTime = new Date('1970-01-01T17:30:00');
+  var basePunchInTime = new Date("1970-01-01T".concat(req_punchin_str, ":00")); //new Date('1970-01-01T08:00:00');
+  //const maxPunchInTime = new Date('1970-01-01T08:10:00');
+  var maxPunchInTime = new Date(basePunchInTime.getTime() + grace_allowed * 60000);
+  var basePunchOutTime = new Date("1970-01-01T".concat(req_punchout_str, ":00")); //new Date('1970-01-01T17:30:00');
 
   // Check if punch-in time is after 8:10 AM or punch-out time is before 5:25 PM
   if (punchInTime > maxPunchInTime || punchOutTime < basePunchOutTime) {
@@ -213,6 +224,13 @@ function toHoursAndMinutesBare(totalMinutes) {
 }
 function padToTwoDigits(num) {
   return num.toString().padStart(2, '0');
+}
+function addMinutesToStringTime(time_str, minutes) {
+  var time = time_str.split(":").map(Number);
+  var totalMinutes = time[0] * 60 + time[1] + minutes;
+  var hours = Math.floor(totalMinutes / 60);
+  var newMinutes = totalMinutes % 60;
+  return "".concat(hours, ":").concat(padToTwoDigits(newMinutes));
 }
 
 /***/ })
