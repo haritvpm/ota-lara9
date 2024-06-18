@@ -1,5 +1,5 @@
 "use strict";
-import {toHoursAndMinutes,toHoursAndMinutesBare, timePeriodIncludesPeriod, stringTimeToDate, setEmployeeTypes } from './utils.js';
+import {addMinutes, eligibleForSitOTCheck, toHoursAndMinutes,toHoursAndMinutesBare, timePeriodIncludesPeriod, stringTimeToDate, setEmployeeTypes } from './utils.js';
 
 const dateofdutyprefix = "Date of Duty";
 
@@ -35,7 +35,7 @@ var vm = new Vue({
 		pen_names_to_desig: [],
 		presets: presets,
 		presets_default: presets_default,
-		
+		is11thOrLater : false,
 		configtime: {
 
 
@@ -146,7 +146,8 @@ var vm = new Vue({
 
 	methods: {
 		copytimedown: function () {
-			if (this.form.overtimes.length > 1) {
+			if (this.form.overtimes.length >= 1) 
+				{
 				for (var i = 0; i < this.form.overtimes.length; i++) {
 					if( this.form.overtimes[i].from == "" || this.form.overtimes[i].to == "" ){
 						this.form.overtimes[i].from = this.form.overtimes[i].punchin;
@@ -165,7 +166,7 @@ var vm = new Vue({
 		sessionchanged: function () {
 			//alert(this.form.session);
 
-			//alert(JSON.stringify((calenderdays2[this.form.session])));
+			alert(JSON.stringify((calenderdays2[this.form.session])));
 			//this.configdate.enabledDates =  Object.keys(calenderdaysmap)
 			this.myerrors = [];
 
@@ -202,6 +203,11 @@ var vm = new Vue({
 					}
 									
 				}
+
+				//if dutydate is after 2024-06-01, then it is 11th or later
+				const dutydate = moment(this.form.duty_date, "DD-MM-YYYY")
+				this.is11thOrLater = dutydate.isAfter("2024-06-01")
+				console.log('is11thOrLater: ' + this.is11thOrLater)
 								
 			}
 		},
@@ -302,7 +308,16 @@ var vm = new Vue({
 			if (row?.from == "" || row?.to == "") {
 				return "";
 			}
+			
+			if (!row?.from || !row?.to ) {
+				return "";
+			}
+
 			const { datefrom, dateto } = this.strTimesToDatesNormalized(row.from, row.to)
+			if (!datefrom || !dateto) {
+				return "";
+			}
+			console.log(datefrom, dateto)
 			return toHoursAndMinutesBare((dateto - datefrom) / 60000)
 
 		},
@@ -475,8 +490,8 @@ var vm = new Vue({
         
 				if (this.hasFirst(row.slots)) {
 
-					if (!timePeriodIncludesPeriod(row.from, row.to, "06:05", "11:25") && 
-						!timePeriodIncludesPeriod(row.from, row.to, "07:05", "12:25")) { //hostel
+					if (!timePeriodIncludesPeriod(row.from, row.to, "06:10", "11:30") && 
+						!timePeriodIncludesPeriod(row.from, row.to, "07:10", "12:30")) { //hostel
 						this.myerrors.push("Row " + (i + 1) + ": Parttime employee - time should include 06:00/7.00 to 11:30/12.30 on a sitting day");
 						return false;
 					}
@@ -484,7 +499,7 @@ var vm = new Vue({
 				} else if (this.hasSecond(row.slots)) {
 
 					//no need to strict time. let them decide for themselves. 2 to 4.30 is actual
-					if (!timePeriodIncludesPeriod(row.from, row.to, "14:05", "16:25")) {
+					if (!timePeriodIncludesPeriod(row.from, row.to, "14:00", "16:30")) {
 						this.myerrors.push("Row " + (i + 1) + ": Parttime employee - time should include 14:00 to 16:30 as per G.O on a sitting day");
 						return false;
 					}
@@ -497,9 +512,9 @@ var vm = new Vue({
 				if (this.hasFirst(row.slots)) {
 
 					////its acutally 4.30. no need to enforce ending time. have doubts regarding mla hostel.
-					if (!timePeriodIncludesPeriod(row.from, row.to, "06:05", "16:15") &&
-						!timePeriodIncludesPeriod(row.from, row.to, "07:05", "17:15") ) { 
-						this.myerrors.push("Row " + (i + 1) + ": Fulltime employee - time shall include 6/7 a.m. to 4.30/5.30 pm on a sitting day");
+					if (!timePeriodIncludesPeriod(row.from, row.to, "07:10", "16:30") &&
+						!timePeriodIncludesPeriod(row.from, row.to, "07:10", "17:30") ) { 
+						this.myerrors.push("Row " + (i + 1) + ": Fulltime employee - time shall include 7 a.m. to 4.30/5.30 pm on a sitting day");
 						return false;
 					}
 
@@ -511,7 +526,7 @@ var vm = new Vue({
 			
 				if( this.hasFirst(row.slots)){
 
-					if (!timePeriodIncludesPeriod(row.from, row.to, "08:05", "17:25")) {
+					if (!timePeriodIncludesPeriod(row.from, row.to, "08:10", "17:30")) {
 						this.myerrors.push("Row " + (i + 1) + ": For sitting OT, time should include 08:00 to 17:30 as per GO");
 						return false;
 					}
@@ -643,7 +658,7 @@ var vm = new Vue({
 
 				var row = self.form.overtimes[i];
 				
-				if(row.punching && self.dayHasPunching)  minot_minutes -= isSittingOrWorkingDay ? 5 : 5; //corrected to allow leeway 
+				//if(row.punching && self.dayHasPunching)  minot_minutes -= isSittingOrWorkingDay ? 5 : 5; //corrected to allow leeway 
 
 				setEmployeeTypes(row);
 				if (row.punching) {
@@ -675,6 +690,8 @@ var vm = new Vue({
 
 				}
 				const {datefrom, dateto }= this.strTimesToDatesNormalized(row.from, row.to)
+				//const momentfrom = moment(datefrom)
+				//console.log('momentfrom: ' + momentfrom.format('HH:mm'))
 
 				var otmins_actual = parseFloat((dateto - datefrom) / 60000) ;
 
@@ -691,10 +708,41 @@ var vm = new Vue({
 					const {overlap, checkingPeriod } = this.overlapsWithOfficeHoursForNormalEmpl(datefrom, dateto, isSittingDay, isWorkingDay)
 					if(overlap){ //if there is overlap, we check the fulltime instead of just from 5.30
 						let otmins_onsitday_includingsitOT = 570
-						if(row.punching && self.dayHasPunching) { otmins_onsitday_includingsitOT -= 10 }
+						//if(row.punching && self.dayHasPunching) { otmins_onsitday_includingsitOT -= 10 }
 						otmins_practical +=  otmins_onsitday_includingsitOT*this._daylenmultiplier;
 						othours_ideal +=  9.5 * this._daylenmultiplier;
 					}
+					else //no overlap user has entered time from 5.30
+					if(self.is11thOrLater && row.punching && self.dayHasPunching){
+						//if is11thOrLater we need to see if they are eligible for sitting OT. if so, make sure second ot starts from 5.30/5.40 pm if grace used
+						
+						const {eligibleForSitOT, graceMin} = eligibleForSitOTCheck(row.punchin, row.punchout)
+						//if they are eligible for sit OT, 'from' need to start from 5.30+grace
+						if(eligibleForSitOT){
+							let grace = graceMin
+							if(grace > 0){
+								//if they are eligible for sit OT, 'from' need to start from 5.30+grace
+								//console.log('row.from: ' + row.from)
+								const momentfrom = moment.utc(datefrom)
+								//const otstartstarttime_req = moment(stringTimeToDate('17:30')).add(grace, 'minutes')
+								const otstartstarttime_req = addMinutes (stringTimeToDate('17:30'), grace)
+								const momentfromreq = moment.utc(otstartstarttime_req)
+
+								//user will be claiming sitting OT later (auto calculated)
+								//so we need to make sure they are eligible for sitting OT
+								//if sit OT can be claimed, it will be from 5.30+grace. so dont allow second OT to start before that
+
+								
+								console.log('momentfromreq: ' + momentfromreq.format('DD/MM/YYYY HH:mm'))
+								console.log('momentfrom: ' + momentfrom.format('DD/MM/YYYY HH:mm'))
+								if(momentfrom.isBefore(momentfromreq)){
+									this.myerrors.push(`Row  ${i + 1} :OT needs to start from ${ momentfromreq.format('HH:mm')} on a sitting day`);
+									return false;
+								}
+							}
+						}
+					}
+
 				}
 				console.log('otmins_needed: ' + otmins_practical);
 				//new validation after adding normal_office_hours
@@ -753,7 +801,9 @@ var vm = new Vue({
 						//if there is second, third, but no first
 						if ( !this.hasFirst(row.slots) &&  row.slots.length) {
 							let sNormalStart = "06:00";
-							let sNormalEnd = "11:30";
+							let sNormalEnd = "14:00";//"11:30";
+							//PT can be from 6-11:30 or 7-12:30
+							//their 2nd OT is from 2-4.30. so dont allow them to enter whole period. only after 12.30
 							//if this slot does not contain sitting ot on a sitting day 
 							if (
 								this.timePeriodsOverlap(datefrom, dateto, sNormalStart, sNormalEnd)) {

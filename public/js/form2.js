@@ -10,7 +10,9 @@
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "addMinutes": () => (/* binding */ addMinutes),
 /* harmony export */   "checkDatesAndOT": () => (/* binding */ checkDatesAndOT),
+/* harmony export */   "eligibleForSitOTCheck": () => (/* binding */ eligibleForSitOTCheck),
 /* harmony export */   "setEmployeeTypes": () => (/* binding */ setEmployeeTypes),
 /* harmony export */   "sittingAllowableForNonAebasDay": () => (/* binding */ sittingAllowableForNonAebasDay),
 /* harmony export */   "stringTimeToDate": () => (/* binding */ stringTimeToDate),
@@ -29,16 +31,22 @@ function setEmployeeTypes(row) {
   row.isNormal = !row.isPartime && !row.isFulltime && !row.isWatchnward;
 }
 function stringTimeToDate(sTimeWithSemicolonSeperator) {
+  if (!sTimeWithSemicolonSeperator) return null;
   var time = sTimeWithSemicolonSeperator.split(":").map(Number);
   //warning: months in JS starts from 0
   return Date.UTC(2000, 1, 1, time[0], time[1]);
 }
 ;
+function addMinutes(date, minutes) {
+  return date + minutes * 60000;
+}
 function timePeriodIncludesPeriod(from, to, fromReq, toReq) {
+  if (!from || !to) return false;
   var datefrom = stringTimeToDate(from);
   var dateto = stringTimeToDate(to);
   var time800am = stringTimeToDate(fromReq);
   var time530pm = stringTimeToDate(toReq);
+  if (!datefrom || !dateto) return false;
   return time800am >= datefrom && time530pm <= dateto;
 }
 //check if punchin or out if available, fails
@@ -72,28 +80,32 @@ function checkDatesAndOT(row, data) {
       //punched
 
       if (row.isPartime) {
-        if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "11:25") || timePeriodIncludesPeriod(punchin, punchout, "07:05", "12:25")) {
+        if (eligibleForSitOTCheck(punchin, punchout, "06:00", "11:30").eligibleForSitOT || eligibleForSitOTCheck(punchin, punchout, "07:00", "12:30").eligibleForSitOT) {
           data.dates[i].ot = 'YES';
           count++;
         } else {
           data.dates[i].ot = 'No. (6/7 am - 11:30/12:30)';
         }
       } else if (row.isFulltime) {
-        if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "16:25") || timePeriodIncludesPeriod(punchin, punchout, "07:05", "17:25")) {
+        console.log(punchin, punchout);
+        if (eligibleForSitOTCheck(punchin, punchout, "07:00", "16:30").eligibleForSitOT || eligibleForSitOTCheck(punchin, punchout, "07:00", "17:25").eligibleForSitOT) {
           count++;
           data.dates[i].ot = 'YES';
         } else {
-          data.dates[i].ot = 'No. (6/7 am - 4:30pm/5:30pm)';
+          data.dates[i].ot = 'No. (7 am - 4:30pm/5:30pm)';
         }
       } else if (row.isWatchnward) {
         //no punching
       } //all other employees for sitting days
       else {
-        if (timePeriodIncludesPeriod(punchin, punchout, "08:05", "17:25")) {
+        var _eligibleForSitOTChec = eligibleForSitOTCheck(punchin, punchout, "08:00", "17:30"),
+          eligibleForSitOT = _eligibleForSitOTChec.eligibleForSitOT,
+          graceMin = _eligibleForSitOTChec.graceMin;
+        if (eligibleForSitOT) {
           count++;
           data.dates[i].ot = 'YES';
         } else {
-          data.dates[i].ot = 'No. (08:00 - 5:30pm)';
+          data.dates[i].ot = "No. ".concat(addMinutesToStringTime('08:00', graceMin), "-").concat(addMinutesToStringTime('17:30', graceMin));
         }
       }
       data.dates[i].userdecision = false;
@@ -114,22 +126,22 @@ function checkDatesAndOT(row, data) {
     //non aebasday, check if user has not punched incorrectly when server was failing
     data.dates[i].userdecision = false;
     if (row.isPartime) {
-      if (sittingAllowableForNonAebasDay(punchin, punchout, "06:05", "11:25") || sittingAllowableForNonAebasDay(punchin, punchout, "07:05", "12:25")) {
+      if (sittingAllowableForNonAebasDay(punchin, punchout, "06:10", "11:30") || sittingAllowableForNonAebasDay(punchin, punchout, "07:10", "12:30")) {
         data.dates[i].userdecision = true;
       } else {
         data.dates[i].ot = 'No. (6/7 - 11:30/12:30)';
       }
     } else if (row.isFulltime) {
-      if (sittingAllowableForNonAebasDay(punchin, punchout, "06:05", "16:25") || sittingAllowableForNonAebasDay(punchin, punchout, "07:05", "17:25")) {
+      if (sittingAllowableForNonAebasDay(punchin, punchout, "07:10", "16:30") || sittingAllowableForNonAebasDay(punchin, punchout, "07:10", "17:30")) {
         data.dates[i].userdecision = true;
       } else {
-        data.dates[i].ot = 'No. (6/7 - 4:30pm/5:30pm)';
+        data.dates[i].ot = 'No. (7 - 4:30pm/5:30pm)';
       }
     } else if (row.isWatchnward) {
       //no punching
     } //all other employees for sitting days
     else {
-      if (sittingAllowableForNonAebasDay(punchin, punchout, "08:05", "17:25")) {
+      if (sittingAllowableForNonAebasDay(punchin, punchout, "08:10", "17:30")) {
         data.dates[i].userdecision = true;
       } else {
         data.dates[i].ot = 'No. (08:00 - 5:30pm)';
@@ -155,6 +167,49 @@ function checkDatesAndOT(row, data) {
     total_userdecision_days: total_userdecision_days
   };
 }
+function eligibleForSitOTCheck(punchin_str, punchout_str) {
+  var req_punchin_str = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '08:00';
+  var req_punchout_str = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : '17:30';
+  var grace_allowed = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 10;
+  // Convert punch-in and punch-out times to Date objects
+  var punchInTime = new Date("1970-01-01T".concat(punchin_str, ":00"));
+  var punchOutTime = new Date("1970-01-01T".concat(punchout_str, ":00"));
+
+  // Define the base punch-in time (8:00 AM), maximum allowed punch-in time (8:10 AM) and base punch-out time (5:30 PM)
+  var basePunchInTime = new Date("1970-01-01T".concat(req_punchin_str, ":00")); //new Date('1970-01-01T08:00:00');
+  //const maxPunchInTime = new Date('1970-01-01T08:10:00');
+  var maxPunchInTime = new Date(basePunchInTime.getTime() + grace_allowed * 60000);
+  var basePunchOutTime = new Date("1970-01-01T".concat(req_punchout_str, ":00")); //new Date('1970-01-01T17:30:00');
+
+  // Check if punch-in time is after 8:10 AM or punch-out time is before 5:25 PM
+  if (punchInTime > maxPunchInTime || punchOutTime < basePunchOutTime) {
+    return {
+      eligibleForSitOT: false,
+      graceMin: 0
+    };
+  }
+
+  // Check if punch-in time is before or at 8:00 AM
+  if (punchInTime <= basePunchInTime) {
+    // In this case, punch-out time only needs to be 5:30 PM or later
+    return {
+      eligibleForSitOT: punchOutTime >= basePunchOutTime,
+      graceMin: 0
+    };
+  }
+
+  // Calculate the extra minutes after 8:00 AM
+  var extraMinutes = (punchInTime - basePunchInTime) / (1000 * 60);
+
+  // Calculate the required punch-out time
+  var requiredPunchOutTime = new Date(basePunchOutTime.getTime() + extraMinutes * 60 * 1000);
+
+  // Check if the actual punch-out time is after or equal to the required punch-out time
+  return {
+    eligibleForSitOT: punchOutTime >= requiredPunchOutTime,
+    graceMin: extraMinutes
+  };
+}
 function toHoursAndMinutes(totalMinutes) {
   var hours = Math.floor(totalMinutes / 60);
   var minutes = totalMinutes % 60;
@@ -169,6 +224,13 @@ function toHoursAndMinutesBare(totalMinutes) {
 }
 function padToTwoDigits(num) {
   return num.toString().padStart(2, '0');
+}
+function addMinutesToStringTime(time_str, minutes) {
+  var time = time_str.split(":").map(Number);
+  var totalMinutes = time[0] * 60 + time[1] + minutes;
+  var hours = Math.floor(totalMinutes / 60);
+  var newMinutes = totalMinutes % 60;
+  return "".concat(hours, ":").concat(padToTwoDigits(newMinutes));
 }
 
 /***/ })
@@ -270,6 +332,7 @@ var vm = new Vue({
     pen_names_to_desig: [],
     presets: presets,
     presets_default: presets_default,
+    is11thOrLater: false,
     configtime: {
       format: "HH:mm",
       stepping: 15
@@ -366,7 +429,7 @@ var vm = new Vue({
   watch: {},
   methods: {
     copytimedown: function copytimedown() {
-      if (this.form.overtimes.length > 1) {
+      if (this.form.overtimes.length >= 1) {
         for (var i = 0; i < this.form.overtimes.length; i++) {
           if (this.form.overtimes[i].from == "" || this.form.overtimes[i].to == "") {
             this.form.overtimes[i].from = this.form.overtimes[i].punchin;
@@ -385,7 +448,7 @@ var vm = new Vue({
     sessionchanged: function sessionchanged() {
       //alert(this.form.session);
 
-      //alert(JSON.stringify((calenderdays2[this.form.session])));
+      alert(JSON.stringify(calenderdays2[this.form.session]));
       //this.configdate.enabledDates =  Object.keys(calenderdaysmap)
       this.myerrors = [];
 
@@ -411,6 +474,11 @@ var vm = new Vue({
             this.form.overtimes[i].slots = [];
           }
         }
+
+        //if dutydate is after 2024-06-01, then it is 11th or later
+        var dutydate = moment(this.form.duty_date, "DD-MM-YYYY");
+        this.is11thOrLater = dutydate.isAfter("2024-06-01");
+        console.log('is11thOrLater: ' + this.is11thOrLater);
       }
     },
     updateDateDependencies: function updateDateDependencies() {
@@ -485,9 +553,16 @@ var vm = new Vue({
       if ((row === null || row === void 0 ? void 0 : row.from) == "" || (row === null || row === void 0 ? void 0 : row.to) == "") {
         return "";
       }
+      if (!(row !== null && row !== void 0 && row.from) || !(row !== null && row !== void 0 && row.to)) {
+        return "";
+      }
       var _this$strTimesToDates = this.strTimesToDatesNormalized(row.from, row.to),
         datefrom = _this$strTimesToDates.datefrom,
         dateto = _this$strTimesToDates.dateto;
+      if (!datefrom || !dateto) {
+        return "";
+      }
+      console.log(datefrom, dateto);
       return (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.toHoursAndMinutesBare)((dateto - datefrom) / 60000);
     },
     limitText: function limitText(count) {
@@ -647,14 +722,14 @@ var vm = new Vue({
         //parttime emp
 
         if (this.hasFirst(row.slots)) {
-          if (!(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(row.from, row.to, "06:05", "11:25") && !(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(row.from, row.to, "07:05", "12:25")) {
+          if (!(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(row.from, row.to, "06:10", "11:30") && !(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(row.from, row.to, "07:10", "12:30")) {
             //hostel
             this.myerrors.push("Row " + (i + 1) + ": Parttime employee - time should include 06:00/7.00 to 11:30/12.30 on a sitting day");
             return false;
           }
         } else if (this.hasSecond(row.slots)) {
           //no need to strict time. let them decide for themselves. 2 to 4.30 is actual
-          if (!(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(row.from, row.to, "14:05", "16:25")) {
+          if (!(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(row.from, row.to, "14:00", "16:30")) {
             this.myerrors.push("Row " + (i + 1) + ": Parttime employee - time should include 14:00 to 16:30 as per G.O on a sitting day");
             return false;
           }
@@ -664,8 +739,8 @@ var vm = new Vue({
       } else if (row.isFulltime) {
         if (this.hasFirst(row.slots)) {
           ////its acutally 4.30. no need to enforce ending time. have doubts regarding mla hostel.
-          if (!(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(row.from, row.to, "06:05", "16:15") && !(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(row.from, row.to, "07:05", "17:15")) {
-            this.myerrors.push("Row " + (i + 1) + ": Fulltime employee - time shall include 6/7 a.m. to 4.30/5.30 pm on a sitting day");
+          if (!(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(row.from, row.to, "07:10", "16:30") && !(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(row.from, row.to, "07:10", "17:30")) {
+            this.myerrors.push("Row " + (i + 1) + ": Fulltime employee - time shall include 7 a.m. to 4.30/5.30 pm on a sitting day");
             return false;
           }
         }
@@ -673,7 +748,7 @@ var vm = new Vue({
       } else if (row.isWatchnward) {} //all other employees for sitting days
       else {
         if (this.hasFirst(row.slots)) {
-          if (!(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(row.from, row.to, "08:05", "17:25")) {
+          if (!(0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.timePeriodIncludesPeriod)(row.from, row.to, "08:10", "17:30")) {
             this.myerrors.push("Row " + (i + 1) + ": For sitting OT, time should include 08:00 to 17:30 as per GO");
             return false;
           }
@@ -793,7 +868,8 @@ var vm = new Vue({
           }
         }
         var row = self.form.overtimes[i];
-        if (row.punching && self.dayHasPunching) minot_minutes -= isSittingOrWorkingDay ? 5 : 5; //corrected to allow leeway 
+
+        //if(row.punching && self.dayHasPunching)  minot_minutes -= isSittingOrWorkingDay ? 5 : 5; //corrected to allow leeway 
 
         (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.setEmployeeTypes)(row);
         if (row.punching) {
@@ -822,6 +898,9 @@ var vm = new Vue({
         var _this$strTimesToDates4 = this.strTimesToDatesNormalized(row.from, row.to),
           datefrom = _this$strTimesToDates4.datefrom,
           dateto = _this$strTimesToDates4.dateto;
+        //const momentfrom = moment(datefrom)
+        //console.log('momentfrom: ' + momentfrom.format('HH:mm'))
+
         var otmins_actual = parseFloat((dateto - datefrom) / 60000);
 
         //add totalhours needed
@@ -840,12 +919,41 @@ var vm = new Vue({
           if (overlap) {
             //if there is overlap, we check the fulltime instead of just from 5.30
             var otmins_onsitday_includingsitOT = 570;
-            if (row.punching && self.dayHasPunching) {
-              otmins_onsitday_includingsitOT -= 10;
-            }
+            //if(row.punching && self.dayHasPunching) { otmins_onsitday_includingsitOT -= 10 }
             otmins_practical += otmins_onsitday_includingsitOT * this._daylenmultiplier;
             othours_ideal += 9.5 * this._daylenmultiplier;
-          }
+          } else
+            //no overlap user has entered time from 5.30
+            if (self.is11thOrLater && row.punching && self.dayHasPunching) {
+              //if is11thOrLater we need to see if they are eligible for sitting OT. if so, make sure second ot starts from 5.30/5.40 pm if grace used
+
+              var _eligibleForSitOTChec = (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.eligibleForSitOTCheck)(row.punchin, row.punchout),
+                eligibleForSitOT = _eligibleForSitOTChec.eligibleForSitOT,
+                graceMin = _eligibleForSitOTChec.graceMin;
+              //if they are eligible for sit OT, 'from' need to start from 5.30+grace
+              if (eligibleForSitOT) {
+                var grace = graceMin;
+                if (grace > 0) {
+                  //if they are eligible for sit OT, 'from' need to start from 5.30+grace
+                  //console.log('row.from: ' + row.from)
+                  var momentfrom = moment.utc(datefrom);
+                  //const otstartstarttime_req = moment(stringTimeToDate('17:30')).add(grace, 'minutes')
+                  var otstartstarttime_req = (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.addMinutes)((0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.stringTimeToDate)('17:30'), grace);
+                  var momentfromreq = moment.utc(otstartstarttime_req);
+
+                  //user will be claiming sitting OT later (auto calculated)
+                  //so we need to make sure they are eligible for sitting OT
+                  //if sit OT can be claimed, it will be from 5.30+grace. so dont allow second OT to start before that
+
+                  console.log('momentfromreq: ' + momentfromreq.format('DD/MM/YYYY HH:mm'));
+                  console.log('momentfrom: ' + momentfrom.format('DD/MM/YYYY HH:mm'));
+                  if (momentfrom.isBefore(momentfromreq)) {
+                    this.myerrors.push("Row  ".concat(i + 1, " :OT needs to start from ").concat(momentfromreq.format('HH:mm'), " on a sitting day"));
+                    return false;
+                  }
+                }
+              }
+            }
         }
         console.log('otmins_needed: ' + otmins_practical);
         //new validation after adding normal_office_hours
@@ -902,7 +1010,9 @@ var vm = new Vue({
           //if there is second, third, but no first
           if (!this.hasFirst(row.slots) && row.slots.length) {
             var sNormalStart = "06:00";
-            var sNormalEnd = "11:30";
+            var sNormalEnd = "14:00"; //"11:30";
+            //PT can be from 6-11:30 or 7-12:30
+            //their 2nd OT is from 2-4.30. so dont allow them to enter whole period. only after 12.30
             //if this slot does not contain sitting ot on a sitting day 
             if (this.timePeriodsOverlap(datefrom, dateto, sNormalStart, sNormalEnd)) {
               this.myerrors.push("Row ".concat(i + 1, " : 2nd OT cannot be between ").concat(sNormalStart, " and ").concat(sNormalEnd, " on a ").concat(daytypedesc));

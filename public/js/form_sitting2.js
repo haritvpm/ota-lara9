@@ -10,7 +10,9 @@
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "addMinutes": () => (/* binding */ addMinutes),
 /* harmony export */   "checkDatesAndOT": () => (/* binding */ checkDatesAndOT),
+/* harmony export */   "eligibleForSitOTCheck": () => (/* binding */ eligibleForSitOTCheck),
 /* harmony export */   "setEmployeeTypes": () => (/* binding */ setEmployeeTypes),
 /* harmony export */   "sittingAllowableForNonAebasDay": () => (/* binding */ sittingAllowableForNonAebasDay),
 /* harmony export */   "stringTimeToDate": () => (/* binding */ stringTimeToDate),
@@ -29,16 +31,22 @@ function setEmployeeTypes(row) {
   row.isNormal = !row.isPartime && !row.isFulltime && !row.isWatchnward;
 }
 function stringTimeToDate(sTimeWithSemicolonSeperator) {
+  if (!sTimeWithSemicolonSeperator) return null;
   var time = sTimeWithSemicolonSeperator.split(":").map(Number);
   //warning: months in JS starts from 0
   return Date.UTC(2000, 1, 1, time[0], time[1]);
 }
 ;
+function addMinutes(date, minutes) {
+  return date + minutes * 60000;
+}
 function timePeriodIncludesPeriod(from, to, fromReq, toReq) {
+  if (!from || !to) return false;
   var datefrom = stringTimeToDate(from);
   var dateto = stringTimeToDate(to);
   var time800am = stringTimeToDate(fromReq);
   var time530pm = stringTimeToDate(toReq);
+  if (!datefrom || !dateto) return false;
   return time800am >= datefrom && time530pm <= dateto;
 }
 //check if punchin or out if available, fails
@@ -72,28 +80,32 @@ function checkDatesAndOT(row, data) {
       //punched
 
       if (row.isPartime) {
-        if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "11:25") || timePeriodIncludesPeriod(punchin, punchout, "07:05", "12:25")) {
+        if (eligibleForSitOTCheck(punchin, punchout, "06:00", "11:30").eligibleForSitOT || eligibleForSitOTCheck(punchin, punchout, "07:00", "12:30").eligibleForSitOT) {
           data.dates[i].ot = 'YES';
           count++;
         } else {
           data.dates[i].ot = 'No. (6/7 am - 11:30/12:30)';
         }
       } else if (row.isFulltime) {
-        if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "16:25") || timePeriodIncludesPeriod(punchin, punchout, "07:05", "17:25")) {
+        console.log(punchin, punchout);
+        if (eligibleForSitOTCheck(punchin, punchout, "07:00", "16:30").eligibleForSitOT || eligibleForSitOTCheck(punchin, punchout, "07:00", "17:25").eligibleForSitOT) {
           count++;
           data.dates[i].ot = 'YES';
         } else {
-          data.dates[i].ot = 'No. (6/7 am - 4:30pm/5:30pm)';
+          data.dates[i].ot = 'No. (7 am - 4:30pm/5:30pm)';
         }
       } else if (row.isWatchnward) {
         //no punching
       } //all other employees for sitting days
       else {
-        if (timePeriodIncludesPeriod(punchin, punchout, "08:05", "17:25")) {
+        var _eligibleForSitOTChec = eligibleForSitOTCheck(punchin, punchout, "08:00", "17:30"),
+          eligibleForSitOT = _eligibleForSitOTChec.eligibleForSitOT,
+          graceMin = _eligibleForSitOTChec.graceMin;
+        if (eligibleForSitOT) {
           count++;
           data.dates[i].ot = 'YES';
         } else {
-          data.dates[i].ot = 'No. (08:00 - 5:30pm)';
+          data.dates[i].ot = "No. ".concat(addMinutesToStringTime('08:00', graceMin), "-").concat(addMinutesToStringTime('17:30', graceMin));
         }
       }
       data.dates[i].userdecision = false;
@@ -114,22 +126,22 @@ function checkDatesAndOT(row, data) {
     //non aebasday, check if user has not punched incorrectly when server was failing
     data.dates[i].userdecision = false;
     if (row.isPartime) {
-      if (sittingAllowableForNonAebasDay(punchin, punchout, "06:05", "11:25") || sittingAllowableForNonAebasDay(punchin, punchout, "07:05", "12:25")) {
+      if (sittingAllowableForNonAebasDay(punchin, punchout, "06:10", "11:30") || sittingAllowableForNonAebasDay(punchin, punchout, "07:10", "12:30")) {
         data.dates[i].userdecision = true;
       } else {
         data.dates[i].ot = 'No. (6/7 - 11:30/12:30)';
       }
     } else if (row.isFulltime) {
-      if (sittingAllowableForNonAebasDay(punchin, punchout, "06:05", "16:25") || sittingAllowableForNonAebasDay(punchin, punchout, "07:05", "17:25")) {
+      if (sittingAllowableForNonAebasDay(punchin, punchout, "07:10", "16:30") || sittingAllowableForNonAebasDay(punchin, punchout, "07:10", "17:30")) {
         data.dates[i].userdecision = true;
       } else {
-        data.dates[i].ot = 'No. (6/7 - 4:30pm/5:30pm)';
+        data.dates[i].ot = 'No. (7 - 4:30pm/5:30pm)';
       }
     } else if (row.isWatchnward) {
       //no punching
     } //all other employees for sitting days
     else {
-      if (sittingAllowableForNonAebasDay(punchin, punchout, "08:05", "17:25")) {
+      if (sittingAllowableForNonAebasDay(punchin, punchout, "08:10", "17:30")) {
         data.dates[i].userdecision = true;
       } else {
         data.dates[i].ot = 'No. (08:00 - 5:30pm)';
@@ -155,6 +167,49 @@ function checkDatesAndOT(row, data) {
     total_userdecision_days: total_userdecision_days
   };
 }
+function eligibleForSitOTCheck(punchin_str, punchout_str) {
+  var req_punchin_str = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '08:00';
+  var req_punchout_str = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : '17:30';
+  var grace_allowed = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 10;
+  // Convert punch-in and punch-out times to Date objects
+  var punchInTime = new Date("1970-01-01T".concat(punchin_str, ":00"));
+  var punchOutTime = new Date("1970-01-01T".concat(punchout_str, ":00"));
+
+  // Define the base punch-in time (8:00 AM), maximum allowed punch-in time (8:10 AM) and base punch-out time (5:30 PM)
+  var basePunchInTime = new Date("1970-01-01T".concat(req_punchin_str, ":00")); //new Date('1970-01-01T08:00:00');
+  //const maxPunchInTime = new Date('1970-01-01T08:10:00');
+  var maxPunchInTime = new Date(basePunchInTime.getTime() + grace_allowed * 60000);
+  var basePunchOutTime = new Date("1970-01-01T".concat(req_punchout_str, ":00")); //new Date('1970-01-01T17:30:00');
+
+  // Check if punch-in time is after 8:10 AM or punch-out time is before 5:25 PM
+  if (punchInTime > maxPunchInTime || punchOutTime < basePunchOutTime) {
+    return {
+      eligibleForSitOT: false,
+      graceMin: 0
+    };
+  }
+
+  // Check if punch-in time is before or at 8:00 AM
+  if (punchInTime <= basePunchInTime) {
+    // In this case, punch-out time only needs to be 5:30 PM or later
+    return {
+      eligibleForSitOT: punchOutTime >= basePunchOutTime,
+      graceMin: 0
+    };
+  }
+
+  // Calculate the extra minutes after 8:00 AM
+  var extraMinutes = (punchInTime - basePunchInTime) / (1000 * 60);
+
+  // Calculate the required punch-out time
+  var requiredPunchOutTime = new Date(basePunchOutTime.getTime() + extraMinutes * 60 * 1000);
+
+  // Check if the actual punch-out time is after or equal to the required punch-out time
+  return {
+    eligibleForSitOT: punchOutTime >= requiredPunchOutTime,
+    graceMin: extraMinutes
+  };
+}
 function toHoursAndMinutes(totalMinutes) {
   var hours = Math.floor(totalMinutes / 60);
   var minutes = totalMinutes % 60;
@@ -169,6 +224,13 @@ function toHoursAndMinutesBare(totalMinutes) {
 }
 function padToTwoDigits(num) {
   return num.toString().padStart(2, '0');
+}
+function addMinutesToStringTime(time_str, minutes) {
+  var time = time_str.split(":").map(Number);
+  var totalMinutes = time[0] * 60 + time[1] + minutes;
+  var hours = Math.floor(totalMinutes / 60);
+  var newMinutes = totalMinutes % 60;
+  return "".concat(hours, ":").concat(padToTwoDigits(newMinutes));
 }
 
 /***/ })
@@ -282,6 +344,7 @@ var vm = new Vue({
     }
 
     Vue.set(this.$data, 'form', _form);
+    this.reloadsittings();
     //copy name to PEN field
     $('[data-widget="pushmenu"]').PushMenu('collapse');
     this.sessionchanged();
@@ -324,6 +387,11 @@ var vm = new Vue({
   },
   watch: {},
   methods: (_methods = {
+    reloadsittings: function reloadsittings() {
+      for (var i = 0; i < this.form.overtimes.length; i++) {
+        this.getSittingOTs(i, false);
+      }
+    },
     sessionchanged: function sessionchanged() {
       this.myerrors = [];
       //this.configdate.enable =  calenderdays2[this.form.session]

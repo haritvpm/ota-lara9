@@ -15,16 +15,26 @@ export function setEmployeeTypes(row) {
 
 }
 export function stringTimeToDate(sTimeWithSemicolonSeperator) {
+
+    if( !sTimeWithSemicolonSeperator ) return null;
     const time = sTimeWithSemicolonSeperator.split(":").map(Number);
     //warning: months in JS starts from 0
     return Date.UTC(2000, 1, 1, time[0], time[1]);
 };
 
+export function addMinutes(date, minutes) {
+  return (date + minutes*60000);
+}
+
 export function timePeriodIncludesPeriod (from, to, fromReq, toReq)  {
+    if( !from || !to ) return false;
     const datefrom = stringTimeToDate(from)
     const dateto = stringTimeToDate(to) 	
     const time800am = stringTimeToDate(fromReq)
     const time530pm = stringTimeToDate(toReq)
+
+    if( !datefrom || !dateto ) return false;
+
     return time800am >= datefrom && time530pm <= dateto;
  }
  //check if punchin or out if available, fails
@@ -62,8 +72,8 @@ export function  checkDatesAndOT(row, data){
     if( punchin && punchout  ){ //punched
 
       if (row.isPartime) {
-        if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "11:25") || 
-            timePeriodIncludesPeriod(punchin, punchout, "07:05", "12:25")) {
+        if (eligibleForSitOTCheck(punchin, punchout, "06:00", "11:30").eligibleForSitOT || 
+            eligibleForSitOTCheck(punchin, punchout, "07:00", "12:30").eligibleForSitOT) {
           data.dates[i].ot = 'YES'
           count++;
         } else{
@@ -71,25 +81,26 @@ export function  checkDatesAndOT(row, data){
         }
       }
       else if (row.isFulltime) {
-  
-         if (timePeriodIncludesPeriod(punchin, punchout, "06:05", "16:25") || 
-             timePeriodIncludesPeriod(punchin, punchout, "07:05", "17:25")) { 
+          console.log(punchin, punchout)
+         if (eligibleForSitOTCheck(punchin, punchout, "07:00", "16:30").eligibleForSitOT || 
+            eligibleForSitOTCheck(punchin, punchout, "07:00", "17:25").eligibleForSitOT) { 
             count++;
             data.dates[i].ot = 'YES'
           } else{
-            data.dates[i].ot = 'No. (6/7 am - 4:30pm/5:30pm)'
+            data.dates[i].ot = 'No. (7 am - 4:30pm/5:30pm)'
           }
       }    
       else if (row.isWatchnward) {
         //no punching
       } //all other employees for sitting days
       else {
-
-          if (timePeriodIncludesPeriod(punchin, punchout, "08:05", "17:25")) {
+         const {eligibleForSitOT, graceMin} = eligibleForSitOTCheck(punchin, punchout, "08:00", "17:30");
+          if (eligibleForSitOT) {
             count++;
             data.dates[i].ot = 'YES'
           }else{
-            data.dates[i].ot = 'No. (08:00 - 5:30pm)'
+              data.dates[i].ot = `No. ${addMinutesToStringTime('08:00',graceMin)}-${addMinutesToStringTime('17:30',graceMin)}`
+           
           }
       }
 
@@ -112,8 +123,8 @@ export function  checkDatesAndOT(row, data){
     data.dates[i].userdecision = false 
 
     if (row.isPartime) {
-      if (sittingAllowableForNonAebasDay(punchin, punchout, "06:05", "11:25") || 
-          sittingAllowableForNonAebasDay(punchin, punchout, "07:05", "12:25")) {
+      if (sittingAllowableForNonAebasDay(punchin, punchout, "06:10", "11:30") || 
+          sittingAllowableForNonAebasDay(punchin, punchout, "07:10", "12:30")) {
         data.dates[i].userdecision = true 
        
       } else{
@@ -122,19 +133,19 @@ export function  checkDatesAndOT(row, data){
     }
     else if (row.isFulltime) {
 
-       if (sittingAllowableForNonAebasDay(punchin, punchout, "06:05", "16:25") || 
-          sittingAllowableForNonAebasDay(punchin, punchout, "07:05", "17:25")) { 
+       if (sittingAllowableForNonAebasDay(punchin, punchout, "07:10", "16:30") || 
+          sittingAllowableForNonAebasDay(punchin, punchout, "07:10", "17:30")) { 
           data.dates[i].userdecision = true 
         
         } else{
-          data.dates[i].ot = 'No. (6/7 - 4:30pm/5:30pm)'
+          data.dates[i].ot = 'No. (7 - 4:30pm/5:30pm)'
         }
     }    
     else if (row.isWatchnward) {
       //no punching
     } //all other employees for sitting days
     else {
-        if (sittingAllowableForNonAebasDay(punchin, punchout, "08:05", "17:25")) {
+        if (sittingAllowableForNonAebasDay(punchin, punchout, "08:10", "17:30")) {
           data.dates[i].userdecision = true 
       
         }else{
@@ -164,6 +175,40 @@ export function  checkDatesAndOT(row, data){
  }
 
 }
+export function eligibleForSitOTCheck(punchin_str, punchout_str,req_punchin_str='08:00', req_punchout_str='17:30', grace_allowed=10) 
+{
+   // Convert punch-in and punch-out times to Date objects
+   const punchInTime = new Date(`1970-01-01T${punchin_str}:00`);
+   const punchOutTime = new Date(`1970-01-01T${punchout_str}:00`);
+   
+   // Define the base punch-in time (8:00 AM), maximum allowed punch-in time (8:10 AM) and base punch-out time (5:30 PM)
+   const basePunchInTime = new Date(`1970-01-01T${req_punchin_str}:00`);//new Date('1970-01-01T08:00:00');
+   //const maxPunchInTime = new Date('1970-01-01T08:10:00');
+   const maxPunchInTime = new Date(basePunchInTime.getTime() + grace_allowed*60000);
+
+   const basePunchOutTime = new Date(`1970-01-01T${req_punchout_str}:00`);//new Date('1970-01-01T17:30:00');
+   
+   // Check if punch-in time is after 8:10 AM or punch-out time is before 5:25 PM
+  if (punchInTime > maxPunchInTime || punchOutTime < basePunchOutTime) {
+    return {eligibleForSitOT: false, graceMin: 0};
+  }
+
+    // Check if punch-in time is before or at 8:00 AM
+    if (punchInTime <= basePunchInTime) {
+      // In this case, punch-out time only needs to be 5:30 PM or later
+      return {eligibleForSitOT: punchOutTime >= basePunchOutTime, graceMin: 0};
+    }
+  
+   // Calculate the extra minutes after 8:00 AM
+   const extraMinutes = (punchInTime - basePunchInTime) / (1000 * 60);
+   
+   // Calculate the required punch-out time
+   const requiredPunchOutTime = new Date(basePunchOutTime.getTime() + extraMinutes * 60 * 1000);
+   
+   // Check if the actual punch-out time is after or equal to the required punch-out time
+   return {eligibleForSitOT: punchOutTime >= requiredPunchOutTime, graceMin: extraMinutes};
+
+}
 
 export function toHoursAndMinutes(totalMinutes) {
   const hours = Math.floor(totalMinutes / 60);
@@ -179,4 +224,12 @@ export function toHoursAndMinutesBare(totalMinutes) {
 }
 function padToTwoDigits(num) {
   return num.toString().padStart(2, '0');
+}
+
+function addMinutesToStringTime(time_str, minutes) {
+  const time = time_str.split(":").map(Number);
+  const totalMinutes = time[0] * 60 + time[1] + minutes;
+  const hours = Math.floor(totalMinutes / 60);
+  const newMinutes = totalMinutes % 60;
+  return `${hours}:${padToTwoDigits(newMinutes)}`;
 }

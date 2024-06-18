@@ -162,7 +162,7 @@
 				
 				<!-- <a href="#" class="float-right" v-show ="form.overtimes.length>1" @click="copyworknaturedown" >WorkNature</a> -->
 				<!-- <span v-show ="form.overtimes.length>1" class="float-right">&nbsp;|&nbsp;</span> -->
-				 <a href="#" class="pull-right" v-show ="form.overtimes.length>1" @click="copytimedown" >Time</a>
+				 <a href="#" class="pull-right" v-show ="form.overtimes.length>=1" @click="copytimedown" >Time</a>
 
 				 <span v-show ="form.overtimes.length>1" class="float-right">Copy Punch Times:&nbsp;</span>
 

@@ -35,9 +35,11 @@ var vm = new Vue({
       //console.log( _form.overtimes[i].overtimesittings_)row.overtimesittings.map(s => s.date);
       _form.overtimes[i].overtimesittings =  _.uniq(_form.overtimes[i].overtimesittings.map(s => s.date));
       //_form.overtimes[i].overtimesittings =  _.uniq(_form.overtimes[i].overtimesittings_);
+
     }
 
     Vue.set(this.$data, 'form', _form);
+    this.reloadsittings();
     //copy name to PEN field
 		$('[data-widget="pushmenu"]').PushMenu('collapse')
 
@@ -53,7 +55,10 @@ var vm = new Vue({
 
   },
   mounted: function () {
+    
   },
+
+ 
 
   computed: {
     configdate: function () {
@@ -86,7 +91,12 @@ var vm = new Vue({
   },
 
   methods: {
-
+    reloadsittings: function(){
+      for(var i=0; i < this.form.overtimes.length; i++){
+        this.getSittingOTs(i,false)
+        
+      }
+    },
     sessionchanged: function () {
       this.myerrors = [];
       //this.configdate.enable =  calenderdays2[this.form.session]
