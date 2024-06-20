@@ -13,9 +13,16 @@ use Illuminate\Database\Eloquent\Model;
 class Designation extends Model
 {
     protected $fillable = ['designation', 'rate', 'punching',
-    'normal_office_hours',];
+    'normal_office_hours','type',
+        'has_additional_ot',
+        'office_time_id',];
     
 
+    public const TYPE_SELECT = [
+        'normal'   => 'normal',
+        'fulltime' => 'fulltime',
+        'parttime' => 'parttime',
+    ];
     /**
      * Set attribute to money format
      * @param $input
@@ -24,5 +31,9 @@ class Designation extends Model
     {
         $this->attributes['rate'] = $input ? $input : null;
     }
-    
+
+    public function office_time()
+    {
+        return $this->belongsTo(OfficeTime::class, 'office_time_id');
+    }
 }

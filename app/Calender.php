@@ -14,7 +14,7 @@ use Carbon\Carbon;
 */
 class Calender extends Model
 {
-    protected $fillable = ['date', 'day_type', 'description', 'session_id', 'daylength_multiplier',  'punching',
+    protected $fillable = ['date', 'day_type', 'description', 'session_id',   'office_ends_at','daylength_multiplier',  'punching',
 ];
 
 public const PUNCHING_SELECT = [

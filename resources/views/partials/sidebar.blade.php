@@ -176,7 +176,7 @@
             </ul>
             </li>
             @endcan
-            @can('punching_management_access')
+            @can('employee_management_access')
             <li class="nav-item has-treeview {{ request()->is("admin/punchings*") ? "menu-open" : "" }} {{ request()->is("admin/punching-traces*") ? "menu-open" : "" }} {{ request()->is("admin/devices*") ? "menu-open" : "" }} {{ request()->is("admin/govt-calendars*") ? "menu-open" : "" }} {{ request()->is("admin/sections*") ? "menu-open" : "" }} {{ request()->is("admin/section-employees*") ? "menu-open" : "" }} {{ request()->is("admin/officer-employees*") ? "menu-open" : "" }} {{ request()->is("admin/officer-mappings*") ? "menu-open" : "" }} {{ request()->is("admin/user-employees*") ? "menu-open" : "" }}">
                         <a class="nav-link nav-dropdown-toggle {{ request()->is("admin/punchings*") ? "active" : "" }} {{ request()->is("admin/punching-traces*") ? "active" : "" }} {{ request()->is("admin/devices*") ? "active" : "" }} {{ request()->is("admin/govt-calendars*") ? "active" : "" }} {{ request()->is("admin/sections*") ? "active" : "" }} {{ request()->is("admin/section-employees*") ? "active" : "" }} {{ request()->is("admin/officer-employees*") ? "active" : "" }} {{ request()->is("admin/officer-mappings*") ? "active" : "" }} {{ request()->is("admin/user-employees*") ? "active" : "" }}" href="#">
                                     <i class="fa-fw nav-icon fas fa-address-card">
@@ -208,87 +208,26 @@
                                         </p>
                                     </a>
                                 </li>
-                                <li class="nav-item">
-                                    <a href="{{ route("admin.devices.index") }}" class="nav-link {{ request()->is("admin/devices") || request()->is("admin/devices/*") ? "active" : "" }}">
-                                        <i class="fa-fw nav-icon fas fa-laptop">
+                               
+                            <li class="{{ request()->is("admin/office-times") || request()->is("admin/office-times/*") ? "active" : "" }}">
+                    <a href="{{ route("admin.office-times.index") }}">
+                        <i class="fa-fw fas fa-cogs">
 
-                                        </i>
-                                        <p>
-                                            {{ trans('cruds.device.title') }}
-                                        </p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="{{ route("admin.govt-calendars.index") }}" class="nav-link {{ request()->is("admin/govt-calendars") || request()->is("admin/govt-calendars/*") ? "active" : "" }}">
-                                        <i class="fa-fw nav-icon fas fa-cogs">
+                        </i>
+                        <span>{{ trans('cruds.officeTime.title') }}</span>
 
-                                        </i>
-                                        <p>
-                                            {{ trans('cruds.govtCalendar.title') }}
-                                        </p>
-                                    </a>
-                                </li>
+                    </a>
+                </li>
 
-                                @can('section_access')
-                                <li class="nav-item">
-                                    <a href="{{ route("admin.sections.index") }}" class="nav-link {{ request()->is("admin/sections") || request()->is("admin/sections/*") ? "active" : "" }}">
-                                        <i class="fa-fw nav-icon fas fa-puzzle-piece">
+                    <li class="{{ request()->is("admin/shift-times") || request()->is("admin/shift-times/*") ? "active" : "" }}">
+                    <a href="{{ route("admin.shift-times.index") }}">
+                        <i class="fa-fw fas fa-cogs">
 
-                                        </i>
-                                        <p>
-                                            {{ trans('cruds.section.title') }}
-                                        </p>
-                                    </a>
-                                </li>
-                            @endcan
-                            @can('section_employee_access')
-                                <li class="nav-item">
-                                    <a href="{{ route("admin.section-employees.index") }}" class="nav-link {{ request()->is("admin/section-employees") || request()->is("admin/section-employees/*") ? "active" : "" }}">
-                                        <i class="fa-fw nav-icon fas fa-user-plus">
+                        </i>
+                        <span>{{ trans('cruds.shiftTime.title') }}</span>
 
-                                        </i>
-                                        <p>
-                                            {{ trans('cruds.sectionEmployee.title') }}
-                                        </p>
-                                    </a>
-                                </li>
-                            @endcan
-                            @can('officer_employee_access')
-                                <li class="nav-item">
-                                    <a href="{{ route("admin.officer-employees.index") }}" class="nav-link {{ request()->is("admin/officer-employees") || request()->is("admin/officer-employees/*") ? "active" : "" }}">
-                                        <i class="fa-fw nav-icon fas fa-user-plus">
-
-                                        </i>
-                                        <p>
-                                            {{ trans('cruds.officerEmployee.title') }}
-                                        </p>
-                                    </a>
-                                </li>
-                            @endcan
-                            @can('officer_mapping_access')
-                                <li class="nav-item">
-                                    <a href="{{ route("admin.officer-mappings.index") }}" class="nav-link {{ request()->is("admin/officer-mappings") || request()->is("admin/officer-mappings/*") ? "active" : "" }}">
-                                        <i class="fa-fw nav-icon fas fa-link">
-
-                                        </i>
-                                        <p>
-                                            {{ trans('cruds.officerMapping.title') }}
-                                        </p>
-                                    </a>
-                                </li>
-                            @endcan
-                            @can('user_employee_access')
-                                <li class="nav-item">
-                                    <a href="{{ route("admin.user-employees.index") }}" class="nav-link {{ request()->is("admin/user-employees") || request()->is("admin/user-employees/*") ? "active" : "" }}">
-                                        <i class="fa-fw nav-icon fas fa-link">
-
-                                        </i>
-                                        <p>
-                                            {{ trans('cruds.userEmployee.title') }}
-                                        </p>
-                                    </a>
-                                </li>
-                            @endcan
+                    </a>
+                             </li>
                         </ul>
 
                     </li>

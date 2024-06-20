@@ -786,8 +786,8 @@ var vm = new Vue({
     overlapsWithOfficeHoursForNormalEmpl: function overlapsWithOfficeHoursForNormalEmpl(datefrom, dateto, isSittingDay, isWorkingDay) {
       var overlap = false;
       var checkingPeriod = "".concat(sNormalStart, " and ").concat(sNormalEnd);
-      var sNormalStart = "10:15";
-      var sNormalEnd = "17:15";
+      var sNormalStart = "10:00"; //for flexi
+      var sNormalEnd = "17:30"; //"17:15".  in flexi time, 5.30 is the end time
       if (isSittingDay) {
         sNormalStart = "08:00";
         sNormalEnd = "17:30";

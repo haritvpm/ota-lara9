@@ -1288,6 +1288,8 @@ class MyForms2Controller extends Controller
         $isPartime = str_contains($desig,"part time") || str_contains($desig,"parttime") || 
                      str_contains($category,"parttime")||
                      $emp->designation->normal_office_hours == 3; //ugly
+
+        //example sweeper. but since category can be 'NonGazetted/MLAhostel' we dont know if fulltime
         $isFulltime = str_contains($category,"fulltime")||
                       $emp->designation->normal_office_hours == 6;
 

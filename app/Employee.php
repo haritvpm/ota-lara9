@@ -13,7 +13,9 @@ use Illuminate\Database\Eloquent\Model;
 */
 class Employee extends Model
 {
-    protected $fillable = ['srismt', 'name',  'pen', 'category', 'designation_id',  'added_by', 'desig_display', 'categories_id','aadhaarid','created_at' , 'punching',];
+    protected $fillable = ['srismt', 'name',  'pen', 'category', 'designation_id',  'added_by', 'desig_display', 'categories_id','aadhaarid',
+    'created_at' , 'punching',        'is_shift',
+        'shift_time_id',];
    
     public static $enum_srismt = ["Sri" => "Sri", "Smt" => "Smt", "Kum" => "Kum"];
 
@@ -62,5 +64,10 @@ class Employee extends Model
     {
        return  $this->aadhaarid . '/' . $this->pen . ': ' . $this->name . ' (' . $this->designation->designation . ')';
     }
+     public function shift_time()
+    {
+        return $this->belongsTo(ShiftTime::class, 'shift_time_id');
+    }
+
     
 }

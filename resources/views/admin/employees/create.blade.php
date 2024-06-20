@@ -143,6 +143,30 @@
                     @endif
                 </div>
             </div>
+	    
+	    <div>
+                                <input type="hidden" name="is_shift" value="0">
+                                <input type="checkbox" name="is_shift" id="is_shift" value="1" {{ old('is_shift', 0) == 1 ? 'checked' : '' }}>
+                                <label for="is_shift" style="font-weight: 400">{{ trans('cruds.employee.fields.is_shift') }}</label>
+                            </div>
+                            @if($errors->has('is_shift'))
+                                <span class="help-block" role="alert">{{ $errors->first('is_shift') }}</span>
+                            @endif
+                            <span class="help-block">{{ trans('cruds.employee.fields.is_shift_helper') }}</span>
+                        </div>
+                        <div class="form-group {{ $errors->has('shift_time') ? 'has-error' : '' }}">
+                            <label for="shift_time_id">{{ trans('cruds.employee.fields.shift_time') }}</label>
+                            <select class="form-control select2" name="shift_time_id" id="shift_time_id">
+                                @foreach($shift_times as $id => $entry)
+                                    <option value="{{ $id }}" {{ old('shift_time_id') == $id ? 'selected' : '' }}>{{ $entry }}</option>
+                                @endforeach
+                            </select>
+                            @if($errors->has('shift_time'))
+                                <span class="help-block" role="alert">{{ $errors->first('shift_time') }}</span>
+                            @endif
+                            <span class="help-block">{{ trans('cruds.employee.fields.shift_time_helper') }}</span>
+                        </div>
+
                      
 
             @endif
