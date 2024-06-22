@@ -11,7 +11,7 @@ class StoreShiftTimeRequest extends FormRequest
 {
     public function authorize()
     {
-        return Gate::allows('shift_time_create');
+        return Gate::allows('designation_create');
     }
 
     public function rules()

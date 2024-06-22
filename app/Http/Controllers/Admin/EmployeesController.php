@@ -9,6 +9,7 @@ use Carbon\Carbon;
 
 use Illuminate\Support\Facades\Gate;
 use App\Http\Controllers\Controller;
+use App\ShiftTime;
 use Illuminate\Http\Request;
 use App\Http\Requests\Admin\StoreEmployeesRequest;
 use App\Http\Requests\Admin\UpdateEmployeesRequest;
@@ -374,11 +375,11 @@ class EmployeesController extends Controller
                                                    :   Employee::$enum_category;
 
         $categories = \App\Category::get()->pluck('category', 'id')->prepend(trans('quickadmin.qa_please_select'), ''); 
-
+ $shift_times = ShiftTime::pluck('groupname', 'id')->prepend(trans('global.pleaseSelect'), '');
         $enum_srismt = Employee::$enum_srismt;
         
         
-        return view('admin.employees.create', compact( 'enum_srismt', 'enum_category', 'designations', 'categories', 'temppen'));
+        return view('admin.employees.create', compact( 'shift_times','enum_srismt', 'enum_category', 'designations', 'categories', 'temppen'));
     }
     public function create_temppen()
     {
@@ -441,7 +442,9 @@ class EmployeesController extends Controller
         $categories = \App\Category::get()->pluck('category', 'id')->prepend(trans('quickadmin.qa_please_select'), '');
 
         $employee = Employee::findOrFail($id);
- 
+   $shift_times = ShiftTime::pluck('groupname', 'id')->prepend(trans('global.pleaseSelect'), '');
+
+        $employee->load('shift_time');
         $enum_srismt = Employee::$enum_srismt;
 
         if(!\Auth::user()->isAdmin()){
@@ -451,7 +454,7 @@ class EmployeesController extends Controller
             }
         }
 
-        return view('admin.employees.edit', compact( 'enum_srismt', 'employee', 'enum_category', 'designations', 'categories'));
+        return view('admin.employees.edit', compact( 'shift_times','enum_srismt', 'employee', 'enum_category', 'designations', 'categories'));
     }
 
     /**

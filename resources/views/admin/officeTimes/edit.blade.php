@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('layouts.app')
 @section('content')
 <div class="content">
 
@@ -83,6 +83,38 @@
                                 <span class="help-block" role="alert">{{ $errors->first('office_minutes') }}</span>
                             @endif
                             <span class="help-block">{{ trans('cruds.officeTime.fields.office_minutes_helper') }}</span>
+                        </div>
+                        <div class="form-group {{ $errors->has('sittingday_duration_min_for_second_ot') ? 'has-error' : '' }}">
+                            <label for="sittingday_duration_min_for_second_ot">{{ trans('cruds.officeTime.fields.sittingday_duration_min_for_second_ot') }}</label>
+                            <input class="form-control" type="number" name="sittingday_duration_min_for_second_ot" id="sittingday_duration_min_for_second_ot" value="{{ old('sittingday_duration_min_for_second_ot', $officeTime->sittingday_duration_min_for_second_ot) }}" step="1">
+                            @if($errors->has('sittingday_duration_min_for_second_ot'))
+                                <span class="help-block" role="alert">{{ $errors->first('sittingday_duration_min_for_second_ot') }}</span>
+                            @endif
+                            <span class="help-block">{{ trans('cruds.officeTime.fields.sittingday_duration_min_for_second_ot_helper') }}</span>
+                        </div>
+                        <div class="form-group {{ $errors->has('workingday_duration_min_for_first_ot') ? 'has-error' : '' }}">
+                            <label for="workingday_duration_min_for_first_ot">{{ trans('cruds.officeTime.fields.workingday_duration_min_for_first_ot') }}</label>
+                            <input class="form-control" type="number" name="workingday_duration_min_for_first_ot" id="workingday_duration_min_for_first_ot" value="{{ old('workingday_duration_min_for_first_ot', $officeTime->workingday_duration_min_for_first_ot) }}" step="1">
+                            @if($errors->has('workingday_duration_min_for_first_ot'))
+                                <span class="help-block" role="alert">{{ $errors->first('workingday_duration_min_for_first_ot') }}</span>
+                            @endif
+                            <span class="help-block">{{ trans('cruds.officeTime.fields.workingday_duration_min_for_first_ot_helper') }}</span>
+                        </div>
+                        <div class="form-group {{ $errors->has('sitting_ot_time_str') ? 'has-error' : '' }}">
+                            <label for="sitting_ot_time_str">{{ trans('cruds.officeTime.fields.sitting_ot_time_str') }}</label>
+                            <input class="form-control" type="text" name="sitting_ot_time_str" id="sitting_ot_time_str" value="{{ old('sitting_ot_time_str', $officeTime->sitting_ot_time_str) }}">
+                            @if($errors->has('sitting_ot_time_str'))
+                                <span class="help-block" role="alert">{{ $errors->first('sitting_ot_time_str') }}</span>
+                            @endif
+                            <span class="help-block">{{ trans('cruds.officeTime.fields.sitting_ot_time_str_helper') }}</span>
+                        </div>
+                        <div class="form-group {{ $errors->has('sitting_ot_initial_leeway_min') ? 'has-error' : '' }}">
+                            <label for="sitting_ot_initial_leeway_min">{{ trans('cruds.officeTime.fields.sitting_ot_initial_leeway_min') }}</label>
+                            <input class="form-control" type="number" name="sitting_ot_initial_leeway_min" id="sitting_ot_initial_leeway_min" value="{{ old('sitting_ot_initial_leeway_min', $officeTime->sitting_ot_initial_leeway_min) }}" step="1">
+                            @if($errors->has('sitting_ot_initial_leeway_min'))
+                                <span class="help-block" role="alert">{{ $errors->first('sitting_ot_initial_leeway_min') }}</span>
+                            @endif
+                            <span class="help-block">{{ trans('cruds.officeTime.fields.sitting_ot_initial_leeway_min_helper') }}</span>
                         </div>
                         <div class="form-group">
                             <button class="btn btn-danger" type="submit">

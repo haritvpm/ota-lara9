@@ -13,7 +13,7 @@ class PunchingTraceController extends Controller
 {
     public function index(Request $request)
     {
-        abort_if(Gate::denies('punching_trace_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('designation_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         if ($request->ajax()) {
             $query = PunchingTrace::query()->select(sprintf('%s.*', (new PunchingTrace)->table));

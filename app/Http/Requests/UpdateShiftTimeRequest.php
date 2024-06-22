@@ -11,7 +11,7 @@ class UpdateShiftTimeRequest extends FormRequest
 {
     public function authorize()
     {
-        return Gate::allows('shift_time_edit');
+        return Gate::allows('designation_create');
     }
 
     public function rules()

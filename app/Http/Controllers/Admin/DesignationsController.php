@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreDesignationsRequest;
 use App\Http\Requests\Admin\UpdateDesignationsRequest;
 use Yajra\DataTables\DataTables;
+use App\OfficeTime;
 
 class DesignationsController extends Controller
 {
@@ -39,7 +40,9 @@ class DesignationsController extends Controller
         if (! Gate::allows('designation_create')) {
             return abort(401);
         }
-        return view('admin.designations.create');
+       $office_times = OfficeTime::pluck('groupname', 'id')->prepend(trans('global.pleaseSelect'), '');
+
+        return view('admin.designations.create', compact('office_times'));
     }
 
     /**
@@ -73,8 +76,11 @@ class DesignationsController extends Controller
             return abort(401);
         }
         $designation = Designation::findOrFail($id);
+	   $office_times = OfficeTime::pluck('groupname', 'id')->prepend(trans('global.pleaseSelect'), '');
 
-        return view('admin.designations.edit', compact('designation'));
+        $designation->load('office_time');
+
+        return view('admin.designations.edit', compact('designation', 'office_times'));
     }
 
     /**
@@ -112,6 +118,7 @@ class DesignationsController extends Controller
         $employees = \App\Employee::where('designation_id', $id)->get();
 
         $designation = Designation::findOrFail($id);
+	 $designation->load('office_time');
 
         return view('admin.designations.show', compact('designation', 'employees'));
     }

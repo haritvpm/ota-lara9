@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('layouts.app')
 @section('content')
 <div class="content">
 
@@ -95,6 +95,38 @@
                                     </th>
                                     <td>
                                         {{ $officeTime->office_minutes }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        {{ trans('cruds.officeTime.fields.sittingday_duration_min_for_second_ot') }}
+                                    </th>
+                                    <td>
+                                        {{ $officeTime->sittingday_duration_min_for_second_ot }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        {{ trans('cruds.officeTime.fields.workingday_duration_min_for_first_ot') }}
+                                    </th>
+                                    <td>
+                                        {{ $officeTime->workingday_duration_min_for_first_ot }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        {{ trans('cruds.officeTime.fields.sitting_ot_time_str') }}
+                                    </th>
+                                    <td>
+                                        {{ $officeTime->sitting_ot_time_str }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        {{ trans('cruds.officeTime.fields.sitting_ot_initial_leeway_min') }}
+                                    </th>
+                                    <td>
+                                        {{ $officeTime->sitting_ot_initial_leeway_min }}
                                     </td>
                                 </tr>
                             </tbody>

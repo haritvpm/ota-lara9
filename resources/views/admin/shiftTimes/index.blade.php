@@ -1,7 +1,7 @@
-@extends('layouts.admin')
+@extends('layouts.app')
 @section('content')
 <div class="content">
-    @can('shift_time_create')
+    @can('designation_create')
         <div style="margin-bottom: 10px;" class="row">
             <div class="col-lg-12">
                 <a class="btn btn-success" href="{{ route('admin.shift-times.create') }}">

@@ -15,7 +15,7 @@ class OfficeTimeController extends Controller
 {
     public function index()
     {
-        abort_if(Gate::denies('office_time_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('designation_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $officeTimes = OfficeTime::all();
 
@@ -24,7 +24,7 @@ class OfficeTimeController extends Controller
 
     public function create()
     {
-        abort_if(Gate::denies('office_time_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('designation_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         return view('admin.officeTimes.create');
     }
@@ -38,7 +38,7 @@ class OfficeTimeController extends Controller
 
     public function edit(OfficeTime $officeTime)
     {
-        abort_if(Gate::denies('office_time_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('designation_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         return view('admin.officeTimes.edit', compact('officeTime'));
     }
@@ -52,14 +52,14 @@ class OfficeTimeController extends Controller
 
     public function show(OfficeTime $officeTime)
     {
-        abort_if(Gate::denies('office_time_show'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('designation_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         return view('admin.officeTimes.show', compact('officeTime'));
     }
 
     public function destroy(OfficeTime $officeTime)
     {
-        abort_if(Gate::denies('office_time_delete'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('designation_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $officeTime->delete();
 

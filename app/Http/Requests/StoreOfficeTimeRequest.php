@@ -11,7 +11,7 @@ class StoreOfficeTimeRequest extends FormRequest
 {
     public function authorize()
     {
-        return Gate::allows('office_time_create');
+        return Gate::allows('designation_create');
     }
 
     public function rules()
@@ -22,14 +22,14 @@ class StoreOfficeTimeRequest extends FormRequest
                 'required',
                 'unique:office_times',
             ],
-            'fn_from' => [
-                'date_format:' . config('panel.time_format'),
-                'nullable',
-            ],
-            'an_to' => [
-                'date_format:' . config('panel.time_format'),
-                'nullable',
-            ],
+            // 'fn_from' => [
+            //     'date_format:' . config('panel.time_format'),
+            //     'nullable',
+            // ],
+            // 'an_to' => [
+            //     'date_format:' . config('panel.time_format'),
+            //     'nullable',
+            // ],
             'minutes_for_ot_workingday' => [
                 'required',
                 'integer',

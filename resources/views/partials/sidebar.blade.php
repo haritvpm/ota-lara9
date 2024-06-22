@@ -208,26 +208,28 @@
                                         </p>
                                     </a>
                                 </li>
-                               
-                            <li class="{{ request()->is("admin/office-times") || request()->is("admin/office-times/*") ? "active" : "" }}">
-                    <a href="{{ route("admin.office-times.index") }}">
-                        <i class="fa-fw fas fa-cogs">
+                                <li class="nav-item">
+                                    <a href="{{ route("admin.office-times.index") }}" class="nav-link {{ request()->is("admin/office-times") || request()->is("admin/office-times/*") ? "active" : "" }}">
+                                        <i class="fa-fw nav-icon fas fa-cogs">
 
-                        </i>
-                        <span>{{ trans('cruds.officeTime.title') }}</span>
+                                        </i>
+                                        <p>
+                                        <p>{{ trans('cruds.officeTime.title') }} </p>
+                                        </p>
+                                    </a>
+                                </li>
 
-                    </a>
-                </li>
+                                <li class="nav-item">
+                                    <a href="{{ route("admin.shift-times.index") }}" class="nav-link {{ request()->is("admin/shift-times") || request()->is("admin/shift-times/*") ? "active" : "" }}">
+                                        <i class="fa-fw nav-icon fas fa-cogs">
 
-                    <li class="{{ request()->is("admin/shift-times") || request()->is("admin/shift-times/*") ? "active" : "" }}">
-                    <a href="{{ route("admin.shift-times.index") }}">
-                        <i class="fa-fw fas fa-cogs">
+                                        </i>
+                                        <p>
+                                        <p>{{ trans('cruds.shiftTime.title') }} </p>
+                                        </p>
+                                    </a>
+                                </li>
 
-                        </i>
-                        <span>{{ trans('cruds.shiftTime.title') }}</span>
-
-                    </a>
-                             </li>
                         </ul>
 
                     </li>

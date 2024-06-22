@@ -13,12 +13,12 @@ class CreateOfficeTimesTable extends Migration
             $table->string('groupname')->unique();
             $table->time('fn_from')->nullable();
             $table->time('an_to')->nullable();
-            $table->integer('minutes_for_ot_workingday');
-            $table->integer('minutes_for_ot_holiday');
+            $table->integer('minutes_for_ot_workingday')->nullable();;
+            $table->integer('minutes_for_ot_holiday')->nullable();;
             $table->integer('max_ot_workingday')->nullable();
             $table->integer('max_ot_sittingday')->nullable();
             $table->integer('max_ot_holiday')->nullable();
-            $table->integer('office_minutes');
+           // $table->integer('office_minutes');
             $table->timestamps();
           //  $table->softDeletes();
         });

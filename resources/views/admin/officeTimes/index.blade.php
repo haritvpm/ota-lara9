@@ -1,7 +1,7 @@
-@extends('layouts.admin')
+@extends('layouts.app')
 @section('content')
 <div class="content">
-    @can('office_time_create')
+    @can('designation_create')
         <div style="margin-bottom: 10px;" class="row">
             <div class="col-lg-12">
                 <a class="btn btn-success" href="{{ route('admin.office-times.create') }}">
@@ -55,6 +55,18 @@
                                         {{ trans('cruds.officeTime.fields.office_minutes') }}
                                     </th>
                                     <th>
+                                        {{ trans('cruds.officeTime.fields.sittingday_duration_min_for_second_ot') }}
+                                    </th>
+                                    <th>
+                                        {{ trans('cruds.officeTime.fields.workingday_duration_min_for_first_ot') }}
+                                    </th>
+                                    <th>
+                                        {{ trans('cruds.officeTime.fields.sitting_ot_time_str') }}
+                                    </th>
+                                    <th>
+                                        {{ trans('cruds.officeTime.fields.sitting_ot_initial_leeway_min') }}
+                                    </th>
+                                    <th>
                                         &nbsp;
                                     </th>
                                 </tr>
@@ -96,19 +108,31 @@
                                             {{ $officeTime->office_minutes ?? '' }}
                                         </td>
                                         <td>
+                                            {{ $officeTime->sittingday_duration_min_for_second_ot ?? '' }}
+                                        </td>
+                                        <td>
+                                            {{ $officeTime->workingday_duration_min_for_first_ot ?? '' }}
+                                        </td>
+                                        <td>
+                                            {{ $officeTime->sitting_ot_time_str ?? '' }}
+                                        </td>
+                                        <td>
+                                            {{ $officeTime->sitting_ot_initial_leeway_min ?? '' }}
+                                        </td>
+                                        <td>
                                             @can('office_time_show')
                                                 <a class="btn btn-xs btn-primary" href="{{ route('admin.office-times.show', $officeTime->id) }}">
                                                     {{ trans('global.view') }}
                                                 </a>
                                             @endcan
 
-                                            @can('office_time_edit')
+                                            @can('designation_create')
                                                 <a class="btn btn-xs btn-info" href="{{ route('admin.office-times.edit', $officeTime->id) }}">
                                                     {{ trans('global.edit') }}
                                                 </a>
                                             @endcan
 
-                                            @can('office_time_delete')
+                                            @can('designation_create')
                                                 <form action="{{ route('admin.office-times.destroy', $officeTime->id) }}" method="POST" onsubmit="return confirm('{{ trans('global.areYouSure') }}');" style="display: inline-block;">
                                                     <input type="hidden" name="_method" value="DELETE">
                                                     <input type="hidden" name="_token" value="{{ csrf_token() }}">

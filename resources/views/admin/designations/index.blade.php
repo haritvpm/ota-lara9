@@ -33,7 +33,13 @@
                         <th>
                             {{ trans('cruds.designation.fields.normal_office_hours') }}
                         </th>
-                        <!-- <th>@lang('quickadmin.designations.fields.designation-mal')</th> -->
+			
+                       <th>
+                                        {{ trans('cruds.designation.fields.type') }}
+                                    </th>
+				    <th>
+                                        {{ trans('cruds.designation.fields.office_time') }}
+                                    </th>
                                                 <th>&nbsp;</th>
 
                     </tr>
@@ -54,6 +60,13 @@
                                 <td>
                                     {{ $designation->normal_office_hours ?? '' }}
                                 </td>
+				 <td>
+                                            {{ App\Designation::TYPE_SELECT[$designation->type] ?? '' }}
+                                        </td>
+                                  
+                                        <td>
+                                            {{ $designation->office_time->groupname ?? '' }}
+                                        </td>
                                 <td>
                                     @can('designation_view')
                                     <a href="{{ route('admin.designations.show',[$designation->id]) }}" class="btn btn-sm btn-primary">@lang('quickadmin.qa_view')</a>
